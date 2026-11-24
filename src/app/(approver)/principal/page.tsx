@@ -13,6 +13,7 @@
  * business logic, file kept < 400 lines.
  */
 
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useSynchronization } from "@/hooks/useSynchronization";
@@ -152,6 +153,16 @@ export default function PrincipalCommandCenter() {
         role={user?.role ?? "principal"}
         pendingCount={counts.pending}
         urgentCount={counts.overdue + counts.escalated}
+      />
+
+      <ContextSituationBar
+        roleLabel="Principal"
+        purpose="Institutional command plane for top-tier approvals, policy escalations, and campus governance"
+        contextLabel="Executive Command Center"
+        statusSummary={counts.escalated > 0 || counts.overdue > 0 ? `${counts.overdue} SLA breached items and ${counts.escalated} policy escalations requiring your determination.` : `${counts.pending} pending decisions across all campus workflows.`}
+        severity={counts.overdue > 0 ? "critical" : counts.escalated > 0 ? "warn" : "ok"}
+        primaryAction={{ label: "Attention Queue", href: "/principal/attention" }}
+        secondaryAction={{ label: "Decision Ledger", href: "/principal/decisions" }}
       />
 
       {/* ── Headline row: the "what needs me" numbers. PR-05: each tile is a

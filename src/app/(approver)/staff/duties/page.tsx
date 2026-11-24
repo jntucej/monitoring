@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, Users, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import type { StaffMyDayResponse } from "../types";
 
 function StaffDutiesInner() {
@@ -55,6 +56,21 @@ function StaffDutiesInner() {
         </div>
       </div>
 
+      <ContextSituationBar
+        roleLabel="Campus Staff"
+        purpose="Monitor active duty rosters and colleagues currently on shift across campus."
+        contextLabel="Shift & Duty Schedule"
+        statusTone={slice && slice.totalOnShift > 0 ? "ok" : "info"}
+        statusPill={`${slice?.totalOnShift ?? 0} On Shift`}
+        statusSummary={
+          slice && slice.totalOnShift > 0
+            ? `${slice.totalOnShift} staff member${slice.totalOnShift === 1 ? "" : "s"} currently scheduled on shift.`
+            : "No staff roster entries recorded on shift for today."
+        }
+        primaryAction={{ label: "My Day", href: "/staff/my-day" }}
+        secondaryAction={{ label: "Assigned Tasks", href: "/staff/assigned-tasks" }}
+      />
+
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
@@ -94,8 +110,23 @@ function StaffDutiesInner() {
               ))}
             </div>
           ) : (
-            <div className="p-4 min-w-0">
-              <p className="text-sm text-text-muted">No staff are on shift today.</p>
+            <div className="p-6 min-w-0 text-center space-y-2">
+              <p className="text-sm font-medium text-text-secondary">No staff are on shift today</p>
+              <p className="text-xs text-text-muted">Duty schedules will populate once shifts are assigned by administration.</p>
+              <div className="pt-2 flex flex-wrap justify-center gap-2">
+                <Link
+                  href="/staff/my-day"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                >
+                  View My Day
+                </Link>
+                <Link
+                  href="/staff/assigned-tasks"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  Check Tasks
+                </Link>
+              </div>
             </div>
           )}
         </div>

@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { MealReviewPanel } from "@/components/mess/MealReviewPanel";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function StudentMessReviewsPage() {
   const isSakuga = useIsSakuga();
@@ -15,6 +16,14 @@ export default function StudentMessReviewsPage() {
       <PageHeader
         title="Meal Reviews"
         subtitle="Rate your meals."
+      />
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Submit ratings and quality feedback on breakfast, lunch, snacks, and dinner servings"
+        contextLabel="Dining Quality & Feedback"
+        statusSummary="Help mess managers improve food quality by rating today's dishes and service."
+        primaryAction={{ label: "Meal Token", href: "/student/mess/token" }}
+        secondaryAction={{ label: "Mess Bill", href: "/student/mess-bill" }}
       />
       {isSakuga && (
         <div className="surface-card bg-bg-surface p-4 flex items-center justify-between gap-4">

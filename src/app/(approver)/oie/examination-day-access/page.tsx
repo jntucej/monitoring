@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildOieExaminationDayAccessInspection } from "@/lib/role-registers/oieInspections";
 import {
@@ -206,6 +207,20 @@ function ExaminationDayAccessInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Officer In-Charge of Examinations"
+        purpose="Verify candidate campus and hall entry authorization for examination sessions."
+        contextLabel="Examination Day Access"
+        statusTone={rows.length > 0 ? "info" : "ok"}
+        statusPill={`${rows.length} records`}
+        statusSummary={`Tracking ${rows.length} exam-day gate access and hall entry permissions.`}
+        primaryAction={{ label: "Candidate Attendance", href: "/oie/candidate-attendance" }}
+        secondaryActions={[
+          { label: "OIE Overview", href: "/oie" },
+          { label: "Exceptions", href: "/oie/access-exceptions" },
+        ]}
+      />
 
       {error && (
         <ErrorBanner

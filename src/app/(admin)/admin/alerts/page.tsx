@@ -19,6 +19,7 @@ const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string 
 };
 
 import { fmtRelative } from "@/lib/formatters";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 const timeAgo = fmtRelative;
 
 function AdminAlertsInner() {
@@ -215,6 +216,14 @@ function AdminAlertsInner() {
 
   return (
     <div className="space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor alerts for campus operations."
+        contextLabel="Alerts"
+        statusSummary="Review current alerts state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-text-primary">Alert Center</h1>

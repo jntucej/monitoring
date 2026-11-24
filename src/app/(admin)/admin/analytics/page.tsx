@@ -14,6 +14,7 @@ import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /**
  * Admin Analytics — re-skin of the inline Card+BarChart/PieChart layout.
@@ -207,6 +208,14 @@ function AdminAnalyticsInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor campus analytics for campus operations."
+        contextLabel="Campus Analytics"
+        statusSummary="Review current campus analytics state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Campus Analytics"
         subtitle={`Traffic and occupancy from ${data?.range.from ?? "—"} to ${data?.range.to ?? "—"}`}

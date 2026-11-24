@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { useState } from "react";
@@ -78,6 +79,16 @@ export default function OperatorClaimPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+      <div className="mb-4">
+        <ContextSituationBar
+          roleLabel="Gate Operator"
+          purpose="Claim physical gate assignment for the shift using supervisor-issued authorization tokens"
+          contextLabel="Gate Claim Terminal"
+          statusSummary="Enter the gate claim PIN or select an unassigned terminal to activate your scanner session."
+          primaryAction={{ label: "Set Kiosk PIN", href: "/operator/kiosk-pin" }}
+          secondaryAction={{ label: "Operator Home", href: "/operator" }}
+        />
+      </div>
       <div className="mx-auto max-w-lg space-y-5">
         <div>
           <h1 className="text-lg font-bold text-text-primary flex items-center gap-2">

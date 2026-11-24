@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { useState } from "react";
@@ -90,6 +91,14 @@ export default function AuditPage() {
   return (
     <div className="space-y-4">
       <PageHeader title="Audit Ledger" subtitle="Reconstruct why every consequential action happened — click any event to inspect" />
+      <ContextSituationBar
+        roleLabel="Principal"
+        purpose="Forensic audit ledger documenting every consequential administrative and security action"
+        contextLabel="Institutional Audit Ledger"
+        statusSummary="Reconstruct reasons, actors, and timelines for every consequential campus action."
+        primaryAction={{ label: "Governance Reports", href: "/principal/governance/reports" }}
+        secondaryAction={{ label: "Decision Ledger", href: "/principal/decisions" }}
+      />
       {loading && <Loading />}
       {!loading && rows.length === 0 && <EmptyState title="No audit records" description="The institutional decision ledger is empty." />}
       <div className="space-y-2">

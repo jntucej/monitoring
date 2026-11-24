@@ -58,8 +58,10 @@ export default function StudentPassesPage() {
 
       {/* Context & next step */}
       <ContextSituationBar
+        roleLabel="Student"
+        purpose="View, verify, and present campus entry and exit QR passes"
         contextLabel="Gate Passes vs. Requests"
-        summary="Approved requests become active QR gate passes here. Need a new outing or leave? Submit a request first."
+        statusSummary="Approved requests become active QR gate passes here. Need a new outing or leave? Submit a request first."
         primaryAction={{ label: "New Request", href: "/student/permissions/new" }}
         secondaryAction={{ label: "My Requests", href: "/student/permissions" }}
       />

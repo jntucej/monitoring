@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface Coordinator {
   id: string;
@@ -119,6 +120,21 @@ export default function CoordinatorPage() {
         <h1 className="text-lg font-bold text-text-primary">Coordinator</h1>
         <p className="text-xs text-text-muted mt-1">Class {scopeId} · appointed</p>
       </header>
+
+      <ContextSituationBar
+        roleLabel="Student Representative"
+        purpose="Release class announcements, triage batch concerns, and coordinate with faculty"
+        contextLabel="Class Representative Desk"
+        severity={relayInbox.length > 0 ? "warn" : "ok"}
+        statusPill={relayInbox.length > 0 ? `${relayInbox.length} pending release` : "Inbox clear"}
+        statusSummary={
+          relayInbox.length > 0
+            ? `${relayInbox.length} announcement${relayInbox.length === 1 ? "" : "s"} waiting for your approval to broadcast to the class.`
+            : `Active CR for class ${scopeId}. Review relay messages or submit batch concerns.`
+        }
+        primaryAction={{ label: "Class Requests", href: "/student/class-requests" }}
+        secondaryAction={{ label: "Student Home", href: "/student" }}
+      />
 
       {msg && <p className={`text-xs font-medium ${msg.ok ? "text-action-success" : "text-action-danger"}`}>{msg.text}</p>}
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface MessBillData {
   totalServed?: number;
@@ -68,6 +69,21 @@ export default function MessBillPage() {
           className="surface-card min-h11 p-2 text-sm"
         />
       </div>
+
+      <ContextSituationBar
+        roleLabel="Hosteller"
+        purpose="Track monthly dining costs, meal count, and submit timely meal opt-outs before cutoffs"
+        contextLabel="Mess Billing & Opt-Outs"
+        severity="info"
+        statusPill={data ? `₹${data.totalAmount ?? 0} billed` : "Loading bill…"}
+        statusSummary={
+          data
+            ? `${data.totalServed ?? 0} meals served this month at ₹${data.mealRate ?? 0}/meal. Opt out before ${data.cutoffTime ?? "cutoff"} to avoid billing.`
+            : "Reviewing your monthly dining consumption, rates, and opt-out cutoffs."
+        }
+        primaryAction={{ label: "Meal Token", href: "/student/mess/token" }}
+        secondaryAction={{ label: "Mess Landing", href: "/student/mess" }}
+      />
 
       {loading ? (
         <p className="text-text-muted text-sm">Loading bill details…</p>

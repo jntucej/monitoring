@@ -21,6 +21,7 @@ import {
   Inbox
 } from "lucide-react";
 import { incidentInspection, type IncidentRow } from "@/components/approver/wardenConsoleModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes */
 
@@ -93,6 +94,23 @@ function DeputyWardenIncidentsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Deputy Warden"
+        purpose="Review and record hostel security incidents, track emergency alerts, and coordinate escalations"
+        contextLabel={`Incident Reporting & Safety Alerts · ${openCount} Open`}
+        statusSummary={
+          openCount > 0
+            ? `${openCount} open security or safety alert${openCount === 1 ? "" : "s"} requiring attention.`
+            : "No active incidents or security alerts reported. Campus status is nominal."
+        }
+        severity={openCount > 0 ? "warn" : "ok"}
+        primaryAction={{ label: "Daily Overview", href: "/deputy-warden/daily-overview" }}
+        secondaryActions={[
+          { label: "Curfew Oversight", href: "/deputy-warden/curfew-oversight" },
+          { label: "Shift Handover", href: "/deputy-warden/shift-handover" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

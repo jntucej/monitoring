@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -201,6 +202,17 @@ function PassLeaveSubmissionInner() {
         </div>
       </div>
 
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Create and submit outing or leave applications for wards into the campus approval pipeline."
+        contextLabel="Request Submission Portal"
+        statusTone="info"
+        statusPill={`${wards.length} Ward${wards.length === 1 ? "" : "s"} Available`}
+        statusSummary="Guardian submissions initiate official approval workflows. Track submitted tickets in Request Status."
+        primaryAction={{ label: "Request Status", href: "/guardian/request-status" }}
+        secondaryAction={{ label: "Ward Status", href: "/guardian/child-status" }}
+      />
+
       <div className="surface-card bg-amber-400/10 p-3 text-sm text-action-warning flex items-start gap-2.5">
         <Info className="w-4 h-4 shrink-0 mt-0.5 text-action-warning" />
         <p>
@@ -230,9 +242,18 @@ function PassLeaveSubmissionInner() {
           </h2>
 
           {wards.length === 0 ? (
-            <p className="text-sm text-text-muted py-2">
-              No wards linked to your account.
-            </p>
+            <div className="surface-card bg-bg-base/60 p-6 text-center space-y-2">
+              <p className="text-sm font-semibold text-text-secondary">No wards linked to your account</p>
+              <p className="text-xs text-text-muted">A student must be linked to your guardian account before you can submit leave requests.</p>
+              <div className="pt-2">
+                <Link
+                  href="/guardian/contact-info"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                >
+                  Verify Contact &amp; Link Details
+                </Link>
+              </div>
+            </div>
           ) : (
             <>
               <div>
@@ -372,8 +393,17 @@ function PassLeaveSubmissionInner() {
               <Loader2 className="w-4 h-4 animate-spin" /> Loading requests…
             </div>
           ) : rows.length === 0 ? (
-            <div className="surface-card p-6 text-center text-sm text-text-muted">
-              No requests found for your wards.
+            <div className="surface-card p-6 text-center space-y-2">
+              <p className="text-sm font-semibold text-text-secondary">No requests found</p>
+              <p className="text-xs text-text-muted">No pass or leave requests have been submitted for your wards yet.</p>
+              <div className="pt-2">
+                <Link
+                  href="/guardian/child-status"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  View Ward Status
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="space-y-2">

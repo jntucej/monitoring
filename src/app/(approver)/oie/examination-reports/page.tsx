@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   ArrowRight,
   FileBarChart,
@@ -193,6 +194,19 @@ function ExaminationReportsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Officer In-Charge of Examinations"
+        purpose="Generate hall occupancy summaries, clearance statistics, and exam reports."
+        contextLabel="Examination Reports"
+        statusTone="info"
+        statusSummary="Export examination audit statistics, clearance volumes, and hall allocations."
+        primaryAction={{ label: "Records", href: "/oie/records" }}
+        secondaryActions={[
+          { label: "OIE Overview", href: "/oie" },
+          { label: "Decision History", href: "/oie/decision-history" },
+        ]}
+      />
 
       {error && (
         <ErrorBanner

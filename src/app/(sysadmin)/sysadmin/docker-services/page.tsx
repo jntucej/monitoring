@@ -12,6 +12,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { DockerFleetPanel } from "@/components/sysadmin/monitoring/DockerFleetPanel";
 import { AlertTriangle, Container } from "lucide-react";
 import { SysAdminGroupTrace } from "@/components/nav/level4/SysAdminGroupTrace";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface ServicesData {
   status?: string;
@@ -57,6 +58,14 @@ function DockerServicesInner() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor docker services for campus operations."
+        contextLabel="Docker Services"
+        statusSummary="Review current docker services state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div>
         <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
           <Container className="w-6 h-6 text-action-danger" />

@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
@@ -164,6 +165,15 @@ function ExceptionsInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Gate Operator"
+        purpose="Review denied scans, invalid pass alerts, curfew overrides, and gate transit discrepancies"
+        contextLabel="Exceptions Register"
+        statusSummary="Investigate gate scan rejections, expired pass attempts, and perimeter security anomalies."
+        severity="warn"
+        primaryAction={{ label: "Manual Entry", href: "/operator/manual-entry" }}
+        secondaryAction={{ label: "Transit Log", href: "/operator/transactions" }}
+      />
       {(txError || permError) && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />

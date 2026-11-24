@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { ShieldCheck, AlertTriangle, ArrowRight, BellRing } from "lucide-react";
 
 /* response shapes */
@@ -81,6 +82,24 @@ function ExamSuperintendentIncidentsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Superintendent"
+        purpose="Record and track examination hall incidents, malpractice reports, and room irregularities."
+        contextLabel="Exam Incidents"
+        statusTone={examAlerts.length > 0 ? "warn" : "ok"}
+        statusPill={examAlerts.length > 0 ? `${examAlerts.length} reported` : "No incidents"}
+        statusSummary={
+          examAlerts.length > 0
+            ? `${examAlerts.length} hall incident report${examAlerts.length === 1 ? "" : "s"} logged during active examination sessions.`
+            : "No active examination hall incident reports logged."
+        }
+        primaryAction={{ label: "Access Desk", href: "/exam/superintendent" }}
+        secondaryActions={[
+          { label: "Today Overview", href: "/exam/superintendent/home" },
+          { label: "Schedule", href: "/exam/superintendent/schedule" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

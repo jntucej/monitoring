@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useMemo, lazy } from "react";
@@ -75,6 +76,14 @@ function OperatorStatsInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Gate Operator"
+        purpose="Track shift scanning metrics, hourly throughput volumes, and entry versus exit splits"
+        contextLabel="Shift Analytics"
+        statusSummary="Live scan volume and transit velocity metrics for your active duty window."
+        primaryAction={{ label: "View Transactions", href: "/operator/transactions" }}
+        secondaryAction={{ label: "Open Gate Desk", href: "/operator" }}
+      />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 min-w-0">

@@ -16,6 +16,7 @@ import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { SysadminHealthPanel } from "@/components/approver/SysadminHealthPanel";
 import { AdminAlertsPanel } from "@/components/approver/AdminAlertsPanel";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /**
  * SysAdmin Command Center — the live operational-state cockpit.
@@ -102,6 +103,14 @@ export default function SysadminCommandCenterPage() {
 function CommandCenterSkeleton() {
   return (
     <div className="space-y-6" aria-hidden="true" inert>
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Live operational state"
+        contextLabel="Live operational state"
+        statusSummary="Review current live operational state state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <Skeleton className="h-20 w-full rounded-2xl" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Skeleton className="h-28 rounded-2xl" />

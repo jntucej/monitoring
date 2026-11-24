@@ -1,10 +1,12 @@
 "use client";
 
 import { Suspense, useMemo } from "react";
+import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorEmptyState } from "@/components/operator/shared/OperatorEmptyState";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { Loader2, Clock, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { EntityInspector } from "@/components/shared/EntityInspector";
@@ -58,6 +60,21 @@ function WorkerShiftsInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Campus Operator · Worker"
+        purpose="Track daily gate check-in/out records, scan counts, and active duty timing."
+        contextLabel="Shift & Gate Presence"
+        statusTone={todayShift?.check_in ? "ok" : "info"}
+        statusPill={todayShift?.check_in ? "Shift Logged" : "No Shift Active"}
+        statusSummary={
+          todayShift?.check_in
+            ? `Shift started at ${fmtTime(todayShift.check_in)} with ${todayShift.scans ?? 0} scan(s) logged.`
+            : "No active shift logged yet today. Check-in records and gate scans will show here."
+        }
+        primaryAction={{ label: "Work Orders", href: "/worker/work-orders" }}
+        secondaryAction={{ label: "Worker Today", href: "/worker" }}
+      />
+
       <div className="flex items-center gap-3 min-w-0">
         <Clock className="h-6 w-6 text-action-success shrink-0" />
         <div className="min-w-0">
@@ -94,7 +111,19 @@ function WorkerShiftsInner() {
               </div>
             </div>
           ) : (
-            <OperatorEmptyState icon={<Clock className="h-6 w-6 text-text-muted" />} title="No shift recorded today" description="Gate check-ins will appear here once recorded." />
+            <OperatorEmptyState
+              icon={<Clock className="h-6 w-6 text-text-muted" />}
+              title="No shift recorded today"
+              description="Gate check-ins will appear here once recorded. You can inspect work orders or check the worker dashboard."
+              action={
+                <Link
+                  href="/worker/work-orders"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                >
+                  Inspect Work Orders
+                </Link>
+              }
+            />
           )}
         </div>
       </OperatorWidgetBoundary>

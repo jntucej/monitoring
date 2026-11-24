@@ -7,6 +7,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { Megaphone } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { AnnouncementsResponse, fmtDateTime } from "../_shared";
@@ -38,6 +39,20 @@ function Inner() {
           All notifications
         </Link>
       </div>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Read campus-wide official circulars, institutional bulletins, and holiday notifications"
+        contextLabel="Institutional Announcements"
+        severity="info"
+        statusPill={list.length > 0 ? `${list.length} active` : "None"}
+        statusSummary={
+          list.length > 0
+            ? `${list.length} official campus circular${list.length === 1 ? "" : "s"} and bulletins published.`
+            : "No active announcements published at this time."
+        }
+        primaryAction={{ label: "All Notifications", href: "/student/notifications" }}
+        secondaryAction={{ label: "Campus Feed", href: "/student/campus" }}
+      />
       {list.length === 0 ? (
         <EmptyState
           title="No announcements"

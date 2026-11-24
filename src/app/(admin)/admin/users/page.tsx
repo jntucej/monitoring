@@ -7,6 +7,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import { UserManagementPanel } from "@/components/admin/UserManagementPanel";
 import Link from "next/link";
 import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface DepartmentData {
   code: string;
@@ -117,6 +118,14 @@ export default function AdminUsersPage() {
   return (
     
       <div className="space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor users for campus operations."
+        contextLabel="Users"
+        statusSummary="Review current users state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <p className="text-text-muted">

@@ -10,6 +10,7 @@ import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface LockdownRow {
   id: string;
@@ -82,6 +83,14 @@ function AdminLockdownInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Broadcast or lift a campus-wide gate lockdown"
+        contextLabel="Broadcast or lift a campus-wide gate lockdown"
+        statusSummary="Review current broadcast or lift a campus-wide gate lockdown state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-40 rounded-2xl" />
       </div>

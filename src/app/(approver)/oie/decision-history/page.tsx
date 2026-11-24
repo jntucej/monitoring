@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildOieDecisionHistoryInspection } from "@/lib/role-registers/oieInspections";
 import {
@@ -233,6 +234,20 @@ function DecisionHistoryInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Officer In-Charge of Examinations"
+        purpose="Audit past clearance decisions, approval rationales, and timestamps."
+        contextLabel="Decision Archive"
+        statusTone="info"
+        statusPill={`${allRows.length} decisions`}
+        statusSummary={`Archive of ${allRows.length} exam clearance decisions and historical dispositions.`}
+        primaryAction={{ label: "Pending Queue", href: "/oie/queue/pending" }}
+        secondaryActions={[
+          { label: "OIE Overview", href: "/oie" },
+          { label: "Branch Coordination", href: "/oie/exam-branch-coordination" },
+        ]}
+      />
 
       {error && (
         <ErrorBanner

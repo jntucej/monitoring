@@ -8,6 +8,7 @@ import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/le
 import { CalendarDays, CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { Scan, Student } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 interface Row {
   roll: string;
   name: string;
@@ -146,6 +147,14 @@ const api = useApi();
   return (
     
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor attendance for campus operations."
+        contextLabel="Attendance"
+        statusSummary="Review current attendance state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <p className="text-2xl font-bold">Attendance</p>

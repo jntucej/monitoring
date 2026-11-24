@@ -5,6 +5,7 @@
 
 "use client";
 
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEffect, useMemo, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
@@ -155,6 +156,15 @@ export default function PrincipalPassesPage() {
           approval. Recorded as <code>pass.generated</code>, not <code>pass.approved</code>.
         </p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Principal"
+        purpose="Direct executive pass generation bypassing lower approver tiers under emergency authority"
+        contextLabel="Authority-Issued Pass Terminal"
+        statusSummary="Directly generate verified gate passes for students with administrative sign-off."
+        primaryAction={{ label: "Hostel Oversight", href: "/principal/operations/hostel" }}
+        secondaryAction={{ label: "Pending Approvals", href: "/principal/approvals" }}
+      />
 
       <section className="rounded-xl border border-border bg-bg-base p-4">
         <div className="grid gap-3 sm:grid-cols-2">

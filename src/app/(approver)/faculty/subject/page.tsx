@@ -17,11 +17,16 @@ export default function SubjectFacultyTodayPage() {
     <div className="p-4 sm:p-6 space-y-4 max-w-4xl mx-auto">
       <PageHeader title="Subject Faculty" subtitle="Daily teaching schedule, class attendance, and subject overview." />
       <ContextSituationBar
+        roleLabel="Subject Faculty"
+        purpose="Record attendance and manage daily lecture schedule across course assignments."
         contextLabel="Subject Teaching Workspace"
         statusTone="info"
-        summary="Open your assigned classes or mark today's subject attendance."
+        statusSummary="Open your assigned classes or mark today's subject attendance."
         primaryAction={{ label: "Mark Attendance", href: "/faculty/subject/attendance" }}
-        secondaryAction={{ label: "My Classes", href: "/faculty/subject/classes" }}
+        secondaryActions={[
+          { label: "My Classes", href: "/faculty/subject/classes" },
+          { label: "Class Overview", href: "/faculty" },
+        ]}
       />
       <details className="surface-card bg-bg-surface p-4">
         <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-text-secondary">

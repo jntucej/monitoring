@@ -6,6 +6,7 @@ import type { Scan } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
 import { ActiveFilterBar } from "@/components/shared/ActiveFilterBar";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function StudentHistoryPage() {
 const api = useApi();
@@ -70,6 +71,20 @@ const api = useApi();
           ))}
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Audit chronological campus gate check-ins and check-outs verified by physical gate scanners"
+        contextLabel="Gate Scan Records"
+        statusPill={loading ? "Scanning…" : `${scans.length} scans logged`}
+        statusSummary={
+          scans.length > 0
+            ? `Showing ${filtered.length} of ${scans.length} campus turnstile and gate scan events.`
+            : "No gate scan records logged yet for your student identity."
+        }
+        primaryAction={{ label: "Active Gate Passes", href: "/student/passes" }}
+        secondaryAction={{ label: "Attendance Calendar", href: "/student/attendance-calendar" }}
+      />
 
       <div className="bg-bg-surface rounded-xl border border-border overflow-hidden">
         <ActiveFilterBar

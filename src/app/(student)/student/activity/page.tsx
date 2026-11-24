@@ -1,5 +1,6 @@
 "use client";
 
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
@@ -13,6 +14,14 @@ export default function ActivityPage() {
       <h1 className="text-lg font-semibold text-primary">
         My Activity
       </h1>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Monitor recent campus interactions, timeline events, and task continuity"
+        contextLabel="Activity & Timeline"
+        statusSummary="Review your chronological activity timeline and resume in-flight campus tasks."
+        primaryAction={{ label: "Gate Scan Log", href: "/student/history" }}
+        secondaryAction={{ label: "Student Home", href: "/student" }}
+      />
       <WidgetBoundary name="recent-activity">
         <RecentActivity />
       </WidgetBoundary>

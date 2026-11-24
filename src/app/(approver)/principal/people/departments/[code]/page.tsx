@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -74,6 +75,14 @@ export default function PrincipalDepartmentDetailPage() {
 
   return (
     <div className="space-y-5" data-role-tier="tier-3">
+      <ContextSituationBar
+        roleLabel="Principal"
+        purpose="Inspect specific academic department metrics, faculty composition, and student enrollments"
+        contextLabel={dept ? `Department Scope · ${dept.name} (${dept.code})` : "Department Scope"}
+        statusSummary={dept ? `${deptPerms.length} pending permissions, ${deptFlagged.length} flagged attendance, and ${deptLate.length} late arrivals.` : "Loading department metrics..."}
+        primaryAction={{ label: "All Departments", href: "/principal/people/departments" }}
+        secondaryAction={{ label: "Assignment Tree", href: "/principal/people/assignment-tree" }}
+      />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"

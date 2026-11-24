@@ -19,6 +19,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes (mirror shared endpoints) */
 
@@ -172,6 +173,24 @@ function DeputyWardenDailyOverviewInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Deputy Warden"
+        purpose="Monitor daily campus hostel operations, verify gate movement metrics, and maintain shift readiness"
+        contextLabel={`Daily Operations Overview · ${onCampusTotal} On Campus`}
+        statusSummary={
+          pendingTotal > 0
+            ? `${pendingTotal} request${pendingTotal === 1 ? "" : "s"} pending review at warden stage.${slaBreached > 0 ? ` ${slaBreached} past SLA deadline.` : ""}`
+            : "Campus gates nominal. No pending requests awaiting warden review."
+        }
+        severity={slaBreached > 0 ? "warn" : pendingTotal > 0 ? "info" : "ok"}
+        primaryAction={{ label: "Outpass Queue", href: "/deputy-warden" }}
+        secondaryActions={[
+          { label: "Gate Movement", href: "/deputy-warden/gate-movement" },
+          { label: "Curfew Oversight", href: "/deputy-warden/curfew-oversight" },
+          { label: "Shift Handover", href: "/deputy-warden/shift-handover" },
+        ]}
+      />
 
       {(presenceError || outpassError) && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

@@ -13,6 +13,7 @@ import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
 import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll, getDepartmentFromRoll, resolveCourseType } from "@/lib/rollNumber";
 import { useEntityInspector } from "@/components/shared/useEntityInspector";
 import { EntityInspector, KVPairs, InspectorButton, type EntityInspection } from "@/components/shared/EntityInspector";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface StudentRecord {
   id: string;
@@ -620,6 +621,14 @@ const api = useApi();
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor students for campus operations."
+        contextLabel="Students"
+        statusSummary="Review current students state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">

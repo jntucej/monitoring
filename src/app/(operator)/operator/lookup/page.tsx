@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -157,6 +158,14 @@ function OperatorLookupInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Gate Operator"
+        purpose="Lookup student records, current hosteller or day-scholar campus state, and approved passes"
+        contextLabel="Student & Pass Lookup"
+        statusSummary="Search any student by roll number or name to verify campus status, active passes, and hostel blocks."
+        primaryAction={{ label: "Manual Entry", href: "/operator/manual-entry" }}
+        secondaryAction={{ label: "Pass Verification", href: "/operator/pass-verification" }}
+      />
       <PostIncidentBanner
         incidents={[]}
         onAcknowledge={() => {}}

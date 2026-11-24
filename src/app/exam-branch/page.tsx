@@ -11,6 +11,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   ShieldCheck,
   AlertTriangle,
@@ -123,6 +124,24 @@ function ExamBranchPassQueueInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Branch"
+        purpose="Review and process student examination passes and clearance workflows."
+        contextLabel="Exam Pass Queue"
+        statusTone={pendingCount > 0 ? "warn" : "ok"}
+        statusPill={pendingCount > 0 ? `${pendingCount} pending` : "Queue clear"}
+        statusSummary={
+          pendingCount > 0
+            ? `${pendingCount} exam pass request${pendingCount === 1 ? "" : "s"} awaiting verification and processing.`
+            : "No pending exam pass requests in your queue."
+        }
+        primaryAction={{ label: "OIE Requests", href: "/exam-branch/oie-approval-requests" }}
+        secondaryActions={[
+          { label: "Verification", href: "/exam-branch/verification" },
+          { label: "Today Overview", href: "/exam-branch/home" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

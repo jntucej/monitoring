@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, lazy } from "react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 const StudentAttendancePage = lazy(
   () => import("@/components/student/StudentAttendancePage")
@@ -8,8 +9,18 @@ const StudentAttendancePage = lazy(
 
 export default function AttendancePage() {
   return (
-    <Suspense fallback={null}>
-      <StudentAttendancePage />
-    </Suspense>
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Monitor overall attendance rate, safe skips, class schedule, and file attendance disputes"
+        contextLabel="Attendance & Safe Skips"
+        statusSummary="Track your semester class attendance against requirements, review daily logs, and file period disputes."
+        primaryAction={{ label: "Attendance Calendar", href: "/student/attendance-calendar" }}
+        secondaryAction={{ label: "Gate Scan Log", href: "/student/history" }}
+      />
+      <Suspense fallback={null}>
+        <StudentAttendancePage />
+      </Suspense>
+    </div>
   );
 }

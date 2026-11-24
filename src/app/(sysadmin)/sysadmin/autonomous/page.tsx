@@ -19,6 +19,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders, cn } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -116,6 +117,14 @@ function StatCard({
   };
   return (
     <div className={cn("surface-card p-4", toneClasses[tone])}>
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor autonomous for campus operations."
+        contextLabel="Autonomous"
+        statusSummary="Review current autonomous state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div className="flex items-center gap-3">
         <Icon className="h-4 w-4 opacity-60" />
         <div>

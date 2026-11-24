@@ -7,11 +7,21 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { PermissionList } from "@/components/approver/PermissionList";
 
 function StaffLeavesInner() {
   return (
     <div className="p-4 sm:p-6 md:p-4 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+      <ContextSituationBar
+        roleLabel="Campus Staff"
+        purpose="Submit, approve, or track teaching and non-teaching staff leave applications."
+        contextLabel="Leave Permission Management"
+        statusTone="info"
+        statusSummary="Manage staff leave submissions, track multi-level approvals, and review leave records."
+        primaryAction={{ label: "Request Status", href: "/staff/request-status" }}
+        secondaryAction={{ label: "My Day", href: "/staff/my-day" }}
+      />
       <WidgetBoundary title="Staff Leave Requests">
         <PermissionList
           workflowType="staff_leave"

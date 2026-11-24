@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface IngestResult {
   documentId: string;
@@ -65,6 +66,14 @@ function AdminKbInner() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Ingest policy and SOP documents into the on-campus RAG knowledge base"
+        contextLabel="Ingest policy and SOP documents into the on-campus RAG knowledge base"
+        statusSummary="Review current ingest policy and sop documents into the on-campus rag knowledge base state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Knowledge Base"
         subtitle="Ingest policy and SOP documents into the on-campus RAG knowledge base"

@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   ShieldCheck,
   Loader2,
@@ -76,6 +77,24 @@ function FacultyNotificationsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Faculty · Alerts"
+        purpose="Stay updated on institutional broadcasts, approval notices, and schedule updates."
+        contextLabel="Notification Inbox"
+        statusTone={announcements.length > 0 ? "info" : "ok"}
+        statusPill={`${announcements.length} updates`}
+        statusSummary={
+          announcements.length > 0
+            ? `${announcements.length} active announcement${announcements.length === 1 ? "" : "s"} logged in your faculty channel.`
+            : "No active announcements recorded in your inbox."
+        }
+        primaryAction={{ label: "Faculty Home", href: "/faculty" }}
+        secondaryActions={[
+          { label: "Permissions", href: "/faculty/permissions" },
+          { label: "Reports", href: "/faculty/reports" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

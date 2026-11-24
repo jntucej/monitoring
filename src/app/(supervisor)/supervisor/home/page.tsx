@@ -27,6 +27,7 @@ import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { gateLiveInspection, shiftInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 
@@ -202,6 +203,15 @@ export default function SupervisorTodayPage() {
 
       <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
         <PageHeader title="Supervisor" subtitle="Shift command & gate operations" />
+        <ContextSituationBar
+          roleLabel="Gate Supervisor"
+          purpose="Coordinate campus gate operations, active security shifts, and perimeter incident response"
+          contextLabel="Supervisor Command Center"
+          statusSummary={escalationsOpen > 0 || incidentsOpen > 0 ? `${escalationsOpen} escalations and ${incidentsOpen} incidents requiring supervisor attention.` : "All supervised gates active and shift coverage operational."}
+          severity={incidentsOpen > 0 ? "critical" : escalationsOpen > 0 ? "warn" : "ok"}
+          primaryAction={{ label: "Live Gate Desk", href: "/supervisor/gates/live" }}
+          secondaryAction={{ label: "Shift Handover", href: "/supervisor/shift/handover" }}
+        />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {kpis.map((k) => <KpiTile key={k.label} {...k} />)}
         </div>

@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface AlumniRow {
   id: string;
@@ -57,6 +58,14 @@ function AdminAlumniInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Graduated and checked-out students"
+        contextLabel="Graduated and checked-out students"
+        statusSummary="Review current graduated and checked-out students state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>

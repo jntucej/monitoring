@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { EntityInspector } from "@/components/shared/EntityInspector";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver/wardenConsoleModels";
 
 export default function Page() {
@@ -12,6 +13,18 @@ export default function Page() {
     : null;
   return (
     <div className="space-y-4">
+      <ContextSituationBar
+        roleLabel="Officer In-Charge of Examinations"
+        purpose="Address escalated exam-day exceptions and urgent verification hold-ups."
+        contextLabel="Escalated Exam Queue"
+        statusTone="warn"
+        statusSummary="Resolve escalated clearance requests requiring executive OIE intervention."
+        primaryAction={{ label: "Pending Queue", href: "/oie/queue/pending" }}
+        secondaryActions={[
+          { label: "OIE Overview", href: "/oie" },
+          { label: "Exceptions", href: "/oie/access-exceptions" },
+        ]}
+      />
       <KanbanBoard
         source="/api/oie/queue?status=ESCALATED"
         columns={["ESCALATED"]}

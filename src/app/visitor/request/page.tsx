@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, FileText, AlertTriangle, ArrowRight } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import type { VisitorsMineResponse } from "../types";
 
 function VisitorRequestInner() {
@@ -62,6 +63,23 @@ function VisitorRequestInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Campus Visitor"
+        purpose="Monitor submitted visit requests, host approval state, and visit parameters."
+        contextLabel="Visit Request Record"
+        statusTone={req?.state === "ACTIVE" ? "ok" : "info"}
+        statusPill={req?.state === "ACTIVE" ? "Active" : req?.state === "COMPLETED" ? "Completed" : "No Active Request"}
+        statusSummary={
+          req?.state === "ACTIVE"
+            ? `Visit request with host ${req.hostName ?? "host"} is active. Proceed to check in or view pass.`
+            : req?.state === "COMPLETED"
+              ? "Your previous visit request has concluded. Review registration or schedule a new visit."
+              : "No visit request is currently active. Coordinate with your host for visitor access."
+        }
+        primaryAction={{ label: "Visit & Check-In", href: "/visitor/visit" }}
+        secondaryAction={{ label: "Visitor Registration", href: "/visitor/registration" }}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

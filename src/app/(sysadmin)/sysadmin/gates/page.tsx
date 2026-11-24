@@ -11,6 +11,7 @@ import { useEntityResolver, type EntityInspection } from "@/components/shared/en
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import {DoorOpen, Plus, Pencil, Power, Trash2, Search, UserCog, X, Monitor}  from "lucide-react";
 import { GateClaimCodePanel } from "@/components/supervisor/GateClaimCodePanel";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /**
  * Per-row child component: lazily resolves the "gate" kind when the card
@@ -25,6 +26,14 @@ function GateCardInspector({ gate, onInspect }: { gate: Gate; onInspect: (m: Ent
   if (loading || error) {
     return (
       <div className="flex items-center gap-2 text-xs text-text-muted px-3 py-4">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor gates for campus operations."
+        contextLabel="Gates"
+        statusSummary="Review current gates state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         {error ? "Could not load gate details" : "Loading gate…"}
       </div>
     );

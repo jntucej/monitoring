@@ -25,6 +25,7 @@ import {
   Layers,
   AlertCircle,
 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface CustomReasonItem {
   id: string;
@@ -183,6 +184,14 @@ const api = useApi();
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor reasons for campus operations."
+        contextLabel="Reasons"
+        statusSummary="Review current reasons state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-2xl font-bold text-text-primary flex items-center gap-2">

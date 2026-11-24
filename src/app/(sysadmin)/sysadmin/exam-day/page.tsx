@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface AccessRow {
   id: string;
@@ -69,6 +70,14 @@ function SysadminExamDayInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Clearance desk + candidate attendance for exam-day gate access"
+        contextLabel="Clearance desk + candidate attendance for exam-day gate access"
+        statusSummary="Review current clearance desk + candidate attendance for exam-day gate access state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>

@@ -12,6 +12,7 @@ import {
 } from "@/components/shared/EntityInspector";
 import { ExternalLink, ChevronRight } from "lucide-react";
 import type { CaseRow } from "@/lib/institutional/cases";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 const CASE_TYPE_LABEL: Record<string, string> = {
   gate_pass: "Gate pass",
@@ -160,6 +161,14 @@ export default function AdminCasesPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="The case register behind the institutional decision architecture"
+        contextLabel="The case register behind the institutional decision architecture"
+        statusSummary="Review current the case register behind the institutional decision architecture state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Institutional Cases"
         subtitle="The case register behind the institutional decision architecture"

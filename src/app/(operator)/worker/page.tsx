@@ -5,6 +5,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { QuickActions } from "@/components/operator/shared/QuickActions";
 import { OperatorNotifications } from "@/components/operator/shared/OperatorNotifications";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
@@ -19,6 +20,16 @@ export default function WorkerPage() {
     <Suspense fallback={<OperatorPageLoading />}>
       <AuthGuard allowedRoles={["worker"]}>
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+          <ContextSituationBar
+            roleLabel="Campus Operator · Worker"
+            purpose="Daily operational tasks, active shift recording, and work order tracking."
+            contextLabel="Operator Shift & Tasks"
+            statusTone="info"
+            statusPill="Active Shift"
+            statusSummary="View today's assigned tasks, track shift check-in times, and review open work orders."
+            primaryAction={{ label: "View Shifts", href: "/worker/shifts" }}
+            secondaryAction={{ label: "Work Orders", href: "/worker/work-orders" }}
+          />
 
           <OperatorWidgetBoundary name="RoleDashboardPanel" title="Worker Dashboard">
             <RoleDashboardPanel

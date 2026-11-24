@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { getAuthHeaders } from "@/lib/utils";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface HistoryItem {
   direction?: string;
@@ -69,6 +70,14 @@ function AdminStudentDetail() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Full record, movement history, flags, and guardian link"
+        contextLabel="Full record, movement history, flags, and guardian link"
+        statusSummary="Review current full record, movement history, flags, and guardian link state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Student Profile"
         subtitle="Full record, movement history, flags, and guardian link"

@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface AchievementDef {
   code: string;
@@ -49,6 +50,14 @@ function SysadminAchievementsInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor achievements for campus operations."
+        contextLabel="Achievements"
+        statusSummary="Review current achievements state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>

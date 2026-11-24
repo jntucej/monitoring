@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { DigitalIdCard } from "@/components/student/DigitalIdCard";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { QrCode } from "lucide-react";
 
@@ -18,6 +19,16 @@ function StudentIdInner() {
           Show this QR code at campus gates, library, or mess counters for quick verification.
         </p>
       </div>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Present your secure campus barcode/QR identity for verification at gates, library, and mess"
+        contextLabel="Digital Student Credential"
+        severity="ok"
+        statusPill="Active Credential"
+        statusSummary="Carry your authenticated student barcode and QR token for turnstiles and checkpoints."
+        primaryAction={{ label: "My Gate Passes", href: "/student/passes" }}
+        secondaryAction={{ label: "Profile & Security", href: "/student/profile-security" }}
+      />
       <div className="max-w-md mx-auto sm:max-w-none">
         <DigitalIdCard />
       </div>

@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface Dept {
   id: string;
@@ -164,6 +165,14 @@ function AdminClassesInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Teaching groups by department, year, and section"
+        contextLabel="Teaching groups by department, year, and section"
+        statusSummary="Review current teaching groups by department, year, and section state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-64 rounded-2xl" />
       </div>

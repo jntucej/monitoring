@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildFacultyCorrectionInspection } from "@/lib/role-registers/facultyInspections";
 import {
@@ -84,6 +85,24 @@ function FacultyCorrectionRequestsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Faculty · Corrections"
+        purpose="Inspect student attendance correction memos and forward validated edits."
+        contextLabel="Correction Queue"
+        statusTone={rows.length > 0 ? "warn" : "ok"}
+        statusPill={rows.length > 0 ? `${rows.length} pending` : "All clear"}
+        statusSummary={
+          rows.length > 0
+            ? `${rows.length} attendance correction request${rows.length === 1 ? "" : "s"} awaiting faculty verification.`
+            : "No pending attendance correction memos in your queue."
+        }
+        primaryAction={{ label: "Faculty Home", href: "/faculty" }}
+        secondaryActions={[
+          { label: "Permissions", href: "/faculty/permissions" },
+          { label: "Request History", href: "/faculty/request-history" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

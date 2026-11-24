@@ -1,5 +1,20 @@
 "use client";
+
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { ApprovalsView } from "./_shared/ApprovalsView";
+
 export default function Page() {
-  return <ApprovalsView status="PENDING" title="Pending approvals" />;
+  return (
+    <div className="space-y-4">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Primary executive approvals desk for institutional leaves, gate passes, and academic clearances"
+        contextLabel="Executive Approvals Desk"
+        statusSummary="Review and authorize pending student workflow requests, gate passes, and department escalations."
+        primaryAction={{ label: "Escalated Requests", href: "/vice-principal/escalated-requests" }}
+        secondaryAction={{ label: "VP Dashboard", href: "/vice-principal/home" }}
+      />
+      <ApprovalsView status="PENDING" title="Pending approvals" />
+    </div>
+  );
 }

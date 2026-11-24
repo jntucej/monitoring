@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -89,6 +90,14 @@ export default function PrincipalGateDetailPage() {
       data-role-tier={rules ? rules.tierLabel.split("•")[0].trim().toLowerCase().replace(/\s+/g, "-") : "tier-3"}
       data-event-mode={rules?.mode ?? "gate-admin"}
     >
+      <ContextSituationBar
+        roleLabel="Principal"
+        purpose="Detailed operational audit and guard coverage inspection for this specific campus portal"
+        contextLabel={gate ? `Portal Telemetry · ${gate.gateName || gate.gateCode}` : "Portal Telemetry"}
+        statusSummary={gate ? `Status: ${gate.status || "Operational"} · Scans today: ${gate.scansToday ?? "Normal"} · Guard coverage active.` : "Loading portal telemetry..."}
+        primaryAction={{ label: "All Campus Gates", href: "/principal/operations/gates" }}
+        secondaryAction={{ label: "Security Incidents", href: "/principal/operations/incidents" }}
+      />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"

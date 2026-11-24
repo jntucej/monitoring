@@ -24,6 +24,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function CaretakerPage() {
   const { inspection, inspect, closeInspection } = useEntityInspector();
@@ -34,6 +35,18 @@ export default function CaretakerPage() {
     <Suspense fallback={<PageLoading />}>
         <div className="space-y-6">
           <PageHeader title="Caretaker" subtitle="Facilities & maintenance" />
+          <ContextSituationBar
+            roleLabel="Caretaker"
+            purpose="Maintain hostel facility operations, monitor physical infrastructure tasks, and oversee on-ground workers"
+            contextLabel="Facilities & Maintenance Overview"
+            statusSummary="Monitor real-time hostel maintenance boards, track urgent repairs, and coordinate facility tasks."
+            severity="info"
+            primaryAction={{ label: "Maintenance Queue", href: "/caretaker/maintenance" }}
+            secondaryActions={[
+              { label: "Complaint Console", href: "/caretaker" },
+              { label: "Workers Status", href: "/caretaker/workers" },
+            ]}
+          />
           <WidgetBoundary name="RoleDashboardPanel" title="Caretaker Dashboard">
             <RoleDashboardPanel
               title="Caretaker dashboard"

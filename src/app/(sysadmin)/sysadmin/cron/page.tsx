@@ -14,6 +14,7 @@ import {
   SysAdminTraceDrawer,
   type SysAdminTraceTarget,
 } from "@/components/nav/level4/SysAdminTraceDrawer";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface JobRow {
   id: string;
@@ -116,6 +117,14 @@ function SysadminCronInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor scheduled jobs for campus operations."
+        contextLabel="Scheduled Jobs"
+        statusSummary="Review current scheduled jobs state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>

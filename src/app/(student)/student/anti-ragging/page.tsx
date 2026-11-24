@@ -6,6 +6,7 @@ import { useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { AntiRaggingProgress } from "@/components/student/AntiRaggingProgress";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function AntiRaggingPage() {
   const [form, setForm] = useState({
@@ -43,6 +44,16 @@ export default function AntiRaggingPage() {
   if (caseNumber) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
+        <ContextSituationBar
+          roleLabel="Student"
+          purpose="Confidential reporting channel for ragging, bullying, and harassment incidents"
+          contextLabel="Confidential Protection"
+          severity="ok"
+          statusPill={`Case #${caseNumber}`}
+          statusSummary="Your report has been lodged directly with the Principal's office."
+          primaryAction={{ label: "View Complaints", href: "/student/complaints" }}
+          secondaryAction={{ label: "Student Home", href: "/student" }}
+        />
         <div className="space-y-4">
           <h1 className="text-2xl font-semibold text-emerald-700">Case filed successfully</h1>
           <p className="text-sm">
@@ -75,6 +86,17 @@ export default function AntiRaggingPage() {
           This is a confidential, restricted channel. Only the Principal&apos;s office will see this filing.
         </p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Confidential reporting channel for ragging, bullying, and harassment incidents"
+        contextLabel="Safety Escalation"
+        severity="critical"
+        statusPill="Confidential Channel"
+        statusSummary="Direct, restricted intake reviewed exclusively by the Principal's office. Anonymous filing supported."
+        primaryAction={{ label: "General Complaints", href: "/student/complaints" }}
+        secondaryAction={{ label: "Campus Safety Helpline", href: "tel:18001805522" }}
+      />
 
       <div>
         <label className="block text-sm font-medium text-text-muted mb-1" htmlFor="category">Category</label>

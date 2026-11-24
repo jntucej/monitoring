@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import {
   buildFacultyClassRequestInspection,
@@ -198,6 +199,24 @@ export default function FacultyClassRequestsPage() {
         <h1 className="text-lg font-bold text-text-primary">Class requests</h1>
         <p className="text-xs text-text-muted mt-1">Requests routed to you{isHod ? " and class-level issues" : ""}.</p>
       </header>
+
+      <ContextSituationBar
+        roleLabel={isHod ? "HOD · Class Requests" : "Faculty · Class Requests"}
+        purpose="Review student requests, broadcast class notices, and resolve classroom escalations."
+        contextLabel="Request Queue"
+        statusTone={queue.length > 0 ? "warn" : "ok"}
+        statusPill={queue.length > 0 ? `${queue.length} pending` : "Queue clear"}
+        statusSummary={
+          queue.length > 0
+            ? `${queue.length} open class request${queue.length === 1 ? "" : "s"} awaiting review.`
+            : "No open requests routed to your class queue right now."
+        }
+        primaryAction={{ label: "Faculty Home", href: "/faculty" }}
+        secondaryActions={[
+          { label: "Permissions", href: "/faculty/permissions" },
+          { label: "Request History", href: "/faculty/request-history" },
+        ]}
+      />
 
       {msg && <p className={`text-xs font-medium ${msg.ok ? "text-action-success" : "text-action-danger"}`}>{msg.text}</p>}
 

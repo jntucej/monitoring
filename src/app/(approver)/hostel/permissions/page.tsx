@@ -5,6 +5,7 @@ import { Suspense, useCallback } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { PermissionList } from "@/components/approver/PermissionList";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
@@ -203,6 +204,23 @@ function HostelPermissionsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Hostel Approver"
+        purpose="Review hostel outpass and leave requests, monitor gate presence, and enforce curfew adherence"
+        contextLabel={`Hostel Permissions & Presence · ${curfew.label}`}
+        statusSummary={
+          pendingCount > 0
+            ? `${pendingCount} pending hostel outpass request${pendingCount === 1 ? "" : "s"} at your stage.${slaBreached > 0 ? ` ${slaBreached} past SLA deadline.` : ""}`
+            : "No pending hostel passes at your review stage. Monitoring gate occupancy and curfew status."
+        }
+        severity={slaBreached > 0 ? "warn" : pendingCount > 0 ? "info" : "ok"}
+        primaryAction={{ label: "Curfew Oversight", href: "/deputy-warden/curfew-oversight" }}
+        secondaryActions={[
+          { label: "Gate Movement", href: "/deputy-warden/gate-movement" },
+          { label: "Daily Overview", href: "/deputy-warden/daily-overview" },
+        ]}
+      />
 
       {/* error banners — presence matrix may 403 for hostel roles; render gracefully */}
       {presenceError && (

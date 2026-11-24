@@ -21,6 +21,7 @@ import { LiveClassCard } from "@/components/shared/LiveClassCard";
 import { EmergencyPulse } from "../_retention/EmergencyPulse";
 import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPreview";
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { PrincipalWidgetBoundary as WidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import { OverallClassSatisfactionCard } from "@/components/principal/OverallClassSatisfactionCard";
 import { PrincipalDigest } from "@/components/retention/PrincipalDigest";
@@ -181,6 +182,15 @@ export default function PrincipalTodayPage() {
 
       <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
 <PageHeader title="Principal" subtitle="Campus leadership console" />
+        <ContextSituationBar
+          roleLabel="Principal"
+          purpose="Executive campus leadership console monitoring institutional pulse, decision streaks, and strategic KPIs"
+          contextLabel="Principal Overview & Leadership Console"
+          statusSummary={(d?.emergency?.length ?? 0) > 0 || (d?.counts.overdue ?? 0) > 0 ? `${d?.emergency?.length ?? 0} emergencies and ${d?.counts.overdue ?? 0} overdue items requiring immediate executive command.` : `${pending} approvals in queue, ${sessionDecisions} decisions cleared this session.`}
+          severity={(d?.emergency?.length ?? 0) > 0 ? "critical" : (d?.counts.overdue ?? 0) > 0 ? "warn" : "ok"}
+          primaryAction={{ label: "Command Center", href: "/principal" }}
+          secondaryAction={{ label: "Attention Queue", href: "/principal/attention" }}
+        />
         <WidgetBoundary name="PrincipalKpis" title="Principal KPIs">
           {error && !loading && data === null ? (
             // Recoverable error with retry — mirrors the admin overview pattern (RC8/SD2).

@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -190,6 +191,14 @@ export default function PrincipalCasesPage() {
       <PageHeader
         title="Case Register"
         subtitle="Institutional cases — click any case to inspect it in place"
+      />
+      <ContextSituationBar
+        roleLabel="Principal"
+        purpose="Formal disciplinary, academic dishonesty, and institutional inquiry cases"
+        contextLabel="Institutional Case Register"
+        statusSummary={rows.length > 0 ? `${rows.length} institutional cases on file; click any case to inspect evidentiary provenance.` : "No active institutional cases on file."}
+        primaryAction={{ label: "Emergency Command", href: "/principal/emergency" }}
+        secondaryAction={{ label: "Audit Ledger", href: "/principal/governance/audit" }}
       />
       {loading && <Loading />}
       {!loading && rows.length === 0 && (

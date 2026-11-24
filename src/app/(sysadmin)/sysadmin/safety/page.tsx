@@ -9,6 +9,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { SafetyContent } from "@/components/sysadmin/domains/alerts/SafetyContent";
 import type { SafetyData } from "@/components/sysadmin/domains/alerts/types";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 function SafetyInner() {
   const { data, loading, error, refresh } = useDashboardData<SafetyData>(
@@ -23,6 +24,14 @@ function SafetyInner() {
 
   return (
     <div className="space-y-4 min-w-0">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Gate lockdown cockpit: secure / elevated / critical states plus the incident timeline"
+        contextLabel="Gate lockdown cockpit: secure / elevated / critical states plus the incident timeline"
+        statusSummary="Review current gate lockdown cockpit: secure / elevated / critical states plus the incident timeline state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <PageHeader
         title="Safety & Security Control"
         subtitle="Gate lockdown cockpit: secure / elevated / critical states plus the incident timeline"

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useApiResource } from "@/hooks/useApiResource";
 import { Loader2, GraduationCap, User } from "lucide-react";
 
@@ -101,6 +102,19 @@ function ClassRosterInner() {
 
   return (
     <div className="space-y-4 p-2 min-w-0">
+      <ContextSituationBar
+        roleLabel="Faculty · Roster"
+        purpose="Review enrolled students, profile summaries, and roll identifiers for this class."
+        contextLabel={details ? `Year ${details.year} · ${details.section}` : "Class Roster"}
+        statusTone="info"
+        statusPill={`${students.length} students`}
+        statusSummary={`Enrolled student roster for Year ${details?.year ?? ""} ${details?.section ?? ""}. Select a student to inspect.`}
+        primaryAction={{ label: "View Attendance", href: `/faculty/attendance/${classId}` }}
+        secondaryActions={[
+          { label: "My Classes", href: "/faculty/my-classes" },
+          { label: "Directory", href: "/faculty/student-directory" },
+        ]}
+      />
       {/* Attendance analytics panel */}
       <Suspense fallback={<PageLoading />}>
         <FacultyRosterPanel classId={classId} />

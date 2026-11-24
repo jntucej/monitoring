@@ -5,6 +5,7 @@ import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   Bell
 } from "lucide-react";
@@ -21,6 +22,16 @@ function NotificationsInner() {
           Alerts, approvals and campus notices for your wards
         </p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Monitor critical alerts, pass approval milestones, and emergency campus bulletins."
+        contextLabel="Guardian Alert Center"
+        statusTone="info"
+        statusSummary="Stay notified of gate scan events, pass decision updates, and institutional broadcasts for your wards."
+        primaryAction={{ label: "Ward Status", href: "/guardian/child-status" }}
+        secondaryAction={{ label: "Request Status", href: "/guardian/request-status" }}
+      />
 
       {/* NotificationCenter is already wrapped in its own WidgetBoundary;
           wrap the outer page in one too so the whole section degrades

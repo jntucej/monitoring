@@ -21,6 +21,7 @@ import {
   Inbox
 } from "lucide-react";
 import { gatePresenceInspection, type GatePresenceRow } from "@/components/approver/wardenConsoleModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes */
 
@@ -97,6 +98,19 @@ function DeputyWardenGatemovementInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Deputy Warden"
+        purpose="Monitor live campus gate movements, track entry/exit throughput, and identify perimeter anomalies"
+        contextLabel={`Gate Movement & Presence · ${onCampusTotal} Inside`}
+        statusSummary={`${onCampusTotal} person(s) currently on campus across ${gates.length} reporting gate(s).`}
+        severity="info"
+        primaryAction={{ label: "Curfew Oversight", href: "/deputy-warden/curfew-oversight" }}
+        secondaryActions={[
+          { label: "Daily Overview", href: "/deputy-warden/daily-overview" },
+          { label: "Outpass Queue", href: "/deputy-warden" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

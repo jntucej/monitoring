@@ -11,6 +11,7 @@ import {
   MEAL_TYPES, MEAL_LABEL, SATISFACTION_LEVELS,
   type MealType, type Satisfaction, satisfactionLabel,
 } from "@/lib/mess-reviews";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface DailyRow {
   date: string; mealType: MealType;
@@ -66,6 +67,25 @@ export default function MessReviewsPage() {
           </button>
         }
       />
+      <div className="my-4">
+        <ContextSituationBar
+          roleLabel="Mess In-Charge"
+          purpose="Evaluate student meal ratings, review anonymized dining feedback, and address food quality concerns"
+          contextLabel="Student Meal Satisfaction"
+          statusSummary={
+            data
+              ? `Reviewing meal satisfaction ratings and recent student comments for ${data.from} → ${data.to}.`
+              : "Review student satisfaction distributions and feedback across breakfast, lunch, and dinner."
+          }
+          severity="info"
+          primaryAction={{ label: "Menu Management", href: "/mess/menu-management" }}
+          secondaryActions={[
+            { label: "Mess Issues", href: "/mess/mess-issues" },
+            { label: "Token Scanner", href: "/mess/scan" },
+            { label: "Mess Overview", href: "/mess" },
+          ]}
+        />
+      </div>
       <WidgetBoundary title="Meal Reviews">
         {loading && <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>}
         {error && <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger">{error}</div>}

@@ -21,6 +21,7 @@ import {
   type MenuDayInfo,
   type MessMenuItem,
 } from "@/components/approver/wardenConsoleModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface MenuResponse {
   success: boolean;
@@ -108,6 +109,23 @@ function MessMenuInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Mess In-Charge"
+        purpose="Publish scheduled mess menus, monitor active meal service windows, and inspect item availability"
+        contextLabel={`Menu Schedule · ${fmtDate(menuData?.mealDate)}`}
+        statusSummary={
+          menuHasDay
+            ? `${menuItems.length} menu items scheduled (${menuItems.filter((i) => i.isAvailable).length} available). Window: ${fmtTime(menuData?.windowOpens)} – ${fmtTime(menuData?.windowCloses)}.`
+            : "No active mess menu published for today. Review upcoming meal day catalogs."
+        }
+        severity="info"
+        primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
+        secondaryActions={[
+          { label: "Inventory & Stock", href: "/mess/inventory-stock" },
+          { label: "Daily Meal Counts", href: "/mess/daily-meal-counts" },
+          { label: "Mess Overview", href: "/mess" },
+        ]}
+      />
       <WidgetBoundary title="Menu Management">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
           <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">

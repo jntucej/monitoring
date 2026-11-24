@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Suspense } from "react";
+import { useMemo, useState, Suspense } from "react";
+import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorEmptyState } from "@/components/operator/shared/OperatorEmptyState";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { Loader2, ClipboardList, CheckCircle2 } from "lucide-react";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { requestInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
@@ -56,6 +57,21 @@ function WorkerWorkOrdersInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Campus Operator · Worker"
+        purpose="Review assigned campus maintenance requests and execute frontline work orders."
+        contextLabel="Assigned Work Orders"
+        statusTone={totalOpen > 0 ? "warn" : "ok"}
+        statusPill={totalOpen > 0 ? `${totalOpen} Open` : "Queue Clear"}
+        statusSummary={
+          totalOpen > 0
+            ? `You have ${totalOpen} pending work order${totalOpen === 1 ? "" : "s"} requiring attention.`
+            : "All caught up. No pending work orders assigned to you right now."
+        }
+        primaryAction={{ label: "View Shifts", href: "/worker/shifts" }}
+        secondaryAction={{ label: "Worker Today", href: "/worker" }}
+      />
+
       <div className="flex items-center gap-3 min-w-0">
         <ClipboardList className="h-6 w-6 text-action-info shrink-0" />
         <div className="min-w-0">
@@ -78,7 +94,19 @@ function WorkerWorkOrdersInner() {
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" /> Loading…
             </div>
           ) : open.length === 0 ? (
-            <OperatorEmptyState icon={<CheckCircle2 className="h-6 w-6 text-action-success" />} title="All caught up" description="No open work orders assigned to you right now." />
+            <OperatorEmptyState
+              icon={<CheckCircle2 className="h-6 w-6 text-action-success" />}
+              title="All caught up"
+              description="No open work orders assigned to you right now. You can check your shift or return to the main dashboard."
+              action={
+                <Link
+                  href="/worker/shifts"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                >
+                  View Shifts
+                </Link>
+              }
+            />
           ) : (
             <div className="divide-y divide-slate-800">
               {open.map((o) => (

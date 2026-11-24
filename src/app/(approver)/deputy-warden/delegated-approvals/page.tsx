@@ -30,6 +30,7 @@ import {
   ApproverStageDrawer,
   type StagePivotItem,
 } from "@/components/nav/level2/ApproverStageDrawer";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes */
 
@@ -209,6 +210,23 @@ function DeputyWardenDelegatedApprovalsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Deputy Warden"
+        purpose="Review permission requests within explicit warden delegation scope and escalate out-of-scope requests"
+        contextLabel={`Delegated Scope · ${delegationActive ? "Active" : "Read-only"}`}
+        statusSummary={
+          delegationActive
+            ? `${total} pending request${total === 1 ? "" : "s"} within your active delegation scope.${slaBreached > 0 ? ` ${slaBreached} past SLA deadline.` : ""}`
+            : "No active delegation recorded. Requests viewable in read-only mode and require warden escalation."
+        }
+        severity={slaBreached > 0 ? "warn" : delegationActive ? "info" : "ok"}
+        primaryAction={{ label: "Outpass Queue", href: "/deputy-warden" }}
+        secondaryActions={[
+          { label: "Leave Requests", href: "/deputy-warden/leave-requests" },
+          { label: "Daily Overview", href: "/deputy-warden/daily-overview" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

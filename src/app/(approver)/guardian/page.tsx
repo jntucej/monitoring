@@ -4,6 +4,7 @@ import { Suspense, useCallback, useMemo, lazy } from "react";
 import Link from "next/link";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import {
   ShieldCheck,
@@ -262,6 +263,21 @@ function GuardianOverviewInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Monitor linked student campus presence, active passes, and submit requests."
+        contextLabel="Ward Oversight Hub"
+        statusTone={pendingRows.length > 0 ? "warn" : "ok"}
+        statusPill={`${wards.length} Ward${wards.length === 1 ? "" : "s"} · ${onCampus} On Campus`}
+        statusSummary={
+          pendingRows.length > 0
+            ? `${pendingRows.length} pass/leave request(s) awaiting approval chain decisions.`
+            : `All caught up. ${onCampus} of ${wards.length} linked student(s) currently on campus.`
+        }
+        primaryAction={{ label: "Submit Pass / Leave", href: "/guardian/pass-leave-submission" }}
+        secondaryAction={{ label: "Ward Requests", href: "/guardian/child-requests" }}
+      />
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -6,6 +6,7 @@ import { useApi } from "@/hooks/useApi";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface OperatorAction {
   id: string;
@@ -292,6 +293,14 @@ export default function OperatorActionsPage() {
                       : "transparent",
                 }}
               >
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Approval gate for automated & manual operator actions — one-tap approve/reject"
+        contextLabel="Approval gate for automated & manual operator actions — one-tap approve/reject"
+        statusSummary="Review current approval gate for automated & manual operator actions — one-tap approve/reject state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">

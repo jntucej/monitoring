@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
@@ -102,6 +103,14 @@ function VpDecisionHistoryInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Searchable audit trail of past determinations, sign-offs, and rejected requests"
+        contextLabel="Executive Decision Ledger"
+        statusSummary="Audit approved, rejected, and delegated decisions with full provenance and timestamps."
+        primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}
+        secondaryAction={{ label: "30-Day History", href: "/vice-principal/history/30-days" }}
+      />
       <WidgetBoundary title="Decision History">
         <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-text-muted mb-3 min-w-0">

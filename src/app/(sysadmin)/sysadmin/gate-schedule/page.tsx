@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useExport } from "@/hooks/useExport";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 type PeriodKey = "today" | "this-week" | "this-month" | "all";
 const PERIODS: Array<{ key: PeriodKey; label: string }> = [
@@ -128,6 +129,14 @@ function SysadminGateScheduleInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Access rules and the gate holiday calendar"
+        contextLabel="Access rules and the gate holiday calendar"
+        statusSummary="Review current access rules and the gate holiday calendar state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>

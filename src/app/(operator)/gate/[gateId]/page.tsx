@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from "react";
@@ -424,6 +425,17 @@ const shift = useOperatorShiftClock();
 
   return (
     <div className="relative min-h-[85vh] flex flex-col bg-bg-base text-text-primary pb-safe min-w-0">
+      <div className="px-4 pt-3 max-w-4xl mx-auto w-full">
+        <ContextSituationBar
+          roleLabel="Gate Operator"
+          purpose="Live terminal for real-time QR scanning, student roll check, and directional entry/exit validation"
+          contextLabel={gateName ? `Gate Desk · ${gateName}` : "Gate Desk"}
+          statusSummary={gateMode === "OPEN" && !activeLockdown ? "Kiosk active and ready for barcode, roll entry, or RFID scanning." : "Scanning restricted: check active gate mode or campus lockdown status."}
+          severity={activeLockdown ? "critical" : gateMode === "MAINTENANCE" ? "warn" : "ok"}
+          primaryAction={{ label: "Manual Roll Entry", onClick: () => { primeAudioOnGesture(); setManualOpen(true); } }}
+          secondaryAction={{ label: "Operator Console", href: "/operator" }}
+        />
+      </div>
       {/* ── Operational status + confirmation card (above the camera layer) ── */}
       <div className="fixed top-14 inset-x-0 z-60 flex flex-col items-center gap-2 px-4 pointer-events-none">
         <div className="pointer-events-auto w-full max-w-md space-y-2">

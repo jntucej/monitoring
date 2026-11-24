@@ -20,6 +20,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { CalendarLayerPicker, STUDENT_CALENDAR_LAYERS } from "@/components/shared/calendar/CalendarLayerPicker";
 import { LifefulCalendarAgenda } from "@/components/nav/LifefulCalendarAgenda";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { getAuthHeaders } from "@/lib/utils";
 
 export default function StudentCalendarPage() {
@@ -49,6 +50,16 @@ export default function StudentCalendarPage() {
           Classes · events · passes · meals · curfew · exams — all in one view.
         </p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Unified multi-layer schedule covering academic classes, passes, meal windows, and campus events"
+        contextLabel="Schedule & Events"
+        statusPill={`${layers.length} active layers`}
+        statusSummary="Consolidated campus calendar showing classes, exam dates, pass windows, and extracurricular events."
+        primaryAction={{ label: "Attendance Calendar", href: "/student/attendance-calendar" }}
+        secondaryAction={{ label: "My Events", href: "/student/my-events" }}
+      />
 
       {/* The layer picker (the "unified view" control). */}
       <CalendarLayerPicker selected={layers} onToggle={toggleLayer} />

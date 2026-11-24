@@ -24,6 +24,7 @@ import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/us
 import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
 import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface MessIssue {
   id: string;
@@ -208,6 +209,24 @@ function MessIssuesInner() {
           <Plus className="w-4 h-4" /> Raise Issue
         </button>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Mess In-Charge"
+        purpose="Log mess incidents, flag student dining no-shows or token revocations, and audit audit trail entries"
+        contextLabel={`Mess Issues & Incident Audit · ${issuesRes?.data?.total ?? 0} Events`}
+        statusSummary={
+          (issuesRes?.data?.total ?? 0) > 0
+            ? `${issuesRes?.data?.total ?? 0} mess issue event${issuesRes?.data?.total === 1 ? "" : "s"} logged. Review flagged no-shows and token exceptions.`
+            : "No mess exception issues or incidents recorded. Logging is operational."
+        }
+        severity="info"
+        primaryAction={{ label: "Operational Requests", href: "/mess/operational-requests" }}
+        secondaryActions={[
+          { label: "Token Scanner", href: "/mess/scan" },
+          { label: "Reviews", href: "/mess/reviews" },
+          { label: "Mess Overview", href: "/mess" },
+        ]}
+      />
 
       {error && (
         <WidgetError message={`Issues feed unavailable: ${error}`} onRetry={() => void refreshAll()} />

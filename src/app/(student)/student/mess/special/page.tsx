@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { SpecialItemSelector } from "@/components/mess/SpecialItemSelector";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function StudentMessSpecialPage() {
   const isSakuga = useIsSakuga();
@@ -15,6 +16,14 @@ export default function StudentMessSpecialPage() {
       <PageHeader
         title="Special Items"
         subtitle="Pick the special items you want."
+      />
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Select festive menus, weekend specials, and dietary preferences for mess preparation"
+        contextLabel="Special Menus & Diet Preferences"
+        statusSummary="Pre-order upcoming event dishes and customize dietary requirements for upcoming meals."
+        primaryAction={{ label: "Meal Token", href: "/student/mess/token" }}
+        secondaryAction={{ label: "Mess Reviews", href: "/student/mess/reviews" }}
       />
       {isSakuga && (
         <div className="surface-card bg-bg-surface p-4">

@@ -4,6 +4,7 @@ import { Briefcase } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -22,6 +23,16 @@ export default function StaffPage() {
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["staff"]}>
         <div className="space-y-6">
+          <ContextSituationBar
+            roleLabel="Campus Staff"
+            purpose="Daily operational tasks, assigned approvals, and campus roster coordination."
+            contextLabel="Staff Hub"
+            statusTone="info"
+            statusPill="Active Shift"
+            statusSummary="Track your daily assignments, submit leave applications, and process pending requests."
+            primaryAction={{ label: "My Day", href: "/staff/my-day" }}
+            secondaryAction={{ label: "Assigned Tasks", href: "/staff/assigned-tasks" }}
+          />
 
           <WidgetBoundary name="RoleDashboardPanel" title="Staff Dashboard">
             <RoleDashboardPanel

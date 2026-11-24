@@ -15,6 +15,7 @@ import { useUIStore } from "@/stores/uiStore";
 import {Wrench, Send, Loader2, AlertTriangle, Inbox, Plus}  from "lucide-react";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { operationalRequestInspection } from "@/components/approver/wardenConsoleModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface OperationalRequest {
   id: string;
@@ -194,6 +195,24 @@ function MessOperationalRequestsInner() {
           {formOpen ? "Close form" : "Raise Request"}
         </button>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Mess In-Charge"
+        purpose="Escalate kitchen supply deficits, equipment malfunctions, and staffing needs to facilities authority"
+        contextLabel={`Operational Requests Queue · ${openCount} Open`}
+        statusSummary={
+          openCount > 0
+            ? `${openCount} operational request${openCount === 1 ? "" : "s"} open and awaiting caretaker / facilities review.`
+            : "No open kitchen operational requests. All supply and equipment tickets resolved."
+        }
+        severity={openCount > 0 ? "warn" : "ok"}
+        primaryAction={{ label: "Inventory Stock", href: "/mess/inventory-stock" }}
+        secondaryActions={[
+          { label: "Mess Issues", href: "/mess/mess-issues" },
+          { label: "Token Scanner", href: "/mess/scan" },
+          { label: "Mess Overview", href: "/mess" },
+        ]}
+      />
 
       {error && (
         <WidgetError

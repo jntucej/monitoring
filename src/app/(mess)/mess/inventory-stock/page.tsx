@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { stockItemInspection, type MessInventoryItem } from "@/components/approver/wardenConsoleModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface InventoryItem {
   id: string;
@@ -101,6 +102,23 @@ function MessInventoryStockInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Mess In-Charge"
+        purpose="Monitor kitchen commodity stock, track menu ingredient allocation, and report supply deficits"
+        contextLabel={`Mess Stock & Provisions · ${d ? `${d.total} Items` : "Stock"}`}
+        statusSummary={
+          d
+            ? `${d.total} items active (${d.primaryCount} primary menu items, ${items.reduce((s, i) => s + i.scheduledDays, 0)} scheduled day allocations).`
+            : "Review kitchen stock levels, scheduled item allocations, and supply readiness."
+        }
+        severity="info"
+        primaryAction={{ label: "Operational Requests", href: "/mess/operational-requests" }}
+        secondaryActions={[
+          { label: "Menu Management", href: "/mess/menu-management" },
+          { label: "Mess Overview", href: "/mess" },
+        ]}
+      />
 
       {error && (
         <WidgetError message={`Inventory unavailable: ${error}`} onRetry={() => void refreshAll()} />

@@ -15,6 +15,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource } from "@/hooks/useApiResource";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface ButtonEntry {
   label: string;
@@ -123,6 +124,14 @@ function AppMapInner() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor application map for campus operations."
+        contextLabel="Application Map"
+        statusSummary="Review current application map state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <PageHeader
         title="Application Map"
         subtitle={`A flat, readable view of every page · ${data?.pageCount ?? 0} pages · generated ${data?.generatedAt ? new Date(data.generatedAt).toLocaleString() : "…"}`}

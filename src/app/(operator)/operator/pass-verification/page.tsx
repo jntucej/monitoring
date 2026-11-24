@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
@@ -129,6 +130,14 @@ function PassVerificationInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Gate Operator"
+        purpose="Verify student and visitor gate passes, approval signatures, and validity windows"
+        contextLabel="Pass Verification Desk"
+        statusSummary="Inspect QR digital passes, check active validity windows, and verify approver cryptographic signatures."
+        primaryAction={{ label: "Search Pass", href: "/operator/lookup" }}
+        secondaryAction={{ label: "Daily Transactions", href: "/operator/transactions" }}
+      />
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">

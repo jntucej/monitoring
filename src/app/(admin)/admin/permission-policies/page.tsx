@@ -9,6 +9,7 @@ import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { ShieldCheck, GitBranch, FileCheck, Clock, Users, Search, X, Lock } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 /* ── response shape (mirrors /api/admin/permission-policies) ─────────────── */
 
 interface PolicyWorkflow {
@@ -38,6 +39,14 @@ interface PermissionPoliciesData {
 function SkeletonCard() {
   return (
     <div className="surface-card bg-bg-elevated p-4 space-y-2 animate-pulse">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Workflow stage definitions, SLAs, and open approval requests"
+        contextLabel="Workflow stage definitions, SLAs, and open approval requests"
+        statusSummary="Review current workflow stage definitions, slas, and open approval requests state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <div className="h-3 w-24 rounded bg-bg-elevated" />
       <div className="h-5 w-32 rounded bg-bg-elevated" />
       <div className="h-3 w-40 rounded bg-bg-elevated" />

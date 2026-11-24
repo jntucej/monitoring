@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -243,6 +244,14 @@ function ManualEntryInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Gate Operator"
+        purpose="Manual movement registration for students with damaged codes or barcode scanner failures"
+        contextLabel="Manual Entry Desk"
+        statusSummary="Record entry or exit movements manually when optical or NFC scanners fail to read a physical badge."
+        primaryAction={{ label: "Student Lookup", href: "/operator/lookup" }}
+        secondaryAction={{ label: "Exceptions Log", href: "/operator/exceptions" }}
+      />
       {/* Lookup form */}
       <OperatorWidgetBoundary title="Person Lookup">
         {/* O12: voice-assisted entry — prefill the lookup form */}

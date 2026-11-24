@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { ClassConfirmCard } from "@/components/faculty/ClassConfirmCard";
 import { LiveClassCard } from "@/components/shared/LiveClassCard";
 import { AssignmentsCard } from "@/components/faculty/AssignmentsCard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
@@ -84,6 +85,19 @@ function FacultyMyclassesInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Faculty · Teaching"
+        purpose="Confirm class sessions, review active assignments, and coordinate course modules."
+        contextLabel="Teaching Console"
+        statusTone="info"
+        statusSummary="Manage live classroom engagement, course assignments, and class status."
+        primaryAction={{ label: "Faculty Home", href: "/faculty" }}
+        secondaryActions={[
+          { label: "Class Roster", href: "/faculty/class" },
+          { label: "Student Directory", href: "/faculty/student-directory" },
+        ]}
+      />
 
       {/* Pre-class confirmation (Flow A): confirm today's sessions, single or
           bulk. Gated by the class.confirm capability. */}

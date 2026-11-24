@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   AlertTriangle,
   ArrowRight,
@@ -110,6 +111,24 @@ function ExamBranchDiscrepanciesInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Branch"
+        purpose="Detect and resolve candidate identity mismatches, hall inconsistencies, and attendance flags."
+        contextLabel="Exam Discrepancies"
+        statusTone={alerts.length > 0 ? "warn" : "ok"}
+        statusPill={alerts.length > 0 ? `${alerts.length} flags` : "Zero flags"}
+        statusSummary={
+          alerts.length > 0
+            ? `${alerts.length} discrepancy record${alerts.length === 1 ? "" : "s"} identified across exam seating and hall verification.`
+            : "No active exam discrepancy flags detected."
+        }
+        primaryAction={{ label: "Verification Desk", href: "/exam-branch/verification" }}
+        secondaryActions={[
+          { label: "Pass Queue", href: "/exam-branch" },
+          { label: "OIE Requests", href: "/exam-branch/oie-approval-requests" },
+        ]}
+      />
 
       {error && !forbidden && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

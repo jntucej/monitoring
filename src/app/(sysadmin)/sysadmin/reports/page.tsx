@@ -5,6 +5,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import type { DashboardData } from "@/lib/types";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface GeneratedReport {
   id: string;
@@ -82,6 +83,14 @@ export default function SysAdminReportsPage() {
   return (
     <AuthGuard allowedRoles={["admin", "sysadmin"]}>
       <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Generate and download campus reports"
+        contextLabel="Generate and download campus reports"
+        statusSummary="Review current generate and download campus reports state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <PageHeader title="Reports" subtitle="Generate and download campus reports" />
 
         <div className="surface-card p-5 space-y-4">

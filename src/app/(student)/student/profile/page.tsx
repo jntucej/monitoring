@@ -8,6 +8,7 @@ import { AcademicPersonalSection } from "@/components/student/AcademicPersonalSe
 import { ThemePicker } from "@/components/student/ThemePicker";
 import { SakugaControls } from "@/components/student/SakugaControls";
 import { StudentPositionCard } from "@/components/student/StudentPositionCard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -28,6 +29,16 @@ function StudentProfileInner() {
           View your academic details, residence status, theme preferences, and account security settings.
         </p>
       </div>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="View enrollment particulars, residence status, customize visual theme, and configure preferences"
+        contextLabel="Student Profile & Preferences"
+        severity="ok"
+        statusPill={user?.role?.toUpperCase() ?? "STUDENT"}
+        statusSummary="Verify your registered personal records, adjust theme settings, and inspect academic information."
+        primaryAction={{ label: "Account Security", href: "/student/profile-security" }}
+        secondaryAction={{ label: "Digital ID Card", href: "/student/id" }}
+      />
       {/* Position-aware card: varies by where you live (hosteller vs day
           scholar) and where you are now (in/out of campus). */}
       <StudentPositionCard />

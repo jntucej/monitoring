@@ -2,6 +2,7 @@
 
 import { Suspense, lazy } from "react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 const MyEventsPage = lazy(() => import("@/components/shared/events/MyEventsPage"));
 
@@ -14,6 +15,14 @@ export default function StudentMyEventsPage() {
           RSVP to campus events, check in at the venue, and track your event attendance.
         </p>
       </div>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Manage event RSVPs, scan-in credentials, workshop registrations, and participation records"
+        contextLabel="Campus Events & RSVPs"
+        statusSummary="Browse campus events, verify attendance check-ins, and manage your booked slots."
+        primaryAction={{ label: "Campus Feed", href: "/student/campus" }}
+        secondaryAction={{ label: "Full Calendar", href: "/student/calendar" }}
+      />
       <Suspense fallback={null}>
         <MyEventsPage />
       </Suspense>

@@ -21,6 +21,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { shiftHandoverInspection } from "@/components/approver/wardenConsoleModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes (mirror /api/campus-extra/handover) */
 
@@ -88,6 +89,19 @@ function DeputyWardenHandoverInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Deputy Warden"
+        purpose="Review shift logs, maintain continuity across warden shifts, and record operational handover briefings"
+        contextLabel={`Shift Continuity · ${(data?.data?.handovers ?? []).length} Recorded (7d)`}
+        statusSummary="Inspect operator and supervisor shift handovers, log critical hostel observations, and ensure operational readiness."
+        severity="info"
+        primaryAction={{ label: "Daily Overview", href: "/deputy-warden/daily-overview" }}
+        secondaryActions={[
+          { label: "Incident Reporting", href: "/deputy-warden/incident-reporting" },
+          { label: "Curfew Oversight", href: "/deputy-warden/curfew-oversight" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

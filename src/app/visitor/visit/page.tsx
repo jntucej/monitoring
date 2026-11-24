@@ -4,11 +4,13 @@
 // and /visitor/checkin-out redirect here.
 
 import { useState } from "react";
+import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { EntityInspector, type EntityInspection } from "@/components/shared/EntityInspector";
 import { visitorVisitInspection } from "@/components/shared/visitorInspection";
 import type { VisitorLogRow } from "../types";
@@ -49,10 +51,28 @@ export default function VisitorVisitPage() {
   if (!d || state === "NONE") {
     return (
       <WidgetBoundary name="visitor-visit">
-        <div className="mx-auto max-w-md p-4">
+        <div className="mx-auto max-w-md p-4 space-y-4">
+          <ContextSituationBar
+            roleLabel="Campus Visitor"
+            purpose="Campus visit clearance and security gate check-in/out."
+            contextLabel="Visit Status"
+            statusTone="info"
+            statusPill="No Visit Today"
+            statusSummary="No scheduled visit record found for today. Submit a visit request to get security gate clearance."
+            primaryAction={{ label: "Request Visit", href: "/visitor/request" }}
+            secondaryAction={{ label: "Visitor Portal", href: "/visitor" }}
+          />
           <EmptyState
-            title="No visit"
-            description="You don't have a visit today. Request one from your host to get started."
+            title="No active visit"
+            description="You don't have an active visit today. Request one from your host or return to the visitor portal."
+            action={
+              <Link
+                href="/visitor/request"
+                className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+              >
+                Request Visit
+              </Link>
+            }
           />
         </div>
       </WidgetBoundary>
@@ -91,6 +111,24 @@ export default function VisitorVisitPage() {
   return (
     <WidgetBoundary name="visitor-visit">
       <div className="mx-auto max-w-md space-y-4 p-4">
+        <ContextSituationBar
+          roleLabel="Campus Visitor"
+          purpose="Perform gate check-in upon arrival and gate check-out upon departure."
+          contextLabel="Active Visit Pass"
+          statusTone={isActive ? "ok" : "info"}
+          statusPill={isActive ? "Checked In" : "Ready for Check-In"}
+          statusSummary={
+            isActive
+              ? `Currently on campus with ${d.hostInfo.name ?? "host"}. Use check out when leaving.`
+              : `Visit approved with ${d.hostInfo.name ?? "host"}. Ready to check in at security.`
+          }
+          primaryAction={{
+            label: action.label,
+            onClick: act,
+            loading: acting,
+          }}
+          secondaryAction={{ label: "Visitor Portal", href: "/visitor" }}
+        />
         <h1 className="text-lg font-semibold">Your visit</h1>
         <div className="surface-card space-y-2 bg-bg-surface p-4">
           <p className="text-sm text-text-secondary">

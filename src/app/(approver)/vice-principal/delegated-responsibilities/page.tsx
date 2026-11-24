@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense } from "react";
@@ -71,6 +72,14 @@ function VpDelegatedResponsibilitiesInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Manage temporary and standing delegations of approval authority to faculty or coordinators"
+        contextLabel="Authority Delegations"
+        statusSummary="Configure temporary approval proxies, delegate specific workflows, and audit delegated actions."
+        primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}
+        secondaryAction={{ label: "Department Performance", href: "/vice-principal/department-performance" }}
+      />
       <WidgetBoundary title="Delegated Responsibilities">
         <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">

@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import Link from "next/link";
@@ -24,6 +25,14 @@ export default function PrincipalAssignmentTreePage() {
             People Register &rarr;
           </Link>
         </header>
+        <ContextSituationBar
+          roleLabel="Principal"
+          purpose="Visualize and manage institutional reporting hierarchy, academic departments, and hostel allocations"
+          contextLabel="Institutional Hierarchy Tree"
+          statusSummary="Interactive hierarchy connecting governance roles, academic departments, hostel wings, and students."
+          primaryAction={{ label: "People Directory", href: "/principal/people" }}
+          secondaryAction={{ label: "Departments Roster", href: "/principal/people/departments" }}
+        />
 
         <ReactiveAssignmentTree />
       </div>

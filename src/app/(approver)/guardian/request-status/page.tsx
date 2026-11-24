@@ -2,8 +2,10 @@
 
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   Loader2,
   Inbox
@@ -101,6 +103,23 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
         </div>
       </div>
 
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Track stage-by-stage approval progress, verifications, and decisions for ward requests."
+        contextLabel="Request Lifecycle & Approvals"
+        statusTone={rows.length > 0 ? "info" : "ok"}
+        statusPill={`${rows.length} Request${rows.length === 1 ? "" : "s"}`}
+        statusSummary={
+          effectiveTicket
+            ? `Viewing timeline for ticket ${effectiveTicket}. Click any request on the left to inspect its path.`
+            : rows.length > 0
+              ? `Tracking ${rows.length} ward request(s). Select a request to view its stage history.`
+              : "No requests found for your wards. Submit a request to initiate approval tracking."
+        }
+        primaryAction={{ label: "Submit Request", href: "/guardian/pass-leave-submission" }}
+        secondaryAction={{ label: "Ward Status", href: "/guardian/child-status" }}
+      />
+
       {error && (
         <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-600">
           {error}
@@ -118,8 +137,17 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
               <Loader2 className="w-4 h-4 animate-spin" /> Loading requests…
             </div>
           ) : rows.length === 0 ? (
-            <div className="surface-card p-6 text-center text-sm text-text-muted">
-              No requests found for your wards.
+            <div className="surface-card p-6 text-center space-y-2">
+              <p className="text-sm font-semibold text-text-secondary">No requests found</p>
+              <p className="text-xs text-text-muted">No pass or leave requests have been found for your linked wards.</p>
+              <div className="pt-2">
+                <Link
+                  href="/guardian/pass-leave-submission"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                >
+                  Submit Pass / Leave
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
@@ -163,8 +191,19 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
           {effectiveTicket ? (
             <RequestTimeline ticket={effectiveTicket} />
           ) : (
-            <div className="surface-card p-8 text-center text-sm text-text-muted h-full flex items-center justify-center">
-              Select a request to view its approval timeline.
+            <div className="surface-card p-8 text-center text-sm text-text-muted h-full flex flex-col items-center justify-center space-y-2">
+              <p className="font-medium text-text-secondary">Select a request</p>
+              <p className="text-xs text-text-muted">Choose a request from the list to view its complete approval timeline.</p>
+              {rows.length === 0 && (
+                <div className="pt-2">
+                  <Link
+                    href="/guardian/pass-leave-submission"
+                    className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                  >
+                    Submit a Request
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>

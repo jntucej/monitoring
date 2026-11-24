@@ -11,6 +11,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { PermissionList } from "@/components/approver/PermissionList";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import type { Role } from "@/lib/types";
 
 const ALLOWED_ROLES: Role[] = ["hostel_manager","deputy_warden","caretaker","warden"] as Role[];
@@ -18,6 +19,19 @@ const ALLOWED_ROLES: Role[] = ["hostel_manager","deputy_warden","caretaker","war
 function Inner() {
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Hostel Manager"
+        purpose="Review and process permission requests routed to your hostel block, and manage residential workflows"
+        contextLabel="Resident Ticket Inbox"
+        statusSummary="Process permission requests and leave applications routed to your assigned hostel blocks."
+        severity="info"
+        primaryAction={{ label: "Rooms & Occupancy", href: "/hostel-manager/rooms" }}
+        secondaryActions={[
+          { label: "Residents Roster", href: "/hostel-manager/residents" },
+          { label: "Housekeeping", href: "/hostel-manager/housekeeping-tasks" },
+          { label: "Maintenance", href: "/hostel-manager/maintenance" },
+        ]}
+      />
       <PermissionList
         title="Resident Tickets"
         description="Hostel permission requests routed to your block. Acting on a ticket advances it through the hostel approval chain."

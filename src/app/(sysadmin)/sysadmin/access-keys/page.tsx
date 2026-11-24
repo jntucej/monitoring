@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface EnrollmentCodeRow {
   id: string;
@@ -172,6 +173,14 @@ export default function SysAdminAccessKeysPage() {
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor access keys for campus operations."
+        contextLabel="Access Keys"
+        statusSummary="Review current access keys state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <div className="flex items-center gap-3">
           <div className="size-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
             <KeyRound className="w-5 h-5 text-action-success" />

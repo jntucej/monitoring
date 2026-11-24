@@ -20,6 +20,7 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes */
 
@@ -144,6 +145,19 @@ function HostelManagerResourceManagementInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Hostel Manager"
+        purpose="Manage hostel facilities, monitor room resources and utility stock, and audit block assets"
+        contextLabel={`Hostel Resources · ${gates.length} Gates / ${onCampusTotal} Present`}
+        statusSummary={`${studentOnCampus} students on campus across active gates. Resource inventories and utilities tracked for all blocks.`}
+        severity="info"
+        primaryAction={{ label: "Maintenance", href: "/hostel-manager/maintenance" }}
+        secondaryActions={[
+          { label: "Housekeeping", href: "/hostel-manager/housekeeping-tasks" },
+          { label: "Rooms & Occupancy", href: "/hostel-manager/rooms" },
+        ]}
+      />
 
       {/* Authority note */}
       <div className="surface-card bg-bg-base p-4 min-w-0">

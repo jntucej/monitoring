@@ -77,10 +77,17 @@ function FacultyInner() {
     return (
       <div className="p-4 sm:p-6 space-y-4 max-w-3xl mx-auto">
         <ContextSituationBar
+          roleLabel="Faculty · Class Teacher"
+          purpose="Monitor assigned class permissions, attendance status, and student academic routing."
           contextLabel="Faculty Workspace"
-          summary="You are not assigned as a class teacher yet. Ask your Head of Department (HOD) to assign a class, or open your permissions and subject teaching views."
+          statusTone="warn"
+          statusPill="Unassigned"
+          statusSummary="You are not assigned as a class teacher yet. Ask your Head of Department (HOD) to assign a class, or open your permissions and subject teaching views."
           primaryAction={{ label: "View Permissions", href: "/faculty/permissions" }}
-          secondaryAction={{ label: "Subject Teaching", href: "/faculty/subject" }}
+          secondaryActions={[
+            { label: "Subject Teaching", href: "/faculty/subject" },
+            { label: "Directory", href: "/faculty/student-directory" },
+          ]}
         />
         <EmptyState
           title="Not assigned as class teacher"
@@ -103,6 +110,22 @@ function FacultyInner() {
   return (
     <div className="space-y-4 p-2 min-w-0">
       <PageHeader title="Faculty" subtitle="Class scope & HOD-stage queue" />
+      <ContextSituationBar
+        roleLabel="Faculty · Class Teacher"
+        purpose="Monitor assigned class permissions, attendance status, and student academic routing."
+        contextLabel={activeClass ? `Year ${activeClass.year} · ${activeClass.section}` : "All Assigned Classes"}
+        statusTone="info"
+        statusSummary={
+          activeClass
+            ? `Viewing active class queue for Year ${activeClass.year} ${activeClass.section}. Review pending items or switch view.`
+            : "Select a class to filter your student permissions and class queue."
+        }
+        primaryAction={{ label: "View Permissions", href: "/faculty/permissions" }}
+        secondaryActions={[
+          { label: "My Classes", href: "/faculty/my-classes" },
+          { label: "Attendance", href: activeClass ? `/faculty/attendance/${activeClass.id}` : "/faculty/my-classes" },
+        ]}
+      />
       {classes.length > 1 ? (
         /* Scope picker: year × section chips, persisted in URL */
         <div className="surface-card bg-bg-surface p-3 min-w-0">

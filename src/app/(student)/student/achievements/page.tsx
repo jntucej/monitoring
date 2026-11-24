@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, lazy } from "react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { Achievements } from "@/components/engagement/Achievements";
 import { PersonalGoals } from "@/components/engagement/PersonalGoals";
@@ -17,6 +18,14 @@ export default function AchievementsPage() {
       <h1 className="text-lg font-semibold text-primary">
         Achievements & Goals
       </h1>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Review your academic milestones, badges, personal goals, and campus contributions"
+        contextLabel="Achievements & Milestones"
+        statusSummary="Track your personal development progress, milestone badges, and semester contributions."
+        primaryAction={{ label: "Semester Recap", href: "/student/recap" }}
+        secondaryAction={{ label: "Student Home", href: "/student" }}
+      />
       <WidgetBoundary name="achievements">
         <Achievements />
       </WidgetBoundary>

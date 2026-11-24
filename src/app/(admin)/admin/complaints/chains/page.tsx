@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useEntityInspector } from "@/components/shared/useEntityInspector";
 import { EntityInspector, KVPairs, InspectorButton, type EntityInspection } from "@/components/shared/EntityInspector";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface ComplaintCategoryRow {
   code: string;
@@ -117,6 +118,14 @@ export default function ChainsPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor complaints chains for campus operations."
+        contextLabel="Complaints Chains"
+        statusSummary="Review current complaints chains state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <h1 className="text-2xl font-semibold">Complaint escalation chains</h1>
       <p className="text-sm text-text-muted">
         Escalation chains are system-managed. Contact your IT / Platform Team to request routing changes.

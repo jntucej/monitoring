@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes */
 
@@ -55,12 +56,28 @@ function StaffRequestStatusInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
+          <h1 className="text-base font-semibold text-white">Request Status</h1>
           <p className="mt-1 text-sm text-text-muted min-w-0">
             Signed in as <span className="font-medium capitalize text-text-secondary">{role.replace(/_/g, " ")}</span>
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Campus Staff"
+        purpose="Track personal leave request progress, stage approvals, and decisions."
+        contextLabel="Request Lifecycle"
+        statusTone={((data as DataResponse | null)?.total ?? 0) > 0 ? "info" : "ok"}
+        statusPill={`${(data as DataResponse | null)?.total ?? 0} Requests`}
+        statusSummary={
+          ((data as DataResponse | null)?.total ?? 0) > 0
+            ? `Tracking ${(data as DataResponse | null)?.total} total request(s) across approval stages.`
+            : "No active or historical requests found. You can submit a new leave request anytime."
+        }
+        primaryAction={{ label: "Submit Leave", href: "/staff/leaves" }}
+        secondaryAction={{ label: "Assigned Tasks", href: "/staff/assigned-tasks" }}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

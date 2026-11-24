@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useState } from "react";
@@ -67,6 +68,15 @@ function VpEscalatedInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Review urgent requests escalated beyond normal departmental resolution thresholds"
+        contextLabel="Escalated Requests Queue"
+        statusSummary={rows.length > 0 ? `${rows.length} urgent escalations requiring executive review.` : "All escalated items resolved."}
+        severity={rows.length > 0 ? "warn" : "ok"}
+        primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}
+        secondaryAction={{ label: "Decision History", href: "/vice-principal/decision-history" }}
+      />
       <WidgetBoundary title="Escalated Requests">
         <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">

@@ -1,8 +1,10 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
@@ -148,6 +150,21 @@ function MovementInfoInner() {
         </div>
       </div>
 
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Inspect gate entry and exit timeline records for your linked wards."
+        contextLabel="Authorised Gate Movement"
+        statusTone="info"
+        statusPill={`${wards.length} Ward${wards.length === 1 ? "" : "s"} · ${scans.length} Scan${scans.length === 1 ? "" : "s"}`}
+        statusSummary={
+          activeWard
+            ? `Viewing movement timeline for ${wardName} (${activeRoll}). ${entries} entries, ${exits} exits recorded.`
+            : "Review gate entry and exit timeline records for your linked wards."
+        }
+        primaryAction={{ label: "Ward Status", href: "/guardian/child-status" }}
+        secondaryAction={{ label: "Pass / Leave Request", href: "/guardian/pass-leave-submission" }}
+      />
+
       {personsError && (
         <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-600 flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
@@ -169,8 +186,23 @@ function MovementInfoInner() {
           <Loader2 className="w-4 h-4 animate-spin" /> Loading movement records…
         </div>
       ) : total === 0 ? (
-        <div className="surface-card bg-bg-base/60 p-8 text-center text-sm text-text-muted">
-          No wards linked to your account yet. Movement records appear once a student is linked.
+        <div className="surface-card bg-bg-base/60 p-8 text-center space-y-3">
+          <p className="text-sm font-semibold text-text-secondary">No Linked Wards</p>
+          <p className="text-xs text-text-muted">No wards are linked to your account yet. Movement records appear once a student is linked.</p>
+          <div className="pt-2 flex flex-wrap justify-center gap-2">
+            <Link
+              href="/guardian/contact-info"
+              className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+            >
+              Verify Contact Info
+            </Link>
+            <Link
+              href="/guardian/child-status"
+              className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Check Ward Status
+            </Link>
+          </div>
         </div>
       ) : (
         <>
@@ -241,8 +273,23 @@ function MovementInfoInner() {
                 <Loader2 className="w-4 h-4 animate-spin" /> Loading movements…
               </div>
             ) : scans.length === 0 ? (
-              <div className="p-8 text-center text-sm text-text-muted">
-                No gate movements recorded for this ward yet.
+              <div className="p-8 text-center space-y-2">
+                <p className="text-sm font-medium text-text-secondary">No gate movements recorded</p>
+                <p className="text-xs text-text-muted">No gate movements recorded for this ward yet. Live scans will appear here.</p>
+                <div className="pt-2 flex flex-wrap justify-center gap-2">
+                  <Link
+                    href="/guardian/child-status"
+                    className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                  >
+                    View Ward Status
+                  </Link>
+                  <Link
+                    href="/guardian/pass-leave-submission"
+                    className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    Submit Pass Request
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="px-4 py-2 divide-y divide-border/50">

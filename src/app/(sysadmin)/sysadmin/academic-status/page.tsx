@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -166,6 +167,14 @@ function AcademicStatusInner() {
   if (loading && !roster) {
     return (
       <div className="space-y-4 p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor academic status for campus operations."
+        contextLabel="Academic Status"
+        statusSummary="Review current academic status state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-6 w-64" />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-48 w-full" />

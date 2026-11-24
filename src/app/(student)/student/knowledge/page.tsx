@@ -5,6 +5,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 // Relocated knowledge + feedback surfaces (moved off the home screen).
 export default function KnowledgePage() {
@@ -15,6 +16,15 @@ export default function KnowledgePage() {
       <h1 className="text-lg font-semibold text-primary">
         Knowledge &amp; Feedback
       </h1>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Search campus knowledge base, FAQs, policies, and submit institutional feedback"
+        contextLabel="Knowledge & Feedback"
+        statusSummary="Browse campus manuals, policy answers, and submit suggestions to the university feedback desk."
+        primaryAction={{ label: "Campus Feed", href: "/student/campus" }}
+        secondaryAction={{ label: "Student Home", href: "/student" }}
+      />
 
       {/* Sakuga-VFX glossary tooltip row — hover a term to see its definition */}
       {isSakuga && (

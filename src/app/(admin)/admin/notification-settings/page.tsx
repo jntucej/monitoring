@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 /* ── response shape (mirrors /api/admin/notification-settings) ────────────── */
 
 interface ChannelStat {
@@ -70,6 +71,14 @@ function AdminNotificationSettingsInner() {
 
   return (
     <div className="space-y-4">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor notification settings for campus operations."
+        contextLabel="Notification Settings"
+        statusSummary="Review current notification settings state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Queue Depth">

@@ -14,6 +14,7 @@ import Link from "next/link";
 import {Users, AlertTriangle, Loader2, Inbox, Building2}  from "lucide-react";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { hostelBlockInspection, type HostelBlockOccupancy } from "@/components/approver/wardenConsoleModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface AttendanceBlockRow {
   hostelBlock: string;
@@ -129,6 +130,24 @@ function MessMealAttendanceInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Mess In-Charge"
+        purpose="Monitor live hostel block meal turnout, verify dietary breakdowns, and reconcile scan completions"
+        contextLabel={`Meal Attendance · ${d ? fmtDate(d.mealDate) : "Attendance"}`}
+        statusSummary={
+          d && d.totals
+            ? `${d.totals.confirmed} meals confirmed served out of ${d.totals.declared} declared present (${d.totals.attendanceRate}% turnout).`
+            : "Reconcile expected dining headcounts against confirmed scans across hostel blocks."
+        }
+        severity="info"
+        primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
+        secondaryActions={[
+          { label: "Daily Meal Counts", href: "/mess/daily-meal-counts" },
+          { label: "Consumption Reports", href: "/mess/consumption-reports" },
+          { label: "Mess Overview", href: "/mess" },
+        ]}
+      />
 
       {error && !/404|no mess day/i.test(error) && (
         <WidgetError message={`Meal attendance unavailable: ${error}`} onRetry={() => void refreshAll()} />

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { Button } from "@/components/ui/button";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { getAuthHeaders } from "@/lib/utils";
 
 /**
@@ -39,6 +40,20 @@ export default function SessionsPage() {
   return (
     <div className="space-y-3 p-4">
       <h1 className="text-lg font-semibold">Active sessions</h1>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Audit active browser sessions, IP addresses, user agents, and terminate untrusted sessions"
+        contextLabel="Active Device Sessions"
+        severity={rows.length > 3 ? "warn" : "ok"}
+        statusPill={`${rows.length} session${rows.length === 1 ? "" : "s"}`}
+        statusSummary={
+          rows.length > 0
+            ? `You are signed in on ${rows.length} device${rows.length === 1 ? "" : "s"}. Sign out unfamiliar sessions.`
+            : "No active device sessions detected."
+        }
+        primaryAction={{ label: "Profile & Security", href: "/student/profile-security" }}
+        secondaryAction={{ label: "Student Home", href: "/student" }}
+      />
       <ul className="space-y-2">
         {rows.length === 0 ? (
           <li className="text-sm text-muted">No recorded sessions.</li>

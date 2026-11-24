@@ -13,6 +13,7 @@ import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { useEntityInspector } from "@/components/shared/useEntityInspector";
 import { EntityInspector, KVPairs, InspectorButton, type EntityInspection } from "@/components/shared/EntityInspector";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface StaffRecord {
   id: string;
@@ -289,6 +290,14 @@ const api = useApi();
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor staff for campus operations."
+        contextLabel="Staff"
+        statusSummary="Review current staff state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold tracking-tight text-text-primary flex items-center gap-2.5">

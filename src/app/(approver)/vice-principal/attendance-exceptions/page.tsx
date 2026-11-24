@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense } from "react";
@@ -77,6 +78,15 @@ function VpAttendanceExceptionsInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Review severe student attendance deficits, shortage warnings, and condonation appeals"
+        contextLabel="Attendance Exceptions Ledger"
+        statusSummary="Monitor students with critical attendance shortages and assess eligibility for exam condonation."
+        severity="warn"
+        primaryAction={{ label: "Exam Coordination", href: "/vice-principal/examination-coordination" }}
+        secondaryAction={{ label: "Department Performance", href: "/vice-principal/department-performance" }}
+      />
       <WidgetBoundary title="Attendance Exceptions">
         <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">

@@ -9,6 +9,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { visitorInspection as visitorModel } from "@/components/shared/inspectionModels";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface VisitorRow {
   id: string;
@@ -102,6 +103,14 @@ function AdminVisitorsInner() {
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Live check-in / check-out board and visit records"
+        contextLabel="Live check-in / check-out board and visit records"
+        statusSummary="Review current live check-in / check-out board and visit records state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>

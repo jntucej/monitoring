@@ -5,6 +5,7 @@ import { UserCheck, FileText, History, MapPin, ArrowRight } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import type { VisitorsMineResponse } from "./types";
@@ -29,6 +30,26 @@ export default function VisitorLandingPage() {
         <h1 className="text-2xl font-bold">Visitor Portal</h1>
         <p className="text-sm text-text-muted">Your visit status, check-in/out, and history.</p>
       </header>
+
+      <ContextSituationBar
+        roleLabel="Campus Visitor"
+        purpose="Manage campus arrival, check-in at security gates, and monitor visit approvals."
+        contextLabel="Visit Status Overview"
+        statusTone={state === "ACTIVE" ? "ok" : "info"}
+        statusPill={state === "ACTIVE" ? "Checked In" : state ? "Visit Scheduled" : "No Active Visit"}
+        statusSummary={
+          state === "ACTIVE"
+            ? `Currently checked in with ${host ? `host ${host}` : "your host"}. Remember to check out when leaving.`
+            : state
+              ? `Visit scheduled${host ? ` with ${host}` : ""}. Ready for security gate check-in.`
+              : "No active visit today. Submit a visit request to get security gate clearance."
+        }
+        primaryAction={{
+          label: state === "ACTIVE" ? "Check Out" : "Visit & Check-In",
+          href: "/visitor/visit",
+        }}
+        secondaryAction={{ label: "Request Visit", href: "/visitor/request" }}
+      />
 
       <WidgetBoundary name="VisitorStatusHome" title="Your visit">
         {loading ? (

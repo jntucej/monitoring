@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 const CATEGORIES = [
   { code: "ACADEMIC", label: "Academic", icon: "📚" },
@@ -100,6 +101,23 @@ export default function StudentClassRequestsPage() {
           Raise a concern and it routes automatically to the right office. Urgent items page the HOD directly.
         </p>
       </header>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Submit academic, timetable, and classroom concerns directly to departmental coordinators"
+        contextLabel="Class & Academic Petitions"
+        severity={requests.some((r) => r.status === "escalated" || r.priority === "urgent") ? "warn" : "info"}
+        statusPill={
+          loading
+            ? "Loading…"
+            : requests.length > 0
+              ? `${requests.length} total (${requests.filter((r) => r.status === "open" || r.status === "in_progress").length} active)`
+              : "No requests"
+        }
+        statusSummary="Raise academic or classroom issues that automatically route to your class representative and faculty."
+        primaryAction={{ label: "Coordinator Portal", href: "/student/coordinator" }}
+        secondaryAction={{ label: "General Complaints", href: "/student/complaints" }}
+      />
 
       {/* Raise a request */}
       <section className="surface-card p-2.5 space-y-3">

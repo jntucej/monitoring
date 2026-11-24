@@ -14,6 +14,7 @@ import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 // ── Types (mirror the API) ─────────────────────────────────────────────────
 interface Rule {
@@ -138,6 +139,14 @@ function AutonomyPanel() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Configuration-driven workflow engine: rules, autonomy levels, kill-switch, and explain-why audit. No deploy for policy changes."
+        contextLabel="Configuration-driven workflow engine: rules, autonomy levels, kill-switch, and explain-why audit. No deploy for policy changes."
+        statusSummary="Review current configuration-driven workflow engine: rules, autonomy levels, kill-switch, and explain-why audit. no deploy for policy changes. state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       {/* Rule Builder */}
       <WidgetBoundary title="Rule Builder">
         <div className="space-y-2">

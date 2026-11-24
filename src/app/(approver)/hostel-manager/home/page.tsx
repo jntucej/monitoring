@@ -21,6 +21,7 @@ import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function HostelManagerPage() {
     const [active, setActive] = useState<HMBoardRow | null>(null);
@@ -32,6 +33,19 @@ return (
       <AuthGuard allowedRoles={["hostel_manager", "principal"]}>
         <div className="space-y-6">
           <PageHeader title="Hostel Manager" subtitle="Hostel operations & allocation" />
+          <ContextSituationBar
+            roleLabel="Hostel Manager"
+            purpose="Oversee hostel facilities, manage room allocations, and direct housekeeping operations"
+            contextLabel="Hostel Operations & Allocation Dashboard"
+            statusSummary="Track block occupancy, monitor resident maintenance tickets, and coordinate daily facilities workflow."
+            severity="info"
+            primaryAction={{ label: "Resident Tickets", href: "/hostel-manager" }}
+            secondaryActions={[
+              { label: "Rooms & Occupancy", href: "/hostel-manager/rooms" },
+              { label: "Housekeeping", href: "/hostel-manager/housekeeping-tasks" },
+              { label: "Resource Management", href: "/hostel-manager/resource-management" },
+            ]}
+          />
           <WidgetBoundary name="RoleDashboardPanel" title="Hostel Manager Dashboard">
             <RoleDashboardPanel
               title="Hostel Manager dashboard"

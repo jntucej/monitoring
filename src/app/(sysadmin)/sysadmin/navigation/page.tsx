@@ -6,6 +6,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Layout, Plus, Trash2, Edit3, CheckCircle2, ShieldAlert, Layers } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface NavItem {
   id?: string;
@@ -97,6 +98,14 @@ const api = useApi();
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor navigation for campus operations."
+        contextLabel="Navigation"
+        statusSummary="Review current navigation state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <p className="text-2xl font-bold text-text-primary flex items-center gap-2">

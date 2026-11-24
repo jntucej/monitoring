@@ -10,6 +10,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Database, AlertTriangle } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface DbHealthData {
   status: string;
@@ -40,6 +41,14 @@ function DatabaseHealthInner() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor database health for campus operations."
+        contextLabel="Database Health"
+        statusSummary="Review current database health state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div>
         <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
           <Database className="w-6 h-6 text-action-info" />

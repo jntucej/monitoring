@@ -1,8 +1,10 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useAuthStore } from "@/stores/authStore";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -240,9 +242,24 @@ function ChildStatusInner() {
           Child Status
         </p>
         <p className="mt-1 text-sm text-text-muted">
-          Where your wards are right now and their recent gate activity
+          Current campus presence and last known gate activity for your wards
         </p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Monitor live campus presence, check-in state, and recent gate crossings for linked wards."
+        contextLabel="Ward Campus Presence"
+        statusTone="info"
+        statusPill={`${wards.length} Ward${wards.length === 1 ? "" : "s"}`}
+        statusSummary={
+          wards.length > 0
+            ? `Supervising ${wards.length} linked student(s). Click any ward card to inspect presence details.`
+            : "No wards currently linked to your guardian account."
+        }
+        primaryAction={{ label: "Submit Pass / Leave", href: "/guardian/pass-leave-submission" }}
+        secondaryAction={{ label: "Movement Records", href: "/guardian/movement-info" }}
+      />
 
       {personsError && (
         <div className="surface-card bg-action-danger/10 p-3 text-sm text-action-danger flex items-center justify-between gap-3">
@@ -265,8 +282,23 @@ function ChildStatusInner() {
           <Loader2 className="w-4 h-4 animate-spin" /> Loading ward status…
         </div>
       ) : wards.length === 0 ? (
-        <div className="surface-card bg-bg-base/60 p-8 text-center text-sm text-text-muted">
-          No wards linked to your account yet.
+        <div className="surface-card bg-bg-base/60 p-8 text-center space-y-3">
+          <p className="text-sm font-semibold text-text-secondary">No Linked Wards</p>
+          <p className="text-xs text-text-muted">No students are currently linked to your guardian account. Contact campus administration or submit a pass request.</p>
+          <div className="pt-2 flex flex-wrap justify-center gap-2">
+            <Link
+              href="/guardian/contact-info"
+              className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+            >
+              Verify Contact Info
+            </Link>
+            <Link
+              href="/guardian/pass-leave-submission"
+              className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Pass / Leave Submission
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">

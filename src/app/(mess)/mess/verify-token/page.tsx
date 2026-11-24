@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ScanLine } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,6 +42,25 @@ export default function VerifyTokenPage() {
         title="Verify meal token"
         subtitle="Scan a student's QR or enter their roll + 6-character code."
       />
+      <div className="my-4">
+        <ContextSituationBar
+          roleLabel="Mess In-Charge"
+          purpose="Verify event meal passes, confirm attendee identity via roll number, and mark special tokens served"
+          contextLabel={`Event Token Verification · ${events.length} Active Events`}
+          statusSummary={
+            events.length > 0
+              ? `${events.length} active special event${events.length === 1 ? "" : "s"} scheduled. Select an event to verify student tokens.`
+              : "No active special dining events scheduled. Scan standard meal tokens at the Token Scanner."
+          }
+          severity="info"
+          primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
+          secondaryActions={[
+            { label: "Special Events", href: "/mess/special-events" },
+            { label: "Daily Meal Counts", href: "/mess/daily-meal-counts" },
+            { label: "Mess Overview", href: "/mess" },
+          ]}
+        />
+      </div>
       <WidgetBoundary title="Verify token">
         {loading && <Skeleton className="h-24 w-full" />}
         {!loading && !activeEventId && (

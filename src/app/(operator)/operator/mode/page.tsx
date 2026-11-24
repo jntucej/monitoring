@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -124,6 +125,14 @@ function OperatorModeInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Gate Operator"
+        purpose="Manage gate operational states between standard scanning, curfew strictness, and maintenance"
+        contextLabel="Terminal Operation Mode"
+        statusSummary="Switch terminal operational mode or review emergency perimeter lockdown protocols."
+        primaryAction={{ label: "Gate Desk", href: "/operator" }}
+        secondaryAction={{ label: "Operator Announcements", href: "/operator/announcements" }}
+      />
       <div className="min-w-0">
         <h2 className="text-lg font-bold text-text-primary">Gate Mode</h2>
         <p className="text-xs text-text-muted mt-1 min-w-0">

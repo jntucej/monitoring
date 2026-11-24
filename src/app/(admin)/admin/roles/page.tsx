@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /**
  * Admin Roles & Hierarchy — re-skin of the role tree + access matrix.
@@ -90,6 +91,14 @@ function Node({
 
   return (
     <div>
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Role graph, membership, and on-campus presence"
+        contextLabel="Role graph, membership, and on-campus presence"
+        statusSummary="Review current role graph, membership, and on-campus presence state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <button
         onClick={() => hasChildren && onToggle(node.code)}
         className="surface-card flex items-center gap-2 w-full min-h11 text-left px-2 py-1.5 hover:bg-bg-surface/60 group"

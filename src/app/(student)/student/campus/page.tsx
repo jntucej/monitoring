@@ -1,6 +1,7 @@
 "use client";
 
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { CampusFeed } from "@/components/engagement/CampusFeed";
 import { EventsPanel } from "@/components/engagement/EventsPanel";
 import { Communities } from "@/components/engagement/Communities";
@@ -14,6 +15,14 @@ export default function CampusPage() {
       <h1 className="text-lg font-semibold text-primary">
         Campus
       </h1>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Explore campus social feeds, community groups, club notices, and event highlights"
+        contextLabel="Campus Community"
+        statusSummary="Stay connected with campus buzz, community activities, and student announcements."
+        primaryAction={{ label: "My Events", href: "/student/my-events" }}
+        secondaryAction={{ label: "Campus Calendar", href: "/student/calendar" }}
+      />
       <WidgetBoundary name="feed">
         <CampusFeed />
       </WidgetBoundary>

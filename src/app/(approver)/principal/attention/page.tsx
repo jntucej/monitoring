@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
@@ -116,6 +117,15 @@ export default function AttentionPage() {
       <PageHeader
         title="Institutional Attention"
         subtitle="What requires your decision — compressed, not raw"
+      />
+      <ContextSituationBar
+        roleLabel="Principal"
+        purpose="Institutional attention register highlighting urgent, overdue, and high-impact matters"
+        contextLabel="Institutional Attention Queue"
+        statusSummary={items.length > 0 ? `${items.length} critical items requiring your immediate executive intervention.` : "All institutional attention items cleared."}
+        severity={items.some((i) => i.severity === "CRITICAL") ? "critical" : items.length > 0 ? "warn" : "ok"}
+        primaryAction={{ label: "Command Center", href: "/principal" }}
+        secondaryAction={{ label: "Escalations Queue", href: "/principal/escalations" }}
       />
       {loading && <Loading />}
       {!loading && items.length === 0 && <EmptyState title="Nothing requires attention" description="The executive attention queue is clear." />}

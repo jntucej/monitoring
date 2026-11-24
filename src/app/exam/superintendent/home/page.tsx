@@ -4,6 +4,7 @@ import { ScanEye } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -25,6 +26,19 @@ export default function ExamSuperintendentPage() {
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["exam_superintendent"]}>
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+
+          <ContextSituationBar
+            roleLabel="Exam Superintendent"
+            purpose="Coordinate examination session halls, monitor invigilator attendance, and log hall incidents."
+            contextLabel="Today Overview"
+            statusTone="info"
+            statusSummary="Supervise live exam hall operations, room clearances, and session progression."
+            primaryAction={{ label: "Access Desk", href: "/exam/superintendent" }}
+            secondaryActions={[
+              { label: "Exam Schedule", href: "/exam/superintendent/schedule" },
+              { label: "Incident Log", href: "/exam/superintendent/incidents" },
+            ]}
+          />
 
           <WidgetBoundary name="RoleDashboardPanel" title="Exam Superintendent Dashboard">
             <RoleDashboardPanel

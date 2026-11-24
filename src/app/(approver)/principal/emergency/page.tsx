@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { useState } from "react";
@@ -104,6 +105,15 @@ export default function EmergencyPage() {
   return (
     <div className="space-y-4">
       <PageHeader title="Emergency Command" subtitle="The command plane — bypasses normal workflows, never bypasses authorization + audit" />
+      <ContextSituationBar
+        roleLabel="Principal"
+        purpose="Emergency command plane bypassing standard workflows with strict authorization and audit guarantees"
+        contextLabel="Emergency Command Plane"
+        statusSummary="Direct perimeter lockdown controls, instant student recall directives, and campus-wide alerts."
+        severity="critical"
+        primaryAction={{ label: "Security Incidents", href: "/principal/operations/incidents" }}
+        secondaryAction={{ label: "Campus Gates", href: "/principal/operations/gates" }}
+      />
       {loading && <Loading />}
       {!loading && (
         <>

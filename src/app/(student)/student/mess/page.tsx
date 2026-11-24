@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { MyMealHistory } from "@/components/shared/meals/MyMealHistory";
 import { SelfActionLoop, type NextActionStep } from "@/components/nav/level0/SelfActionLoop";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { UtensilsCrossed } from "lucide-react";
 
 /* S7: mess landing — 4-card grid instead of a blind redirect to /reviews.
@@ -36,6 +37,15 @@ export default function StudentMessLanding() {
           View today&apos;s menu and meal token, rate meals, check special events, and track your mess bill.
         </p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Central dining hub for menus, tokens, meal feedback, special diets, and mess accounts"
+        contextLabel="Dining Services Hub"
+        statusSummary="Access your daily meal tokens, provide meal feedback, and review running mess charges."
+        primaryAction={{ label: "Today's Meal Token", href: "/student/mess/token" }}
+        secondaryAction={{ label: "Mess Bill", href: "/student/mess-bill" }}
+      />
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {cards.map((c) => (

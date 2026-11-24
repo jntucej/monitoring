@@ -10,6 +10,7 @@
 import { FilePlus2 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PassCreateFormV2 } from "@/components/shared/pass/PassCreateFormV2";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function NewPermissionPage() {
   return (
@@ -24,6 +25,15 @@ export default function NewPermissionPage() {
             Submit a request for outing, leave, or late entry. Once approved by your faculty or warden, an active gate pass is issued.
           </p>
         </div>
+
+        <ContextSituationBar
+          roleLabel="Student"
+          purpose="Create and dispatch new outing, day pass, home leave, or late-entry approval requests"
+          contextLabel="New Pass Application"
+          statusSummary="Fill in destination, departure/return times, and reason. Requests route to your mentor or hostel warden."
+          primaryAction={{ label: "My Requests", href: "/student/permissions" }}
+          secondaryAction={{ label: "Active Gate Passes", href: "/student/passes" }}
+        />
 
         <PassCreateFormV2 mode="student" />
       </div>

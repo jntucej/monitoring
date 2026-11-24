@@ -210,8 +210,14 @@ function StudentHomeInner() {
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
       <ContextSituationBar
+        roleLabel="Student"
+        purpose={
+          personaKey === "hosteller"
+            ? "Track residence, curfew, hostel passes, and dining services"
+            : "Track academic schedules, day attendance, and campus gate passes"
+        }
         contextLabel={personaKey === "hosteller" ? "Hosteller Dashboard" : "Day Scholar Dashboard"}
-        summary={
+        statusSummary={
           personaKey === "hosteller"
             ? "Track your curfew status, active hostel passes, meal tokens, and campus updates."
             : "Track your class attendance, today's schedule, gate passes, and campus updates."

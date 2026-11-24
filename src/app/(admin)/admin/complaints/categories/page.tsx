@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface CategoryRow {
   code: string;
@@ -42,6 +43,14 @@ export default function CategoriesPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor complaints categories for campus operations."
+        contextLabel="Complaints Categories"
+        statusSummary="Review current complaints categories state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <h1 className="text-2xl font-semibold">Complaint categories</h1>
       <div className="border rounded bg-white overflow-x-auto">
         <table className="w-full text-sm">

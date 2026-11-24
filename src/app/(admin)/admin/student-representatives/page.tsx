@@ -8,6 +8,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { getActionsForRole } from "@/lib/role-action-engine";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function RepsPage() {
   const [rows, setRows] = useState<any[]>([]);
@@ -62,6 +63,14 @@ export default function RepsPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor student representatives for campus operations."
+        contextLabel="Student Representatives"
+        statusSummary="Review current student representatives state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Student representatives</h1>

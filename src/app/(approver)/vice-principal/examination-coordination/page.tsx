@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useMemo } from "react";
@@ -85,6 +86,15 @@ function VpExaminationInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-5 px-4 sm:px-6 lg:px-8 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Coordinate examination clearances, hall ticket permissions, and attendance eligibility"
+        contextLabel="Examination Coordination Hub"
+        statusSummary={pendingExam.length > 0 ? `${pendingExam.length} exam permission requests pending, ${slaAtRisk.length} at risk of SLA breach.` : "All examination clearance workflows up to date."}
+        severity={slaAtRisk.length > 0 ? "warn" : "ok"}
+        primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}
+        secondaryAction={{ label: "Attendance Exceptions", href: "/vice-principal/attendance-exceptions" }}
+      />
       <WeekBar />
       <WidgetBoundary title="Examination Operations">
         <div className="surface-card bg-bg-base p-4 min-w-0">

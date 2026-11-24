@@ -13,26 +13,41 @@ export interface ContextAction {
   disabled?: boolean;
   disabledReason?: string;
   badgeCount?: number;
+  tone?: "primary" | "secondary" | "danger";
 }
 
+export type PageActionItem = ContextAction;
+
 export interface ContextSituationBarProps {
+  /** Who is viewing this page, e.g. "Deputy Warden · Hostel L2" */
+  roleLabel?: string;
+  /** Why this page exists for this role */
+  purpose?: string;
   /** Short live context tag, e.g. "Day Scholar · CSE" or "Lunch Window · 12:30–14:00" */
   contextLabel: string;
   /** Plain-language summary of what is happening right now and what to do next */
-  summary: string;
+  summary?: string;
+  /** Alias for summary */
+  statusSummary?: string;
   /** Optional secondary explanation ("Why am I seeing this?") */
   why?: string;
   /** Optional live status pill, e.g. "2 pending", "Closes in 25m" */
   statusPill?: string;
   /** Semantic tone variant */
   statusTone?: ContextTone;
+  /** Alias for statusTone */
+  severity?: ContextTone;
   /** Backwards-compatible alias for statusTone */
   tone?: "neutral" | "ok" | "warn" | "danger";
   /** Primary contextual action right on this screen */
   primaryAction?: ContextAction;
   /** Optional secondary contextual link/action */
   secondaryAction?: ContextAction;
+  /** Optional list of secondary contextual actions */
+  secondaryActions?: ContextAction[];
 }
+
+export type ContextSituationProps = ContextSituationBarProps;
 
 const TONE_STYLES: Record<
   ContextTone,
@@ -57,9 +72,11 @@ const TONE_STYLES: Record<
 };
 
 function resolveTone(
+  severity?: ContextTone,
   statusTone?: ContextTone,
   tone?: ContextSituationBarProps["tone"],
 ): ContextTone {
+  if (severity) return severity;
   if (statusTone) return statusTone;
   if (tone === "ok") return "ok";
   if (tone === "warn") return "warn";
@@ -74,10 +91,13 @@ function ActionControl({
   action: ContextAction;
   variant: "primary" | "secondary";
 }) {
+  const effectiveTone = action.tone ?? variant;
   const cls =
-    variant === "primary"
+    effectiveTone === "primary"
       ? "inline-flex items-center gap-1.5 rounded-lg bg-action-primary px-3.5 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity shrink-0"
-      : "inline-flex items-center gap-1.5 rounded-lg bg-bg-elevated px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors shrink-0";
+      : effectiveTone === "danger"
+        ? "inline-flex items-center gap-1.5 rounded-lg bg-action-danger px-3.5 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity shrink-0"
+        : "inline-flex items-center gap-1.5 rounded-lg bg-bg-elevated px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors shrink-0";
 
   const badge =
     typeof action.badgeCount === "number" && action.badgeCount > 0 ? (
@@ -112,23 +132,33 @@ function ActionControl({
 }
 
 /**
- * ContextSituationBar — answers three questions on any page:
- * 1. Where am I & what is happening right now? (contextLabel + statusPill)
- * 2. What needs my attention & why? (summary + why)
- * 3. What can I do right here? (primaryAction / secondaryAction)
+ * ContextSituationBar — Role + Purpose + Context + Action contract:
+ * 1. Who is this for & why is it here? (roleLabel + purpose)
+ * 2. What is happening right now? (contextLabel + statusPill + summary/statusSummary)
+ * 3. What can I do right here? (primaryAction / secondaryAction / secondaryActions)
  */
 export function ContextSituationBar({
+  roleLabel,
+  purpose,
   contextLabel,
   summary,
+  statusSummary,
   why,
   statusPill,
   statusTone,
+  severity,
   tone,
   primaryAction,
   secondaryAction,
+  secondaryActions,
 }: ContextSituationBarProps) {
-  const resolved = resolveTone(statusTone, tone);
+  const resolved = resolveTone(severity, statusTone, tone);
   const styles = TONE_STYLES[resolved];
+  const mainSummary = statusSummary ?? summary ?? "";
+  const allSecondary = [
+    ...(secondaryAction ? [secondaryAction] : []),
+    ...(secondaryActions ?? []),
+  ];
 
   return (
     <section
@@ -137,6 +167,11 @@ export function ContextSituationBar({
     >
       <div className="space-y-1 min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
+          {roleLabel && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-bg-elevated text-text-secondary">
+              {roleLabel}
+            </span>
+          )}
           <p className={`text-[11px] font-semibold uppercase tracking-wider ${styles.label}`}>
             {contextLabel}
           </p>
@@ -146,12 +181,15 @@ export function ContextSituationBar({
             </span>
           )}
         </div>
-        <p className="text-sm font-medium text-text-primary">{summary}</p>
+        {purpose && <p className="text-xs text-text-secondary">{purpose}</p>}
+        {mainSummary && <p className="text-sm font-medium text-text-primary">{mainSummary}</p>}
         {why && <p className="text-xs text-text-muted">{why}</p>}
       </div>
-      {(primaryAction || secondaryAction) && (
+      {(primaryAction || allSecondary.length > 0) && (
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          {secondaryAction && <ActionControl action={secondaryAction} variant="secondary" />}
+          {allSecondary.map((act, idx) => (
+            <ActionControl key={`${act.label}-${idx}`} action={act} variant="secondary" />
+          ))}
           {primaryAction && <ActionControl action={primaryAction} variant="primary" />}
         </div>
       )}

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Scanner } from "@/components/operator/Scanner";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -163,6 +164,20 @@ function ScanPageInner() {
           </span>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Mess In-Charge"
+        purpose="Scan and validate student meal QR tokens at the dining counter, verify diet preference, and record meal delivery"
+        contextLabel="Live Token Validation & Serving"
+        statusSummary="Scan student QR tokens or enter code manually to verify meal entitlement (Veg / Non-Veg) and log servings."
+        severity="info"
+        primaryAction={{ label: "Daily Meal Counts", href: "/mess/daily-meal-counts" }}
+        secondaryActions={[
+          { label: "Verify Token", href: "/mess/verify-token" },
+          { label: "Meal Attendance", href: "/mess/meal-attendance" },
+          { label: "Mess Overview", href: "/mess" },
+        ]}
+      />
 
       {/* Camera scan CTA */}
       <WidgetBoundary title="Scanner">

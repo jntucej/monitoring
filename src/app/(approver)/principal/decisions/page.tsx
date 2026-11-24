@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
@@ -84,6 +85,14 @@ export default function DecisionsPage() {
   return (
     <div className="space-y-4">
       <PageHeader title="Decision Ledger" subtitle="Every consequential action — the institutional decision history" />
+      <ContextSituationBar
+        roleLabel="Principal"
+        purpose="Immutable institutional decision ledger recording all executive determinations with proof of provenance"
+        contextLabel="Executive Decision Ledger"
+        statusSummary="Audit all past approvals, rejections, overrides, and delegations with complete timestamps."
+        primaryAction={{ label: "Audit Ledger", href: "/principal/governance/audit" }}
+        secondaryAction={{ label: "Command Center", href: "/principal" }}
+      />
       {loading && <Loading />}
       {!loading && rows.length === 0 && <EmptyState title="No decisions recorded" description="The decision ledger is empty." />}
       {!loading && rows.length > 0 && (

@@ -22,6 +22,7 @@ import {
   Clock,
   Sparkles,
 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface TelegramStudent {
   id: string;
@@ -276,6 +277,14 @@ export default function SysadminBotPage() {
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>
       <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-6 space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor bot for campus operations."
+        contextLabel="Bot"
+        statusSummary="Review current bot state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
           <div>

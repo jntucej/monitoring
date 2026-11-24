@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   FileText,
   AlertTriangle,
@@ -94,6 +95,19 @@ function ExamBranchDocsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Branch"
+        purpose="Access exam regulations, circular templates, and operational documentation."
+        contextLabel="Exam Documentation"
+        statusTone="info"
+        statusSummary="Browse institutional guidelines, seating rubrics, and examination SOPs."
+        primaryAction={{ label: "Pass Queue", href: "/exam-branch" }}
+        secondaryActions={[
+          { label: "Today Overview", href: "/exam-branch/home" },
+          { label: "Reports", href: "/exam-branch/reports" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

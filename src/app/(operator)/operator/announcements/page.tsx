@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -62,6 +63,14 @@ function OperatorAnnouncementsInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Gate Operator"
+        purpose="Receive urgent security advisories, campus transit notices, and supervisory directives"
+        contextLabel="Operational Bulletins"
+        statusSummary="Review active administrative circulars, perimeter announcements, and emergency notices."
+        primaryAction={{ label: "Notifications Feed", href: "/operator/notifications" }}
+        secondaryAction={{ label: "Gate Desk", href: "/operator" }}
+      />
       <div className="flex items-center justify-between min-w-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 min-w-0">

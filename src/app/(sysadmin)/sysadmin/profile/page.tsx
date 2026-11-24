@@ -13,6 +13,7 @@ import { useApi } from "@/hooks/useApi";
 import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
 import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import {Shield, KeyRound, Lock, Save, Loader2, CheckCircle2, Eye, EyeOff, User, Mail, Phone, Building2, Clock, ArrowRight, RefreshCw, AlertTriangle, Activity, ShieldCheck, ShieldAlert}  from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface SysAdminProfile {
   id: string;
@@ -267,6 +268,14 @@ const api = useApi();
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor profile for campus operations."
+        contextLabel="Profile"
+        statusSummary="Review current profile state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Loader2 className="size-6 animate-spin text-action-danger" />
         <p className="text-xs text-text-muted font-medium">Loading administrator profile...</p>
       </div>

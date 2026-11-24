@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { CalendarDays, AlertTriangle, ArrowRight, Building2 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* /api/campus-extra/calendar response shape */
 interface CalendarResponse {
@@ -83,6 +84,20 @@ function ExamBranchCalendarInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Branch"
+        purpose="Review institutional academic schedules, examination sessions, and hall booking calendars."
+        contextLabel="Exam Calendar"
+        statusTone="info"
+        statusPill={`${events.length} sessions`}
+        statusSummary={`Tracking ${events.length} examination slots and scheduled academic sessions.`}
+        primaryAction={{ label: "Pass Queue", href: "/exam-branch" }}
+        secondaryActions={[
+          { label: "Today Overview", href: "/exam-branch/home" },
+          { label: "Verification", href: "/exam-branch/verification" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

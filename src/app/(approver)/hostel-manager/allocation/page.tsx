@@ -7,11 +7,16 @@ export default function HostelManagerAllocationPage() {
     <div className="p-4 space-y-4">
       <PageHeader title="Bed Allocation" subtitle="View hostel block capacity and resident assignments." />
       <ContextSituationBar
-        contextLabel="Hostel Allocation"
-        statusTone="info"
-        summary="Bed assignments are managed centrally by Campus Admin. You can inspect live block occupancy and resident lists here."
+        roleLabel="Hostel Manager"
+        purpose="Monitor block capacity and bed allocation status, and reconcile student resident assignments"
+        contextLabel="Hostel Bed Allocation"
+        statusSummary="Bed assignments are managed centrally by Campus Admin. Inspect live block occupancy and resident lists here."
+        severity="info"
         primaryAction={{ label: "View Rooms & Occupancy", href: "/hostel-manager/rooms" }}
-        secondaryAction={{ label: "View Residents", href: "/hostel-manager/residents" }}
+        secondaryActions={[
+          { label: "View Residents", href: "/hostel-manager/residents" },
+          { label: "Resource Management", href: "/hostel-manager/resource-management" },
+        ]}
       />
       <HostelAdminFallback
         feature="Bed allocation"

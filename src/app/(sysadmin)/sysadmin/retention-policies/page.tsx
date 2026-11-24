@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface PolicyRow {
   id: string;
@@ -45,6 +46,14 @@ function SysadminRetentionInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Data-retention and de-provisioning policy definitions"
+        contextLabel="Data-retention and de-provisioning policy definitions"
+        statusSummary="Review current data-retention and de-provisioning policy definitions state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>

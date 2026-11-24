@@ -9,6 +9,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface PassRow {
   id: string;
@@ -148,6 +149,14 @@ function AdminPassesInner() {
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Outing, day-pass, and home-out pass records"
+        contextLabel="Outing, day-pass, and home-out pass records"
+        statusSummary="Review current outing, day-pass, and home-out pass records state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>

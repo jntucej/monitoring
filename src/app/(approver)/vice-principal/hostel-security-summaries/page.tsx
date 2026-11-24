@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -165,6 +166,14 @@ function VpHostelSecurityInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Institutional oversight of hostel curfews, warden night reports, and campus security logs"
+        contextLabel="Hostel & Security Overview"
+        statusSummary="Review residential hostel occupancy, curfew adherence rates, and overnight security escalations."
+        primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}
+        secondaryAction={{ label: "Institutional Analytics", href: "/vice-principal/analytics" }}
+      />
       <WidgetBoundary title="Hostel & Security Rollup">
         <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">

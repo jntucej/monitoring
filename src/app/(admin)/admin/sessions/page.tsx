@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface SessionRow {
   sessionId: string;
@@ -78,6 +79,14 @@ function AdminSessionsInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Live JWT / refresh-token sessions — revoke any that look off"
+        contextLabel="Live JWT / refresh-token sessions — revoke any that look off"
+        statusSummary="Review current live jwt / refresh-token sessions — revoke any that look off state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>

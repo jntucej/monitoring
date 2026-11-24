@@ -14,6 +14,7 @@ import {
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { scanInspection } from "@/components/shared/inspectionModels";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* ── response shape (mirrors /api/admin/exceptions) ── */
 
@@ -117,6 +118,14 @@ function AdminExceptionsInner() {
 
   return (
     <div className="space-y-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Today's flagged, denied, manual, and corrected gate scans across every gate"
+        contextLabel="Today's flagged, denied, manual, and corrected gate scans across every gate"
+        statusSummary="Review current today's flagged, denied, manual, and corrected gate scans across every gate state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Scan Exceptions"
         subtitle="Today's flagged, denied, manual, and corrected gate scans across every gate"

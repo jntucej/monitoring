@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { ShieldCheck, AlertTriangle, ArrowRight, KeyRound } from "lucide-react";
 
 /* response shapes */
@@ -81,6 +82,20 @@ function ExamSuperintendentAccessInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Superintendent"
+        purpose="Verify candidate credentials, door clearances, and exam room admittance authorizations."
+        contextLabel="Exam Access Desk"
+        statusTone={authorised.length > 0 ? "ok" : "info"}
+        statusPill={`${authorised.length} cleared`}
+        statusSummary={`Tracking ${authorised.length} candidate clearance records authorized for hall access.`}
+        primaryAction={{ label: "Today Overview", href: "/exam/superintendent/home" }}
+        secondaryActions={[
+          { label: "Exam Schedule", href: "/exam/superintendent/schedule" },
+          { label: "Incidents", href: "/exam/superintendent/incidents" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

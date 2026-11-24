@@ -3,10 +3,19 @@
 
 import Link from "next/link";
 import { UserCheck, Lock, Users, ArrowUpRight } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function AccessHubPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor access for campus operations."
+        contextLabel="Access"
+        statusSummary="Review current access state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div>
         <p className="text-2xl font-bold tracking-tight text-text-primary">Access & Identity Governance</p>
         <p className="text-sm text-text-secondary mt-1">

@@ -5,6 +5,7 @@ import { FileText, Download, BarChart3, Loader2, ClipboardList, Clock } from "lu
 import { getAuthHeaders } from "@/lib/utils";
 
 import type { DashboardData } from "@/lib/types";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 interface GeneratedReport {
   id: string;
   title: string;
@@ -188,6 +189,14 @@ export default function AdminReportsPage() {
   return (
     
       <div className="space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor reports for campus operations."
+        contextLabel="Reports"
+        statusSummary="Review current reports state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <div>
         <p className="text-2xl font-bold">Reports</p>
         <p className="text-text-muted">Generate and download reports</p>

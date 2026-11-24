@@ -5,6 +5,7 @@ import Link from "next/link";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import {User, KeyRound, Bell, ArrowRight, Lock, Eye}  from "lucide-react";
 
@@ -18,6 +19,17 @@ function StudentProfileSecurityInner() {
         <User className="w-4 h-4 text-action-primary" />
         <p className="text-sm font-semibold text-text-primary">Profile &amp; Account Security</p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Manage authentication credentials, active device logins, notification channels, and privacy scoping"
+        contextLabel="Security & Session Controls"
+        severity="ok"
+        statusPill="Protected Account"
+        statusSummary="Monitor security posture, active login devices, password changes, and notification preferences."
+        primaryAction={{ label: "Active Sessions", href: "/student/profile-security/sessions" }}
+        secondaryAction={{ label: "Privacy & Consent", href: "/student/profile/privacy" }}
+      />
 
       {/* Account profile */}
       <section aria-label="Account profile">

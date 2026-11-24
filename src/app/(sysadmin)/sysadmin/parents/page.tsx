@@ -7,6 +7,7 @@ import { useApi } from "@/hooks/useApi";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import {Users, Plus, Search, Link as LinkIcon, Unlink, Check, Copy, KeyRound, X, Loader2, UserCheck}  from "lucide-react";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface ParentRow {
   id: string;
@@ -70,6 +71,14 @@ function EnrollmentCodeModal({ userId, userName, onClose }: { userId: string; us
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor parents for campus operations."
+        contextLabel="Parents"
+        statusSummary="Review current parents state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div className="surface-card bg-bg-elevated w-full max-w-md p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-white flex items-center gap-2">

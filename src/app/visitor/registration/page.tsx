@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, UserCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes */
 
@@ -92,6 +93,21 @@ function VisitorRegistrationInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Campus Visitor"
+        purpose="Verify identity credentials, visitor registration number, and profile metadata."
+        contextLabel="Identity & Registration"
+        statusTone={reg?.status === "active" || reg?.status === "ACTIVE" ? "ok" : "info"}
+        statusPill={reg?.status ? `Status: ${reg.status}` : "Registered"}
+        statusSummary={
+          reg?.uniqueId
+            ? `Visitor ID ${reg.uniqueId} is verified on record for campus security checks.`
+            : "Review and verify your registered visitor credentials before entering campus."
+        }
+        primaryAction={{ label: "Visit & Check-In", href: "/visitor/visit" }}
+        secondaryAction={{ label: "Visit History", href: "/visitor/history" }}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

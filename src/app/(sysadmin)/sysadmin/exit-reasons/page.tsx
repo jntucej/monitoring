@@ -7,6 +7,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { DoorOpen, Plus, Trash2, Edit3, ShieldAlert, CheckCircle2 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 const ExitReasonsPanel = lazy(
   () => import("@/components/operator/ExitReasonsPanel")
@@ -96,6 +97,14 @@ export default function ExitReasonsPage() {
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor exit reasons for campus operations."
+        contextLabel="Exit Reasons"
+        statusSummary="Review current exit reasons state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold text-text-primary flex items-center gap-2">

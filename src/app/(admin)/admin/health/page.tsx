@@ -7,6 +7,7 @@ import { WidgetLoading } from "@/components/admin/shared/LoadingStates";
 import { HealthDashboard } from "@/components/admin/HealthDashboard";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 type ComponentStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
 
@@ -29,6 +30,14 @@ const DOT: Record<ComponentStatus, string> = {
 function StatusDot({ status, label, detail }: { status: ComponentStatus; label: string; detail?: string }) {
   return (
     <div className="surface-card flex items-center gap-2 bg-bg-surface px-3 py-2">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor health for campus operations."
+        contextLabel="Health"
+        statusSummary="Review current health state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <span className={`size-2 rounded-full ${DOT[status]} ${status === "healthy" ? "animate-pulse" : ""}`} />
       <div>
         <p className="text-xs font-medium text-text-primary">{label}</p>

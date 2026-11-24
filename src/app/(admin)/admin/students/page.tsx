@@ -17,6 +17,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { parseRollNumber } from "@/lib/rollNumber";
 import type { Person, StudentDetails } from "@/lib/types";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /**
  * Admin Students — faceted student directory.
@@ -289,6 +290,14 @@ function AdminStudentsInner() {
   if (!data && !error) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Full student roster with department, year, and hostel state"
+        contextLabel="Full student roster with department, year, and hostel state"
+        statusSummary="Review current full student roster with department, year, and hostel state state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (

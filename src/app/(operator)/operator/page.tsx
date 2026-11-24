@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import Link from "next/link";
@@ -87,6 +88,14 @@ export default function OperatorPage() {
       <AuthGuard allowedRoles={["operator", "admin", "sysadmin"]}>
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
           <PageHeader title="Operator" subtitle="Gate operations" />
+          <ContextSituationBar
+            roleLabel="Gate Operator"
+            purpose="Daily operational hub for assigned entry points, campus transit policies, and shift handover"
+            contextLabel="Gate Workspace"
+            statusSummary="Check assigned gate duties, active pass queues, or claim an active terminal for your shift."
+            primaryAction={{ label: "Open Gate Desk", href: "/operator/claim" }}
+            secondaryAction={{ label: "Pass Verification", href: "/operator/pass-verification" }}
+          />
           <OperatorDeskHero />
           <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
             <PersonalizedCampusHome />

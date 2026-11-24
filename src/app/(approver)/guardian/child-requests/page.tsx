@@ -1,8 +1,10 @@
 "use client";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
+import Link from "next/link";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   Loader2,
   Inbox,
@@ -148,9 +150,26 @@ function statusBadge(status?: string) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="surface-card bg-bg-base/60 p-8 text-center text-sm text-text-muted">
-      <Inbox className="w-6 h-6 mx-auto mb-2 text-text-muted" />
-      <p>{message}</p>
+    <div className="surface-card bg-bg-base/60 p-8 text-center space-y-3">
+      <Inbox className="w-6 h-6 mx-auto text-text-muted" />
+      <div>
+        <p className="text-sm font-semibold text-text-secondary">No Pending Requests</p>
+        <p className="text-xs text-text-muted mt-1">{message}</p>
+      </div>
+      <div className="pt-2 flex flex-wrap justify-center gap-2">
+        <Link
+          href="/guardian/pass-leave-submission"
+          className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+        >
+          Submit New Pass / Leave
+        </Link>
+        <Link
+          href="/guardian/child-status"
+          className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors"
+        >
+          View Ward Status
+        </Link>
+      </div>
     </div>
   );
 }
@@ -226,6 +245,21 @@ function ChildRequestsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Monitor and inspect pending pass and leave applications submitted by linked wards."
+        contextLabel="Ward Request Queue"
+        statusTone={rows.length > 0 ? "warn" : "ok"}
+        statusPill={rows.length > 0 ? `${rows.length} Pending` : "Queue Clear"}
+        statusSummary={
+          rows.length > 0
+            ? `${rows.length} pending request(s) awaiting approval chain review across your wards.`
+            : "No pending requests from your wards. The queue is clear."
+        }
+        primaryAction={{ label: "Submit Pass / Leave", href: "/guardian/pass-leave-submission" }}
+        secondaryAction={{ label: "Ward Status", href: "/guardian/child-status" }}
+      />
 
       {error && (
         <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-600 flex items-center justify-between gap-3">

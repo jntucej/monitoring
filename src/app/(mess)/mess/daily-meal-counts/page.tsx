@@ -19,6 +19,7 @@ import {
   Loader2,
   Inbox,
 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface MealCountsResponse {
   success: boolean;
@@ -136,6 +137,24 @@ function MessDailyMealCountsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Mess In-Charge"
+        purpose="Verify daily student meal preferences, track declared vs served turnout, and calculate no-show counts"
+        contextLabel={`Daily Meal Counts · ${fmtDate(d?.mealDate)}`}
+        statusSummary={
+          d && d.total > 0
+            ? `${d.declaredPresent} declared present (${d.confirmed} served, ${d.noShows} no-shows) for today's scheduled meal.`
+            : "No student meal selections recorded yet for this meal day."
+        }
+        severity={d && d.noShows > 10 ? "warn" : "info"}
+        primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
+        secondaryActions={[
+          { label: "Meal Attendance", href: "/mess/meal-attendance" },
+          { label: "Consumption Reports", href: "/mess/consumption-reports" },
+          { label: "Mess Overview", href: "/mess" },
+        ]}
+      />
 
       {error && !/404|no mess day/i.test(error) && (
         <WidgetError message={`Meal counts unavailable: ${error}`} onRetry={() => void refreshAll()} />

@@ -27,6 +27,7 @@ import {
   ApproverStageDrawer,
   type StagePivotItem,
 } from "@/components/nav/level2/ApproverStageDrawer";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes */
 
@@ -177,6 +178,19 @@ function DeputyWardenDecisionHistoryInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Deputy Warden"
+        purpose="Audit past approval decisions, track decision latency, and review resolved hostel permissions"
+        contextLabel={`Decision Audit Log · ${decidedCount} Decided`}
+        statusSummary={`${decidedCount} decision${decidedCount === 1 ? "" : "s"} logged (${approvedCount} approved, ${rejectedCount} rejected/escalated).`}
+        severity="info"
+        primaryAction={{ label: "Outpass Queue", href: "/deputy-warden" }}
+        secondaryActions={[
+          { label: "Delegated Approvals", href: "/deputy-warden/delegated-approvals" },
+          { label: "Daily Overview", href: "/deputy-warden/daily-overview" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

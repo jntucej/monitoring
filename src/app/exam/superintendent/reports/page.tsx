@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { ShieldCheck, AlertTriangle, ArrowRight, FileBarChart } from "lucide-react";
 
 /* response shapes */
@@ -77,6 +78,19 @@ function ExamSuperintendentReportsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Superintendent"
+        purpose="Generate hall occupancy summaries, invigilator duty reports, and session debriefs."
+        contextLabel="Superintendent Reports"
+        statusTone="info"
+        statusSummary="Export session summary metrics, room audit counts, and student attendance logs."
+        primaryAction={{ label: "Today Overview", href: "/exam/superintendent/home" }}
+        secondaryActions={[
+          { label: "Access Desk", href: "/exam/superintendent" },
+          { label: "Exam Schedule", href: "/exam/superintendent/schedule" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

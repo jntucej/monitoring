@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import {
   hostelBlockInspection,
@@ -26,6 +27,22 @@ export default function HostelManagerRoomsPage() {
   return (
     <div className="p-4 space-y-4">
       <PageHeader title="Rooms" subtitle="Block and room occupancy." />
+      <ContextSituationBar
+        roleLabel="Hostel Manager"
+        purpose="Monitor room capacity and block occupancy rates, and plan hostel space utilization"
+        contextLabel={`Room Capacity & Occupancy · ${blocks.length} Blocks`}
+        statusSummary={
+          blocks.length > 0
+            ? `${blocks.reduce((s, b) => s + b.occupied, 0)} occupied out of ${blocks.reduce((s, b) => s + b.total, 0)} beds allocated across ${blocks.length} blocks.`
+            : "No hostel blocks recorded."
+        }
+        severity="info"
+        primaryAction={{ label: "Bed Allocation", href: "/hostel-manager/allocation" }}
+        secondaryActions={[
+          { label: "View Residents", href: "/hostel-manager/residents" },
+          { label: "Housekeeping", href: "/hostel-manager/housekeeping-tasks" },
+        ]}
+      />
       {error ? (
         <p className="text-xs text-text-muted">
           Block occupancy unavailable: {error}

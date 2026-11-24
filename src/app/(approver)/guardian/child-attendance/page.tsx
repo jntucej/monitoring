@@ -1,11 +1,13 @@
 "use client";
 
 import { Suspense, lazy, useState, useEffect } from "react";
+import Link from "next/link";
 import { ChildWeeklyActivity } from "@/components/parent/ChildWeeklyActivity";
 import { ChildStatus } from "@/components/parent/ChildStatus";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
 import {
@@ -30,6 +32,16 @@ function ChildAttendanceInner() {
           7-day gate activity summary for your wards
         </p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Review weekly gate check-in patterns, curfew compliance, and activity heatmaps for wards."
+        contextLabel="Attendance & Gate Activity"
+        statusTone="info"
+        statusSummary="Monitor 7-day attendance trends, recent gate in/out scans, and period heatmaps."
+        primaryAction={{ label: "Ward Status", href: "/guardian/child-status" }}
+        secondaryAction={{ label: "Movement Records", href: "/guardian/movement-info" }}
+      />
 
       <WidgetBoundary title="Ward Status">
         <ChildStatus />
@@ -97,7 +109,20 @@ function ChildSelector({ onPick }: { onPick: (id: string) => void }) {
 
   if (!loaded) return <PageLoading />;
   if (children.length === 0)
-    return <p className="text-sm text-text-muted">No linked children found.</p>;
+    return (
+      <div className="surface-card bg-bg-base/60 p-6 text-center space-y-2 mt-3">
+        <p className="text-sm font-semibold text-text-secondary">No linked children found</p>
+        <p className="text-xs text-text-muted">No student profiles are associated with your guardian account.</p>
+        <div className="pt-2">
+          <Link
+            href="/guardian/contact-info"
+            className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+          >
+            Update Contact Details
+          </Link>
+        </div>
+      </div>
+    );
 
   return (
     <div className="flex flex-wrap gap-2 mt-3">

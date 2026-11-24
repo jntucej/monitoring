@@ -15,6 +15,7 @@ import {
   ExternalLink,
   ShieldCheck,
 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* ── API response shape ───────────────────────────────────────────────────── */
 
@@ -99,6 +100,14 @@ function ReadOnlyCard({
 }) {
   return (
     <div className="surface-card bg-bg-elevated p-5">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage institutional settings. Sysadmin-only sections are read-only here."
+        contextLabel="Manage institutional settings. Sysadmin-only sections are read-only here."
+        statusSummary="Review current manage institutional settings. sysadmin-only sections are read-only here. state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <Info className="w-4 h-4 text-action-info shrink-0" />

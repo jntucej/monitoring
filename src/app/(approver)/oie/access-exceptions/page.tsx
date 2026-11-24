@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildOieAccessExceptionInspection } from "@/lib/role-registers/oieInspections";
 import {
@@ -293,6 +294,24 @@ function AccessExceptionsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Officer In-Charge of Examinations"
+        purpose="Adjudicate exam-day access exceptions, candidate disqualifications, and hall discrepancies."
+        contextLabel="Access Exceptions"
+        statusTone={rows.length > 0 ? "warn" : "ok"}
+        statusPill={rows.length > 0 ? `${rows.length} exceptions` : "No exceptions"}
+        statusSummary={
+          rows.length > 0
+            ? `${rows.length} candidate access exception${rows.length === 1 ? "" : "s"} logged requiring urgent resolution.`
+            : "No open candidate access exceptions."
+        }
+        primaryAction={{ label: "Day Access", href: "/oie/examination-day-access" }}
+        secondaryActions={[
+          { label: "OIE Overview", href: "/oie" },
+          { label: "Pending Queue", href: "/oie/queue/pending" },
+        ]}
+      />
 
       {error && (
         <ErrorBanner

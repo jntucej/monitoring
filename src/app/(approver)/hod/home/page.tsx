@@ -29,6 +29,7 @@ import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface PriorityItem {
   id: string;
@@ -140,6 +141,23 @@ export default function HodTodayPage() {
 <Greeting />
         <RoleOnboarding />
 <PageHeader title="Head of Department" subtitle="Department leadership console" />
+        <ContextSituationBar
+          roleLabel="Head of Department"
+          purpose="Oversee department academic operations, faculty attendance, and escalation queues."
+          contextLabel="Leadership Console"
+          statusTone={pending > 0 ? "warn" : "ok"}
+          statusPill={pending > 0 ? `${pending} pending` : "All clear"}
+          statusSummary={
+            pending > 0
+              ? `${pending} pending approval${pending === 1 ? "" : "s"} require department leadership review.`
+              : "No pending approval requests requiring department action today."
+          }
+          primaryAction={{ label: "Approvals Queue", href: "/hod", badgeCount: pending }}
+          secondaryActions={[
+            { label: "Faculty Directory", href: "/hod/faculty/directory" },
+            { label: "Department Reports", href: "/hod/reports" },
+          ]}
+        />
         <WidgetBoundary name="HodKpis" title="HOD KPIs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <KpiTile label="Pending approvals" value={d?.counts.pending ?? 0} />

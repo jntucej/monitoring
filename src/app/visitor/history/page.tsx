@@ -13,6 +13,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, History, AlertTriangle, ArrowRight, Search } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import type { VisitorsMineResponse, VisitorLogRow } from "../types";
 
 function fmtRange(l: VisitorLogRow): string {
@@ -75,6 +76,21 @@ function VisitorHistoryInner() {
         </div>
       </div>
 
+      <ContextSituationBar
+        roleLabel="Campus Visitor"
+        purpose="Review past campus visits, check-in timestamps, hosts visited, and exit records."
+        contextLabel="Visit History Log"
+        statusTone="info"
+        statusPill={`${history.length} Visit${history.length === 1 ? "" : "s"}`}
+        statusSummary={
+          history.length > 0
+            ? `You have ${history.length} recorded campus visit${history.length === 1 ? "" : "s"}. Click any entry to inspect details.`
+            : "No previous campus visits on record yet. Logged visits will be archived here."
+        }
+        primaryAction={{ label: "Visit & Check-In", href: "/visitor/visit" }}
+        secondaryAction={{ label: "Request Visit", href: "/visitor/request" }}
+      />
+
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
@@ -105,8 +121,17 @@ function VisitorHistoryInner() {
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading…
             </div>
           ) : history.length === 0 ? (
-            <div className="p-4 min-w-0">
-              <p className="text-sm text-text-muted">No completed visits yet. Your visit history will appear here.</p>
+            <div className="p-6 min-w-0 text-center space-y-2">
+              <p className="text-sm font-medium text-text-secondary">No completed visits yet</p>
+              <p className="text-xs text-text-muted">Your visit history will appear here once you complete a campus visit.</p>
+              <div className="pt-2">
+                <Link
+                  href="/visitor/request"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                >
+                  Request a Visit
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="divide-y divide-slate-800 min-w-0">

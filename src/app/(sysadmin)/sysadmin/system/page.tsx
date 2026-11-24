@@ -3,10 +3,19 @@
 
 import Link from "next/link";
 import { Activity, Clock, Database, Sparkles, Layout, ArrowUpRight, Server } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function SystemHubPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor system for campus operations."
+        contextLabel="System"
+        statusSummary="Review current system state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div>
         <p className="text-2xl font-bold tracking-tight text-text-primary">System Operations & Integrations</p>
         <p className="text-sm text-text-secondary mt-1">

@@ -7,6 +7,7 @@ import { HodIdInput } from "@/components/sysadmin/HodIdInput";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Building2, Plus, Trash2, Edit3, CheckCircle2, ShieldAlert, Users, GraduationCap } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface Department {
   code: string;
@@ -96,6 +97,14 @@ const api = useApi();
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor departments for campus operations."
+        contextLabel="Departments"
+        statusSummary="Review current departments state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <div className="flex items-center justify-between">
           <div>
             <p className="text-2xl font-bold text-text-primary flex items-center gap-2">

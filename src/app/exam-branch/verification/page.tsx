@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {AlertTriangle, ArrowRight, BadgeCheck, SearchCheck}  from "lucide-react";
 
 /* /api/occupancy/presence-matrix response shape */
@@ -115,6 +116,24 @@ function ExamBranchVerificationInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Branch"
+        purpose="Verify candidate credentials against seating plans, exam passes, and presence rolls."
+        contextLabel="Exam Verification"
+        statusTone={vpRequests.length > 0 ? "warn" : "ok"}
+        statusPill={vpRequests.length > 0 ? `${vpRequests.length} to verify` : "Clear"}
+        statusSummary={
+          vpRequests.length > 0
+            ? `${vpRequests.length} candidate verification record${vpRequests.length === 1 ? "" : "s"} awaiting seating and badge validation.`
+            : "No candidates currently queued for credential verification."
+        }
+        primaryAction={{ label: "Pass Queue", href: "/exam-branch" }}
+        secondaryActions={[
+          { label: "OIE Requests", href: "/exam-branch/oie-approval-requests" },
+          { label: "Today Overview", href: "/exam-branch/home" },
+        ]}
+      />
 
       {presenceError && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

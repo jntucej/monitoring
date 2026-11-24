@@ -7,11 +7,20 @@
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { MaintenanceContent } from "@/components/sysadmin/domains/automation/MaintenanceContent";
 import { Wrench } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function MaintenancePage() {
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor maintenance for campus operations."
+        contextLabel="Maintenance"
+        statusSummary="Review current maintenance state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <div className="flex items-center gap-2">
           <Wrench className="w-5 h-5 text-action-primary" />
           <div>

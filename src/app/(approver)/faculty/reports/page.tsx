@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { ClassReviewsWidget } from "@/components/faculty/ClassReviewsWidget";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildFacultyReportDeptInspection, type FacultyDeptSummaryRecord } from "@/lib/role-registers/facultyInspections";
 import {
@@ -89,6 +90,19 @@ function FacultyReportsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Faculty · Reports"
+        purpose="Analyze class feedback, academic reviews, and departmental summaries."
+        contextLabel="Reports & Feedback"
+        statusTone="info"
+        statusSummary="Monitor academic evaluations, class sentiment reviews, and teaching reports."
+        primaryAction={{ label: "Faculty Home", href: "/faculty" }}
+        secondaryActions={[
+          { label: "My Classes", href: "/faculty/my-classes" },
+          { label: "Permissions", href: "/faculty/permissions" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

@@ -187,8 +187,10 @@ export default function StudentPermissionsPage() {
         </div>
 
         <ContextSituationBar
+          roleLabel="Student"
+          purpose="Track outing, leave, and late-entry requests and approval workflows"
           contextLabel="Request Status"
-          statusTone={pendingCount > 0 ? "warn" : approvedCount > 0 ? "ok" : "info"}
+          severity={pendingCount > 0 ? "warn" : approvedCount > 0 ? "ok" : "info"}
           statusPill={
             loading
               ? "Checking…"
@@ -198,7 +200,7 @@ export default function StudentPermissionsPage() {
                   ? `${approvedCount} approved`
                   : "No active requests"
           }
-          summary={
+          statusSummary={
             pendingCount > 0
               ? `You have ${pendingCount} request${pendingCount === 1 ? "" : "s"} awaiting faculty or warden approval.`
               : approvedCount > 0

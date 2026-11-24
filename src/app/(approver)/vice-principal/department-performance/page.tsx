@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useMemo } from "react";
@@ -69,6 +70,14 @@ function VpDepartmentPerformanceInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Cross-departmental academic performance monitoring, attendance rates, and KPI evaluation"
+        contextLabel="Department Performance Radar"
+        statusSummary="Evaluate academic metrics, department attendance benchmarks, and faculty workload distributions."
+        primaryAction={{ label: "Academic Departments", href: "/vice-principal/academics/departments" }}
+        secondaryAction={{ label: "Attendance Exceptions", href: "/vice-principal/attendance-exceptions" }}
+      />
       <WidgetBoundary title="Department Performance">
         <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">

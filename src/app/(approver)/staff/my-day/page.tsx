@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import type { StaffMyDayResponse } from "../types";
 
 function StaffMydayInner() {
@@ -54,6 +55,21 @@ function StaffMydayInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Campus Staff"
+        purpose="Monitor daily gate movements, assigned tasks, and duty roster status."
+        contextLabel="Daily Staff Roster"
+        statusTone={summary && summary.openRequestsCount > 0 ? "warn" : "ok"}
+        statusPill={summary ? `${summary.movementsToday} scans · ${summary.openRequestsCount} pending` : "Active"}
+        statusSummary={
+          summary && summary.openRequestsCount > 0
+            ? `You have ${summary.openRequestsCount} pending request${summary.openRequestsCount === 1 ? "" : "s"} and ${summary.movementsToday} gate movement${summary.movementsToday === 1 ? "" : "s"} today.`
+            : `All caught up with ${summary?.movementsToday ?? 0} gate movement${(summary?.movementsToday ?? 0) === 1 ? "" : "s"} logged today.`
+        }
+        primaryAction={{ label: "Assigned Tasks", href: "/staff/assigned-tasks" }}
+        secondaryAction={{ label: "Staff Roster Duties", href: "/staff/duties" }}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
@@ -127,7 +143,15 @@ function StaffMydayInner() {
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-text-muted">No recent movements recorded.</p>
+                <div className="surface-card p-4 text-center space-y-2">
+                  <p className="text-xs text-text-muted">No recent movements recorded today.</p>
+                  <Link
+                    href="/staff/duties"
+                    className="inline-flex items-center gap-1 text-xs text-action-primary hover:underline font-medium"
+                  >
+                    Check Roster Duties <ArrowRight className="size-3" />
+                  </Link>
+                </div>
               )}
             </div>
           )}

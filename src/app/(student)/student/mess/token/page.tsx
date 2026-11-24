@@ -3,6 +3,7 @@
 import { useApiResource } from "@/hooks/useApiResource";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { UtensilsCrossed, Info } from "lucide-react";
 
 interface Token {
@@ -55,6 +56,21 @@ function StudentMessTokenInner() {
         <UtensilsCrossed className="size-5 text-action-primary" />
         <h1 className="text-lg font-semibold">Mess Meal Token</h1>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Present daily QR meal token and redemption code at dining hall counters"
+        contextLabel="Daily Dining Token"
+        severity={mealTokens.length > 0 ? "ok" : "info"}
+        statusPill={mealTokens.length > 0 ? `${mealTokens.length} active token${mealTokens.length === 1 ? "" : "s"}` : "No active token"}
+        statusSummary={
+          mealTokens.length > 0
+            ? `Your active meal token is ready. Present the numeric code or QR at the dining service line.`
+            : "No active meal token issued for today. Review eligibility status or opt-outs."
+        }
+        primaryAction={{ label: "Rate Meals", href: "/student/mess/reviews" }}
+        secondaryAction={{ label: "Mess Bill", href: "/student/mess-bill" }}
+      />
 
       <WidgetBoundary name="StudentMessToken" title="Mess Meal Token" capability="mess.view">
         {error ? (

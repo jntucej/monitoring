@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 
 import { useUIStore } from "@/stores/uiStore";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function AntiRaggingConfigPage() {
   const [config, setConfig] = useState<any>(null);
@@ -37,6 +38,14 @@ export default function AntiRaggingConfigPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor anti ragging config for campus operations."
+        contextLabel="Anti Ragging Config"
+        statusSummary="Review current anti ragging config state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <h1 className="text-2xl font-semibold">Anti-Ragging Alert Configuration</h1>
       <form onSubmit={save} className="surface-card space-y-4 bg-white p-6">
         <label className="flex items-center gap-2">

@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { CsvValidationPreview, type CsvValidationPreviewProps } from "@/components/admin/CsvValidationPreview";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 
 /**
@@ -104,6 +105,14 @@ export default function AdminStudentsImportPage() {
 
   return (
       <div className="max-w-5xl mx-auto p-4 sm:p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="CSV provisioning with two-phase validation. The role column is read from the CSV; existing students are skipped, never overwritten."
+        contextLabel="CSV provisioning with two-phase validation. The role column is read from the CSV; existing students are skipped, never overwritten."
+        statusSummary="Review current csv provisioning with two-phase validation. the role column is read from the csv; existing students are skipped, never overwritten. state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <PageHeader
           title="Student Bulk Import"
           subtitle="CSV provisioning with two-phase validation. The role column is read from the CSV; existing students are skipped, never overwritten."

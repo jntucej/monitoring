@@ -7,6 +7,7 @@ import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { AdminAuditLogViewer } from "@/components/admin/AdminAuditLogViewer";
 import { History, ShieldAlert } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 function AdminAuditLogsInner() {
   const user = useAuthStore((s) => s.user);
@@ -21,6 +22,14 @@ function AdminAuditLogsInner() {
 
   return (
     <div className="space-y-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor audit logs for campus operations."
+        contextLabel="Audit Logs"
+        statusSummary="Review current audit logs state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <div>
         <p className="text-xs text-text-muted">
           Campus-split audit trail — operational campus events with infra-noise actions

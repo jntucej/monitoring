@@ -5,6 +5,7 @@ import Link from "next/link";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useApiResource } from "@/hooks/useApiResource";
 import { GraduationCap, ArrowRight } from "lucide-react";
 
@@ -56,6 +57,19 @@ function FacultyClassIndexInner() {
 
   return (
     <div className="space-y-3 p-2 min-w-0">
+      <ContextSituationBar
+        roleLabel="Faculty · Classes"
+        purpose="Navigate assigned class sections and view capacity and subject associations."
+        contextLabel={role === "class_teacher" ? "Taught Classes" : "All Assigned Classes"}
+        statusTone="info"
+        statusPill={`${classes.length} classes`}
+        statusSummary="Select a class section to inspect roster and attendance metrics."
+        primaryAction={{ label: "Faculty Home", href: "/faculty" }}
+        secondaryActions={[
+          { label: "My Classes", href: "/faculty/my-classes" },
+          { label: "Student Directory", href: "/faculty/student-directory" },
+        ]}
+      />
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
           <GraduationCap className="w-3.5 h-3.5" /> My Classes

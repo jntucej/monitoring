@@ -15,6 +15,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { FileUp, Check, Clock, Loader2 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { AssignmentConfirmationBar } from "@/components/nav/AssignmentConfirmationBar";
 import { useUIStore } from "@/stores/uiStore";
 
@@ -126,6 +127,8 @@ function StudentAssignmentsInner() {
     );
   }
   const rows = data?.data?.assignments ?? [];
+  const pendingCount = rows.filter((a) => a.myStatus === "PENDING" || a.myStatus === "LATE").length;
+  const overdueCount = rows.filter((a) => a.myStatus === "PENDING" && new Date(a.dueAt).getTime() < Date.now()).length;
 
   return (
     <WidgetBoundary name="StudentAssignments" title="My assignments" capability="assignment.view">
@@ -136,6 +139,28 @@ function StudentAssignmentsInner() {
             View class assignments, due dates, and upload your submissions.
           </p>
         </div>
+        <ContextSituationBar
+          roleLabel="Student"
+          purpose="Track coursework assignments, deadlines, and upload submissions"
+          contextLabel="Coursework & Submissions"
+          severity={overdueCount > 0 ? "warn" : pendingCount > 0 ? "info" : "ok"}
+          statusPill={
+            overdueCount > 0
+              ? `${overdueCount} overdue`
+              : pendingCount > 0
+                ? `${pendingCount} due`
+                : "All caught up"
+          }
+          statusSummary={
+            overdueCount > 0
+              ? `You have ${overdueCount} overdue assignment${overdueCount === 1 ? "" : "s"} requiring immediate submission.`
+              : pendingCount > 0
+                ? `You have ${pendingCount} pending assignment${pendingCount === 1 ? "" : "s"} scheduled.`
+                : "No pending submissions. All assignments are submitted or graded."
+          }
+          primaryAction={{ label: "Exams Schedule", href: "/student/exams" }}
+          secondaryAction={{ label: "Academic Marks", href: "/student/marks" }}
+        />
         <div className="surface-card bg-bg-surface p-4 space-y-3">
           <div className="flex items-center gap-2">
             <FileUp className="h-4 w-4 text-action-primary" />

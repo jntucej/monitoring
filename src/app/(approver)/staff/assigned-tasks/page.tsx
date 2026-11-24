@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import type { StaffMyDayResponse } from "../types";
 
 function StaffAssignedTasksInner() {
@@ -54,6 +55,21 @@ function StaffAssignedTasksInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Campus Staff"
+        purpose="Review and process staff-leave requests and workflow actions assigned to you."
+        contextLabel="Assigned Task Queue"
+        statusTone={slice && slice.totalOpen > 0 ? "warn" : "ok"}
+        statusPill={slice && slice.totalOpen > 0 ? `${slice.totalOpen} Open` : "Queue Clear"}
+        statusSummary={
+          slice && slice.totalOpen > 0
+            ? `You have ${slice.totalOpen} open staff-leave request${slice.totalOpen === 1 ? "" : "s"} waiting for review.`
+            : "No pending staff-leave tasks assigned to you right now."
+        }
+        primaryAction={{ label: "My Requests", href: "/staff/requests" }}
+        secondaryAction={{ label: "Staff Roster Duties", href: "/staff/duties" }}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
@@ -104,7 +120,24 @@ function StaffAssignedTasksInner() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-text-muted">No open staff-leave requests assigned to you.</p>
+                <div className="surface-card p-6 text-center space-y-2">
+                  <p className="text-sm font-medium text-text-secondary">No open staff-leave requests assigned to you</p>
+                  <p className="text-xs text-text-muted">You are all caught up. Check your personal requests or duty schedule.</p>
+                  <div className="pt-2 flex flex-wrap justify-center gap-2">
+                    <Link
+                      href="/staff/requests"
+                      className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                    >
+                      View My Requests
+                    </Link>
+                    <Link
+                      href="/staff/duties"
+                      className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors"
+                    >
+                      Check Roster Duties
+                    </Link>
+                  </div>
+                </div>
               )}
               {slice?.lastMovement && (
                 <p className="text-xs text-text-muted">

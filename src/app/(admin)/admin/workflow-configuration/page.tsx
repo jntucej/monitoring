@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 /* ── response shape (mirrors /api/admin/workflow-configuration) ───────────── */
 
 interface WorkflowStat {
@@ -83,6 +84,14 @@ function AdminWorkflowConfigurationInner() {
 
   return (
     <div className="space-y-4">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Pass types, pending requests, and approval routing"
+        contextLabel="Pass types, pending requests, and approval routing"
+        statusSummary="Review current pass types, pending requests, and approval routing state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Workflow Configuration"
         subtitle="Pass types, pending requests, and approval routing"

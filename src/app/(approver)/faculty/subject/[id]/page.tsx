@@ -25,6 +25,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 
 import { ClassRoster } from "@/components/faculty/ClassRoster";
 import { StudentContextPanel } from "@/components/faculty/StudentContextPanel";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 function SubjectClassDrilldownInner() {
   const params = useParams<{ id: string }>();
@@ -50,6 +51,20 @@ function SubjectClassDrilldownInner() {
               >
                 <ArrowRight className="size-3.5 rotate-180" /> Back to subject picker
               </button>
+            </div>
+            <div className="p-4">
+              <ContextSituationBar
+                roleLabel="Subject Faculty"
+                purpose="Inspect class roster and track individual student performance for this subject."
+                contextLabel={subject ? `Subject: ${subject}` : `Class: ${classId}`}
+                statusTone="info"
+                statusSummary={`Viewing student roster for class ${classId}. Select a student to inspect attendance and details.`}
+                primaryAction={{ label: "All Subjects", href: "/faculty/subject" }}
+                secondaryActions={[
+                  { label: "Mark Attendance", href: "/faculty/subject/attendance" },
+                  { label: "My Classes", href: "/faculty/subject/classes" },
+                ]}
+              />
             </div>
             <ClassRoster
               classId={classId}

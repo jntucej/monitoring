@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -105,6 +106,17 @@ function ContactInfoInner() {
           Your account contact details as registered on the campus portal
         </p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Maintain verified guardian contact numbers and account communication settings."
+        contextLabel="Guardian Profile & Contact"
+        statusTone="info"
+        statusPill={p?.status ? `Account: ${p.status}` : "Verified"}
+        statusSummary="Keep your emergency phone number and contact information up to date for campus gate notifications."
+        primaryAction={{ label: "Ward Status", href: "/guardian/child-status" }}
+        secondaryAction={{ label: "Ward Requests", href: "/guardian/child-requests" }}
+      />
 
       {error && (
         <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-600 flex items-center gap-2">

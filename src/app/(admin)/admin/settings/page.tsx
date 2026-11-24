@@ -6,11 +6,20 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { CollegeInfoForm } from "@/components/admin/CollegeInfoForm";
 import { PassTypesForm } from "@/components/admin/PassTypesForm";
 import { PreviewAsPanel } from "@/components/shared/PreviewAsPanel";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function AdminSettingsPage() {
   return (
     
       <div className="max-w-6xl mx-auto p-4 sm:p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Configure dynamic system preferences and institutional records"
+        contextLabel="Configure dynamic system preferences and institutional records"
+        statusSummary="Review current configure dynamic system preferences and institutional records state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <PageHeader
           title="Settings"
           subtitle="Configure dynamic system preferences and institutional records"

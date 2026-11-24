@@ -8,6 +8,7 @@ import { WorkerShiftTracker, WorkerShift } from "@/components/admin/WorkerShiftT
 import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 const WorkerMonthlyReviewPanel = lazy(
   () => import("@/components/admin/WorkerMonthlyReviewPanel")
@@ -57,6 +58,14 @@ const api = useApi();
   return (
     
       <div className="min-h-dvh bg-[var(--bg)]">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor workers for campus operations."
+        contextLabel="Workers"
+        statusSummary="Review current workers state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <CampusStatusBar />
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}

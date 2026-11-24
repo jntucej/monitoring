@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildFacultyRequestHistoryInspection, type FacultyRequestHistoryRecord } from "@/lib/role-registers/facultyRequestHistoryInspection";
 import {
@@ -83,6 +84,20 @@ function FacultyRequestHistoryInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Faculty · History"
+        purpose="Audit past student requests, approval outcomes, and resolved clearance decisions."
+        contextLabel="Request Archive"
+        statusTone="info"
+        statusPill={`${rows.length} records`}
+        statusSummary={`Archive of ${rows.length} past permission decisions and resolved requests.`}
+        primaryAction={{ label: "Faculty Home", href: "/faculty" }}
+        secondaryActions={[
+          { label: "Permissions", href: "/faculty/permissions" },
+          { label: "Correction Requests", href: "/faculty/correction-requests" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

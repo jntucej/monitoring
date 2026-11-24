@@ -6,12 +6,26 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { PermissionList } from "@/components/approver/PermissionList";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 
 function FacultyPermissionsInner() {
   return (
     <div className="mx-auto max-w-7xl w-full min-w-0 overflow-x-hidden space-y-6 px-4 py-6 md:px-6">
       
+      <ContextSituationBar
+        roleLabel="Faculty · Clearances"
+        purpose="Review initial-stage exam clearances and student memo requests."
+        contextLabel="Permissions Queue"
+        statusTone="info"
+        statusSummary="Review initial-stage student clearance requests and memo workflows."
+        primaryAction={{ label: "Faculty Home", href: "/faculty" }}
+        secondaryActions={[
+          { label: "Request History", href: "/faculty/request-history" },
+          { label: "Correction Requests", href: "/faculty/correction-requests" },
+        ]}
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-muted">

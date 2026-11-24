@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { RequestTimeline } from "@/components/shared/RequestTimeline";
 import { ArrowLeft } from "lucide-react";
 import { PermissionTicketCard } from "@/components/student/PermissionTicketCard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 
 interface Payload {
@@ -33,6 +34,9 @@ export default function PassLifecyclePage() {
     );
 
   const pass = data.data;
+  const isApproved = pass.status?.toUpperCase() === "APPROVED";
+  const isPending = pass.status?.toUpperCase() === "PENDING";
+
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-4">
       <Link
@@ -41,6 +45,22 @@ export default function PassLifecyclePage() {
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back to passes
       </Link>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Inspect end-to-end approval chain, reviewer timestamps, and QR activation status for this pass"
+        contextLabel={`Pass #${ticket}`}
+        severity={isApproved ? "ok" : isPending ? "warn" : "info"}
+        statusPill={pass.status ?? "Status Unknown"}
+        statusSummary={
+          isApproved
+            ? "Pass approved. Your QR code is active for gate scanner verification."
+            : isPending
+              ? "Pass awaiting approver signature from your assigned faculty or hostel warden."
+              : `Current pass status is ${pass.status ?? "unknown"}.`
+        }
+        primaryAction={{ label: "All Gate Passes", href: "/student/passes" }}
+        secondaryAction={{ label: "New Request", href: "/student/permissions/new" }}
+      />
       <PermissionTicketCard ticket={pass} />
       <RequestTimeline ticket={ticket} />
     </div>

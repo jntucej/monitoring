@@ -37,6 +37,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
@@ -248,6 +249,14 @@ function AdminOverviewInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Campus administration"
+        contextLabel="Campus administration"
+        statusSummary="Review current campus administration state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <h1 className="sr-only">Campus administration overview</h1>
       <PageHeader title="Admin" subtitle="Campus administration" onRefresh={load} refreshing={isRefreshing} />
 

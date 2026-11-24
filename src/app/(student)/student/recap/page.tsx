@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { Share2 } from "lucide-react";
 
 interface RecapPayload {
@@ -39,6 +40,16 @@ ${r.completedGoals}/${r.totalGoals} goals completed`;
   };
   return (
     <div className="mx-auto max-w-md space-y-4 p-4">
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Review semester milestones, events attended, goals achieved, and share your recap summary"
+        contextLabel="Semester Reflection & Recap"
+        severity="ok"
+        statusPill={r.periodLabel}
+        statusSummary={`${r.eventsRegistered} events attended, ${r.earnedAchievements.length} achievements earned, and ${r.completedGoals}/${r.totalGoals} goals finished.`}
+        primaryAction={{ label: "Achievements", href: "/student/achievements" }}
+        secondaryAction={{ label: "Student Home", href: "/student" }}
+      />
       <div className="surface-card bg-surface-muted p-6">
         <p className="text-xs uppercase tracking-wide text-text-muted">
           {r.periodLabel}

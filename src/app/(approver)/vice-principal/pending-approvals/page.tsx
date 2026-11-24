@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
@@ -158,6 +159,15 @@ function VpPendingApprovalsInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Review and process pending institutional approval requests and gate leave workflows"
+        contextLabel="Pending Approvals Roster"
+        statusSummary={rows.length > 0 ? `${rows.length} requests awaiting your review, including ${rows.filter(slaBreached).length} approaching SLA deadlines.` : "No pending approvals currently awaiting your review."}
+        severity={rows.some(slaBreached) ? "warn" : "ok"}
+        primaryAction={{ label: "Escalated Requests", href: "/vice-principal/escalated-requests" }}
+        secondaryAction={{ label: "Decision History", href: "/vice-principal/decision-history" }}
+      />
       <WidgetBoundary title="Pending Approvals">
         <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-text-muted mb-3 min-w-0">

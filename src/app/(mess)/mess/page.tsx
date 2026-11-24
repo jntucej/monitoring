@@ -8,6 +8,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { KpiCard } from "@/components/shared/KpiCard";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { mealDayInspection } from "@/components/approver/wardenConsoleModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -60,6 +61,19 @@ function MessDashboardInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="Mess In-Charge"
+        purpose="Direct daily dining service operations, verify meal tokens, and reconcile dining hall attendance"
+        contextLabel={`Mess Operations Overview · ${mealDate}`}
+        statusSummary={`${confirmed} meals confirmed served out of ${declared} declared present (${rate}% attendance rate).`}
+        severity="info"
+        primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
+        secondaryActions={[
+          { label: "Daily Meal Counts", href: "/mess/daily-meal-counts" },
+          { label: "Menu Management", href: "/mess/menu-management" },
+          { label: "Operational Requests", href: "/mess/operational-requests" },
+        ]}
+      />
       <WidgetBoundary name="MessDashboardKpis" title="Mess Incharge Dashboard">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <KpiCard

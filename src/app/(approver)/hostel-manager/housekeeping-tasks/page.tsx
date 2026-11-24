@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes */
 
@@ -61,6 +62,19 @@ function HostelManagerHousekeepingInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Hostel Manager"
+        purpose="Monitor hostel block sanitation, assign housekeeping rosters, and verify completed cleaning rounds"
+        contextLabel={`Housekeeping Operations · ${(data as DataResponse | null)?.total ?? 0} Item(s)`}
+        statusSummary="Verify block hygiene schedules, audit cleaning logs, and monitor housekeeping staff coverage."
+        severity="info"
+        primaryAction={{ label: "Maintenance", href: "/hostel-manager/maintenance" }}
+        secondaryActions={[
+          { label: "Resource Management", href: "/hostel-manager/resource-management" },
+          { label: "Resident Tickets", href: "/hostel-manager" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

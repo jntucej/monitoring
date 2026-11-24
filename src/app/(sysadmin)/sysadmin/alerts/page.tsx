@@ -11,6 +11,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { cn } from "@/lib/utils";
 import { AlertsContent, type AlertsSseState } from "@/components/sysadmin/domains/alerts/AlertsContent";
 import type { AlertsData } from "@/components/sysadmin/domains/alerts/types";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 function useAlertsStream(
   active: boolean,
@@ -80,6 +81,14 @@ function AlertsInner() {
 
   return (
     <div className="space-y-4 min-w-0">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Live feed, rule heat, and severity KPIs for the alerts domain"
+        contextLabel="Live feed, rule heat, and severity KPIs for the alerts domain"
+        statusSummary="Review current live feed, rule heat, and severity kpis for the alerts domain state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <PageHeader
         title="Alerts"
         subtitle="Live feed, rule heat, and severity KPIs for the alerts domain"

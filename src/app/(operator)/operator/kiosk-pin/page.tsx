@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { useState } from "react";
@@ -79,6 +80,16 @@ export default function OperatorKioskPinPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+      <div className="mb-4">
+        <ContextSituationBar
+          roleLabel="Gate Operator"
+          purpose="Configure device terminal quick-unlock PIN for secure shift lock and re-entry"
+          contextLabel="Kiosk Security"
+          statusSummary="Set or update your 4-digit terminal quick-authentication PIN for fast kiosk re-activation."
+          primaryAction={{ label: "Claim Gate", href: "/operator/claim" }}
+          secondaryAction={{ label: "Security Profile", href: "/operator/profile" }}
+        />
+      </div>
       <div className="mx-auto max-w-md space-y-5">
         <div>
           <h1 className="text-lg font-bold text-text-primary flex items-center gap-2">

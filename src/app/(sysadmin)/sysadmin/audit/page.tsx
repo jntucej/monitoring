@@ -8,6 +8,7 @@ import { AuditLogViewer } from "@/components/sysadmin/AuditLogViewer";
 import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 function SysadminAuditInner() {
   const user = useAuthStore((s) => s.user);
@@ -15,6 +16,14 @@ function SysadminAuditInner() {
 
   return (
     <div className="space-y-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor audit for campus operations."
+        contextLabel="Audit"
+        statusSummary="Review current audit state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div>
         <p className="text-2xl font-bold text-text-primary">Technical Audit Logs</p>
         <p className="text-sm text-text-muted">

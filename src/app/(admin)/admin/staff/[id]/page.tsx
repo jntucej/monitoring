@@ -11,6 +11,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface StaffHistoryItem {
   direction?: string;
@@ -61,6 +62,14 @@ function AdminStaffDetail() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Duty roster, leave history, and contact info"
+        contextLabel="Duty roster, leave history, and contact info"
+        statusSummary="Review current duty roster, leave history, and contact info state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Staff Profile"
         subtitle="Duty roster, leave history, and contact info"

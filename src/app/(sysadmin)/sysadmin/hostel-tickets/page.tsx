@@ -9,6 +9,7 @@ import { EntityInspector, KVPairs, ActionRow, InspectorButton } from "@/componen
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useState } from "react";
 import { ClipboardList } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface Row {
   ticket_number: string;
@@ -30,6 +31,14 @@ export default function HostelTicketsAdminPage() {
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin", "principal"] as never}>
       <div className="space-y-4 p-4">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor hostel tickets for campus operations."
+        contextLabel="Hostel Tickets"
+        statusSummary="Review current hostel tickets state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <h1 className="flex items-center gap-2 text-fluid-lg font-semibold">
           <ClipboardList className="h-5 w-5" />
           Hostel Tickets

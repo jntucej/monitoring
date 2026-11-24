@@ -10,6 +10,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Activity, AlertTriangle } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface HealthData {
   status: "healthy" | "degraded" | "unhealthy";
@@ -58,6 +59,14 @@ function ApplicationHealthInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 sm:py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor application health for campus operations."
+        contextLabel="Application Health"
+        statusSummary="Review current application health state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div>
         <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
           <Activity className="w-6 h-6 text-action-danger" />

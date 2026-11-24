@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { UserCheck, AlertTriangle, ArrowRight, ClipboardList } from "lucide-react";
 import {
   useEntityInspector,
@@ -183,6 +184,20 @@ function ExamBranchRecordsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Branch"
+        purpose="Search and inspect student hall registrations, historical admit cards, and clearance logs."
+        contextLabel="Exam Records"
+        statusTone="info"
+        statusPill={`${requests.length} records`}
+        statusSummary={`Archive of ${requests.length} student examination records and verified passes.`}
+        primaryAction={{ label: "Pass Queue", href: "/exam-branch" }}
+        secondaryActions={[
+          { label: "Today Overview", href: "/exam-branch/home" },
+          { label: "Verification Desk", href: "/exam-branch/verification" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

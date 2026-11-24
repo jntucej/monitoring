@@ -19,6 +19,7 @@ import {
   Clock,
   RefreshCw,
 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface BackupStatusData {
   source: "host-backup-dir" | "unavailable";
@@ -66,6 +67,14 @@ function BackupReinforcedInner() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto min-w-0">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor backup for campus operations."
+        contextLabel="Backup"
+        statusSummary="Review current backup state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div>
         <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
           <Database className="w-4 h-4 text-action-success" />

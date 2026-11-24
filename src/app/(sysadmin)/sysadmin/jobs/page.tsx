@@ -9,6 +9,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { JobsContent } from "@/components/sysadmin/domains/automation/JobsContent";
 import type { JobsData } from "@/components/sysadmin/domains/automation/types";
 import { Clock } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function JobsPage() {
   const { data, loading, error } = useDashboardData<JobsData>("/api/admin/jobs/overview", {
@@ -19,6 +20,14 @@ export default function JobsPage() {
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor jobs for campus operations."
+        contextLabel="Jobs"
+        statusSummary="Review current jobs state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-action-primary" />
           <div>

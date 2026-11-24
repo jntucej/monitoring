@@ -4,10 +4,19 @@
 import Link from "next/link";
 import { ShieldCheck, Clock, ArrowUpRight } from "lucide-react";
 import { BackupManagement } from "@/components/sysadmin/BackupManagement";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function DataManagementHubPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor data for campus operations."
+        contextLabel="Data"
+        statusSummary="Review current data state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <div>
         <p className="text-2xl font-bold tracking-tight text-text-primary">Data Governance & Backups</p>
         <p className="text-sm text-text-secondary mt-1">

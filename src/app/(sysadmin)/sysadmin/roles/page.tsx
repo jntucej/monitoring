@@ -25,6 +25,7 @@ import {
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useUIStore } from "@/stores/uiStore";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /** Shape of the read-only /api/roles-graph response. */
 interface RolesGraphPayload {
@@ -453,6 +454,14 @@ export default function RolesManagementPage() {
 
     return (
       <div key={node.code} className="relative">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage and monitor roles for campus operations."
+        contextLabel="Roles"
+        statusSummary="Review current roles state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         {/* node card */}
         <div
           className={`group flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${

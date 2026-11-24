@@ -27,6 +27,7 @@ import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { KpiCard } from "../_shared/KpiCard";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
@@ -175,6 +176,15 @@ export default function VPTodayPage() {
 
       <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
 <PageHeader title="Vice Principal" subtitle="Campus operations & exams" />
+        <ContextSituationBar
+          roleLabel="Vice Principal"
+          purpose="Executive cockpit for campus operations, academic departments, examinations, and urgent approvals"
+          contextLabel="Vice Principal Command Center"
+          statusSummary={(d?.counts.escalated ?? 0) > 0 ? `${d?.counts.escalated} escalated approvals and ${pending} total requests awaiting action.` : `${pending} approval requests in queue. Exam day state: ${d?.counts.examDayState ?? "normal"}.`}
+          severity={(d?.counts.escalated ?? 0) > 0 ? "warn" : "ok"}
+          primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}
+          secondaryAction={{ label: "Exam Coordination", href: "/vice-principal/examination-coordination" }}
+        />
         <WidgetBoundary name="VpKpis" title="Vice Principal KPIs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <KpiCard

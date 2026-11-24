@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useMemo, useState } from "react";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -135,6 +136,21 @@ function VisitScheduleInner() {
         </div>
       </div>
 
+      <ContextSituationBar
+        roleLabel="Student Guardian / Parent"
+        purpose="Plan and coordinate campus visits around institutional events, holidays, and deadlines."
+        contextLabel="Campus Calendar & Visits"
+        statusTone="info"
+        statusPill={`${events.length} Event${events.length === 1 ? "" : "s"}`}
+        statusSummary={
+          events.length > 0
+            ? `Viewing ${events.length} scheduled institutional event(s) and visit windows this month.`
+            : "No scheduled campus events found for this month."
+        }
+        primaryAction={{ label: "Submit Pass / Leave", href: "/guardian/pass-leave-submission" }}
+        secondaryAction={{ label: "Ward Status", href: "/guardian/child-status" }}
+      />
+
       {error && (
         <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-600 flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
@@ -227,9 +243,18 @@ function VisitScheduleInner() {
             Loading campus calendar…
           </div>
         ) : upcoming.length === 0 ? (
-          <p className="text-sm text-text-muted py-6 text-center">
-            No upcoming campus events this month.
-          </p>
+          <div className="surface-card bg-bg-base/60 p-6 text-center space-y-2">
+            <p className="text-sm font-semibold text-text-secondary">No upcoming campus events</p>
+            <p className="text-xs text-text-muted">No upcoming campus events or visit windows scheduled this month.</p>
+            <div className="pt-2">
+              <a
+                href="/guardian/pass-leave-submission"
+                className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+              >
+                Plan a Visit Request
+              </a>
+            </div>
+          </div>
         ) : view === "list" ? (
           <div className="space-y-2 max-h-4 overflow-y-auto">
             {upcoming.map((ev) => {

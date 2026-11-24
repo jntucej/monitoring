@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface ConsentStats { scope: string; granted: number; revoked: number; total: number }
 
@@ -40,6 +41,14 @@ function SysadminConsentInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Data consent framework for biometric and gate access data"
+        contextLabel="Data consent framework for biometric and gate access data"
+        statusSummary="Review current data consent framework for biometric and gate access data state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-48 rounded-2xl" />
       </div>

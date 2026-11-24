@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 /* ── response shape (mirrors /api/admin/gate-device-configuration) ────────── */
 
 interface GateSchedule {
@@ -87,6 +88,14 @@ function AdminGateDeviceConfigurationInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Gate roster, schedules, and per-device settings"
+        contextLabel="Gate roster, schedules, and per-device settings"
+        statusSummary="Review current gate roster, schedules, and per-device settings state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Gate & Device Configuration"
         subtitle="Gate roster, schedules, and per-device settings"

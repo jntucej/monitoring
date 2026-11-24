@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useApiResource } from "@/hooks/useApiResource";
 import { Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
 
@@ -78,6 +79,19 @@ function ClassAttendanceInner() {
 
   return (
     <div className="space-y-4 p-2 min-w-0">
+      <ContextSituationBar
+        roleLabel="Faculty · Attendance"
+        purpose="Monitor class presence rates and daily check-in counts for assigned students."
+        contextLabel={details ? `Year ${details.year} · ${details.section}` : "Class Attendance"}
+        statusTone={rate < 75 ? "warn" : "ok"}
+        statusPill={`${rate}% attendance`}
+        statusSummary={`${present} present, ${absent} absent recorded today.`}
+        primaryAction={{ label: "Class Roster", href: `/faculty/class/${classId}` }}
+        secondaryActions={[
+          { label: "My Classes", href: "/faculty/my-classes" },
+          { label: "Overview", href: "/faculty" },
+        ]}
+      />
       {details ? (
         <div className="surface-card bg-bg-surface p-3 min-w-0">
           <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">

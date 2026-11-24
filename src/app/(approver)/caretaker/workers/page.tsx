@@ -14,6 +14,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* response shapes */
 
@@ -64,6 +65,19 @@ function CaretakerWorkersInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Caretaker"
+        purpose="Monitor on-duty facility workers, track shift coverage, and audit gate-logged worker activity"
+        contextLabel="Facility Staff & Shifts"
+        statusSummary="Monitor real-time hostel maintenance staffing, gate movements, and active shift logs."
+        severity="info"
+        primaryAction={{ label: "Maintenance Tasks", href: "/caretaker/maintenance" }}
+        secondaryActions={[
+          { label: "Facilities Overview", href: "/caretaker/home" },
+          { label: "Complaint Console", href: "/caretaker" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

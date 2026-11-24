@@ -20,6 +20,7 @@ import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function DeputyWardenPage() {
     const [active, setActive] = useState<HMBoardRow | null>(null);
@@ -31,6 +32,19 @@ return (
       <AuthGuard allowedRoles={["deputy_warden", "principal"]}>
         <div className="space-y-6">
           <PageHeader title="Deputy Warden" subtitle="Hostel delegation & discipline" />
+          <ContextSituationBar
+            roleLabel="Deputy Warden"
+            purpose="Supervise hostel safety, process escalated outpass permissions, and ensure residential discipline"
+            contextLabel="Hostel Delegation & Discipline Dashboard"
+            statusSummary="Review active hostel permissions on the Kanban board, audit delegation status, and inspect alerts."
+            severity="info"
+            primaryAction={{ label: "Outpass Queue", href: "/deputy-warden" }}
+            secondaryActions={[
+              { label: "Daily Overview", href: "/deputy-warden/daily-overview" },
+              { label: "Curfew Oversight", href: "/deputy-warden/curfew-oversight" },
+              { label: "Shift Handover", href: "/deputy-warden/shift-handover" },
+            ]}
+          />
           <WidgetBoundary name="RoleDashboardPanel" title="Deputy Warden Dashboard">
             <RoleDashboardPanel
               title="Deputy Warden dashboard"

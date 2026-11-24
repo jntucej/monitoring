@@ -14,10 +14,16 @@ export default function DeputyWardenCurfewOversightPage() {
         </p>
       </div>
       <ContextSituationBar
+        roleLabel="Deputy Warden"
+        purpose="Monitor hostel curfew compliance, overnight gate movement, and late-return requests"
         contextLabel="Hostel Curfew Monitoring"
-        summary="Review live curfew status, check overnight gate scans, or process pending leave requests."
+        statusSummary="Review live curfew status, check overnight gate scans, or process pending leave requests."
+        severity="info"
         primaryAction={{ label: "Live Curfew Status", href: "/deputy-warden/curfew" }}
-        secondaryAction={{ label: "Gate Movement", href: "/deputy-warden/gate-movement" }}
+        secondaryActions={[
+          { label: "Gate Movement", href: "/deputy-warden/gate-movement" },
+          { label: "Daily Overview", href: "/deputy-warden/daily-overview" },
+        ]}
       />
       <EmptyState
         icon={<Clock className="size-6" />}

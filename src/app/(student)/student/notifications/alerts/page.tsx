@@ -7,6 +7,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { Bell } from "lucide-react";
 import type { Role } from "@/lib/types";
 import { NotificationRow, fmtDateTime } from "../_shared";
@@ -42,6 +43,20 @@ function Inner() {
           All notifications
         </Link>
       </div>
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Review targeted campus alerts, gate pass updates, curfew warnings, and account notices"
+        contextLabel="Urgent Alerts & Notices"
+        severity={list.length > 0 ? "warn" : "ok"}
+        statusPill={list.length > 0 ? `${list.length} active` : "All clear"}
+        statusSummary={
+          list.length > 0
+            ? `You have ${list.length} active personal or curfew alert${list.length === 1 ? "" : "s"}.`
+            : "No urgent alerts pending for your account."
+        }
+        primaryAction={{ label: "All Notifications", href: "/student/notifications" }}
+        secondaryAction={{ label: "Campus Announcements", href: "/student/notifications/announcements" }}
+      />
       {list.length === 0 ? (
         <EmptyState
           title="No alerts"

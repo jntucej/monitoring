@@ -15,6 +15,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { ArrowRight, AlertTriangle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface DataResponse {
   success: boolean;
@@ -52,12 +53,23 @@ function StaffMyProfileInner() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
+          <h1 className="text-base font-semibold text-white">Staff Profile</h1>
           <p className="mt-1 text-sm text-text-muted min-w-0">
             Signed in as <span className="font-medium capitalize text-text-secondary">{role.replace(/_/g, " ")}</span>
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Campus Staff"
+        purpose="Manage profile information, role credentials, preferences, and security settings."
+        contextLabel="Staff Profile & Settings"
+        statusTone="info"
+        statusSummary="View your personal staff credentials, campus contact information, and role configuration."
+        primaryAction={{ label: "My Day", href: "/staff/my-day" }}
+        secondaryAction={{ label: "Leave Requests", href: "/staff/leaves" }}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

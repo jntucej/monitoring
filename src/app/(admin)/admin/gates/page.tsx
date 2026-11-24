@@ -11,6 +11,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { gateInspection } from "@/components/shared/inspectionModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface AdminGate {
   id: string;
@@ -157,6 +158,14 @@ export default function AdminGatesPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Manage and monitor gates for campus operations."
+        contextLabel="Gates"
+        statusSummary="Review current gates state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

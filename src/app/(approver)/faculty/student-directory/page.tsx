@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildStudentDirectoryInspection, type StudentDirectoryRecord } from "@/lib/role-registers/studentDirectoryInspection";
 import {
@@ -77,6 +78,20 @@ function FacultyStudentDirectoryInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Faculty · Students"
+        purpose="Search and inspect student academic standings, contact records, and roll details."
+        contextLabel="Student Directory"
+        statusTone="info"
+        statusPill={`${students.length} students`}
+        statusSummary={`Directory of ${students.length} students. Inspect records or jump to class roster.`}
+        primaryAction={{ label: "Faculty Home", href: "/faculty" }}
+        secondaryActions={[
+          { label: "Class Roster", href: "/faculty/class" },
+          { label: "My Classes", href: "/faculty/my-classes" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

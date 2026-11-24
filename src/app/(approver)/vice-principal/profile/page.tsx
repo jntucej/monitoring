@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
@@ -41,6 +42,14 @@ function VicePrincipalProfileInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-4 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Manage executive approver profile, contact details, and institutional notifications"
+        contextLabel="Vice Principal Profile"
+        statusSummary="View your administrative profile, role credentials, and institutional delegation settings."
+        primaryAction={{ label: "Delegated Responsibilities", href: "/vice-principal/delegated-responsibilities" }}
+        secondaryAction={{ label: "VP Dashboard", href: "/vice-principal/home" }}
+      />
       <h1 className="text-xl font-bold text-text-primary">Vice Principal Profile</h1>
 
       <WidgetBoundary title="Vice Principal Profile">

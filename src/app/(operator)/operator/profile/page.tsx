@@ -1,5 +1,6 @@
 "use client";
 
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { Suspense, useEffect, useState } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
@@ -77,6 +78,15 @@ function OperatorProfileInner() {
           Your operator account details.
         </p>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Gate Operator"
+        purpose="Review assigned gate duty details, operator badge credentials, and station preferences"
+        contextLabel="Operator Profile"
+        statusSummary="Check your personal profile, active station assignments, and shift contact information."
+        primaryAction={{ label: "Change Password", href: "/operator/password" }}
+        secondaryAction={{ label: "Kiosk PIN", href: "/operator/kiosk-pin" }}
+      />
 
       {error && (
         <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2 min-w-0">

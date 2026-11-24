@@ -15,6 +15,7 @@ import {
 import { ChartTypeSwitcher } from "@/components/admin/shared/ChartTypeSwitcher";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /**
  * SysAdmin Analytics — ported from the admin console so the root operator has
@@ -107,6 +108,14 @@ function SysAdminAnalyticsInner() {
   if (!data && !error) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Traffic, occupancy, and demographic breakdowns"
+        contextLabel="Traffic, occupancy, and demographic breakdowns"
+        statusSummary="Review current traffic, occupancy, and demographic breakdowns state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}

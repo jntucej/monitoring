@@ -5,6 +5,7 @@ import { Upload, FileSpreadsheet, Download, Loader2, ShieldAlert } from "lucide-
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 
 /**
@@ -110,6 +111,14 @@ export default function AdminAttendanceBulkImportPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 sm:p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Import attendance entries for a date from CSV. Existing roll+date pairs are skipped."
+        contextLabel="Import attendance entries for a date from CSV. Existing roll+date pairs are skipped."
+        statusSummary="Review current import attendance entries for a date from csv. existing roll+date pairs are skipped. state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Bulk Attendance"
         subtitle="Import attendance entries for a date from CSV. Existing roll+date pairs are skipped."

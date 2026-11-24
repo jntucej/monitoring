@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { OccupancyHeatmap } from "@/components/admin/OccupancyHeatmap";
 import { CampusDigitalTwin } from "@/components/admin/CampusDigitalTwin";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function OccupancyPage() {
   const [activeTab, setActiveTab] = useState<"heatmap" | "digital-twin">("heatmap");
@@ -12,6 +13,14 @@ export default function OccupancyPage() {
   return (
     
       <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Live campus presence and the digital twin view"
+        contextLabel="Live campus presence and the digital twin view"
+        statusSummary="Review current live campus presence and the digital twin view state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
         <PageHeader
           title="Occupancy & Twin"
           subtitle="Live campus presence and the digital twin view"

@@ -12,6 +12,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { cn } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface Check {
   id: string;
@@ -65,6 +66,14 @@ export default function SecurityPosturePage() {
 
   return (
     <div className="p-4 sm:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Every defence from Batches A–I, in one view. Red = act now."
+        contextLabel="Every defence from Batches A–I, in one view. Red = act now."
+        statusSummary="Review current every defence from batches a–i, in one view. red = act now. state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <PageHeader
         title="Security posture"
         subtitle="Every defence from Batches A–I, in one view. Red = act now."

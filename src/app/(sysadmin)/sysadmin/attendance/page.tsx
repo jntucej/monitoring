@@ -8,6 +8,7 @@ import type { Scan, Student } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface Row {
   roll: string;
@@ -97,6 +98,14 @@ export default function SysAdminAttendancePage() {
   return (
     <AuthGuard allowedRoles={["admin", "sysadmin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Daily student attendance records"
+        contextLabel="Daily student attendance records"
+        statusSummary="Review current daily student attendance records state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <PageHeader title="Attendance" subtitle="Daily student attendance records" />
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">

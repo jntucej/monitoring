@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { ShieldCheck, AlertTriangle, ArrowRight, CalendarClock } from "lucide-react";
 
 /* response shapes */
@@ -80,6 +81,20 @@ function ExamSuperintendentScheduleInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Superintendent"
+        purpose="Monitor examination timetables, room seating schedules, and slot allocations."
+        contextLabel="Exam Schedule"
+        statusTone={pending.length > 0 ? "info" : "ok"}
+        statusPill={`${pending.length} slots`}
+        statusSummary={`Tracking ${pending.length} scheduled exam sessions and room assignments.`}
+        primaryAction={{ label: "Today Overview", href: "/exam/superintendent/home" }}
+        secondaryActions={[
+          { label: "Access Desk", href: "/exam/superintendent" },
+          { label: "Incidents", href: "/exam/superintendent/incidents" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

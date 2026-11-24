@@ -23,6 +23,7 @@ import {
   ArrowUpRight,
   AlertTriangle,
 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface SecHealth {
   status?: string;
@@ -86,6 +87,14 @@ function SecurityReinforcedInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Zero-trust posture: identity, keys, sessions and service health"
+        contextLabel="Zero-trust posture: identity, keys, sessions and service health"
+        statusSummary="Review current zero-trust posture: identity, keys, sessions and service health state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
       <PageHeader
         title="Infrastructure Security"
         subtitle="Zero-trust posture: identity, keys, sessions and service health"

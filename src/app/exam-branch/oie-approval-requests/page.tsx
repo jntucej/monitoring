@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { ShieldCheck, AlertTriangle, Inbox, ArrowRight, FileWarning } from "lucide-react";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   useEntityInspector,
   EntityInspectorPanel,
@@ -165,6 +166,24 @@ function OieApprovalRequestsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Branch"
+        purpose="Review exam clearance requests pending OIE decision and track escalation bottlenecks."
+        contextLabel="OIE Approval Queue"
+        statusTone={requests.length > 0 ? "warn" : "ok"}
+        statusPill={requests.length > 0 ? `${requests.length} awaiting OIE` : "Queue clear"}
+        statusSummary={
+          requests.length > 0
+            ? `${requests.length} exam clearance request${requests.length === 1 ? "" : "s"} submitted and awaiting OIE sign-off.`
+            : "No exam requests pending OIE approval."
+        }
+        primaryAction={{ label: "Pass Queue", href: "/exam-branch" }}
+        secondaryActions={[
+          { label: "OIE Handoff", href: "/exam-branch/oie-handoff" },
+          { label: "Verification", href: "/exam-branch/verification" },
+        ]}
+      />
 
       {/* OIE handoff notice — never bypass */}
       <div

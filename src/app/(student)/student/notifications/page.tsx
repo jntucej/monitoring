@@ -8,6 +8,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { Megaphone, Bell, X, Check, ChevronDown, ChevronUp } from "lucide-react";
 import type { Role } from "@/lib/types";
 import {
@@ -190,6 +191,23 @@ function Inner() {
           </Link>
         </nav>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Unified notification feed consolidating urgent security/gate alerts and broadcast circulars"
+        contextLabel="Notifications & Bulletins"
+        severity={alerts.data.length > 0 ? "warn" : "info"}
+        statusPill={`${all.length} messages (${alerts.data.length} alerts)`}
+        statusSummary={
+          alerts.data.length > 0
+            ? `You have ${alerts.data.length} priority alert${alerts.data.length === 1 ? "" : "s"} and ${all.length - alerts.data.length} announcements.`
+            : all.length > 0
+              ? `You have ${all.length} total notifications across alerts and announcements.`
+              : "All caught up! No unread notifications or announcements."
+        }
+        primaryAction={{ label: "Curfew & Alerts", href: "/student/notifications/alerts" }}
+        secondaryAction={{ label: "Announcements", href: "/student/notifications/announcements" }}
+      />
 
       {/* Sakuga-VFX toast flash for new alerts */}
       {isSakuga && isNewAlert && (

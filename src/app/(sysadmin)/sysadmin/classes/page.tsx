@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface Dept {
   id: string;
@@ -116,6 +117,14 @@ function AdminClassesInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Teaching groups by department, year, and section"
+        contextLabel="Teaching groups by department, year, and section"
+        statusSummary="Review current teaching groups by department, year, and section state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-64 rounded-2xl" />
       </div>

@@ -8,6 +8,7 @@ import { useIsSakuga } from "@/components/student/useIsSakuga";
 import { AttendanceNextPeriodRadar } from "@/components/student/AttendanceNextPeriodRadar";
 import { LifefulCalendarAgenda } from "@/components/nav/LifefulCalendarAgenda";
 import { ErrorRecoveryBanner } from "@/components/shared/ErrorRecoveryBanner";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 
 import { CalendarDays, CheckCircle2, XCircle, Clock, Loader2, ArrowRight } from "lucide-react";
@@ -104,6 +105,21 @@ function StudentAttendanceCalendarInner() {
           Attendance Summary <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Inspect monthly attendance patterns, absent days, and gate check-in/out stamps"
+        contextLabel="Attendance Calendar"
+        severity={summary && summary.total > 0 && (summary.present / summary.total) < 0.75 ? "warn" : "ok"}
+        statusPill={summary ? `${summary.present}/${summary.total} Days (${summary.total > 0 ? Math.round((summary.present / summary.total) * 100) : 100}%)` : "Loading..."}
+        statusSummary={
+          summary
+            ? `Current month shows ${summary.present} days present and ${summary.absent} absences across ${summary.total} marked days.`
+            : "Reviewing daily attendance stamps and campus gate records."
+        }
+        primaryAction={{ label: "Attendance Summary", href: "/student/attendance" }}
+        secondaryAction={{ label: "Gate Scan Log", href: "/student/history" }}
+      />
 
       {/* View toggle — sakuga-VFX toggle when the theme is active */}
       {isSakuga ? (

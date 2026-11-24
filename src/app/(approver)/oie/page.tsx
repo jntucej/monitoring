@@ -4,6 +4,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -49,6 +50,24 @@ return (
               Examinations cell — review exam clearances, access exceptions, and escalated requests.
             </p>
           </div>
+
+          <ContextSituationBar
+            roleLabel="Officer In-Charge of Examinations"
+            purpose="Evaluate examination clearances, manage day-access permits, and resolve hall exceptions."
+            contextLabel="Exam Cell Overview"
+            statusTone={pendingCount > 0 ? "warn" : "ok"}
+            statusPill={pendingCount > 0 ? `${pendingCount} pending` : "Clear"}
+            statusSummary={
+              pendingCount > 0
+                ? `${pendingCount} candidate clearance${pendingCount === 1 ? "" : "s"} and ${escalatedCount} exception${escalatedCount === 1 ? "" : "s"} await OIE adjudication.`
+                : "No pending candidate exam clearances right now."
+            }
+            primaryAction={{ label: "Pending Queue", href: "/oie/queue/pending", badgeCount: pendingCount }}
+            secondaryActions={[
+              { label: "Day Access", href: "/oie/examination-day-access" },
+              { label: "Exceptions", href: "/oie/access-exceptions" },
+            ]}
+          />
           <WidgetBoundary name="OieKpis" title="OIE KPIs">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <KpiTile label="Queue depth" value={queue.length} tone={queue.length > 0 ? "warn" : "ok"} />

@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
 
 /* response shapes */
@@ -60,6 +61,19 @@ function ExamBranchOiehandoffInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Exam Branch"
+        purpose="Batch forward verified student clearance bundles to the OIE for sign-off."
+        contextLabel="OIE Handoff"
+        statusTone="info"
+        statusSummary="Prepare and forward verified student clearance bundles for final OIE approval."
+        primaryAction={{ label: "Pass Queue", href: "/exam-branch" }}
+        secondaryActions={[
+          { label: "OIE Requests", href: "/exam-branch/oie-approval-requests" },
+          { label: "Verification", href: "/exam-branch/verification" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

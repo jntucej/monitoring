@@ -1,3 +1,4 @@
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
 
 import { Suspense, useCallback } from "react";
@@ -67,6 +68,14 @@ function VpAnalyticsInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Vice Principal"
+        purpose="Executive analytics dashboard tracking approval velocities, SLA adherence, and transit volumes"
+        contextLabel="Vice Principal Analytics"
+        statusSummary="High-level operational metrics across academic departments, gate operations, and approval chains."
+        primaryAction={{ label: "Decision History", href: "/vice-principal/decision-history" }}
+        secondaryAction={{ label: "Department Performance", href: "/vice-principal/department-performance" }}
+      />
       <WidgetBoundary title="VP Analytics">
         <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-text-muted mb-4 min-w-0">

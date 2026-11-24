@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, Bell, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 
 interface NotificationRow {
@@ -76,6 +77,21 @@ function StaffNotificationsInner() {
         </div>
       </div>
 
+      <ContextSituationBar
+        roleLabel="Campus Staff"
+        purpose="Receive operational notices, approval stage alerts, and system broadcasts."
+        contextLabel="Alerts & Notices"
+        statusTone={notifs.some((n) => !n.read) ? "warn" : "info"}
+        statusPill={`${notifs.length} Total`}
+        statusSummary={
+          notifs.length > 0
+            ? `You have ${notifs.length} alert(s) on file${notifs.some((n) => !n.read) ? ", including unread items" : ""}.`
+            : "No active alerts or notices for your staff account right now."
+        }
+        primaryAction={{ label: "My Day", href: "/staff/my-day" }}
+        secondaryAction={{ label: "Assigned Tasks", href: "/staff/assigned-tasks" }}
+      />
+
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
@@ -106,8 +122,23 @@ function StaffNotificationsInner() {
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Notifications…
             </div>
           ) : notifs.length === 0 ? (
-            <div className="p-4 min-w-0">
-              <p className="text-sm text-text-muted">No notifications for your role.</p>
+            <div className="p-6 min-w-0 text-center space-y-2">
+              <p className="text-sm font-medium text-text-secondary">No notifications for your role</p>
+              <p className="text-xs text-text-muted">You are completely up to date. Relevant alerts and broadcast notices will arrive here.</p>
+              <div className="pt-2 flex flex-wrap justify-center gap-2">
+                <Link
+                  href="/staff/my-day"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-action-primary text-white hover:opacity-90 transition-opacity"
+                >
+                  View My Day
+                </Link>
+                <Link
+                  href="/staff/assigned-tasks"
+                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  Check Tasks
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="divide-y divide-slate-800 min-w-0">

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { mealDayInspection } from "@/components/approver/wardenConsoleModels";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface ConsumptionDay {
   messDayId: string;
@@ -132,6 +133,24 @@ function MessConsumptionReportsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Mess In-Charge"
+        purpose="Analyze historical dining trends, reconcile token vs manual servings, and prevent kitchen food waste"
+        contextLabel={`Meal Consumption Trends · Last ${d?.days ?? 14} Days`}
+        statusSummary={
+          d
+            ? `${d.totals?.served ?? 0} total meals served (${d.avgPerDay ?? 0} avg/day) across the monitored window.`
+            : "Review meal serving distributions, scan methods, and dining trends across active mess days."
+        }
+        severity="info"
+        primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
+        secondaryActions={[
+          { label: "Daily Meal Counts", href: "/mess/daily-meal-counts" },
+          { label: "Meal Attendance", href: "/mess/meal-attendance" },
+          { label: "Mess Overview", href: "/mess" },
+        ]}
+      />
 
       {error && (
         <WidgetError message={`Consumption report unavailable: ${error}`} onRetry={() => void refreshAll()} />

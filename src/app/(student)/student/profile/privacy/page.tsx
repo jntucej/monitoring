@@ -5,6 +5,7 @@ import { ShieldCheck, Check, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { getAuthHeaders } from "@/lib/utils";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
 
@@ -110,6 +111,17 @@ export default function PrivacyPage() {
         necessary to provide campus services. All others are optional and can be revoked at
         any time.
       </p>
+
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Manage data privacy authorizations, biometric scopes, and guardian notifications"
+        contextLabel="Data Governance & Consents"
+        severity="info"
+        statusPill={loading ? "Loading…" : `${consents.filter((c) => c.granted).length} scopes active`}
+        statusSummary="Exercise control over data processing authorizations, notification channels, and telemetry."
+        primaryAction={{ label: "Profile & Security", href: "/student/profile-security" }}
+        secondaryAction={{ label: "Student Home", href: "/student" }}
+      />
 
       {error && (
         <Card className="p-4 border-action-danger/30 bg-action-danger/10">

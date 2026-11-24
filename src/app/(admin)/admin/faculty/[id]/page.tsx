@@ -9,6 +9,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { getAuthHeaders } from "@/lib/utils";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface FacultyHistoryItem {
   direction?: string;
@@ -73,6 +74,14 @@ function AdminFacultyDetail() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Class assignments and attendance summary"
+        contextLabel="Class assignments and attendance summary"
+        statusSummary="Review current class assignments and attendance summary state and take action below."
+        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Faculty Profile"
         subtitle="Class assignments and attendance summary"

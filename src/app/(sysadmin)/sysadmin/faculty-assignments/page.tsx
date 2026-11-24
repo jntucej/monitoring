@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface FacultyAssignment {
   id: string;
@@ -140,6 +141,14 @@ function AdminFacultyAssignmentsInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Assign faculty to classes and subjects"
+        contextLabel="Assign faculty to classes and subjects"
+        statusSummary="Review current assign faculty to classes and subjects state and take action below."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-64 rounded-2xl" />
       </div>

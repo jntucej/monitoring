@@ -11,6 +11,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { ArrowRight, Loader2, FileText, AlertTriangle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildOieRecordInspection } from "@/lib/role-registers/oieInspections";
 import {
@@ -271,6 +272,20 @@ function OieRecordsInner() {
           </p>
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Officer In-Charge of Examinations"
+        purpose="Search and inspect examination hall permits, hall tickets, and verified candidate files."
+        contextLabel="Exam Records"
+        statusTone="info"
+        statusPill={`${oieRows.length} records`}
+        statusSummary={`Archive of ${oieRows.length} examination clearance records and hall permits.`}
+        primaryAction={{ label: "Pending Queue", href: "/oie/queue/pending" }}
+        secondaryActions={[
+          { label: "OIE Overview", href: "/oie" },
+          { label: "Reports", href: "/oie/examination-reports" },
+        ]}
+      />
 
       {queueError && (
         <ErrorBanner

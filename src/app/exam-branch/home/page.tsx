@@ -4,6 +4,7 @@ import { FileSpreadsheet } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -30,6 +31,19 @@ export default function ExamBranchPage() {
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["exam_branch"]}>
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 pb-20">
+
+          <ContextSituationBar
+            roleLabel="Exam Branch"
+            purpose="Coordinate exam hall clearances, prepare OIE submissions, and track candidate passes."
+            contextLabel="Today Overview"
+            statusTone="info"
+            statusSummary="Monitor daily examination desk metrics, candidate queues, and verification logs."
+            primaryAction={{ label: "Pass Queue", href: "/exam-branch" }}
+            secondaryActions={[
+              { label: "OIE Requests", href: "/exam-branch/oie-approval-requests" },
+              { label: "Verification Desk", href: "/exam-branch/verification" },
+            ]}
+          />
 
           <WidgetBoundary name="RoleDashboardPanel" title="Exam Branch Dashboard">
             <RoleDashboardPanel

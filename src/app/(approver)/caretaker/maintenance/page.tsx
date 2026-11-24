@@ -9,6 +9,7 @@ import { requestInspection } from "@/components/shared/roleInspectors";
 import { ClipboardList, Loader2, Inbox, Clock } from "lucide-react";
 import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
 import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /**
  * Caretaker maintenance queue — plumbing, electrical, and sanitation repair
@@ -112,6 +113,23 @@ function CaretakerMaintenanceInner() {
           </div>
         )}
       </div>
+
+      <ContextSituationBar
+        roleLabel="Caretaker"
+        purpose="Review and resolve hostel maintenance requests, track repair SLAs, and verify facility completion"
+        contextLabel={data?.data?.assignedHostel ? `Maintenance Queue · ${data.data.assignedHostel}` : "Maintenance Queue"}
+        statusSummary={
+          summary
+            ? `${summary.pending} pending repair ticket${summary.pending === 1 ? "" : "s"} and ${summary.escalated} escalated in this block.`
+            : "Review and resolve plumbing, electrical, and facility repair requests."
+        }
+        severity={summary && summary.escalated > 0 ? "warn" : "info"}
+        primaryAction={{ label: "Facilities Overview", href: "/caretaker/home" }}
+        secondaryActions={[
+          { label: "Complaint Console", href: "/caretaker" },
+          { label: "Workers Status", href: "/caretaker/workers" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
