@@ -10,16 +10,8 @@ import {
   type HMBoardRow,
 } from "@/components/approver/wardenConsoleModels";
 
-import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { AttentionQueue } from "@/components/engagement/AttentionQueue";
-import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
-import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { GridBoard } from "@/components/shared/GridBoard";
-import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
@@ -99,30 +91,6 @@ export default function CaretakerPage() {
               columns={["Open", "In Progress", "Resolved"]}
               onSelect={(row) => inspect(boardRowTicketInspection(row as HMBoardRow, { consoleHref: "/caretaker", consoleLabel: "Caretaker console" }))}
             />
-          </WidgetBoundary>
-          <WidgetBoundary name="AttentionQueue" title="Attention Queue">
-            <AttentionQueue />
-          </WidgetBoundary>
-          <WidgetBoundary name="TaskContinuity" title="Task Continuity">
-            <TaskContinuity />
-          </WidgetBoundary>
-          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
-            <UnifiedCampusCalendar />
-          </WidgetBoundary>
-          <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
-            <RoleAnalytics />
-          </WidgetBoundary>
-          <WidgetBoundary name="CampusFeedbackDesk" title="Campus Feedback Desk">
-            <CampusFeedbackDesk />
-          </WidgetBoundary>
-          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline">
-            <ActivityTimeline />
-          </WidgetBoundary>
-          <WidgetBoundary name="QuickActions" title="Quick Actions">
-            <QuickActions />
-          </WidgetBoundary>
-          <WidgetBoundary name="NotificationCenter" title="Notification Center">
-            <NotificationCenter />
           </WidgetBoundary>
 
           <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
