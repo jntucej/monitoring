@@ -14,6 +14,7 @@ import { MyDayStrip } from "@/components/student/home/MyDayStrip";
 import { ActionItemsStrip } from "@/components/student/home/ActionItemsStrip";
 import { MyStatsCard } from "@/components/student/home/MyStatsCard";
 import { StudentLivingHub } from "@/components/student/StudentLivingHub";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
   StudentModeSwitcher,
   StudentModeBody,
@@ -208,6 +209,16 @@ function StudentHomeInner() {
       <CustomRoleGreeting name={user?.name} role={user?.role ?? "student"} />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
+      <ContextSituationBar
+        contextLabel={personaKey === "hosteller" ? "Hosteller Dashboard" : "Day Scholar Dashboard"}
+        summary={
+          personaKey === "hosteller"
+            ? "Track your curfew status, active hostel passes, meal tokens, and campus updates."
+            : "Track your class attendance, today's schedule, gate passes, and campus updates."
+        }
+        primaryAction={{ label: "Digital ID Card", href: "/student/id" }}
+        secondaryAction={{ label: "New Pass Request", href: "/student/permissions/new" }}
+      />
       <StudentModeSwitcher mode={mode} onChange={setMode} />
       <StudentLivingHub
         snapshot={{

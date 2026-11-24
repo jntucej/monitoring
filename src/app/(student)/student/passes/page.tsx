@@ -18,6 +18,7 @@ import { ExtendPassModal } from "@/components/shared/pass/ExtendPassModal";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { MyDocuments } from "@/components/shared/documents/MyDocuments";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { SelfActionLoop, type NextActionStep } from "@/components/nav/level0/SelfActionLoop";
 import { FileText } from "lucide-react";
 
@@ -54,6 +55,14 @@ export default function StudentPassesPage() {
           </p>
         </div>
       </div>
+
+      {/* Context & next step */}
+      <ContextSituationBar
+        contextLabel="Gate Passes vs. Requests"
+        summary="Approved requests become active QR gate passes here. Need a new outing or leave? Submit a request first."
+        primaryAction={{ label: "New Request", href: "/student/permissions/new" }}
+        secondaryAction={{ label: "My Requests", href: "/student/permissions" }}
+      />
 
       {/* PassHub (active + curfew + quota + create + history toggle) */}
       <WidgetBoundary name="pass-hub">

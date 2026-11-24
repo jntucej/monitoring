@@ -14,6 +14,7 @@ import type { MyClass } from "@/contracts/classes";
 import { Loader2, BookOpen, PencilLine } from "lucide-react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 
@@ -74,10 +75,18 @@ function FacultyInner() {
 
   if (classes.length === 0) {
     return (
-      <EmptyState
-        title="Not assigned as class teacher"
-        description="You have no class assigned. Ask your HOD to assign you to a class."
-      />
+      <div className="p-4 sm:p-6 space-y-4 max-w-3xl mx-auto">
+        <ContextSituationBar
+          contextLabel="Faculty Workspace"
+          summary="You are not assigned as a class teacher yet. Ask your Head of Department (HOD) to assign a class, or open your permissions and subject teaching views."
+          primaryAction={{ label: "View Permissions", href: "/faculty/permissions" }}
+          secondaryAction={{ label: "Subject Teaching", href: "/faculty/subject" }}
+        />
+        <EmptyState
+          title="Not assigned as class teacher"
+          description="You have no class assigned. Ask your Head of Department (HOD) to assign you to a class."
+        />
+      </div>
     );
   }
 
