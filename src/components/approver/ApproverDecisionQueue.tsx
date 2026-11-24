@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowUpRight, CheckCircle2, RefreshCw } from "lucide-react";
-import { DecisionItemCard } from "@/components/shared/DecisionItemCard";
+import {
+  ContextualActionRow,
+  type ActorEventContext,
+} from "@/components/shared/ContextualActionRow";
 import { clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -28,6 +31,28 @@ interface PermissionRow {
   campusStatus?: string;
   departure_at?: string;
   departureAt?: string;
+  stage_history?: Array<{
+    actor_name?: string;
+    actorName?: string;
+    actor_role?: string;
+    actorRole?: string;
+    action?: string;
+    comment?: string | null;
+    reason?: string | null;
+    at?: string;
+    timestamp?: string;
+  }>;
+  stageHistory?: Array<{
+    actor_name?: string;
+    actorName?: string;
+    actor_role?: string;
+    actorRole?: string;
+    action?: string;
+    comment?: string | null;
+    reason?: string | null;
+    at?: string;
+    timestamp?: string;
+  }>;
 }
 
 interface ActiveAlert {
@@ -302,21 +327,60 @@ export function ApproverDecisionQueue({
             const campus = row.campus_status ?? row.campusStatus ?? "Campus status unknown";
             const sla = formatSlaRemaining(row.sla_deadline ?? row.slaDeadline);
             const reason = row.reason?.trim() || "No reason text provided.";
+            const history = row.stage_history ?? row.stageHistory ?? [];
+            const last = history.length > 0 ? history[history.length - 1] : null;
+            const latestActorEvent: ActorEventContext | undefined = last
+              ? {
+                  actorName: last.actor_name ?? last.actorName ?? "Prior Actor",
+                  actorRole: last.actor_role ?? last.actorRole ?? stage,
+                  actionTaken: last.action ?? "UPDATED",
+                  reason: last.comment ?? last.reason ?? null,
+                  atLabel: (last.at ?? last.timestamp)
+                    ? new Date(last.at ?? last.timestamp ?? "").toLocaleString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "Recent",
+                }
+              : undefined;
 
             return (
               <div key={ticket} className="space-y-1.5">
-                <DecisionItemCard
-                  title={`${student} (${roll}) · ${ticket}`}
-                  subtitle={`${wf} · Stage: ${stage} · ${campus}`}
-                  contextBadge={sla}
-                  whyItNeedsAction={reason}
+                <ContextualActionRow
+                  row={{
+                    id: ticket,
+                    primaryTitle: `${student} (${roll}) · ${ticket}`,
+                    secondaryMeta: `${wf} · Stage: ${stage} · ${campus}`,
+                    liveStateBadge: sla,
+                    situationSummary: reason,
+                    latestActorEvent,
+                    historyCount: history.length,
+                    actions: [
+                      {
+                        action: "APPROVE",
+                        label: "Approve",
+                        tone: "primary",
+                        consequence: "Approves stage & activates gate QR if final",
+                      },
+                      {
+                        action: "FORWARD",
+                        label: forwardLabel,
+                        tone: "secondary",
+                        consequence: `Routes ticket to ${forwardLabel.replace(/^Forward to /i, "")}`,
+                      },
+                      {
+                        action: "REJECT",
+                        label: "Reject",
+                        tone: "danger",
+                        requiresReason: true,
+                        consequence: "Closes request & notifies student/guardian",
+                      },
+                    ],
+                  }}
                   busyAction={busyTicket === ticket ? busyAction : null}
-                  decisions={[
-                    { action: "APPROVE", label: "Approve", tone: "primary" },
-                    { action: "FORWARD", label: forwardLabel, tone: "secondary" },
-                    { action: "REJECT", label: "Reject", tone: "danger", requiresReason: true },
-                  ]}
-                  onDecide={(act, comment) => handleDecide(ticket, act, comment)}
+                  onAction={(act, comment) => handleDecide(ticket, act, comment)}
                 />
                 <div className="flex items-center justify-between gap-3 px-1 text-[11px] text-text-muted">
                   <label className="inline-flex items-center gap-1.5 cursor-pointer">
