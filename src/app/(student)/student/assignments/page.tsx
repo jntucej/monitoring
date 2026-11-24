@@ -129,11 +129,18 @@ function StudentAssignmentsInner() {
 
   return (
     <WidgetBoundary name="StudentAssignments" title="My assignments" capability="assignment.view">
-      <div className="surface-card bg-bg-surface p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <FileUp className="h-4 w-4 text-action-primary" />
-          <h3 className="text-sm font-semibold text-text-primary">My assignments</h3>
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-xl font-bold text-text-primary">My Assignments</h1>
+          <p className="text-xs sm:text-sm text-text-muted mt-0.5">
+            View class assignments, due dates, and upload your submissions.
+          </p>
         </div>
+        <div className="surface-card bg-bg-surface p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <FileUp className="h-4 w-4 text-action-primary" />
+            <h2 className="text-sm font-semibold text-text-primary">Assigned work</h2>
+          </div>
         {result && (
           <div className={`text-xs ${result.ok ? "text-emerald-500" : "text-rose-500"}`}>{result.msg}</div>
         )}
@@ -203,6 +210,7 @@ function StudentAssignmentsInner() {
             })}
           </div>
         )}
+        </div>
       </div>
     </WidgetBoundary>
   );

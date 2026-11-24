@@ -88,6 +88,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
         else if (path.startsWith("/exam/superintendent")) targetRole = "exam_superintendent";
         else if (path.startsWith("/oie")) targetRole = "oie";
         else if (path.startsWith("/hod")) targetRole = "hod";
+        else if (path.startsWith("/emo")) targetRole = "emo";
         else if (path.startsWith("/staff")) targetRole = "staff";
         else if (path.startsWith("/faculty")) targetRole = "faculty";
         else if (path.startsWith("/person")) targetRole = "student";

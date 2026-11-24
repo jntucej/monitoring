@@ -74,11 +74,11 @@ export function RoleProfileSettingsPanel({
   return (
     <section
       data-testid="role-occasional-settings"
-      className="surface-card rounded-xl border border-border bg-bg-surface p-4 space-y-4"
+      className="surface-card p-4 space-y-4"
     >
       <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-action-primary" />
+          <SlidersHorizontal className="h-3 w-3 text-action-primary" />
           <div>
             <h3 className="text-sm font-semibold text-text-primary">
               Occasional Role Settings
@@ -136,7 +136,7 @@ export function RoleProfileSettingsPanel({
                       }`}
                     >
                       <span
-                        className={`h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                        className={`h-5 w-5 rounded-full bg-bg-surface transition-transform ${
                           Boolean(val) ? "translate-x-5" : "translate-x-0"
                         }`}
                       />
@@ -160,7 +160,7 @@ export function RoleProfileSettingsPanel({
                 {item.controlType === "link" && item.href && (
                   <Link
                     href={item.href}
-                    className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg-base px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-elevated transition-colors"
+                    className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg-base px-2.5 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-elevated transition-colors"
                   >
                     <span>Configure</span>
                     <ArrowUpRight className="h-3.5 w-3.5" />

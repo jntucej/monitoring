@@ -212,7 +212,7 @@ export function ComplaintDetail({ role }: { role: string }) {
         <div
           role="alert"
           data-testid="complaint-action-error"
-          className="surface-card border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-action-danger"
+          className="surface-card bg-rose-500/10 px-3 py-2 text-xs text-action-danger"
         >
           {actionError}
         </div>
@@ -360,7 +360,7 @@ export function ComplaintDetail({ role }: { role: string }) {
             placeholder="Comments (optional)"
             value={feedbackComment}
             onChange={(e) => setFeedbackComment(e.target.value)}
-            className="surface-card w-full p-2 text-sm bg-white"
+            className="surface-card w-full p-2 text-sm bg-bg-surface"
           />
           <button type="submit" className="surface-card px-3 py-1.5 bg-action-success text-white text-sm">
             Submit & Close
@@ -371,7 +371,7 @@ export function ComplaintDetail({ role }: { role: string }) {
       {/* Tasks / Timeline */}
       <div className="space-y-3">
         <h2 className="font-medium text-text-primary">Timeline & Tasks</h2>
-        <div className="border rounded divide-y bg-white text-sm">
+        <div className="surface-card divide-y text-sm">
           {data.tasks.map((t: any) => (
             <div key={t.id} className="p-3 space-y-1">
               <div className="flex justify-between font-medium">
@@ -408,7 +408,7 @@ export function ComplaintDetail({ role }: { role: string }) {
               href={`/api/complaints/${id}/attachments/${a.id}`}
               target="_blank"
               rel="noreferrer"
-              className="surface-card px-3 py-1.5 bg-white text-xs hover:bg-bg-elevated flex items-center gap-1.5"
+              className="surface-card px-3 py-1.5 bg-bg-surface text-xs hover:bg-bg-elevated flex items-center gap-1.5"
             >
               <span>{a.name}</span>
               {a.internal && <span className="surface-card text-xs bg-action-warning/20 text-action-warning px-1">Internal</span>}

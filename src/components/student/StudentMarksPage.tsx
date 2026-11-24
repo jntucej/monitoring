@@ -133,7 +133,10 @@ export function StudentMarksPage() {
       {cards?.length === 0 && (
         <div className="surface-card p-8 text-center">
           <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
-          <p className="text-sm text-text-muted">No published marks yet.</p>
+          <p className="text-sm font-medium text-text-primary">No published marks yet</p>
+          <p className="text-xs text-text-muted mt-1">
+            Mid-term and semester marks appear here once your faculty or the Exam Branch publishes them.
+          </p>
         </div>
       )}
 

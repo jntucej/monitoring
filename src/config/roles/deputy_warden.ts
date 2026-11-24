@@ -43,5 +43,5 @@ export const DEPUTY_WARDEN_CONFIG: RoleConfig = {
       { target: "curfew-countdown", title: "Curfew countdown", body: "Live timer to curfew end, with gate-movement overlay." },
     ],
   },
-  greetingTemplate: "{blockName} — curfew ends in {mins} min, {residentCount} residents in",
+  greetingTemplate: "Hostel Curfew & Resident Overview",
 };

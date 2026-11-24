@@ -192,16 +192,20 @@ export default function ExitReasonsPage() {
                         <button
                           type="button"
                           onClick={() => setEditingReason(r)}
+                          aria-label={`Edit ${r.name}`}
+                          title={`Edit ${r.name}`}
                           className="surface-card p-2 min-h11 min-w11 inline-flex items-center justify-center bg-bg-elevated hover:text-action-warning transition"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className="w-4 h-4" aria-hidden />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(r.code)}
+                          aria-label={`Delete ${r.name}`}
+                          title={`Delete ${r.name}`}
                           className="surface-card p-2 min-h11 min-w11 inline-flex items-center justify-center bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" aria-hidden />
                         </button>
                       </td>
                     </tr>

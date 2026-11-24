@@ -83,8 +83,8 @@ export function AttendanceNextPeriodRadar({
         href={href}
         className={
           variant === "primary"
-            ? "inline-flex items-center gap-1 rounded-lg bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-95"
-            : "inline-flex items-center gap-1 rounded-lg border border-border bg-bg-surface px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-elevated"
+            ? "surface-card inline-flex items-center gap-1 bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-95"
+            : "surface-card inline-flex items-center gap-1 bg-bg-surface px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-elevated"
         }
       >
         {icon}
@@ -172,13 +172,13 @@ export function AttendanceNextPeriodRadar({
           </div>
 
           {nextPeriod ? (
-            <div className="rounded-xl border border-border bg-bg-elevated/50 p-3 space-y-1.5">
+            <div className="surface-card bg-bg-elevated/50 p-3 space-y-1.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-mono text-xs font-bold text-action-primary">
                   P{nextPeriod.periodNumber} • {nextPeriod.startTime}–{nextPeriod.endTime}
                 </span>
                 {nextPeriod.status && nextPeriod.status !== "scheduled" && (
-                  <span className="rounded-full border border-border bg-bg-surface px-2 py-0.5 text-[11px] font-medium capitalize text-text-primary">
+                  <span className="surface-card px-2 py-0.5 text-[11px] font-medium capitalize text-text-primary bg-bg-surface">
                     {nextPeriod.status}
                   </span>
                 )}
@@ -224,7 +224,7 @@ export function AttendanceNextPeriodRadar({
                 {laterPeriods.map((slot) => (
                   <span
                     key={slot.id}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-elevated px-2.5 py-1 text-xs text-text-primary"
+                    className="surface-card inline-flex items-center gap-1.5 bg-bg-elevated px-2.5 py-1 text-xs text-text-primary"
                   >
                     <Clock className="h-3 w-3 text-text-muted" />
                     <span className="font-mono text-[11px] text-text-muted">
@@ -267,7 +267,7 @@ export function AttendanceNextPeriodRadar({
               return (
                 <div
                   key={sub.subjectCode}
-                  className="rounded-xl border border-border bg-bg-elevated/40 p-3 flex items-center justify-between gap-2"
+                  className="surface-card bg-bg-elevated/40 p-3 flex items-center justify-between gap-2"
                 >
                   <div className="min-w-0">
                     <p className="text-xs font-semibold truncate text-text-primary">
@@ -288,7 +288,7 @@ export function AttendanceNextPeriodRadar({
                         : `${info.safeSkips} safe skip${info.safeSkips === 1 ? "" : "s"}`}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-lg border border-border bg-bg-surface px-2 py-1 font-mono text-xs font-bold text-text-primary">
+                  <span className="shrink-0 surface-card bg-bg-surface px-2 py-1 font-mono text-xs font-bold text-text-primary">
                     {info.pct}%
                   </span>
                 </div>

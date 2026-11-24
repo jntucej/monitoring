@@ -17,19 +17,29 @@ const emptySnapshot: RetentionSnapshot = {
   todayWinsCount: 0,
 };
 
+let lastRaw: string | null = null;
+let cachedSnapshot: RetentionSnapshot = emptySnapshot;
+
 function getSnapshot(): RetentionSnapshot {
   if (typeof window === "undefined") return emptySnapshot;
   try {
     const raw = localStorage.getItem("hod-retention");
-    if (!raw) return emptySnapshot;
+    if (!raw) {
+      lastRaw = null;
+      cachedSnapshot = emptySnapshot;
+      return emptySnapshot;
+    }
+    if (raw === lastRaw) return cachedSnapshot;
     const parsed = JSON.parse(raw);
     const state = parsed.state || {};
-    return {
+    lastRaw = raw;
+    cachedSnapshot = {
       teachingStreak: Number(state.teachingStreak) || 0,
       facultyStreak: Number(state.facultyStreak) || 0,
       sessionDecisions: Number(state.sessionDecisions) || 0,
       todayWinsCount: Array.isArray(state.todayWins) ? state.todayWins.length : 0,
     };
+    return cachedSnapshot;
   } catch {
     return emptySnapshot;
   }
@@ -58,11 +68,12 @@ export function WeekBar() {
       <div className="flex items-center gap-2">
         {data.teachingStreak > 0 && (
           <div
-            className="surface-card flex items-center gap-1 (--action-info,var(--action-primary))]/30 bg-[var(--action-info,var(--action-primary))]/10 px-2 py-0.5 text-xs text-[var(--action-info,var(--action-primary))]"
+            className="surface-card flex items-center gap-1 bg-[var(--action-info,var(--action-primary))]/10 px-2 py-0.5 text-xs text-[var(--action-info,var(--action-primary))]"
             title="Class marking streak"
           >
             <GraduationCap className="size-3" aria-hidden />
             <span className="font-semibold tabular-nums">{data.teachingStreak}</span>
+            <span className="hidden sm:inline text-[10px] opacity-80">class streak</span>
           </div>
         )}
         {data.facultyStreak > 0 && (
@@ -72,6 +83,7 @@ export function WeekBar() {
           >
             <Flame className="size-3" aria-hidden />
             <span className="font-semibold tabular-nums">{data.facultyStreak}</span>
+            <span className="hidden sm:inline text-[10px] opacity-80">no-escalation streak</span>
           </div>
         )}
       </div>

@@ -77,10 +77,10 @@ export default function CoordinatorPage() {
   if (isCoord === null) return <p className="text-xs text-text-muted p-2.5">Checking coordinator status…</p>;
   if (!isCoord) return (
     <div className="p-2.5 max-w-2xl mx-auto">
-      <h1 className="text-lg font-bold text-text-primary">Coordinator</h1>
+      <h1 className="text-lg font-bold text-text-primary">Class Coordinator Portal</h1>
       <p className="text-sm text-text-muted mt-2">
-        You are not the active class coordinator. This surface is for students appointed
-        as the class coordinator (CR/ICR). Ask your HOD or class teacher to appoint you.
+        You are not currently appointed as a class coordinator. This page is for students appointed
+        as a Class Representative (CR) or In-Charge Representative (ICR). Ask your Head of Department (HOD) or class teacher to appoint you.
       </p>
     </div>
   );

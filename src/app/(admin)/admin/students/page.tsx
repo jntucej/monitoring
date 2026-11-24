@@ -204,10 +204,10 @@ function AdminStudentsInner() {
                     value: active.isHosteller ? "Hosteller" : "Day scholar",
                   },
                   ...(active.email
-                    ? [{ label: "Email", value: <span className="flex items-center gap-1"><Mail className="size-3" />{active.email}</span> }]
+                    ? [{ label: "Email", value: <span className="flex items-center gap-1"><Mail className="size-4" />{active.email}</span> }]
                     : []),
                   ...(active.phone
-                    ? [{ label: "Phone", value: <span className="flex items-center gap-1"><Phone className="size-3" />{active.phone}</span> }]
+                    ? [{ label: "Phone", value: <span className="flex items-center gap-1"><Phone className="size-4" />{active.phone}</span> }]
                     : []),
                 ]}
               />

@@ -123,11 +123,11 @@ export function RoleCommandPalette() {
         type="button"
         data-testid="role-command-trigger"
         onClick={() => setOpen(true)}
-        className="fixed bottom-4 left-4 z-40 hidden sm:inline-flex items-center gap-2 rounded-full border border-border bg-bg-surface/95 px-3 py-1.5 text-xs font-medium text-text-muted shadow-md backdrop-blur hover:border-action-primary hover:text-text-primary"
+        className="fixed bottom-4 left-4 z-40 hidden sm:inline-flex items-center gap-2 rounded-full border border-border bg-bg-surface/95 px-2.5 py-1.5 text-xs font-medium text-text-muted shadow-md backdrop-blur hover:border-action-primary hover:text-text-primary"
       >
         <Search className="h-3.5 w-3.5" />
         <span>Quick Jump</span>
-        <kbd className="rounded border border-border bg-bg-elevated px-1.5 py-0.5 font-mono text-[10px]">
+        <kbd className="border border-border bg-bg-elevated px-1.5 py-0.5 font-mono text-[10px]">
           ⌘K
         </kbd>
       </button>

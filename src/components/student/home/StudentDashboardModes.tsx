@@ -22,10 +22,10 @@ export const STUDENT_DASHBOARD_MODES: Array<{
   subtitle: string;
   icon: typeof Compass;
 }> = [
-  { id: "today", label: "Today", subtitle: "Movement & right now", icon: Compass },
-  { id: "academics", label: "Academics", subtitle: "Attendance & classes", icon: GraduationCap },
-  { id: "hostel", label: "Hostel & Mess", subtitle: "Curfew, meals & issues", icon: Home },
-  { id: "growth", label: "Growth", subtitle: "Recap, goals & theme", icon: Sparkles },
+  { id: "today", label: "Today", subtitle: "Gate status & today's schedule", icon: Compass },
+  { id: "academics", label: "Academics", subtitle: "Attendance, classes & marks", icon: GraduationCap },
+  { id: "hostel", label: "Hostel & Mess", subtitle: "Curfew, meal tokens & issues", icon: Home },
+  { id: "growth", label: "Growth", subtitle: "Monthly recap, goals & theme", icon: Sparkles },
 ];
 
 export function StudentModeSwitcher({

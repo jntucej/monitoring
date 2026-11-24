@@ -1,3 +1,5 @@
+"use client";
+
 import { PageHeader } from "@/components/shared/PageHeader";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import {

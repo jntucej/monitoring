@@ -47,6 +47,36 @@ const SOURCE_META: Record<Source, { icon: typeof FileText; color: string }> = {
   audit: { icon: History, color: "text-action-success" },
 };
 
+const AUDIT_LABELS: Record<string, string> = {
+  LOGIN_SUCCESS: "Signed in to your account",
+  LOGIN_FAILED: "Failed sign-in attempt",
+  LOGOUT: "Signed out",
+  SESSION_FAMILY_CREATED: "New login session started",
+  SESSION_REVOKED: "Login session ended",
+  PASSWORD_CHANGED: "Password updated",
+  PIN_CHANGED: "PIN updated",
+  PASS_CREATED: "Gate pass created",
+  PASS_APPROVED: "Gate pass approved",
+  PASS_REJECTED: "Gate pass rejected",
+  PERMISSION_CREATED: "Permission request submitted",
+  PERMISSION_APPROVED: "Permission request approved",
+  PERMISSION_REJECTED: "Permission request rejected",
+  COMPLAINT_CREATED: "Complaint submitted",
+  COMPLAINT_RESOLVED: "Complaint resolved",
+};
+
+function humanizeAuditText(raw: string): string {
+  const trimmed = raw.trim();
+  if (AUDIT_LABELS[trimmed]) return AUDIT_LABELS[trimmed];
+  if (/^[A-Z0-9_]{4,}$/.test(trimmed)) {
+    return trimmed
+      .toLowerCase()
+      .replace(/_/g, " ")
+      .replace(/^\w/, (c) => c.toUpperCase());
+  }
+  return raw;
+}
+
 function formatWhen(iso: string | null): string | null {
   if (!iso) return null;
   const d = new Date(iso);
@@ -137,9 +167,11 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-text-primary">
-                        {item.title}
+                        {humanizeAuditText(item.title)}
                       </p>
-                      <p className="mt-0.5 text-xs text-text-muted">{item.detail}</p>
+                      <p className="mt-0.5 text-xs text-text-muted">
+                        {item.detail === item.title ? "Account security & activity event" : humanizeAuditText(item.detail)}
+                      </p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-1 text-xs text-text-muted">
                         <Clock className="size-3.5" aria-hidden />
                         {when ?? "—"}

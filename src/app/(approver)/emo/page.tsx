@@ -35,7 +35,12 @@ export default function EmoLandingPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-4 sm:space-y-6">
-      <PageHeader title="Electrical Maintenance Officer" subtitle="Campus electrical and lab-power grievances (category D1)" />
+      <div>
+        <h1 className="text-xl font-bold text-text-primary">Electrical Maintenance Officer (EMO)</h1>
+        <p className="text-xs sm:text-sm text-text-muted mt-0.5">
+          Manage campus electrical and lab-power maintenance complaints.
+        </p>
+      </div>
 
       <WidgetBoundary name="EmoKpis" title="EMO KPIs">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

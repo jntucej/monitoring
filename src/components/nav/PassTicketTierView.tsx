@@ -46,12 +46,12 @@ type RuleSet = ReturnType<typeof getPassTicketRulesForRole>;
 
 // Color map for mode badges
 const MODE_CLS: Record<string, string> = {
-  "requester-loop": "border-blue-400/30 bg-blue-400/10 text-blue-400",
-  "gate-verify": "border-emerald-400/30 bg-emerald-400/10 text-emerald-400",
-  "stage-act": "border-amber-400/30 bg-amber-400/10 text-amber-400",
-  "stage-wait": "border-border/30 bg-muted/20 text-muted-foreground",
-  "exec-intervene": "border-rose-400/30 bg-rose-400/10 text-rose-400",
-  "sys-trace": "border-violet-400/30 bg-violet-400/10 text-violet-400",
+  "requester-loop": "border-action-info/30 bg-action-info/10 text-action-info",
+  "gate-verify": "border-action-success/30 bg-action-success/10 text-action-success",
+  "stage-act": "border-action-warning/30 bg-action-warning/10 text-action-warning",
+  "stage-wait": "border-border/30 bg-bg-elevated text-text-secondary",
+  "exec-intervene": "border-action-danger/30 bg-action-danger/10 text-action-danger",
+  "sys-trace": "border-unit-b/30 bg-unit-b/10 text-unit-b",
 };
 
 export function PassTicketTierView({
@@ -93,8 +93,8 @@ export function PassTicketTierView({
       {/* ── Role capability header ─────────────────────────────── */}
       <div
         className={cn(
-          "rounded-xl border px-3 py-2.5 space-y-1",
-          MODE_CLS[rules.mode] ?? "border-border/30 bg-muted/20",
+          "surface-card px-3 py-2.5 space-y-1",
+          MODE_CLS[rules.mode],
         )}
       >
         <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -102,17 +102,17 @@ export function PassTicketTierView({
             <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
             {rules.tierLabel}
           </span>
-          <span className="rounded-full border bg-background px-2 py-0.5 font-mono text-[11px] tabular-nums text-muted-foreground">
+          <span className="bg-surface px-2 py-0.5 font-mono text-[11px] tabular-nums text-text-secondary border-b">
             {ticket.ticketNumber} &middot; {ticket.currentStage} &middot; {ticket.status}
           </span>
         </div>
-        <p className="text-xs text-foreground/80 leading-relaxed">{rules.whyRoleIsHere}</p>
+        <p className="text-xs text-text-primary leading-relaxed">{rules.whyRoleIsHere}</p>
       </div>
 
       {/* ── Reason / notes with smart references ───────────────── */}
       {reasonText && (
-        <div className="rounded-lg border border-dashed p-3 text-xs leading-relaxed bg-background/50">
-          <span className="font-semibold text-muted-foreground mr-1.5 shrink-0">Reason / Ref:</span>
+        <div className="border-y p-3 text-xs leading-relaxed bg-surface">
+          <span className="font-semibold text-text-secondary mr-1.5 shrink-0">Reason / Ref:</span>
           <SmartTextRef text={reasonText} currentPath={currentPath} />
         </div>
       )}
@@ -125,10 +125,10 @@ export function PassTicketTierView({
           ) : (
             <div
               key={sec}
-              className="rounded-lg border border-dashed p-2.5 text-xs text-muted-foreground"
+              className="p-2.5 text-xs text-text-secondary border-b"
             >
               Section:{" "}
-              <span className="font-mono font-medium text-foreground capitalize">
+              <span className="font-mono font-medium text-text-primary capitalize">
                 {sec.replace("-", " ")}
               </span>
             </div>
@@ -139,8 +139,8 @@ export function PassTicketTierView({
       {/* ── Decision / escalation note (when required) ─────────── */}
       {needsNote && onExecuteAction && (
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-            <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+          <label className="text-xs font-medium text-text-secondary flex items-center gap-1.5">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-action-warning" />
             Decision Note (required for this action)
           </label>
           <input
@@ -148,7 +148,7 @@ export function PassTicketTierView({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Enter reason or remarks..."
-            className="w-full rounded-lg border bg-background px-3 py-2 text-xs placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full rounded-lg border bg-surface px-3 py-2 text-xs placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/30"
           />
         </div>
       )}
@@ -168,12 +168,12 @@ export function PassTicketTierView({
                 href={act.href}
                 scroll={false}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5",
-                  "text-xs font-medium hover:bg-accent transition-colors",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5",
+                  "text-xs font-medium text-action-primary hover:underline transition-colors",
                 )}
               >
                 <span>{act.label}</span>
-                <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
+                <ArrowUpRight className="h-3 w-3 text-text-muted" />
               </Link>
             );
           }
@@ -181,10 +181,10 @@ export function PassTicketTierView({
           // API-bound button
           const toneClass =
             act.tone === "primary"
-              ? "bg-primary text-primary-foreground hover:opacity-90"
+              ? "bg-action-primary text-white hover:opacity-90"
               : act.tone === "danger"
-              ? "bg-destructive text-destructive-foreground hover:opacity-90"
-              : "border bg-muted text-foreground hover:bg-accent";
+              ? "bg-action-danger text-white hover:opacity-90"
+              : "border bg-bg-elevated text-text-primary hover:bg-surface";
 
           return (
             <button
@@ -194,7 +194,7 @@ export function PassTicketTierView({
               disabled={pendingId !== null}
               onClick={() => runAction(act)}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium",
+                "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium",
                 "transition-opacity disabled:opacity-50",
                 toneClass,
               )}

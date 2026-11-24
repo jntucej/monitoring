@@ -50,16 +50,9 @@ export function PageHeader({
   if (!title) return null;
 
   return (
-    <div className="md:-mx-4 md:px-4 md:pt-2 md:pb-1">
-      {/* Desktop: visually-hidden h1 for a11y + document context. */}
-      <h1 className="sr-only">{title}</h1>
-      {/* Mobile: visible title bar (the shell chrome is hidden on small screens). */}
-      {showMobileTitle && (
-        <div className="md:hidden -mx-4 px-4 pt-2 pb-1">
-          <h2 className="text-base font-bold text-primary truncate">{title}</h2>
-          {subtitle && <p className="text-xs text-muted truncate">{subtitle}</p>}
-        </div>
-      )}
+    <div className="space-y-0.5 pb-1">
+      <h1 className="text-lg md:text-xl font-bold text-text-primary truncate">{title}</h1>
+      {subtitle && <p className="text-xs md:text-sm text-text-muted">{subtitle}</p>}
     </div>
   );
 }

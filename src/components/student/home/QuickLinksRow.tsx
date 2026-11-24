@@ -12,11 +12,11 @@ import {
 import { useEffectivePref } from "@/hooks/useEffectivePref";
 
 const LINKS = [
-  { id: "requests", href: "/student/permissions", label: "Requests", Icon: ClipboardList },
-  { id: "passes", href: "/student/passes", label: "Passes", Icon: Home },
-  { id: "attendance", href: "/student/attendance", label: "Attendance", Icon: Calendar },
-  { id: "mess", href: "/student/mess", label: "Mess", Icon: Utensils },
-  { id: "campus", href: "/student/campus", label: "Campus", Icon: BookOpen },
+  { id: "requests", href: "/student/permissions", label: "Requests", hint: "Track leave & outing approvals", Icon: ClipboardList },
+  { id: "passes", href: "/student/passes", label: "Passes", hint: "Active QR gate passes", Icon: Home },
+  { id: "attendance", href: "/student/attendance", label: "Attendance", hint: "Class attendance & standing", Icon: Calendar },
+  { id: "mess", href: "/student/mess", label: "Mess", hint: "Menu, meal tokens & bill", Icon: Utensils },
+  { id: "campus", href: "/student/campus", label: "Campus", hint: "Campus feed & events", Icon: BookOpen },
 ] as const;
 
 type LinkId = (typeof LINKS)[number]["id"];
@@ -36,22 +36,29 @@ export function QuickLinksRow() {
   }, [orderPref.value]);
 
   return (
-    <div className="grid grid-cols-5 gap-2">
-      {links.map((id) => {
-        const link = LINKS.find((l) => l.id === id);
-        if (!link) return null;
-        const { Icon } = link;
-        return (
-          <Link
-            key={id}
-            href={link.href}
-            className="surface-card flex flex-col items-center gap-1 bg-bg-surface py-3 text-xs text-text-secondary"
-          >
-            <Icon className="h-5 w-5" aria-hidden />
-            <span>{link.label}</span>
-          </Link>
-        );
-      })}
+    <div className="space-y-1.5">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+        Quick Shortcuts
+      </p>
+      <div className="grid grid-cols-5 gap-2">
+        {links.map((id) => {
+          const link = LINKS.find((l) => l.id === id);
+          if (!link) return null;
+          const { Icon } = link;
+          return (
+            <Link
+              key={id}
+              href={link.href}
+              title={link.hint}
+              aria-label={`${link.label} — ${link.hint}`}
+              className="surface-card flex flex-col items-center gap-1 bg-bg-surface py-3 px-1 text-xs text-text-secondary hover:text-action-primary transition-colors"
+            >
+              <Icon className="h-5 w-5" aria-hidden />
+              <span className="font-medium">{link.label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

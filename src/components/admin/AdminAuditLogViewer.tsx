@@ -200,18 +200,24 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
 
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={() => setReloadKey((k) => k + 1)}
             disabled={loading}
+            aria-label="Refresh audit logs"
+            title="Refresh audit logs"
             className="surface-card p-1.5 text-xs bg-bg-elevated flex items-center gap-1.5 hover:bg-bg-base"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden />
           </button>
           <button
+            type="button"
             onClick={handleExport}
             disabled={items.length === 0}
+            aria-label="Export audit logs to CSV"
+            title="Export audit logs to CSV"
             className="surface-card p-1.5 text-xs bg-bg-elevated flex items-center gap-1.5 hover:bg-bg-base disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5" aria-hidden />
           </button>
         </div>
       </div>
@@ -228,24 +234,30 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value)}
           placeholder="Action (e.g. GATE_ONLINE)"
+          aria-label="Filter by action"
           className="surface-card px-3 py-2 text-sm bg-bg-surface text-text-primary"
         />
         <input
           value={userIdFilter}
           onChange={(e) => setUserIdFilter(e.target.value)}
           placeholder="User ID"
+          aria-label="Filter by user ID"
           className="surface-card px-3 py-2 text-sm bg-bg-surface text-text-primary"
         />
         <input
           type="date"
           value={fromFilter}
           onChange={(e) => setFromFilter(e.target.value)}
+          aria-label="From date"
+          title="From date"
           className="surface-card px-3 py-2 text-sm bg-bg-surface text-text-primary"
         />
         <input
           type="date"
           value={toFilter}
           onChange={(e) => setToFilter(e.target.value)}
+          aria-label="To date"
+          title="To date"
           className="surface-card px-3 py-2 text-sm bg-bg-surface text-text-primary"
         />
       </div>
@@ -326,19 +338,25 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
           <span>Total: {total} items</span>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page <= 1}
+              aria-label="Previous page"
+              title="Previous page"
               className="surface-card p-1 disabled:opacity-40"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
+              <ChevronLeft className="w-3.5 h-3.5" aria-hidden />
             </button>
             <span>{page} / {totalPages}</span>
             <button
+              type="button"
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page >= totalPages}
+              aria-label="Next page"
+              title="Next page"
               className="surface-card p-1 disabled:opacity-40"
             >
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3.5 h-3.5" aria-hidden />
             </button>
           </div>
         </div>

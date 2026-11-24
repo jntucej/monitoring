@@ -69,7 +69,7 @@ function VisitorHistoryInner() {
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">History</h1>
           <p className="mt-1 text-sm text-text-muted min-w-0">
-            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
+            Signed in as <span className="font-medium capitalize text-text-secondary">{role.replace(/_/g, " ")}</span>
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>

@@ -75,7 +75,10 @@ export function StudentLibraryPage() {
             {(data.issues ?? []).length === 0 ? (
               <div className="surface-card p-8 text-center">
                 <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
-                <p className="text-sm text-text-muted">No library issues on record.</p>
+                <p className="text-sm font-medium text-text-primary">No library books currently issued</p>
+                <p className="text-xs text-text-muted mt-1">
+                  Books you borrow from the Central Library using your Digital ID Card will appear here with their due dates.
+                </p>
               </div>
             ) : (
               <div className="surface-card overflow-hidden">

@@ -17,6 +17,9 @@ const ALLOWED_APPROVER_ROLES: Role[] = [
   "exam_superintendent",
   "hostel",
   "staff",
+  "emo",
+  "guardian",
+  "parent",
   "admin",
   "sysadmin",
 ];

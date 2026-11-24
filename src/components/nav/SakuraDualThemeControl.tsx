@@ -78,7 +78,7 @@ export function SakuraDualThemeControl() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-lg border border-border bg-bg-elevated p-0.5 text-xs">
+        <div className="surface-card inline-flex bg-bg-elevated p-0.5 text-xs">
           <button
             type="button"
             onClick={() => selectFamily("default")}
@@ -105,7 +105,7 @@ export function SakuraDualThemeControl() {
           </button>
         </div>
 
-        <div className="inline-flex rounded-lg border border-border bg-bg-elevated p-0.5 text-xs">
+        <div className="surface-card inline-flex bg-bg-elevated p-0.5 text-xs">
           <button
             type="button"
             onClick={() => selectMode("light")}

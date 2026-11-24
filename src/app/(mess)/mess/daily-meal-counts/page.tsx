@@ -131,13 +131,13 @@ function MessDailyMealCountsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="text-sm text-text-muted min-w-0">
-            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
+            Signed in as <span className="font-medium capitalize text-text-secondary">{role.replace(/_/g, " ")}</span>
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
-      {error && (
+      {error && !/404|no mess day/i.test(error) && (
         <WidgetError message={`Meal counts unavailable: ${error}`} onRetry={() => void refreshAll()} />
       )}
 
@@ -157,7 +157,7 @@ function MessDailyMealCountsInner() {
             <div className="p-4 min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 min-w-0">
                 <StatCard icon={Users} label="Selected" value={d.total} sub="Preferences declared" accent="text-action-info" />
-                <StatCard icon={CalendarDays} label="Declared Present" value={d.declaredPresent} sub="will_be_present = TRUE" accent="text-action-warning" />
+                <StatCard icon={CalendarDays} label="Declared Present" value={d.declaredPresent} sub="Students planning to eat" accent="text-action-warning" />
                 <StatCard icon={CheckCircle2} label="Served" value={d.confirmed} sub="Confirmed meals" accent="text-action-success" />
                 <StatCard icon={Inbox} label="No-Shows" value={d.noShows} sub="Declared but not served" accent="text-action-danger" />
                 <StatCard icon={Users} label="Veg" value={d.veg} sub="Primary item VEG" accent="text-action-success" />

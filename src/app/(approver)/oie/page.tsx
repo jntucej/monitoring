@@ -43,7 +43,12 @@ return (
       <AuthGuard allowedRoles={["oie"]}>
         <div className="space-y-6">
 
-          <PageHeader title="OIE" subtitle="Examinations cell — clearances & exceptions" />
+          <div>
+            <h1 className="text-xl font-bold text-text-primary">Officer In-Charge of Examinations (OIE)</h1>
+            <p className="text-xs sm:text-sm text-text-muted mt-0.5">
+              Examinations cell — review exam clearances, access exceptions, and escalated requests.
+            </p>
+          </div>
           <WidgetBoundary name="OieKpis" title="OIE KPIs">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <KpiTile label="Queue depth" value={queue.length} tone={queue.length > 0 ? "warn" : "ok"} />

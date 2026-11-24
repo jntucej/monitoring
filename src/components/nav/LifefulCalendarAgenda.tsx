@@ -70,7 +70,7 @@ export function LifefulCalendarAgenda({
               Live Today
             </span>
           )}
-          <span className="rounded-full border border-border bg-bg-elevated px-2 py-0.5 font-mono text-[11px] text-text-muted">
+          <span className="border border-border bg-bg-elevated px-2.5 py-0.5 font-mono text-[11px] text-text-muted">
             {items.length} {items.length === 1 ? "item" : "items"}
           </span>
         </div>
@@ -85,7 +85,7 @@ export function LifefulCalendarAgenda({
               <button
                 type="button"
                 onClick={onJumpToday}
-                className="rounded-lg border border-border bg-bg-elevated px-2.5 py-1 text-xs font-medium text-action-primary hover:bg-bg-surface transition-colors"
+                className="surface-card bg-bg-elevated px-2.5 py-1 text-xs font-medium text-action-primary hover:bg-bg-surface transition-colors"
               >
                 Jump to Today
               </button>
@@ -99,7 +99,7 @@ export function LifefulCalendarAgenda({
           {countsByCategory.map(([cat, count]) => (
             <span
               key={cat}
-              className="rounded-md border border-border bg-bg-elevated/60 px-2 py-0.5 text-[11px] font-medium capitalize text-text-muted"
+              className="border border-border bg-bg-elevated/60 px-2.5 py-0.5 text-[11px] font-medium capitalize text-text-muted"
             >
               {cat.replace(/[_-]+/g, " ")}:{" "}
               <strong className="text-text-primary">{count}</strong>
@@ -109,7 +109,7 @@ export function LifefulCalendarAgenda({
       )}
 
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-bg-elevated/30 p-4 text-xs text-text-muted">
+        <div className="surface-card border-dashed bg-bg-elevated/30 p-4 text-xs text-text-muted">
           {emptyMessage}
         </div>
       ) : (
@@ -117,7 +117,7 @@ export function LifefulCalendarAgenda({
           {items.map((item) => (
             <div
               key={item.id}
-              className="rounded-xl border border-border bg-bg-elevated/40 p-3 space-y-2 transition-colors hover:border-action-primary/40"
+              className="surface-card bg-bg-elevated/40 p-3 space-y-2 transition-colors hover:border-action-primary/40"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="space-y-0.5 min-w-0">
@@ -146,7 +146,7 @@ export function LifefulCalendarAgenda({
                 </div>
 
                 {item.status && (
-                  <span className="rounded-full border border-border bg-bg-surface px-2 py-0.5 text-[11px] font-medium capitalize text-text-primary">
+                  <span className="border border-border bg-bg-surface px-2.5 py-0.5 text-[11px] font-medium capitalize text-text-primary">
                     {item.status.replace(/[_-]+/g, " ")}
                   </span>
                 )}
@@ -204,7 +204,7 @@ export function LifefulCalendarAgenda({
               <Link
                 key={ql.href + ql.label}
                 href={ql.href}
-                className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg-elevated/60 px-2.5 py-1 text-xs font-medium text-text-primary hover:bg-bg-elevated transition-colors"
+                className="inline-flex items-center gap-1 surface-card bg-bg-elevated/60 px-2.5 py-1 text-xs font-medium text-text-primary hover:bg-bg-elevated transition-colors"
               >
                 <span>{ql.label}</span>
                 <ArrowUpRight className="h-3 w-3" />

@@ -170,9 +170,11 @@ export default function StudentPermissionsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-6 h-6 text-action-primary" />
-              <p className="text-xl md:text-2xl font-bold text-text-primary">My Permissions</p>
+              <h1 className="text-xl md:text-2xl font-bold text-text-primary">My Permission &amp; Leave Requests</h1>
             </div>
-            <p className="text-xs md:text-sm text-text-muted">Track your requests and approvals</p>
+            <p className="text-xs md:text-sm text-text-muted">
+              Track your outing, leave, and late-entry requests and their approval status (e.g. HP = Hostel Pass).
+            </p>
           </div>
           <Link href="/student/permissions/new">
             <Button className="min-h11 gap-2 bg-action-primary hover:opacity-90 text-white font-semibold">

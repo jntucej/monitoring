@@ -25,13 +25,21 @@ export interface PageHeaderProps {
  *
  * Any new code should use `usePageTitle` instead of mounting a PageHeader.
  */
-export function PageHeader({ title }: PageHeaderProps): null {
+export function PageHeader({ title, subtitle }: PageHeaderProps) {
   useEffect(() => {
     if (title && typeof document !== "undefined") {
       document.title = `${title} | Gate Monitor`;
     }
   }, [title]);
-  return null;
+
+  if (!title) return null;
+
+  return (
+    <div className="space-y-0.5 pb-1">
+      <h1 className="text-lg md:text-xl font-bold text-text-primary truncate">{title}</h1>
+      {subtitle && <p className="text-xs md:text-sm text-text-muted">{subtitle}</p>}
+    </div>
+  );
 }
 
 const _refreshIcon = RefreshCw;

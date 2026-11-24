@@ -250,7 +250,7 @@ function ChildRequestsInner() {
       ) : rows.length === 0 ? (
         <EmptyState message="No pending requests from your wards. The queue is clear." />
       ) : (
-        <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
+        <div className="surface-card overflow-hidden">
           <div className="surface-card px-4 py-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
               Pending Requests
@@ -270,7 +270,7 @@ function ChildRequestsInner() {
                     type="button"
                     onClick={() => openInspector(r)}
                     aria-label={`Inspect request ${ticket} for ${ward}`}
-                    className="surface-card block w-full bg-bg-surface p-3 text-left hover:bg-bg-base/40 focus-visible:ring-2 focus-visible:ring-action-primary focus:outline-none rounded transition-colors motion-reduce:transition-none"
+                    className="surface-card block w-full bg-bg-surface p-3 text-left hover:bg-bg-base/40 focus-visible:ring-2 focus-visible:ring-action-primary focus:outline-none transition-colors motion-reduce:transition-none"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono text-xs font-semibold text-white">{ticket}</span>

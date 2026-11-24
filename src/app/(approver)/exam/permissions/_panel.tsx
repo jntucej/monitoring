@@ -118,7 +118,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="mt-1 text-sm text-text-muted">
-            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
+            Signed in as <span className="font-medium capitalize text-text-secondary">{role.replace(/_/g, " ")}</span>
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>

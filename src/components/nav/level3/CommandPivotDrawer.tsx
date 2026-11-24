@@ -177,7 +177,7 @@ export function CommandPivotDrawer({
         {ticketAbility && (
           <div
             data-testid="role-lens-banner"
-            className="px-4 py-2 bg-bg-elevated/40 border-b border-border/50"
+            className="px-4 py-2 bg-bg-elevated/40"
           >
             <p className="text-xs text-text-secondary leading-relaxed">
               {ticketAbility.roleReason}
@@ -194,7 +194,7 @@ export function CommandPivotDrawer({
           )}
 
           {ticketAbility && ticketAbility.actions.length > 0 && (
-            <div data-testid="action-bar" className="surface-card bg-bg-elevated/40 border border-border/50 px-3 py-2.5 space-y-2">
+            <div data-testid="action-bar" className="surface-card bg-bg-elevated/40 p-3 space-y-2">
               <div className="flex items-start gap-2">
                 <Info className="h-4 w-4 text-action-primary shrink-0 mt-0.5" aria-hidden />
                 <div className="min-w-0">
@@ -239,7 +239,7 @@ export function CommandPivotDrawer({
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "surface-card bg-bg-surface border border-border",
+                      "surface-card bg-bg-surface",
                       "px-3 py-2.5 text-left",
                       "hover:border-action-primary/40 hover:bg-bg-elevated transition-colors",
                     )}
@@ -278,7 +278,7 @@ export function CommandPivotDrawer({
               <div
                 data-role-tier={gateRules.tierLabel.split("•")[0].trim().toLowerCase().replace(/\s+/g, "-")}
                 data-event-mode={gateRules.mode}
-                className="rounded-xl border bg-muted/30 p-3 space-y-2"
+                className="surface-card bg-muted/30 p-3 space-y-2"
               >
                 <p className="text-xs font-semibold text-primary">{gateRules.tierLabel}</p>
                 <p className="text-xs text-muted-foreground">{gateRules.whyRoleIsHere}</p>

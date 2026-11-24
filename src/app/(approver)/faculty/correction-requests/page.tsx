@@ -79,7 +79,7 @@ function FacultyCorrectionRequestsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-text-muted min-w-0">
-            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
+            Signed in as <span className="font-medium capitalize text-text-secondary">{role.replace(/_/g, " ")}</span>
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -89,7 +89,11 @@ function FacultyCorrectionRequestsInner() {
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span className="truncate">Correction Requests data unavailable: {error}</span>
+            <span className="truncate">
+              {/403|forbidden/i.test(error)
+                ? "Correction requests are reviewed at the Head of Department (HOD) stage."
+                : `Correction Requests data unavailable: ${error}`}
+            </span>
           </span>
           <button
             type="button"

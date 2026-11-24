@@ -62,9 +62,9 @@ export function AssignmentConfirmationBar({
 
         <div className="flex items-center gap-1.5 text-[11px]">
           <span
-            className={`inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 font-medium ${
+            className={`inline-flex items-center gap-1 px-2 py-0.5 font-medium ${
               assignment.confirmedByCr
-                ? "border-emerald-500/40 bg-emerald-500/10 text-action-success"
+                ? "bg-action-success/10 text-action-success"
                 : "text-text-muted"
             }`}
           >
@@ -72,9 +72,9 @@ export function AssignmentConfirmationBar({
             CR: {assignment.confirmedByCr ? "Confirmed" : "Pending"}
           </span>
           <span
-            className={`inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 font-medium ${
+            className={`inline-flex items-center gap-1 px-2 py-0.5 font-medium ${
               assignment.verifiedByFaculty
-                ? "border-emerald-500/40 bg-emerald-500/10 text-action-success"
+                ? "bg-action-success/10 text-action-success"
                 : "text-text-muted"
             }`}
           >
@@ -104,7 +104,7 @@ export function AssignmentConfirmationBar({
               <Link
                 key={act.id}
                 href={act.href}
-                className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-text-primary hover:bg-bg-elevated"
+                className="inline-flex items-center gap-1 border border-border px-2.5 py-1 text-xs font-medium text-text-primary hover:bg-bg-elevated"
               >
                 <span>{act.label}</span>
                 <ArrowUpRight className="h-3 w-3" />
@@ -123,9 +123,9 @@ export function AssignmentConfirmationBar({
               type="button"
               disabled={busyId !== null}
               onClick={() => trigger(act)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-opacity disabled:opacity-50 ${cls}`}
+              className={`px-2.5 py-1 text-xs font-medium transition-opacity disabled:opacity-50 ${cls}`}
             >
-              {busyId === act.id ? "Saving..." : act.label}
+              <span>{busyId === act.id ? "Working..." : act.label}</span>
             </button>
           );
         })}

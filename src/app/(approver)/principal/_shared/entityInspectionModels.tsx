@@ -163,13 +163,13 @@ export function buildPersonInspection(
           <div className="flex flex-wrap gap-2">
             <a
               href="/principal/approvals"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Open approvals
             </a>
             <a
               href="/principal/attention"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Attention queue
             </a>
@@ -257,13 +257,13 @@ export function buildDepartmentInspection(
           <div className="flex flex-wrap gap-2">
             <a
               href="/principal/people/departments"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Open department register
             </a>
             <a
               href="/principal/people/attendance"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Absent / late lists
             </a>
@@ -366,13 +366,13 @@ export function buildHostelInspection(
           <div className="flex flex-wrap gap-2">
             <a
               href="/principal/operations/hostel"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Open hostel oversight
             </a>
             <a
               href="/principal/attention"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Attention items
             </a>
@@ -462,13 +462,13 @@ export function buildGateInspection(
             <div className="flex flex-wrap gap-2">
               <a
                 href="/principal/operations/gates"
-                className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+                className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
               >
                 Gate register
               </a>
               <a
                 href="/principal/incidents"
-                className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+                className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
               >
                 Incidents
               </a>
@@ -649,7 +649,7 @@ function IncidentActions({ incident, role }: { incident: IncidentRecord; role: R
         onClick={resolve}
         disabled={resolving || isResolved}
         className={
-          "inline-flex min-h-8 items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold transition " +
+          "action-btn inline-flex min-h-8 items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition " +
           (isResolved
             ? "bg-bg-elevated text-text-muted cursor-default"
             : "bg-action-primary text-white hover:opacity-90 disabled:opacity-50")
@@ -659,13 +659,13 @@ function IncidentActions({ incident, role }: { incident: IncidentRecord; role: R
       </button>
       <a
         href="/principal/attention"
-        className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+        className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
       >
         Attention queue
       </a>
       <a
         href="/principal/escalations"
-        className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+        className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
       >
         Escalations
       </a>
@@ -761,13 +761,13 @@ export function buildAuditEventInspection(
           <div className="flex flex-wrap gap-2">
             <a
               href="/principal/audit"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Open audit trail
             </a>
             <a
               href="/principal/decisions"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Decision ledger
             </a>
@@ -866,13 +866,13 @@ export function buildDelegationInspection(
           <div className="flex flex-wrap gap-2">
             <a
               href="/principal/governance/delegations"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Manage delegations
             </a>
             <a
               href="/principal/governance"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Governance
             </a>
@@ -1035,7 +1035,7 @@ function ExamCaseActions({ exam, role }: { exam: ExamCaseRecord; role: RoleGate 
         onClick={resolve}
         disabled={resolving || isResolved || !exam.id}
         className={
-          "inline-flex min-h-8 items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold transition " +
+          "action-btn inline-flex min-h-8 items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition " +
           (isResolved
             ? "bg-bg-elevated text-text-muted cursor-default"
             : "bg-action-primary text-white hover:opacity-90 disabled:opacity-50")
@@ -1045,13 +1045,13 @@ function ExamCaseActions({ exam, role }: { exam: ExamCaseRecord; role: RoleGate 
       </button>
       <a
         href="/principal/examinations"
-        className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+        className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
       >
         Examination oversight
       </a>
       <a
         href="/principal/decisions"
-        className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+        className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
       >
         Decision ledger
       </a>
@@ -1157,13 +1157,13 @@ export function buildApprovalInspection(
           <div className="flex flex-wrap gap-2">
             <a
               href={`/approver/permissions/${approval.ticket_number}`}
-              className="inline-flex min-h-8 items-center rounded bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+              className="action-btn inline-flex min-h-8 items-center bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
             >
               Open ticket to act
             </a>
             <a
               href="/principal/decisions"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Decision ledger
             </a>
@@ -1268,19 +1268,19 @@ export function buildReportInspection(
           <div className="flex flex-wrap gap-2">
             <a
               href="/principal/approvals"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Pending approvals
             </a>
             <a
               href="/principal/decisions"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Decision ledger
             </a>
             <a
               href="/principal/escalations"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Escalations
             </a>
@@ -1389,13 +1389,13 @@ export function buildPersonExceptionInspection(
           <div className="flex flex-wrap gap-2">
             <a
               href="/principal/people/attendance"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               All exceptions
             </a>
             <a
               href="/principal/attention"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Attention queue
             </a>
@@ -1499,19 +1499,19 @@ export function buildSlaCellInspection(
           <div className="flex flex-wrap gap-2">
             <a
               href="/principal/approvals/overdue"
-              className="inline-flex min-h-8 items-center rounded bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+              className="action-btn inline-flex min-h-8 items-center bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
             >
               View overdue tickets
             </a>
             <a
               href="/principal/approvals"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Pending approvals
             </a>
             <a
               href="/principal/governance/analytics"
-              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+              className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Full analytics
             </a>

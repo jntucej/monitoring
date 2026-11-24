@@ -78,10 +78,10 @@ function DockerServicesInner() {
       <SysAdminGroupTrace
         groupLabel="System & Audit Traces"
         links={[
-          { label: "docker", href: "/sysadmin/docker-services" },
-          { label: "db", href: "/sysadmin/database-health" },
-          { label: "redis", href: "/sysadmin/redis-worker" },
-          { label: "audit", href: "/sysadmin/audit" },
+          { label: "Docker Containers", href: "/sysadmin/docker-services" },
+          { label: "PostgreSQL Database", href: "/sysadmin/database-health" },
+          { label: "Redis Worker", href: "/sysadmin/redis-worker" },
+          { label: "Audit Logs", href: "/sysadmin/audit" },
         ]}
       />
 

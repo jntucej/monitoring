@@ -264,7 +264,7 @@ const api = useApi();
       title: s.name,
       subtitle: s.uniqueId || s.id,
       status: (
-        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${s.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-rose-500/10 text-rose-600 border border-rose-500/20"}`}>
+        <span className={`px-1.5 py-0.5 text-[10px] font-semibold uppercase ${s.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-rose-500/10 text-rose-600 border border-rose-500/20"}`}>
           {s.status}
         </span>
       ),
@@ -407,7 +407,7 @@ const api = useApi();
         )}
 
         {/* Table */}
-        <div className="border border-border rounded-xl overflow-hidden bg-bg-surface">
+        <div className="surface-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w175">
               <thead>

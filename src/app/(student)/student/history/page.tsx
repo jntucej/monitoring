@@ -49,7 +49,10 @@ const api = useApi();
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <p className="text-text-muted">All your gate activity</p>
+          <h1 className="text-xl font-bold text-text-primary">Gate Scan History</h1>
+          <p className="text-xs sm:text-sm text-text-muted mt-0.5">
+            Complete log of your campus gate entries (IN) and exits (OUT).
+          </p>
         </div>
         <div className="surface-card flex flex-wrap items-center gap-1 bg-bg-surface p-1">
           {(["ALL", "IN", "OUT"] as const).map((f) => (

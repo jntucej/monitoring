@@ -19,9 +19,14 @@ function StudentProfileInner() {
 
   return (
     <div className="space-y-6 px-4 py-6 md:px-6 min-w-0">
-      <div className="flex items-center gap-2">
-        <User className="w-5 h-5 text-action-primary" />
-        <p className="text-sm font-semibold text-primary">Your Student Profile</p>
+      <div>
+        <div className="flex items-center gap-2">
+          <User className="w-5 h-5 text-action-primary" />
+          <h1 className="text-xl font-bold text-text-primary">Your Student Profile &amp; Settings</h1>
+        </div>
+        <p className="text-xs sm:text-sm text-text-muted mt-0.5">
+          View your academic details, residence status, theme preferences, and account security settings.
+        </p>
       </div>
       {/* Position-aware card: varies by where you live (hosteller vs day
           scholar) and where you are now (in/out of campus). */}

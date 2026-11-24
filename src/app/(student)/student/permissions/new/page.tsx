@@ -18,10 +18,10 @@ export default function NewPermissionPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <FilePlus2 className="w-6 h-6 text-action-primary" />
-            <p className="text-xl md:text-2xl font-bold text-text-primary">New Pass Request</p>
+            <h1 className="text-xl md:text-2xl font-bold text-text-primary">New Permission &amp; Leave Request</h1>
           </div>
           <p className="text-xs md:text-sm text-text-muted">
-            Persona-scoped · fields adapt to the selected pass type.
+            Submit a request for outing, leave, or late entry. Once approved by your faculty or warden, an active gate pass is issued.
           </p>
         </div>
 

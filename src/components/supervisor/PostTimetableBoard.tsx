@@ -31,10 +31,10 @@ export function PostTimetableBoard({
         {posts.map((post) => (
           <div
             key={post.postId}
-            className={`surface-card rounded-2xl border bg-bg-surface p-4 space-y-3 ${
+            className={`surface-card bg-bg-surface p-4 space-y-3 ${
               post.uncovered || post.openIncidents.length > 0
                 ? "border-amber-500/60"
-                : "border-border"
+                : ""
             }`}
           >
             <div className="flex items-start justify-between gap-2">
@@ -69,7 +69,7 @@ export function PostTimetableBoard({
                 post.guards.map((g) => (
                   <div
                     key={g.assignmentId}
-                    className="rounded-xl border border-border bg-bg-elevated/50 px-3 py-2 flex items-center justify-between gap-2 text-xs"
+                    className="surface-card bg-bg-elevated/50 px-3 py-2 flex items-center justify-between gap-2 text-xs"
                   >
                     <div className="min-w-0">
                       <p className="font-semibold truncate text-text-primary">
@@ -80,7 +80,7 @@ export function PostTimetableBoard({
                         {g.roleAtPost}
                       </p>
                     </div>
-                    <span className="shrink-0 rounded-md border border-border bg-bg-surface px-2 py-0.5 font-mono text-[10px] font-semibold text-text-primary">
+                    <span className="shrink-0 surface-card bg-bg-surface px-2 py-0.5 font-mono text-[10px] font-semibold text-text-primary">
                       {g.dutyStatus}
                     </span>
                   </div>
@@ -99,7 +99,7 @@ export function PostTimetableBoard({
                 <button
                   type="button"
                   onClick={() => onReassignPost(post.postId)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg-elevated px-2.5 py-1 font-medium text-text-primary hover:bg-bg-surface"
+                  className="surface-card inline-flex items-center gap-1 bg-bg-elevated px-2.5 py-1 font-medium text-text-primary hover:bg-bg-surface"
                 >
                   <RefreshCw className="h-3 w-3" />
                   <span>Assign / Cover</span>

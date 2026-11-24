@@ -86,7 +86,10 @@ export function StudentFeesPage() {
             {(data.items ?? []).length === 0 ? (
               <div className="surface-card p-8 text-center">
                 <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
-                <p className="text-sm text-text-muted">No fee items.</p>
+                <p className="text-sm font-medium text-text-primary">No fee items on record</p>
+                <p className="text-xs text-text-muted mt-1">
+                  Tuition, hostel, and exam fee dues appear here once posted by the Accounts Office. Contact the Accounts section if you expect a pending challan.
+                </p>
               </div>
             ) : (
               <div className="surface-card overflow-hidden">

@@ -102,7 +102,7 @@ export function MessInchargeStatusBar({
         <span className="inline-flex items-center gap-1.5 min-w-0 shrink-0">
           <Clock className="w-3.5 h-3.5 text-text-muted" />
           <span className="text-text-muted">
-            window closes {fmtWindow(counts?.windowCloses)}
+            {counts?.windowCloses ? `window closes ${fmtWindow(counts.windowCloses)}` : "no active meal window"}
           </span>
         </span>
       </div>

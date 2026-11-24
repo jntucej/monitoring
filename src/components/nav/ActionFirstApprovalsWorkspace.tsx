@@ -126,7 +126,7 @@ export function ActionFirstApprovalsWorkspace({
           }`}
         >
           <p className="text-[11px] font-medium uppercase tracking-wide text-text-muted flex items-center gap-1">
-            <AlertTriangle className="size-3 text-action-danger" />
+            <AlertTriangle className="size-4 text-action-danger" />
             SLA At Risk
           </p>
           <p className={`mt-1 text-2xl font-semibold ${urgentItems.length > 0 ? "text-action-danger" : "text-text-primary"}`}>
@@ -136,7 +136,7 @@ export function ActionFirstApprovalsWorkspace({
 
         <div className="surface-card p-3.5 text-left">
           <p className="text-[11px] font-medium uppercase tracking-wide text-text-muted flex items-center gap-1">
-            <Clock className="size-3" />
+            <Clock className="size-4" />
             In Other Stages
           </p>
           <p className="mt-1 text-2xl font-semibold text-text-primary">{otherStageCount}</p>
@@ -144,7 +144,7 @@ export function ActionFirstApprovalsWorkspace({
 
         <div className="surface-card p-3.5 text-left">
           <p className="text-[11px] font-medium uppercase tracking-wide text-text-muted flex items-center gap-1">
-            <Layers className="size-3" />
+            <Layers className="size-4" />
             Settled / Closed
           </p>
           <p className="mt-1 text-2xl font-semibold text-action-success">{settledCount}</p>
@@ -223,7 +223,7 @@ export function ActionFirstApprovalsWorkspace({
                         type="button"
                         disabled={busyKey !== null}
                         onClick={() => runAction(ticket.ticket_number, "APPROVE")}
-                        className="rounded-lg bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+                        className="bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
                       >
                         {busyKey === `${ticket.ticket_number}:APPROVE` ? "Approving..." : "Approve"}
                       </button>
@@ -241,7 +241,7 @@ export function ActionFirstApprovalsWorkspace({
                             rejectNote.trim() || `Rejected by ${role}`,
                           );
                         }}
-                        className="rounded-lg bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/25 disabled:opacity-50"
+                        className="bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/25 disabled:opacity-50"
                       >
                         {busyKey === `${ticket.ticket_number}:REJECT`
                           ? "Rejecting..."
@@ -253,7 +253,7 @@ export function ActionFirstApprovalsWorkspace({
                         type="button"
                         disabled={busyKey !== null}
                         onClick={() => runAction(ticket.ticket_number, "ESCALATE")}
-                        className="rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-surface disabled:opacity-50"
+                        className="border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-surface disabled:opacity-50"
                       >
                         Escalate
                       </button>
@@ -272,7 +272,7 @@ export function ActionFirstApprovalsWorkspace({
                         value={rejectNote}
                         onChange={(e) => setRejectNote(e.target.value)}
                         placeholder="Enter rejection reason..."
-                        className="w-full rounded-lg border border-border bg-bg-base px-3 py-1.5 text-xs text-text-primary"
+                        className="w-full border border-border bg-bg-base px-3 py-1.5 text-xs text-text-primary"
                       />
                     )}
                   </div>

@@ -82,6 +82,7 @@ function buildExamInspection(exam: NextExam): EntityInspection {
 
 export function StudentExamsPage() {
   const [nextExam, setNextExam] = useState<NextExam | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { inspection, inspect, closeInspection } = useEntityInspector();
 
@@ -90,10 +91,15 @@ export function StudentExamsPage() {
       try {
         const res = await fetch("/api/student/next-exam", { credentials: "include" });
         const json = await res.json();
-        if (json.success && json.data) setNextExam(json.data);
-        else setError(json.error?.message ?? "Failed to load exam schedule");
+        if (json.success) {
+          setNextExam(json.data ?? null);
+        } else {
+          setError(json.error?.message ?? "Failed to load exam schedule");
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load exam schedule");
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
@@ -106,7 +112,7 @@ export function StudentExamsPage() {
       </div>
 
       {error && <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger">{error}</div>}
-      {nextExam === null && !error && (
+      {loading && !error && (
         <div className="flex items-center gap-2 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading exam schedule…
         </div>
@@ -153,10 +159,13 @@ export function StudentExamsPage() {
         </div>
       </WidgetBoundary>
 
-      {!nextExam && !error && (
+      {!loading && !nextExam && !error && (
         <div className="surface-card p-8 text-center">
           <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
-          <p className="text-sm text-text-muted">No upcoming exams scheduled.</p>
+          <p className="text-sm font-medium text-text-primary">No upcoming exams scheduled</p>
+          <p className="text-xs text-text-muted mt-1">
+            When the Exam Branch publishes your next exam timetable, it will appear here automatically.
+          </p>
         </div>
       )}
 

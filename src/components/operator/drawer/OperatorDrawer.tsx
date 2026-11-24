@@ -225,7 +225,11 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
               {user?.name || "Operator"}
             </p>
             <p className="text-xs text-text-muted truncate">
-              {user?.gateId ? `Gate ${user.gateId}` : "No gate assigned"}
+              {user?.gateId
+                ? /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(user.gateId)
+                  ? "Gate assigned"
+                  : `Gate ${user.gateId}`
+                : "No gate assigned"}
             </p>
           </div>
         </div>

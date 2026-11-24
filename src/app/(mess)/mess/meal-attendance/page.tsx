@@ -124,13 +124,13 @@ function MessMealAttendanceInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="text-sm text-text-muted min-w-0">
-            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
+            Signed in as <span className="font-medium capitalize text-text-secondary">{role.replace(/_/g, " ")}</span>
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
-      {error && (
+      {error && !/404|no mess day/i.test(error) && (
         <WidgetError message={`Meal attendance unavailable: ${error}`} onRetry={() => void refreshAll()} />
       )}
 

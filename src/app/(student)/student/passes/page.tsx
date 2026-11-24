@@ -48,10 +48,9 @@ export default function StudentPassesPage() {
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <div>
-          <p className="text-xs text-text-muted">Digital Gate Passes</p>
-          <p className="text-xs text-text-muted">
-            Persona-scoped · driven by {""}
-            <code className="text-text-primary">PassTypeConfig</code>
+          <h1 className="text-xl font-bold text-text-primary">My Gate Passes</h1>
+          <p className="text-xs sm:text-sm text-text-muted">
+            Active QR passes for campus entry and exit, plus your pass history and supporting documents.
           </p>
         </div>
       </div>

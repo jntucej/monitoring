@@ -11,11 +11,11 @@ import { ChevronRight } from "lucide-react";
 import type { EmergencyCommandRow } from "@/lib/institutional/emergency";
 
 const STATE_COLOR: Record<string, string> = {
-  NORMAL: "bg-emerald-500/10 text-emerald-600",
-  ELEVATED: "bg-amber-500/10 text-amber-600",
-  CRITICAL: "bg-orange-500/10 text-orange-600",
-  EMERGENCY: "bg-red-500/10 text-red-600",
-  LOCKDOWN: "bg-red-600/20 text-red-700",
+  NORMAL: "bg-action-success/10 text-action-success",
+  ELEVATED: "bg-action-warning/10 text-action-warning",
+  CRITICAL: "bg-action-warning/20 text-action-warning",
+  EMERGENCY: "bg-action-danger/10 text-action-danger",
+  LOCKDOWN: "bg-action-danger/20 text-action-danger",
 };
 
 /**

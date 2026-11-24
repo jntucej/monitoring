@@ -214,19 +214,19 @@ export function ReactiveAssignmentTree() {
       {/* Sticky Breadcrumb Pill Bar */}
       <nav
         aria-label="Hierarchy breadcrumb"
-        className="sticky top-0 z-10 flex flex-wrap items-center gap-1.5 rounded-xl border border-border bg-bg-surface/95 px-3 py-2 backdrop-blur"
+        className="surface-card sticky top-0 z-10 flex flex-wrap items-center gap-1.5 bg-bg-surface/95 px-3 py-2 backdrop-blur"
       >
         <button
           type="button"
           onClick={() => setSelectedId("institution")}
-          className="min-h-9 rounded-lg px-2.5 py-1 text-xs font-semibold text-action-primary hover:bg-bg-elevated"
+          className="action-btn min-h-9 px-2.5 py-1 text-xs font-semibold text-action-primary hover:bg-bg-elevated"
         >
           Institution
         </button>
         {selectedNode && selectedNode.id !== "institution" && (
           <>
             <span className="text-xs text-text-muted">&rsaquo;</span>
-            <span className="rounded-lg bg-action-primary/10 px-2.5 py-1 text-xs font-semibold text-action-primary">
+            <span className="action-btn bg-action-primary/10 px-2.5 py-1 text-xs font-semibold text-action-primary">
               {selectedNode.label}
             </span>
           </>
@@ -244,7 +244,7 @@ export function ReactiveAssignmentTree() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter departments or hostel blocks..."
-              className="w-full min-h-9 rounded-lg border border-border bg-bg-base pl-8 pr-3 text-xs text-text-primary"
+              className="surface-card w-full min-h-9 bg-bg-base pl-8 pr-3 text-xs text-text-primary"
             />
           </div>
 
@@ -255,7 +255,7 @@ export function ReactiveAssignmentTree() {
                 setSelectedId("institution");
                 setExpanded((prev) => ({ ...prev, institution: !prev.institution }));
               }}
-              className={`w-full min-h-10 rounded-lg border px-3 py-2 text-left flex items-center justify-between gap-2 ${
+              className={`action-btn w-full min-h-10 border px-3 py-2 text-left flex items-center justify-between gap-2 ${
                 selectedId === "institution"
                   ? "border-action-primary bg-action-primary/10"
                   : "border-border bg-bg-base hover:bg-bg-elevated"
@@ -276,13 +276,13 @@ export function ReactiveAssignmentTree() {
             </button>
 
             {expanded.institution && (
-              <div className="pl-3 border-l border-border space-y-1.5">
+              <div className="border-l border-border pl-3.5 space-y-1.5">
                 {filteredChildren.map((node) => (
                   <button
                     key={node.id}
                     type="button"
                     onClick={() => setSelectedId(node.id)}
-                    className={`w-full min-h-10 rounded-lg border px-3 py-2 text-left flex items-center justify-between gap-2 ${
+                    className={`action-btn w-full min-h-10 border px-3 py-2 text-left flex items-center justify-between gap-2 ${
                       selectedId === node.id
                         ? "border-action-primary bg-action-primary/10"
                         : "border-border bg-bg-base hover:bg-bg-elevated"
@@ -323,7 +323,7 @@ export function ReactiveAssignmentTree() {
             <button
               type="button"
               onClick={() => setAssignOpen((v) => !v)}
-              className="min-h-9 inline-flex items-center gap-1.5 rounded-lg bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              className="action-btn min-h-9 inline-flex items-center gap-1.5 bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
             >
               <UserPlus className="size-3.5" />
               <span>+ Assign People</span>
@@ -333,7 +333,7 @@ export function ReactiveAssignmentTree() {
           {/* 2-column wrap metric grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {(selectedNode?.metrics ?? []).map((m) => (
-              <div key={m.label} className="rounded-lg border border-border bg-bg-base p-2.5">
+              <div key={m.label} className="action-btn border border-border bg-bg-base p-2.5">
                 <p className="text-[11px] text-text-muted">{m.label}</p>
                 <p className="text-lg font-semibold text-text-primary">{m.value}</p>
               </div>
@@ -341,7 +341,7 @@ export function ReactiveAssignmentTree() {
           </div>
 
           {unlinkedCount > 0 && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
+            <div className="surface-card bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
               <AlertCircle className="size-4 shrink-0" />
               <span>
                 {unlinkedCount} student{unlinkedCount === 1 ? "" : "s"} in this scope missing a
@@ -353,7 +353,7 @@ export function ReactiveAssignmentTree() {
           {assignOpen && (
             <form
               onSubmit={handleQuickAssign}
-              className="rounded-xl border border-border bg-bg-base p-3 space-y-2.5"
+              className="surface-card bg-bg-base p-3 space-y-2.5"
             >
               <p className="text-xs font-semibold text-text-primary">
                 Quick Assign to {selectedNode?.label}
@@ -362,7 +362,7 @@ export function ReactiveAssignmentTree() {
                 <select
                   value={assignRole}
                   onChange={(e) => setAssignRole(e.target.value as "cr" | "faculty" | "hostel")}
-                  className="min-h-9 rounded-lg border border-border bg-bg-surface px-2.5 text-xs"
+                  className="action-btn min-h-9 border border-border bg-bg-surface px-2.5 text-xs"
                 >
                   <option value="cr">Promote Student to CR</option>
                   <option value="faculty">Assign Faculty / Class Teacher</option>
@@ -374,20 +374,20 @@ export function ReactiveAssignmentTree() {
                   value={assignTargetId}
                   onChange={(e) => setAssignTargetId(e.target.value)}
                   placeholder="Roll number or Employee ID..."
-                  className="min-h-9 rounded-lg border border-border bg-bg-surface px-2.5 text-xs sm:col-span-2"
+                  className="action-btn min-h-9 border border-border bg-bg-surface px-2.5 text-xs sm:col-span-2"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="submit"
-                  className="min-h-9 rounded-lg bg-action-primary px-3 py-1 text-xs font-semibold text-white"
+                  className="action-btn min-h-9 bg-action-primary px-3 py-1 text-xs font-semibold text-white"
                 >
                   Save Assignment
                 </button>
                 <button
                   type="button"
                   onClick={() => setAssignOpen(false)}
-                  className="min-h-9 rounded-lg border border-border px-3 py-1 text-xs font-medium"
+                  className="surface-card min-h-9 px-3 py-1 text-xs font-medium"
                 >
                   Cancel
                 </button>
@@ -411,7 +411,7 @@ export function ReactiveAssignmentTree() {
                   <li key={s.id}>
                     <Link
                       href={`/admin/students/${s.id}`}
-                      className="block rounded-lg border border-border bg-bg-base p-2.5 hover:bg-bg-elevated transition-colors"
+                      className="action-btn block border border-border bg-bg-base p-2.5 hover:bg-bg-elevated transition-colors"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-xs font-semibold text-text-primary truncate">

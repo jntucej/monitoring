@@ -31,16 +31,16 @@ export function PrincipalEmptyReconciler({
   return (
     <div
       data-testid="principal-empty-reconciler"
-      className="rounded-xl border border-dashed bg-muted/25 p-4 space-y-3"
+      className="surface-card p-4 space-y-3"
     >
       <div className="flex items-start gap-2.5">
-        <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+        <AlertCircle className="h-4 w-4 text-action-warning mt-0.5 shrink-0" />
         <div className="space-y-1">
           <p className="text-sm font-medium">{title}</p>
           {typeof headlineCount === "number" && headlineCount > 0 && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-text-secondary">
               Summary reports{" "}
-              <span className="font-semibold text-foreground">{headlineCount}</span>{" "}
+              <span className="font-semibold text-text-primary">{headlineCount}</span>{" "}
               active/tracked items across stages—use the pivots below to inspect where they sit.
             </p>
           )}
@@ -54,21 +54,21 @@ export function PrincipalEmptyReconciler({
               <Link
                 key={b.label}
                 href={b.href}
-                className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-2.5 py-1.5 text-xs font-medium hover:border-primary/50 hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-action-primary hover:underline transition-colors"
               >
                 <span>{b.label}</span>
-                <span className="rounded bg-primary/15 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-primary">
+                <span className="rounded bg-action-primary/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-action-primary">
                   {b.count}
                 </span>
-                <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
+                <ArrowUpRight className="h-3 w-3 text-text-muted" />
               </Link>
             ) : (
               <span
                 key={b.label}
-                className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-2.5 py-1.5 text-xs text-muted-foreground"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-text-secondary"
               >
                 <span>{b.label}</span>
-                <span className="font-mono font-semibold text-foreground">{b.count}</span>
+                <span className="font-mono font-semibold text-text-primary">{b.count}</span>
               </span>
             ),
           )}
@@ -120,17 +120,17 @@ export function PrincipalRecordCard({
     <div
       data-role-tier="tier-3"
       data-testid={`principal-record-${recordId}`}
-      className="rounded-xl border bg-card p-3.5 space-y-3 transition-colors hover:border-primary/40"
+      className="surface-card p-3.5 space-y-3 transition-colors hover:border-action-primary/40"
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-semibold text-primary">{recordId}</span>
-            <span className="rounded-full border px-2 py-0.5 text-[11px] font-medium">
+            <span className="font-mono text-xs font-semibold text-action-primary">{recordId}</span>
+            <span className="border-b px-1 py-0.5 text-[11px] font-medium">
               {status}
             </span>
             {stage && (
-              <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+              <span className="bg-bg-elevated px-1.5 py-0.5 font-mono text-[11px] text-text-secondary">
                 stage: {stage}
               </span>
             )}
@@ -143,7 +143,7 @@ export function PrincipalRecordCard({
             <button
               type="button"
               onClick={onInspect}
-              className="inline-flex items-center gap-1 rounded-lg border bg-background px-2.5 py-1 text-xs font-medium hover:bg-accent"
+              className="inline-flex items-center gap-1 bg-surface px-2.5 py-1 text-xs font-medium hover:bg-bg-elevated"
             >
               <Compass className="h-3.5 w-3.5" />
               <span>Peek</span>
@@ -152,7 +152,7 @@ export function PrincipalRecordCard({
           {fullHref && (
             <Link
               href={fullHref}
-              className="inline-flex items-center gap-1 rounded-lg border bg-background px-2.5 py-1 text-xs font-medium hover:bg-accent"
+              className="inline-flex items-center gap-1 bg-surface px-2.5 py-1 text-xs font-medium hover:bg-bg-elevated"
             >
               <span>Open</span>
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -162,7 +162,7 @@ export function PrincipalRecordCard({
       </div>
 
       {summaryText && (
-        <p className="text-xs text-muted-foreground leading-relaxed">
+        <p className="text-xs text-text-secondary leading-relaxed">
           <SmartTextRef text={summaryText} currentPath={pathname} />
         </p>
       )}
@@ -178,7 +178,7 @@ export function PrincipalRecordCard({
                 key={`${p.kind}-${p.id}-${p.label}`}
                 href={targetHref}
                 scroll={false}
-                className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/20"
+                className="inline-flex items-center gap-1 rounded-md bg-action-primary/10 px-2 py-1 text-[11px] font-medium text-action-primary hover:bg-action-primary/20"
               >
                 <span>{p.label}</span>
                 <ArrowUpRight className="h-3 w-3" />
@@ -196,7 +196,7 @@ export function PrincipalRecordCard({
               type="button"
               disabled={busy !== null}
               onClick={() => run("approve")}
-              className="rounded-lg bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:opacity-95 disabled:opacity-50"
+              className="rounded-lg bg-action-primary px-2.5 py-1 text-xs font-medium text-white hover:opacity-95 disabled:opacity-50"
             >
               {busy === "approve" ? "Applying..." : "Approve / Override"}
             </button>
@@ -210,9 +210,9 @@ export function PrincipalRecordCard({
                 }
                 run("escalate");
               }}
-              className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium hover:bg-muted disabled:opacity-50"
+              className="inline-flex items-center gap-1 border px-2.5 py-1 text-xs font-medium hover:bg-bg-elevated disabled:opacity-50"
             >
-              <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
+              <ShieldAlert className="h-3.5 w-3.5 text-action-warning" />
               <span>{busy === "escalate" ? "Escalating..." : "Escalate"}</span>
             </button>
           </div>
@@ -222,7 +222,7 @@ export function PrincipalRecordCard({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Add escalation or override note..."
-              className="w-full rounded-lg border bg-background px-2.5 py-1.5 text-xs"
+              className="w-full border bg-surface px-2.5 py-1.5 text-xs"
             />
           )}
         </div>

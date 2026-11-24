@@ -87,9 +87,22 @@ function StudentAttendanceCalendarInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
-      <div className="flex items-center gap-2">
-        <CalendarDays className="w-4 h-4 text-action-primary" />
-        <p className="text-sm font-semibold text-text-primary">Attendance Calendar</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <CalendarDays className="w-5 h-5 text-action-primary" />
+            <h1 className="text-xl font-bold text-text-primary">Attendance Calendar</h1>
+          </div>
+          <p className="text-xs sm:text-sm text-text-muted mt-0.5">
+            Day-by-day attendance record and gate check-in/out times.
+          </p>
+        </div>
+        <Link
+          href="/student/attendance"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-bg-elevated px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-action-primary transition-colors"
+        >
+          Attendance Summary <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {/* View toggle — sakuga-VFX toggle when the theme is active */}
