@@ -332,7 +332,7 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin", "parent", "faculty", "staff"] }),
+  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin", "parent", "guardian", "faculty", "staff"] }),
   { keyPrefix: "persons_get", maxRequests: 100 }
 );
 
