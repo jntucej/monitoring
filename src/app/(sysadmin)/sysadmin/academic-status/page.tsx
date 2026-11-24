@@ -10,6 +10,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { PermissionScopeHint } from "@/components/shared/PermissionScopeHint";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -265,10 +266,14 @@ function AcademicStatusInner() {
 
       {(pendingFlags.length > 0 || pendingMsg) && (
         <section className="surface-card bg-bg-surface p-4 space-y-3" aria-label="Pending Academic Status Approvals">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-text-primary">
               Pending Two-Person Approvals ({pendingFlags.length})
             </h2>
+            <PermissionScopeHint
+              rule="Two-person rule: a second authorized reviewer (Dean, Principal, VP, Chief Warden, or SysAdmin) must approve or reject."
+              tone="warn"
+            />
             {pendingMsg && <span className="text-xs font-medium text-action-primary">{pendingMsg}</span>}
           </div>
           <div className="space-y-2">

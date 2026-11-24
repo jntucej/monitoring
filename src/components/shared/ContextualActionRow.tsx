@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { WorkflowChainTracker } from "@/components/shared/WorkflowChainTracker";
 import { ActorTimelineFeed } from "@/components/shared/ActorTimelineFeed";
 import { ActionConsequencePreview } from "@/components/shared/ActionConsequencePreview";
+import { PermissionScopeHint } from "@/components/shared/PermissionScopeHint";
 
 export interface ActorEventContext {
   actorName: string;
@@ -215,6 +216,12 @@ export function ContextualActionRow<TAction extends string>({
               );
             })}
           </div>
+          {row.actions.some((a) => a.disabledReason) && (
+            <PermissionScopeHint
+              rule={row.actions.find((a) => a.disabledReason)?.disabledReason ?? ""}
+              tone="locked"
+            />
+          )}
           {row.actions[0]?.consequence && (
             <ActionConsequencePreview
               nextState={row.actions.map((a) => `${a.label} → ${a.consequence}`).join(" · ")}
