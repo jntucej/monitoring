@@ -12,14 +12,15 @@
     "TASK-0002": "VERIFIED_INTEGRATED",
     "TASK-0003": "VERIFIED_INTEGRATED",
     "TASK-0004": "VERIFIED_INTEGRATED",
-    "TASK-0005": "PENDING",
-    "TASK-0006": "PENDING"
+    "TASK-0005": "VERIFIED_INTEGRATED",
+    "TASK-0006": "VERIFIED_INTEGRATED",
+    "TASK-0007": "CLOSED_AS_ALREADY_RESOLVED"
   },
   "baseline_gates": {
     "eslint": "PASS (0 errors on 99380d0d, per V7 final)",
     "test:ci": "PASS (18/18 on V7 merge 332cac9c)",
     "typecheck": "to confirm at TASK-0001 start"
   },
-  "updated_at": "2026-11-24T15:39:08.634498+00:00",
-  "head_commit": "c566ec56"
+  "updated_at": "2026-11-24T15:53:15.023394+00:00",
+  "head_commit": "953c931d"
 }
