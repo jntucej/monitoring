@@ -4,7 +4,7 @@
 - **Active Branch:** `ux-v5/remediation` (branched from `ux-v45/afx-execution` at `9dd7faa4`)
 - **Source Audit:** `UX_FORENSICS_V4_5_LC_PRO/` (45 findings, 28 role keys, 445 pages, 669 API routes)
 - **Current Phase:** V5 Sequential Execution (CI/Security/Test Remediation)
-- **Active Issue:** `CI-03` (Duplicate migration prefix `20270129000010`)
+- **Active Issue:** `TEST-01` (`nav-snapshots.test.ts` 3 failing day-scholar nav tests)
 - **Baseline Gate Status (2026-11-24):**
   - `npx tsc --noEmit`: PASS (0 errors)
   - `npx unslop-ui . --strict --quiet`: PASS (100/100)
