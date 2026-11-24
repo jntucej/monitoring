@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
             AND NOT EXISTS (
               SELECT 1 FROM mess_preferences p
                WHERE p.user_id::text = u.id::text AND p.mess_day_id::text = $1
-            )`,
+            )
+          LIMIT 5000`,
         [day.id]
       );
 

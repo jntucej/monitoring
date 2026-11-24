@@ -27,7 +27,8 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
        FROM classes c
        WHERE c.class_teacher_id = $1
          AND c.is_active = TRUE
-       ORDER BY c.section`,
+       ORDER BY c.section
+       LIMIT 100`,
     [auth.userId]
   ).catch(() => ({ rows: [] as any[] }));
 

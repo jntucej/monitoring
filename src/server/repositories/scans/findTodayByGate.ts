@@ -17,12 +17,14 @@ export async function findTodayByGate(gateId?: string): Promise<MovementRow[]> {
        WHERE (timestamp AT TIME ZONE 'Asia/Kolkata')::date =
              (now() AT TIME ZONE 'Asia/Kolkata')::date
          AND gate_id = $1
-       ORDER BY timestamp ASC`
+       ORDER BY timestamp ASC
+       LIMIT 2000`
     : `SELECT id, user_id, direction, reason, gate_id, gate_name, timestamp
        FROM movement_logs
        WHERE (timestamp AT TIME ZONE 'Asia/Kolkata')::date =
              (now() AT TIME ZONE 'Asia/Kolkata')::date
-       ORDER BY timestamp ASC`;
+       ORDER BY timestamp ASC
+       LIMIT 2000`;
 
   const params = gateId ? [gateId] : [];
   const { rows } = await query<MovementRow>(sql, params);

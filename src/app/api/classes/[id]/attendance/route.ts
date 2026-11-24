@@ -41,7 +41,8 @@ async function handleGet(req: NextRequest): Promise<Response> {
                                   AND c.section = sd.section
            WHERE c.id = $1
         )
-      ORDER BY u.name`,
+      ORDER BY u.name
+      LIMIT 500`,
     [classId],
   );
 

@@ -70,7 +70,8 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
           WHERE person_id = $1
             AND date >= $2::date
             AND date <  $3::date
-          ORDER BY date ASC`,
+          ORDER BY date ASC
+          LIMIT 62`,
         [auth.userId, start, end]
       )
     ).rows;
