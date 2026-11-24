@@ -166,9 +166,9 @@ export function MessInchargeCommandBar({ role, open, onClose }: MessInchargeComm
     }
   }, [open]);
 
+  const router = useRouter();
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
-  const router = useRouter();
       if (parsed.action === "UNKNOWN") {
         addToast({ variant: "error", message: "Unknown command. Type a command from the list below." });
         return;

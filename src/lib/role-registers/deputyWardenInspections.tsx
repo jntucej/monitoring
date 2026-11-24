@@ -63,7 +63,7 @@ export function buildDeputyWardenDecisionInspection(
   const decided = row.decidedAt ?? row.updated_at ?? row.created_at;
   const sections: InspectionSection[] = [
     kv("Overview", [
-      ["Ticket Number", <span className="font-mono">{row.ticket_number}</span>],
+      ["Ticket Number", <span key="ticket" className="font-mono">{row.ticket_number}</span>],
       ["Workflow Type", row.workflow_type],
       ["Status", row.status],
       ["Current Stage", row.current_stage],
@@ -139,7 +139,7 @@ export function buildDeputyWardenGateMovementInspection(
   const sections: InspectionSection[] = [
     kv("Overview", [
       ["Gate Name", row.name],
-      ["Gate Code", <span className="font-mono">{row.code || row.id}</span>],
+      ["Gate Code", <span key="code" className="font-mono">{row.code || row.id}</span>],
       ["Audience", row.audience],
       ["Gate Type", row.type],
       ["On Campus", row.onCampusCount ?? 0],

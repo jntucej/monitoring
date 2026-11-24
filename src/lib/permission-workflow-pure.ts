@@ -20,7 +20,7 @@ const HOSTEL_CHAIN = [L1_ROLE, L2_ROLE, L3_ROLE, L4_ROLE] as const;
 function getHostelChainFromConfig(): string[] {
   try {
     // Lazy import to avoid a circular dependency (config → types → roles → …).
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { CARETAKER_CONFIG } = require("@/config/roles/caretaker") as typeof import("@/config/roles/caretaker");
     if (CARETAKER_CONFIG?.stages?.length) {
       return CARETAKER_CONFIG.stages.map(s => s.role);

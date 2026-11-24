@@ -115,7 +115,8 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
              FROM users u
              LEFT JOIN student_details  sd ON sd.user_id = u.id
              LEFT JOIN employee_details ed ON ed.user_id = u.id
-            WHERE LOWER(u.email) IN (${phsFor(c)})`,
+            WHERE LOWER(u.email) IN (${phsFor(c)})
+            LIMIT 1000`,
           c
         );
         existing.push(...res.rows.map((r) => ({ email: r.email, unique_id: r.unique_id ?? null, roll: r.roll ?? null, employee_id: r.employee_id ?? null })));

@@ -14,6 +14,7 @@
 // read-only note plus navigation links only. No capability that has no
 // backing route is ever rendered as a button.
 
+import Link from "next/link";
 import type { EntityInspection } from "@/components/shared/EntityInspector";
 import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
@@ -255,12 +256,12 @@ export function buildDepartmentInspection(
         title: "Actions",
         content: gate.isPrincipal ? (
           <div className="flex flex-wrap gap-2">
-            <a
+            <Link
               href="/principal/people/departments"
               className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Open department register
-            </a>
+            </Link>
             <a
               href="/principal/people/attendance"
               className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
@@ -460,12 +461,12 @@ export function buildGateInspection(
               principal role.
             </p>
             <div className="flex flex-wrap gap-2">
-              <a
+              <Link
                 href="/principal/operations/gates"
                 className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
               >
                 Gate register
-              </a>
+              </Link>
               <a
                 href="/principal/incidents"
                 className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"

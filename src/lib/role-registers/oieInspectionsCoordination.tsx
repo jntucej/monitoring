@@ -38,7 +38,7 @@ export function buildOieCoordinationInspection(
 
   const sections: InspectionSection[] = [
     kv("Overview", [
-      ["Ticket Number", <span className="font-mono">{row.ticket_number}</span>],
+      ["Ticket Number", <span key="ticket" className="font-mono">{row.ticket_number}</span>],
       ["Student", studentName],
       ["Roll Number", roll || "—"],
       ["Current Stage", row.current_stage],
@@ -113,7 +113,7 @@ export function buildOieExaminationDayAccessInspection(
 
   const sections: InspectionSection[] = [
     kv("Overview", [
-      ["Ticket Number", <span className="font-mono">{row.ticket_number}</span>],
+      ["Ticket Number", <span key="ticket" className="font-mono">{row.ticket_number}</span>],
       ["Student", studentName],
       ["Roll Number", roll || "—"],
       ["Current Stage", row.current_stage],
@@ -187,7 +187,7 @@ export function buildOieRecordInspection(
 
   const sections: InspectionSection[] = [
     kv("Overview", [
-      ["Ticket Number", <span className="font-mono">{row.ticket_number}</span>],
+      ["Ticket Number", <span key="ticket" className="font-mono">{row.ticket_number}</span>],
       ["Student", studentName],
       ["Roll Number", roll || "—"],
       ["Workflow", row.workflow_type],

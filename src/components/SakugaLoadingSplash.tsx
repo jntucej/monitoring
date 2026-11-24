@@ -21,6 +21,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 // when data-theme="sakuga" is active. The declare global block extends
 // the React JSX namespace so the tag can be used in JSX without TS errors.
 declare module "react" {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       "sakuga-progress": React.DetailedHTMLProps<

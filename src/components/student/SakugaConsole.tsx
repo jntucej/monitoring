@@ -17,6 +17,7 @@ import { SakuraDualThemeControl } from "@/components/nav/SakuraDualThemeControl"
 
 type SakugaProps = Record<string, unknown> & { children?: ReactNode };
 declare module "react" {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       "sakuga-button": SakugaProps;

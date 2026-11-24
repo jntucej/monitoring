@@ -559,6 +559,7 @@ export async function cmdMessage(ctx: BotContext, text?: string): Promise<string
       mode,
       urgency,
       body,
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require("crypto").createHash("sha256").update(body).digest("hex").slice(0, 16),
       autoReleaseAt,
     ],

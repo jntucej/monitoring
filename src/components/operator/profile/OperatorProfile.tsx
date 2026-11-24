@@ -13,13 +13,13 @@ import Link from "next/link";
 
 
 export function OperatorProfile() {
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const role = useAuthStore((s) => s.role);
   const logout = useAuthStore((s) => s.logout);
 const { addToast } = useUIStore();
 
   const handleLogout = async () => {
-  const router = useRouter();
     try {
       await logout();
       addToast({

@@ -24,6 +24,7 @@ import { Palette, Sparkles } from "lucide-react";
 // intentionally omitted here to avoid a TS2717 type-conflict on the tag.
 type SakugaProps = Record<string, unknown> & { children?: ReactNode };
 declare module "react" {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       "sakuga-button": SakugaProps;

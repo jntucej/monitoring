@@ -154,28 +154,19 @@ function ExaminationReportsInner() {
   const metrics = data?.data?.metrics ?? [];
   const seriesData = data?.data?.seriesData ?? [];
 
-
-
-
-
-
   // Render series chart (simple bar-style)
-  const maxSeries = useMemo(() => {
-    if (seriesData.length === 0) return 0;
-    return Math.max(
-      ...seriesData.map((s) => Number(s.resolved ?? s.pending ?? s.scans ?? s.alerts ?? 0))
-    );
-  }, [seriesData]);
+  const maxSeries =
+    seriesData.length === 0
+      ? 0
+      : Math.max(
+          ...seriesData.map((s) => Number(s.resolved ?? s.pending ?? s.scans ?? s.alerts ?? 0))
+        );
 
-  const seriesLabels = useMemo(
-    () =>
-      seriesData.map((s) => {
-        const label = String(s.date ?? "").slice(5); // MM-DD
-        const value = Number(s.resolved ?? s.pending ?? s.scans ?? s.alerts ?? 0);
-        return { label, value };
-      }),
-    [seriesData]
-  );
+  const seriesLabels = seriesData.map((s) => {
+    const label = String(s.date ?? "").slice(5); // MM-DD
+    const value = Number(s.resolved ?? s.pending ?? s.scans ?? s.alerts ?? 0);
+    return { label, value };
+  });
 
   return (
     <div className="mx-auto max-w-7xl w-full min-w-0 overflow-x-hidden space-y-6 px-4 py-6 md:px-6">

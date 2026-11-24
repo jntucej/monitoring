@@ -32,7 +32,8 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
        FROM public.mess_tokens t
        JOIN public.users u ON u.id = t.user_id
       WHERE t.mess_day_id = $1::uuid
-      ORDER BY u.name`,
+      ORDER BY u.name
+      LIMIT 2000`,
     [mealDayId],
   );
 

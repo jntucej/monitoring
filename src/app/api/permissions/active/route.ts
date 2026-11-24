@@ -33,7 +33,8 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }): Pro
         AND status = 'APPROVED'
         AND used_at IS NULL
         AND (to_date IS NULL OR to_date >= NOW())
-      ORDER BY from_date ASC`,
+      ORDER BY from_date ASC
+      LIMIT 100`,
     [targetUserId],
   );
 

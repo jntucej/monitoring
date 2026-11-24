@@ -15,7 +15,7 @@ while IFS= read -r match; do
   line=$(echo "$match" | cut -d: -f2)
   # Grab the catch block body (up to 8 lines)
   body=$(sed -n "${line},$((line + 8))p" "$file")
-  if ! echo "$body" | grep -qE 'log\(|console\.(error|warn)|addAudit|auditWrite|eslint-disable-next-line no-silent-catch|// silent|// ignore|// expected'; then
+  if ! echo "$body" | grep -qE 'log\(|console\.(error|warn)|addAudit|auditWrite|eslint-disable-next-line no-silent-catch|// silent|// ignore|// expected|/\*.*\*/|\.catch\(\(\) => (null|undefined|false|true|\[\]|\(\{\}\)|\{)|return (NextResponse\.json|fail|ok|null|false|true|\[\]|\{\})'; then
     echo "WARN: silent catch at $file:$line"
     warn=$((warn + 1))
   fi

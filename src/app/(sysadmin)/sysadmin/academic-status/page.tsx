@@ -123,6 +123,18 @@ function AcademicStatusInner() {
     }
   }, []);
 
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setRoster(await fetchRoster(null)); // HOD gets auto-scoped server-side
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load roster");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const decidePending = async (userId: string, action: "approve" | "reject") => {
     setPendingBusy(userId);
     setPendingMsg(null);
@@ -144,18 +156,6 @@ function AcademicStatusInner() {
       setPendingBusy(null);
     }
   };
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      setRoster(await fetchRoster(null)); // HOD gets auto-scoped server-side
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load roster");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     load();

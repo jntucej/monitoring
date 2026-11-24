@@ -16,6 +16,7 @@ async function handleGet(_req: NextRequest) {
        WHERE s.revoked_at IS NULL
          AND s.expires_at > NOW()
        ORDER BY s.last_seen_at DESC
+       LIMIT 500
     `);
 
     const activeSessions = sessions.map((s: any) => ({
