@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuthHeaders } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
 import {
   HierarchyTargetPicker,
@@ -13,6 +14,7 @@ import {
 
 export function ComplaintForm() {
   const router = useRouter();
+  const { addToast } = useToast();
   const isSakuga = useIsSakuga();
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCode, setSelectedCode] = useState("");
@@ -94,7 +96,7 @@ export function ComplaintForm() {
     const j = await r.json();
     setBusy(false);
     if (j.success) router.push(`/student/complaints/${j.data.complaintId}`);
-    else alert(j.error?.message ?? "Failed");
+    else addToast({ variant: "error", message: j.error?.message ?? "Failed to submit complaint" });
   };
 
   return (

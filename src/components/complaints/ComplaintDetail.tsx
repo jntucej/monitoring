@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getAuthHeaders } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 import { ComplaintTimeline } from "@/components/shared/complaints/ComplaintTimeline";
 import { useAuthStore } from "@/stores/authStore";
 import { resolveComplaintAbility, makeViewer } from "@/lib/record-abilities";
@@ -14,6 +15,7 @@ import { SmartTextRef } from "@/components/nav/SmartTextRef";
 export function ComplaintDetail({ role }: { role: string }) {
   const params = useParams();
   const id = params?.id as string;
+  const { addToast } = useToast();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [noteText, setNoteText] = useState("");
@@ -123,7 +125,7 @@ export function ComplaintDetail({ role }: { role: string }) {
     });
     const j = await r.json();
     if (j.success) load();
-    else alert(j.error?.message ?? "Failed");
+    else addToast({ variant: "error", message: j.error?.message ?? "Failed to submit feedback" });
   };
 
   const uploadAttachment = async (e: React.FormEvent) => {
@@ -140,7 +142,7 @@ export function ComplaintDetail({ role }: { role: string }) {
     if (j.success) {
       setFile(null);
       load();
-    } else alert(j.error?.message ?? "Upload failed");
+    } else addToast({ variant: "error", message: j.error?.message ?? "Upload failed" });
   };
 
   if (loading) return <p className="text-text-muted">Loading…</p>;
