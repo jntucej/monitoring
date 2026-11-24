@@ -27,6 +27,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { useEffectivePref } from "@/hooks/useEffectivePref";
 import { usePersona } from "@/hooks/usePersona";
+import { useApiResource } from "@/hooks/useApiResource";
 import { resolveRoleConfig } from "@/config/roles";
 import type { WorkspaceContext } from "@/config/roles/types";
 
@@ -203,6 +204,13 @@ function StudentHomeInner() {
     });
   }, [personaKey, widgetOrderPref.value, studentCaps]);
 
+  const { data: permData } = useApiResource<{
+    data?: Array<{ ticket_number?: string; status?: string; current_stage?: string }>;
+  }>("/api/permissions?limit=5", { ttlMs: 30_000 });
+  const recentPerms = permData?.data ?? [];
+  const activePass = recentPerms.find((p) => p.status === "APPROVED");
+  const pendingReq = recentPerms.find((p) => p.status === "PENDING");
+
   const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
       <Greeting />
@@ -217,13 +225,34 @@ function StudentHomeInner() {
             : "Track academic schedules, day attendance, and campus gate passes"
         }
         contextLabel={personaKey === "hosteller" ? "Hosteller Dashboard" : "Day Scholar Dashboard"}
-        statusSummary={
-          personaKey === "hosteller"
-            ? "Track your curfew status, active hostel passes, meal tokens, and campus updates."
-            : "Track your class attendance, today's schedule, gate passes, and campus updates."
+        statusTone={activePass ? "ok" : pendingReq ? "warn" : "info"}
+        statusPill={
+          activePass
+            ? `Active Pass · ${activePass.ticket_number ?? "QR Ready"}`
+            : pendingReq
+              ? `Pending · ${pendingReq.current_stage ?? "In Review"}`
+              : undefined
         }
-        primaryAction={{ label: "Digital ID Card", href: "/student/id" }}
-        secondaryAction={{ label: "New Pass Request", href: "/student/permissions/new" }}
+        statusSummary={
+          activePass
+            ? `Pass ${activePass.ticket_number ?? ""} is approved and ready for gate scan.`
+            : pendingReq
+              ? `Request ${pendingReq.ticket_number ?? ""} is currently at ${pendingReq.current_stage ?? "review"} stage.`
+              : personaKey === "hosteller"
+                ? "Track your curfew status, active hostel passes, meal tokens, and campus updates."
+                : "Track your class attendance, today's schedule, gate passes, and campus updates."
+        }
+        primaryAction={
+          activePass
+            ? { label: "Show QR / Passes", href: "/student/passes" }
+            : { label: "Digital ID Card", href: "/student/id" }
+        }
+        secondaryActions={[
+          { label: "New Pass Request", href: "/student/permissions/new" },
+          ...(personaKey === "hosteller"
+            ? [{ label: "Meal Token", href: "/student/mess/token" }]
+            : []),
+        ]}
       />
       <StudentModeSwitcher mode={mode} onChange={setMode} />
       <StudentLivingHub

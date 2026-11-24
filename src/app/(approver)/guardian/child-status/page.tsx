@@ -78,14 +78,36 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
           </p>
         </div>
       </div>
-      <span
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 ${
-          isIn ? "bg-action-success/15 text-action-success" : "bg-action-danger/15 text-action-danger"
-        }`}
-      >
-        {isIn ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-        {isIn ? "On campus" : "Off campus"}
-      </span>
+      <div className="flex flex-col items-end gap-2 shrink-0">
+        <span
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+            isIn ? "bg-action-success/15 text-action-success" : "bg-action-danger/15 text-action-danger"
+          }`}
+        >
+          {isIn ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+          {isIn ? "On campus" : "Off campus"}
+        </span>
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <Link
+            href={`/guardian/pass-leave-submission?wardId=${encodeURIComponent(ward.id)}`}
+            className="min-h-11 inline-flex items-center rounded-lg bg-action-primary px-3 py-1.5 font-semibold text-white hover:opacity-90"
+          >
+            Submit Pass / Leave
+          </Link>
+          <Link
+            href={`/guardian/movement-info?wardId=${encodeURIComponent(ward.id)}`}
+            className="min-h-11 inline-flex items-center px-2 font-medium text-text-secondary hover:text-action-primary underline"
+          >
+            Movement
+          </Link>
+          <Link
+            href={`/guardian/request-status?wardId=${encodeURIComponent(ward.id)}`}
+            className="min-h-11 inline-flex items-center px-2 font-medium text-text-secondary hover:text-action-primary underline"
+          >
+            Requests
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
