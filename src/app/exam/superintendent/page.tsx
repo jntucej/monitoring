@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { ShieldCheck, AlertTriangle, ArrowRight, KeyRound } from "lucide-react";
 
 /* response shapes */
@@ -95,6 +96,12 @@ function ExamSuperintendentAccessInner() {
           { label: "Exam Schedule", href: "/exam/superintendent/schedule" },
           { label: "Incidents", href: "/exam/superintendent/incidents" },
         ]}
+      />
+      <ApproverDecisionQueue
+        roleLabel="Exam Superintendent"
+        forwardLabel="Forward to OIE"
+        relatedHref="/exam/superintendent/incidents"
+        relatedLabel="Exam Incidents"
       />
 
       {error && (

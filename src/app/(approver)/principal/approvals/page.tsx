@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { ApprovalsView } from "../_shared/ApprovalsView";
 
 export default function PrincipalApprovalsPage() {
@@ -16,6 +17,12 @@ export default function PrincipalApprovalsPage() {
         statusSummary="Review, approve, or delegate pending student leave, gate pass, and event permission tickets."
         primaryAction={{ label: "Attention Queue", href: "/principal/attention" }}
         secondaryAction={{ label: "Decision Ledger", href: "/principal/decisions" }}
+      />
+      <ApproverDecisionQueue
+        roleLabel="Principal"
+        forwardLabel="Escalate / Delegate"
+        relatedHref="/principal/approvals/escalated"
+        relatedLabel="Escalated Queue"
       />
       <ApprovalsView status="PENDING" title="Pending approvals" workflowType={workflowType} />
     </div>

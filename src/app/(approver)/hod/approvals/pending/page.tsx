@@ -1,6 +1,7 @@
 "use client";
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { ApprovalsView } from "../../_shared/ApprovalsView";
 
 export default function HodPendingPage() {
@@ -17,6 +18,12 @@ export default function HodPendingPage() {
           { label: "Today Overview", href: "/hod/home" },
           { label: "Faculty Directory", href: "/hod/faculty/directory" },
         ]}
+      />
+      <ApproverDecisionQueue
+        roleLabel="HOD"
+        forwardLabel="Forward to Vice Principal"
+        relatedHref="/hod/approvals/escalated"
+        relatedLabel="Escalated Queue"
       />
       <ApprovalsView status="PENDING" title="Pending approvals" />
     </div>

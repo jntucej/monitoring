@@ -11,6 +11,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { PermissionList } from "@/components/approver/PermissionList";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import type { Role } from "@/lib/types";
 
@@ -31,6 +32,12 @@ function Inner() {
           { label: "Housekeeping", href: "/hostel-manager/housekeeping-tasks" },
           { label: "Maintenance", href: "/hostel-manager/maintenance" },
         ]}
+      />
+      <ApproverDecisionQueue
+        roleLabel="Hostel Manager"
+        forwardLabel="Forward to Deputy Warden"
+        relatedHref="/hostel-manager/complaints"
+        relatedLabel="Hostel Complaints"
       />
       <PermissionList
         title="Resident Tickets"

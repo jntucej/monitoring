@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { ShieldCheck, AlertTriangle, Inbox, ArrowRight, FileWarning } from "lucide-react";
 import Link from "next/link";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import {
   useEntityInspector,
   EntityInspectorPanel,
@@ -183,6 +184,12 @@ function OieApprovalRequestsInner() {
           { label: "OIE Handoff", href: "/exam-branch/oie-handoff" },
           { label: "Verification", href: "/exam-branch/verification" },
         ]}
+      />
+      <ApproverDecisionQueue
+        roleLabel="Exam Branch"
+        forwardLabel="Forward to OIE"
+        relatedHref="/exam-branch/oie-handoff"
+        relatedLabel="OIE Handoff"
       />
 
       {/* OIE handoff notice — never bypass */}

@@ -1,5 +1,6 @@
 "use client";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -167,6 +168,12 @@ function VpPendingApprovalsInner() {
         severity={rows.some(slaBreached) ? "warn" : "ok"}
         primaryAction={{ label: "Escalated Requests", href: "/vice-principal/escalated-requests" }}
         secondaryAction={{ label: "Decision History", href: "/vice-principal/decision-history" }}
+      />
+      <ApproverDecisionQueue
+        roleLabel="Vice Principal"
+        forwardLabel="Forward to Principal"
+        relatedHref="/vice-principal/escalated-requests"
+        relatedLabel="Escalated Requests"
       />
       <WidgetBoundary title="Pending Approvals">
         <div className="surface-card bg-bg-base p-4 min-w-0">

@@ -1,12 +1,11 @@
 "use client";
 
-import { EmptyState } from "@/components/shared/EmptyState";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
-import { Clock } from "lucide-react";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 
 export default function DeputyWardenCurfewOversightPage() {
   return (
-    <div className="p-4 sm:p-6 space-y-4 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 space-y-4 max-w-5xl mx-auto">
       <div>
         <h1 className="text-xl font-bold text-text-primary">Curfew Oversight</h1>
         <p className="text-xs sm:text-sm text-text-muted mt-0.5">
@@ -25,10 +24,11 @@ export default function DeputyWardenCurfewOversightPage() {
           { label: "Daily Overview", href: "/deputy-warden/daily-overview" },
         ]}
       />
-      <EmptyState
-        icon={<Clock className="size-6" />}
-        title="Curfew Oversight"
-        description="Use Live Curfew Status or Gate Movement above to inspect resident presence and late entries."
+      <ApproverDecisionQueue
+        roleLabel="Deputy Warden"
+        forwardLabel="Forward to Hostel Manager"
+        relatedHref="/deputy-warden/leave-requests"
+        relatedLabel="Leave Requests"
       />
     </div>
   );
