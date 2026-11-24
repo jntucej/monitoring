@@ -18,34 +18,66 @@ export default function MessBillPage() {
   const [optOutType, setOptOutType] = useState("LUNCH");
   const [optOutReason, setOptOutReason] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [optOutStatus, setOptOutStatus] = useState<{ ok: boolean; text: string } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const r = await fetch(`/api/student/mess-bill?month=${month}`, { headers: getAuthHeaders() });
-    const j = await r.json();
-    setData(j.data);
-    setLoading(false);
+    try {
+      const r = await fetch(`/api/student/mess-bill?month=${month}`, { headers: getAuthHeaders() });
+      const j = await r.json();
+      setData(j.data);
+    } finally {
+      setLoading(false);
+    }
   }, [month]);
 
   useEffect(() => {
     load().catch(() => {});
   }, [load]);
 
+  const submitOptOut = async () => {
+    if (isSubmitting || !optOutDate) return;
+    setIsSubmitting(true);
+    setOptOutStatus(null);
+    try {
+      const r = await fetch("/api/student/meal-opt-out", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ mealDate: optOutDate, mealType: optOutType, reason: optOutReason }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.success) {
+        setOptOutStatus({
+          ok: true,
+          text: `Opted out of ${optOutType.toLowerCase()} on ${optOutDate}. Your monthly bill has been updated.`,
+        });
+        setOptOutDate("");
+        setOptOutReason("");
+        await load();
+      } else {
+        const msg = j.error?.message ?? "Failed to opt out";
+        const isCutoff = /cutoff|deadline|past|closed/i.test(msg);
+        setOptOutStatus({
+          ok: false,
+          text: isCutoff
+            ? `${msg} (Opt-outs must be submitted before ${data?.cutoffTime ?? "the daily cutoff"}).`
+            : msg,
+        });
+      }
+    } catch {
+      setOptOutStatus({
+        ok: false,
+        text: "Network error while submitting meal opt-out. Please retry.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const optOut = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = await fetch("/api/student/meal-opt-out", {
-      method: "POST",
-      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-      body: JSON.stringify({ mealDate: optOutDate, mealType: optOutType, reason: optOutReason }),
-    });
-    const j = await r.json();
-    if (j.success) {
-      setOptOutDate("");
-      setOptOutReason("");
-      await load();
-    } else {
-      alert(j.error?.message ?? "Failed to opt out");
-    }
+    await submitOptOut();
   };
 
 
@@ -140,10 +172,37 @@ export default function MessBillPage() {
               className="surface-card w-full min-h-11 p-2 text-sm"
             />
           </div>
-          <button type="submit" className="surface-card w-full min-h-11 inline-flex items-center justify-center px-4 py-2 bg-bg-surface text-white text-sm font-medium">
-            Confirm opt-out
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="surface-card w-full min-h-11 inline-flex items-center justify-center px-4 py-2 bg-action-primary text-white text-sm font-medium disabled:opacity-50"
+          >
+            {isSubmitting ? "Submitting…" : "Confirm opt-out"}
           </button>
         </form>
+        {optOutStatus && (
+          <div
+            role="alert"
+            aria-live="polite"
+            className={`flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs font-medium ${
+              optOutStatus.ok
+                ? "bg-emerald-500/10 text-action-success"
+                : "bg-rose-500/10 text-action-danger"
+            }`}
+          >
+            <span>{optOutStatus.text}</span>
+            {!optOutStatus.ok && (
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => void submitOptOut()}
+                className="underline font-semibold disabled:opacity-50"
+              >
+                Retry
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

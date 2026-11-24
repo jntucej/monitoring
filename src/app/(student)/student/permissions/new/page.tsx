@@ -13,6 +13,10 @@ import { PassCreateFormV2 } from "@/components/shared/pass/PassCreateFormV2";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function NewPermissionPage() {
+  const hour = new Date().getHours();
+  const mins = new Date().getMinutes();
+  const inCurfew = hour > 21 || (hour === 21 && mins >= 30) || hour < 6;
+
   return (
     <AuthGuard allowedRoles={["student"]}>
       <div className="p-4 sm:p-6 md:p-4 space-y-4 sm:space-y-6 max-w-3xl mx-auto">
@@ -30,7 +34,13 @@ export default function NewPermissionPage() {
           roleLabel="Student"
           purpose="Create and dispatch new outing, day pass, home leave, or late-entry approval requests"
           contextLabel="New Pass Application"
-          statusSummary="Fill in destination, departure/return times, and reason. Requests route to your mentor or hostel warden."
+          statusTone={inCurfew ? "warn" : "info"}
+          statusPill={inCurfew ? "Curfew Active (21:30–06:00)" : "Standard Hours (06:00–21:30)"}
+          statusSummary={
+            inCurfew
+              ? "Night curfew is active (21:30–06:00). Late-entry or emergency requests require warden/faculty approval before gate exit."
+              : "Fill in destination, departure/return times, and reason. Requests route to your mentor or hostel warden."
+          }
           primaryAction={{ label: "My Requests", href: "/student/permissions" }}
           secondaryAction={{ label: "Active Gate Passes", href: "/student/passes" }}
         />

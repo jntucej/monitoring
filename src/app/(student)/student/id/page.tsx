@@ -8,6 +8,10 @@ import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { QrCode } from "lucide-react";
 
 function StudentIdInner() {
+  const hour = new Date().getHours();
+  const mins = new Date().getMinutes();
+  const inCurfew = hour > 21 || (hour === 21 && mins >= 30) || hour < 6;
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6 min-w-0">
       <div>
@@ -23,11 +27,15 @@ function StudentIdInner() {
         roleLabel="Student"
         purpose="Present your secure campus barcode/QR identity for verification at gates, library, and mess"
         contextLabel="Digital Student Credential"
-        severity="ok"
-        statusPill="Active Credential"
-        statusSummary="Carry your authenticated student barcode and QR token for turnstiles and checkpoints."
+        severity={inCurfew ? "warn" : "ok"}
+        statusPill={inCurfew ? "Curfew Window (21:30–06:00)" : "Active Credential"}
+        statusSummary={
+          inCurfew
+            ? "Curfew hours (21:30–06:00) are active — an approved gate pass is required alongside your ID for off-campus movement."
+            : "Carry your authenticated student barcode and QR token for turnstiles and checkpoints."
+        }
         primaryAction={{ label: "My Gate Passes", href: "/student/passes" }}
-        secondaryAction={{ label: "Profile & Security", href: "/student/profile-security" }}
+        secondaryAction={{ label: "New Pass Request", href: "/student/permissions/new" }}
       />
       <div className="max-w-md mx-auto sm:max-w-none">
         <DigitalIdCard />
