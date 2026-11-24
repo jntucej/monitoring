@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -140,7 +140,7 @@ function OperatorTransactionsInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card min-h-11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -175,7 +175,7 @@ function OperatorTransactionsInner() {
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`min-h11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
+                className={`min-h-11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
                   filter === f
                     ? "bg-action-primary/15 text-action-primary"
                     : "text-text-muted hover:text-text-primary"
@@ -201,7 +201,7 @@ function OperatorTransactionsInner() {
                 <button
                   type="button"
                   onClick={() => void refreshAll()}
-                  className="surface-card min-h11 inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold hover:bg-bg-elevated/40 shrink-0"
+                  className="surface-card min-h-11 inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold hover:bg-bg-elevated/40 shrink-0"
                 >
                   <Clock className="w-3.5 h-3.5 shrink-0" />
                   Retry

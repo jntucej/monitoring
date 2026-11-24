@@ -115,7 +115,7 @@ export function WorkersView() {
             placeholder="Search workers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="surface-card w-full min-h11 bg-bg-surface py-2 pl-9 pr-3 text-xs text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-action-primary"
+            className="surface-card w-full min-h-11 bg-bg-surface py-2 pl-9 pr-3 text-xs text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
         </div>
 
@@ -123,7 +123,7 @@ export function WorkersView() {
           <select
             value={selectedGate}
             onChange={(e) => setSelectedGate(e.target.value)}
-            className="surface-card min-h11 bg-bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none"
+            className="surface-card min-h-11 bg-bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none"
           >
             <option value="all">All Gates</option>
             {gates.map((g) => (
@@ -141,7 +141,7 @@ export function WorkersView() {
           <button
             key={c.id}
             onClick={() => setCategory(c.id)}
-            className={`inline-flex min-h11 items-center rounded-full px-3 py-1 text-xs font-medium transition ${
+            className={`inline-flex min-h-11 items-center rounded-full px-3 py-1 text-xs font-medium transition ${
               category === c.id
                 ? "bg-action-primary text-white"
                 : "bg-bg-surface text-text-secondary hover:bg-bg-elevated"

@@ -66,7 +66,7 @@ export default function MessBillPage() {
           type="month"
           value={month}
           onChange={(e) => setMonth(e.target.value)}
-          className="surface-card min-h11 p-2 text-sm"
+          className="surface-card min-h-11 p-2 text-sm"
         />
       </div>
 
@@ -116,7 +116,7 @@ export default function MessBillPage() {
               required
               value={optOutDate}
               onChange={(e) => setOptOutDate(e.target.value)}
-              className="surface-card w-full min-h11 p-2 text-sm"
+              className="surface-card w-full min-h-11 p-2 text-sm"
             />
           </div>
           <div>
@@ -124,7 +124,7 @@ export default function MessBillPage() {
             <select id="meal"
               value={optOutType}
               onChange={(e) => setOptOutType(e.target.value)}
-              className="surface-card w-full min-h11 p-2 text-sm"
+              className="surface-card w-full min-h-11 p-2 text-sm"
             >
               <option value="BREAKFAST">Breakfast</option>
               <option value="LUNCH">Lunch</option>
@@ -137,10 +137,10 @@ export default function MessBillPage() {
               placeholder="e.g. Going home"
               value={optOutReason}
               onChange={(e) => setOptOutReason(e.target.value)}
-              className="surface-card w-full min-h11 p-2 text-sm"
+              className="surface-card w-full min-h-11 p-2 text-sm"
             />
           </div>
-          <button type="submit" className="surface-card w-full min-h11 inline-flex items-center justify-center px-4 py-2 bg-bg-surface text-white text-sm font-medium">
+          <button type="submit" className="surface-card w-full min-h-11 inline-flex items-center justify-center px-4 py-2 bg-bg-surface text-white text-sm font-medium">
             Confirm opt-out
           </button>
         </form>

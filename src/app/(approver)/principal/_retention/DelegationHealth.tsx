@@ -24,7 +24,7 @@ export function DelegationHealth({
         </div>
         <Link
           href="/principal/governance/delegations"
-          className="inline-flex min-h11 items-center text-xs text-action-primary hover:underline"
+          className="inline-flex min-h-11 items-center text-xs text-action-primary hover:underline"
         >
           Manage
         </Link>

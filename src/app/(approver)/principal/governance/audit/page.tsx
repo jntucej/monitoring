@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";

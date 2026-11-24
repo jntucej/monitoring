@@ -113,7 +113,7 @@ export default function SysAdminAttendancePage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="surface-card px-3 py-1.5 min-h11 bg-bg-surface text-sm"
+              className="surface-card px-3 py-1.5 min-h-11 bg-bg-surface text-sm"
             />
           </div>
         </div>

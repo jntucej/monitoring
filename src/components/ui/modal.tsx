@@ -153,7 +153,7 @@ const Modal = ({
                 aria-label="Close dialog"
                 className={cn(
                   "flex items-center justify-center rounded-xl text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors active:scale-95",
-                  "absolute top-3 right-3 p-3 min-w11 min-h11"
+                  "absolute top-3 right-3 p-3 min-w-11 min-h-11"
                 )}
               >
                 <X className="w-5 h-5" aria-hidden="true" />

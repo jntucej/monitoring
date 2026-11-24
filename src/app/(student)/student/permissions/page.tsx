@@ -45,7 +45,10 @@ function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "dan
  * Build an EntityInspection model for a permission ticket (student view).
  * Sections: overview → stage history → actions (only the student's own actions).
  */
-function buildPermissionInspection(t: PermissionItem): EntityInspection {
+function buildPermissionInspection(
+  t: PermissionItem,
+  onViewDetails?: (ticketNum: string) => void,
+): EntityInspection {
   const ticketNum = t.ticket_number ?? t.id;
   const statusTone: "ok" | "warn" | "danger" | "neutral" =
     t.status === "APPROVED" || t.status === "COMPLETED" ? "ok"
@@ -91,7 +94,7 @@ function buildPermissionInspection(t: PermissionItem): EntityInspection {
     content: (
       <ActionRow>
         <InspectorButton
-          onClick={() => { /* trigger detail panel via onSelect */ }}
+          onClick={() => onViewDetails?.(ticketNum)}
           variant="primary"
         >
           View details
@@ -180,7 +183,7 @@ export default function StudentPermissionsPage() {
             </p>
           </div>
           <Link href="/student/permissions/new">
-            <Button className="min-h11 gap-2 bg-action-primary hover:opacity-90 text-white font-semibold">
+            <Button className="min-h-11 gap-2 bg-action-primary hover:opacity-90 text-white font-semibold">
               <Plus className="w-4 h-4" /> New Permission
             </Button>
           </Link>
@@ -227,7 +230,7 @@ export default function StudentPermissionsPage() {
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`min-h11 inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`min-h-11 inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
                   filter === f
                     ? "bg-action-primary text-white shadow"
                     : "bg-bg-surface border border-border text-text-muted hover:text-text-primary"
@@ -264,7 +267,14 @@ export default function StudentPermissionsPage() {
                     onSelect={(num) => {
                       setActiveTicket(num);
                       const found = tickets.find((x) => (x.ticket_number ?? x.id) === num);
-                      if (found) inspect(buildPermissionInspection(found));
+                      if (found) {
+                        inspect(
+                          buildPermissionInspection(found, (ticketId) => {
+                            closeInspection();
+                            setActiveTicket(ticketId);
+                          }),
+                        );
+                      }
                     }}
                   />
                   {t.status === "REJECTED" && (

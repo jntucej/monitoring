@@ -23,7 +23,7 @@ export function DrawerCategory({ category, isOpen, onToggle }: DrawerCategoryPro
         type="button"
         onClick={handleToggle}
         className={cn(
-          "w-full min-h11 flex items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider",
+          "w-full min-h-11 flex items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider",
           "text-text-muted hover:text-text-primary hover:bg-bg-elevated",
           "transition-colors select-none"
         )}

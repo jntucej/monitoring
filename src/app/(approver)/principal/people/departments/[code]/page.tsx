@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";

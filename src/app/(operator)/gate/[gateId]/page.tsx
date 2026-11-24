@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from "react";
 import { usePolling } from "@/hooks/usePolling";
@@ -514,7 +514,7 @@ const shift = useOperatorShiftClock();
                 locationOrScope: latest.gateName || gateName,
               });
             }}
-            className="surface-card absolute right-4 z-40 min-h11 px-3 py-1.5 bg-bg-elevated text-xs font-semibold text-text-secondary hover:bg-bg-surface transition-colors"
+            className="surface-card absolute right-4 z-40 min-h-11 px-3 py-1.5 bg-bg-elevated text-xs font-semibold text-text-secondary hover:bg-bg-surface transition-colors"
             aria-label="Open frontline subject sheet for latest scan"
           >
             Verify subject
@@ -596,13 +596,13 @@ const shift = useOperatorShiftClock();
               onChange={(e) => setManualRollInput(e.target.value.toUpperCase())}
               placeholder="e.g. >24JJ1A0501"
               aria-label="Enter roll or employee number to verify manually"
-              className="surface-card w-full min-h11 px-4 py-3 bg-bg-base text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
+              className="surface-card w-full min-h-11 px-4 py-3 bg-bg-base text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
             />
             <div className="flex gap-2">
               <button
                 type="submit"
                 disabled={!manualRollInput.trim() || !!activeLockdown}
-                className="surface-card flex-1 min-h11 px-4 bg-action-primary disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                className="surface-card flex-1 min-h-11 px-4 bg-action-primary disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
               >
                 <KeyRound className="w-5 h-5" />
                 <span>Verify Roll Number</span>
@@ -610,7 +610,7 @@ const shift = useOperatorShiftClock();
               <button
                 type="button"
                 onClick={() => { setManualOpen(false); setManualRollInput(""); }}
-                className="surface-card min-h11 px-4 bg-bg-base text-text-muted text-sm font-semibold"
+                className="surface-card min-h-11 px-4 bg-bg-base text-text-muted text-sm font-semibold"
               >
                 Close
               </button>
@@ -710,7 +710,7 @@ const shift = useOperatorShiftClock();
                         else if (lastRollRef.current) { startScan(lastRollRef.current); }
                         else { reset(); }
                       }}
-                      className="surface-card min-h11 px-4 py-2 bg-action-success text-black font-bold text-xs hover:bg-action-success transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
+                      className="surface-card min-h-11 px-4 py-2 bg-action-success text-black font-bold text-xs hover:bg-action-success transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
                     >
                       <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
@@ -728,7 +728,7 @@ const shift = useOperatorShiftClock();
                         reset();
                       }
                     }}
-                    className="surface-card min-h11 px-4 py-2 bg-action-danger text-white font-semibold text-xs hover:bg-action-danger transition-colors active:scale-[0.98] flex items-center justify-center"
+                    className="surface-card min-h-11 px-4 py-2 bg-action-danger text-white font-semibold text-xs hover:bg-action-danger transition-colors active:scale-[0.98] flex items-center justify-center"
                   >
                     {isAuthError ? "Dismiss & Sign In Again" : "Dismiss"}
                   </button>
@@ -769,14 +769,14 @@ const shift = useOperatorShiftClock();
               <button
                 type="button"
                 onClick={() => { setScannerOpen(true); setManualOpen(false); }}
-                className="min-h11 rounded-xl bg-action-primary text-black font-bold text-sm"
+                className="min-h-11 rounded-xl bg-action-primary text-black font-bold text-sm"
               >
                 Open scanner
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/operator")}
-                className="min-h11 rounded-xl bg-bg-surface border border-border text-text-secondary font-bold text-sm"
+                className="min-h-11 rounded-xl bg-bg-surface border border-border text-text-secondary font-bold text-sm"
               >
                 Dashboard
               </button>

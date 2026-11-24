@@ -14,7 +14,7 @@ export default function ApproverNotFound() {
         </p>
         <Link
           href="/operator"
-          className="surface-card inline-flex min-h11 items-center gap-2 bg-action-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          className="surface-card inline-flex min-h-11 items-center gap-2 bg-action-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           Back to dashboard
         </Link>

@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { Suspense, useMemo } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";

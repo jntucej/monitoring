@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { Suspense, useCallback, useMemo, lazy } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
@@ -106,7 +106,7 @@ function OperatorStatsInner() {
             <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
             <span className="truncate">Stats unavailable: {error}</span>
           </span>
-          <button type="button" onClick={() => void refresh()} className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0">
+          <button type="button" onClick={() => void refresh()} className="surface-card min-h-11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0">
             Retry
           </button>
         </div>

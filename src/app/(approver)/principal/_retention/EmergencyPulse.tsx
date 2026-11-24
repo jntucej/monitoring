@@ -24,7 +24,7 @@ export function EmergencyPulse({
           <li key={item.ticket}>
             <Link
               href={`/principal/approvals?ticket=${encodeURIComponent(item.ticket)}`}
-              className="surface-card flex min-h11 items-center gap-2 p-1.5 text-xs transition hover:bg-action-danger/10"
+              className="surface-card flex min-h-11 items-center gap-2 p-1.5 text-xs transition hover:bg-action-danger/10"
             >
               <span className="min-w-0 flex-1 truncate font-medium text-text-primary">
                 {item.subject}

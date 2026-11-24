@@ -140,7 +140,7 @@ function OperatorProfileInner() {
                 <button
                   type="button"
                   onClick={() => setEditingPhone(true)}
-                  className="inline-flex min-h11 items-center gap-1 text-xs text-action-primary hover:underline"
+                  className="inline-flex min-h-11 items-center gap-1 text-xs text-action-primary hover:underline"
                 >
                   <Pencil className="size-3.5" /> Edit
                 </button>
@@ -155,14 +155,14 @@ function OperatorProfileInner() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+91 XXXXX XXXXX"
-                    className="surface-card w-full min-h11 pl-9 pr-3 py-2 bg-bg-base text-sm text-text-primary focus:ring-2 focus:ringfocus-ring outline-none min-w-0"
+                    className="surface-card w-full min-h-11 pl-9 pr-3 py-2 bg-bg-base text-sm text-text-primary focus:ring-2 focus:ringfocus-ring outline-none min-w-0"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => void handleSavePhone()}
                   disabled={saving}
-                  className="surface-card min-h11 inline-flex items-center justify-center bg-action-primary px-3 py-2 text-xs font-bold text-black hover:brightness-110 disabled:opacity-50 shrink-0"
+                  className="surface-card min-h-11 inline-flex items-center justify-center bg-action-primary px-3 py-2 text-xs font-bold text-black hover:brightness-110 disabled:opacity-50 shrink-0"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 </button>
@@ -170,7 +170,7 @@ function OperatorProfileInner() {
                   type="button"
                   onClick={() => { setEditingPhone(false); setPhone(user?.phone ?? ""); }}
                   disabled={saving}
-                  className="surface-card min-h11 inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-text-muted hover:bg-bg-elevated shrink-0"
+                  className="surface-card min-h-11 inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-text-muted hover:bg-bg-elevated shrink-0"
                 >
                   Cancel
                 </button>

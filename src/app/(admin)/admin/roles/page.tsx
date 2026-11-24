@@ -101,7 +101,7 @@ function Node({
       />
       <button
         onClick={() => hasChildren && onToggle(node.code)}
-        className="surface-card flex items-center gap-2 w-full min-h11 text-left px-2 py-1.5 hover:bg-bg-surface/60 group"
+        className="surface-card flex items-center gap-2 w-full min-h-11 text-left px-2 py-1.5 hover:bg-bg-surface/60 group"
       >
         {hasChildren ? (
           isOpen ? (
@@ -264,24 +264,24 @@ function AdminRolesInner() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search roles…"
-            className="surface-card w-full min-h11 pl-9 pr-3 py-2 bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
+            className="surface-card w-full min-h-11 pl-9 pr-3 py-2 bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
           />
         </div>
         <button
           onClick={expandAll}
-          className="surface-card text-xs px-3 py-1.5 min-h11 hover:bg-bg-surface/60 flex items-center justify-center"
+          className="surface-card text-xs px-3 py-1.5 min-h-11 hover:bg-bg-surface/60 flex items-center justify-center"
         >
           Expand all
         </button>
         <button
           onClick={collapseAll}
-          className="surface-card text-xs px-3 py-1.5 min-h11 hover:bg-bg-surface/60 flex items-center justify-center"
+          className="surface-card text-xs px-3 py-1.5 min-h-11 hover:bg-bg-surface/60 flex items-center justify-center"
         >
           Collapse all
         </button>
         <button
           onClick={load}
-          className="surface-card flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 hover:bg-bg-surface/60 justify-center"
+          className="surface-card flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-11 hover:bg-bg-surface/60 justify-center"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Refresh
         </button>
@@ -301,7 +301,7 @@ function AdminRolesInner() {
                   {filteredNodes.map((n) => (
                     <li
                       key={n.code}
-                      className="surface-card flex items-center justify-between px-2 py-1.5 bg-bg-surface/40 min-h11"
+                      className="surface-card flex items-center justify-between px-2 py-1.5 bg-bg-surface/40 min-h-11"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <ShieldCheck className="w-4 h-4 text-action-primary shrink-0" />
@@ -372,7 +372,7 @@ function AdminRolesInner() {
             </ul>
             <Link
               href="/sysadmin/roles"
-              className="mt-3 flex items-center justify-center gap-1 text-xs text-action-primary hover:underline min-h11"
+              className="mt-3 flex items-center justify-center gap-1 text-xs text-action-primary hover:underline min-h-11"
             >
               Full sysadmin role panel <ArrowUpRight className="size-3.5" />
             </Link>

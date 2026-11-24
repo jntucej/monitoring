@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -155,7 +155,7 @@ export default function OperatorClaimPage() {
             type="button"
             onClick={submit}
             disabled={submitting || code.length < 4}
-            className="w-full min-h11 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-sm font-bold flex items-center justify-center gap-2 transition"
+            className="w-full min-h-11 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-sm font-bold flex items-center justify-center gap-2 transition"
           >
             {submitting ? (
               <>

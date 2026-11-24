@@ -242,7 +242,7 @@ export function IncidentsView() {
                     if (e.key === "Enter" || e.key === " ") openInspector(a);
                   }}
                   aria-label={`Inspect alert: ${a.title ?? a.message ?? "alert"}`}
-                  className="surface-card w-full min-h11 bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                  className="surface-card w-full min-h-11 bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <p className="text-sm font-medium">

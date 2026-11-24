@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
@@ -192,7 +192,7 @@ function ExceptionsInner() {
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={` min-h11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 "text-action-primary" "text-text-muted hover:text-text-primary" `}
+                className={` min-h-11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 "text-action-primary" "text-text-muted hover:text-text-primary" `}
               >
                 {f === "ALL"
                   ? "All exceptions"
@@ -302,7 +302,7 @@ function ExceptionsInner() {
                               )}
                             </div>
                           </td>
-                          <td className="px-3 py-2.5 text-text-muted text-xs max-w55 truncate">
+                          <td className="px-3 py-2.5 text-text-muted text-xs max-w-55 truncate">
                             {r.reason || "—"}
                           </td>
                           <td className="px-3 py-2.5 text-text-muted text-xs whitespace-nowrap">

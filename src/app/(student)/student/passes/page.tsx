@@ -43,7 +43,7 @@ export default function StudentPassesPage() {
       <div className="flex items-center gap-2">
         <Link
           href="/student"
-          className="surface-card min-h11 inline-flex items-center justify-center p-2 text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors"
+          className="surface-card min-h-11 inline-flex items-center justify-center p-2 text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors"
           aria-label="Back to student hub"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -89,16 +89,13 @@ export default function StudentPassesPage() {
               <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
                 My documents
               </h3>
-              {/* Level-0 pivot: tap to focus the active pass ticket so its
-                  next-step actions surface below. */}
-              <button
-                type="button"
-                onClick={() => setSelectedTicket(selectedTicket ? null : "")}
+              <Link
+                href="/student/permissions"
                 className="inline-flex items-center gap-1.5 rounded-lg bg-bg-elevated px-2.5 py-1 text-[11px] font-medium text-text-secondary hover:text-action-primary transition-colors motion-reduce:transition-none"
               >
                 <FileText className="h-3.5 w-3.5" />
-                {selectedTicket ? "Clear focus" : "Focus a document"}
-              </button>
+                View My Requests
+              </Link>
             </div>
             <MyDocuments />
           </div>

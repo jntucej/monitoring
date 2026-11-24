@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -279,7 +279,7 @@ function ManualEntryInner() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Aditi Sharma"
-                className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
+                className="surface-card w-full min-h-11 px-3 py-2.5 bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
               />
             </div>
             <div className="space-y-1.5 min-w-0">
@@ -298,7 +298,7 @@ function ManualEntryInner() {
                   if (e.key === "Enter") void runLookup();
                 }}
                 placeholder="e.g. 24JJ1A0501"
-                className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-base font-mono text-sm text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
+                className="surface-card w-full min-h-11 px-3 py-2.5 bg-bg-base font-mono text-sm text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
               />
             </div>
           </div>
@@ -306,7 +306,7 @@ function ManualEntryInner() {
             type="button"
             onClick={() => void runLookup()}
             disabled={lookupState === "loading" || !idNumber.trim()}
-            className="surface-card w-full sm:w-auto inline-flex min-h11 items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="surface-card w-full sm:w-auto inline-flex min-h-11 items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {lookupState === "loading" ? (
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
@@ -456,7 +456,7 @@ function ManualEntryInner() {
                     type="button"
                     onClick={() => setRecordDirection(d)}
                     disabled={recordState === "submitting"}
-                    className={`min-h11 inline-flex items-center justify-center px-3 py-2 text-sm font-bold transition disabled:opacity-50 "text-black" "text-text-primary "text-black" "text-text-primary"`}
+                    className={`min-h-11 inline-flex items-center justify-center px-3 py-2 text-sm font-bold transition disabled:opacity-50 "text-black" "text-text-primary "text-black" "text-text-primary"`}
                   >
                     {d === "IN" ? "Entry (IN)" : "Exit (OUT)"}
                   </button>
@@ -506,7 +506,7 @@ function ManualEntryInner() {
                     type="button"
                     onClick={() => setRecordEntryType("hosteller")}
                     disabled={recordState === "submitting"}
-                    className={`min-h11 inline-flex items-center justify-center px-3 py-2 text-sm transition-colors "hosteller" "text-[var(--accent-text)] font-medium" "text-text-primary "hosteller" "text-[var(--accent-text)] font-medium" "text-text-primary"`}
+                    className={`min-h-11 inline-flex items-center justify-center px-3 py-2 text-sm transition-colors "hosteller" "text-[var(--accent-text)] font-medium" "text-text-primary "hosteller" "text-[var(--accent-text)] font-medium" "text-text-primary"`}
                   >
                     Hosteller
                   </button>
@@ -514,7 +514,7 @@ function ManualEntryInner() {
                     type="button"
                     onClick={() => setRecordEntryType("day_scholar")}
                     disabled={recordState === "submitting"}
-                    className={`min-h11 inline-flex items-center justify-center px-3 py-2 text-sm transition-colors "day_scholar" "text-[var(--accent-text)] font-medium" "text-text-primary "day_scholar" "text-[var(--accent-text)] font-medium" "text-text-primary"`}
+                    className={`min-h-11 inline-flex items-center justify-center px-3 py-2 text-sm transition-colors "day_scholar" "text-[var(--accent-text)] font-medium" "text-text-primary "day_scholar" "text-[var(--accent-text)] font-medium" "text-text-primary"`}
                   >
                     Day Scholar
                   </button>
@@ -542,7 +542,7 @@ function ManualEntryInner() {
                 onChange={(e) => setRecordReasonText(e.target.value)}
                 placeholder="e.g. returning from doctor visit"
                 disabled={recordState === "submitting"}
-                className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
+                className="surface-card w-full min-h-11 px-3 py-2.5 bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
               />
             </div>
 
@@ -581,7 +581,7 @@ function ManualEntryInner() {
               type="button"
               onClick={() => void submitRecord()}
               disabled={recordState === "submitting"}
-              className="surface-card w-full inline-flex min-h11 items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+              className="surface-card w-full inline-flex min-h-11 items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
             >
               {recordState === "submitting" ? (
                 <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />

@@ -162,7 +162,7 @@ export function SmsQueue() {
               rows.map((r) => (
                 <tr key={r.id} className="border-b border-border/50 hover:bg-bg-elevated">
                   <td className="px-3 py-2 font-mono text-xs">{r.phone_number}</td>
-                  <td className="px-3 py-2 max-w55 truncate" title={r.message}>
+                  <td className="px-3 py-2 max-w-55 truncate" title={r.message}>
                     {r.message}
                   </td>
                   <td className="px-3 py-2">

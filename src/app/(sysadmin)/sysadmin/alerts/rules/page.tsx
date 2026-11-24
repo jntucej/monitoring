@@ -123,8 +123,8 @@ export default function AlertRulesPage() {
             <p className="text-sm text-text-muted">Configure real-time monitoring and threshold alerts.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button onClick={fetchAlerts} variant="secondary" size="sm" className="gap-2 min-h11"><RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh</Button>
-            <Button onClick={() => setIsModalOpen(true)} variant="primary" size="sm" className="gap-2 min-h11"><Plus className="w-4 h-4" /> Create Rule</Button>
+            <Button onClick={fetchAlerts} variant="secondary" size="sm" className="gap-2 min-h-11"><RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh</Button>
+            <Button onClick={() => setIsModalOpen(true)} variant="primary" size="sm" className="gap-2 min-h-11"><Plus className="w-4 h-4" /> Create Rule</Button>
           </div>
         </div>
         <Card className="border">

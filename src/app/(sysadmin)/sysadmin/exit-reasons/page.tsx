@@ -129,7 +129,7 @@ export default function ExitReasonsPage() {
                 maxDurationHours: 12,
               })
             }
-            className="surface-card px-4 py-2 min-h11 bg-action-warning hover:bg-amber-600 text-black font-semibold text-xs flex items-center gap-2 transition shrink-0"
+            className="surface-card px-4 py-2 min-h-11 bg-action-warning hover:bg-amber-600 text-black font-semibold text-xs flex items-center gap-2 transition shrink-0"
           >
             <Plus className="w-4 h-4" /> Add Exit Reason
           </button>
@@ -203,7 +203,7 @@ export default function ExitReasonsPage() {
                           onClick={() => setEditingReason(r)}
                           aria-label={`Edit ${r.name}`}
                           title={`Edit ${r.name}`}
-                          className="surface-card p-2 min-h11 min-w11 inline-flex items-center justify-center bg-bg-elevated hover:text-action-warning transition"
+                          className="surface-card p-2 min-h-11 min-w-11 inline-flex items-center justify-center bg-bg-elevated hover:text-action-warning transition"
                         >
                           <Edit3 className="w-4 h-4" aria-hidden />
                         </button>
@@ -212,7 +212,7 @@ export default function ExitReasonsPage() {
                           onClick={() => handleDelete(r.code)}
                           aria-label={`Delete ${r.name}`}
                           title={`Delete ${r.name}`}
-                          className="surface-card p-2 min-h11 min-w11 inline-flex items-center justify-center bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
+                          className="surface-card p-2 min-h-11 min-w-11 inline-flex items-center justify-center bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
                         >
                           <Trash2 className="w-4 h-4" aria-hidden />
                         </button>
@@ -244,7 +244,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.code || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, code: e.target.value.toUpperCase() })}
                       placeholder="e.g. MEDICAL"
-                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                   <div>
@@ -257,7 +257,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.name || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, name: e.target.value })}
                       placeholder="e.g. Medical Emergency"
-                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                     />
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export default function ExitReasonsPage() {
                     <select
                       value={editingReason.approvalBy || "principal"}
                       onChange={(e) => setEditingReason({ ...editingReason, approvalBy: e.target.value })}
-                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                     >
                       <option value="principal">Principal</option>
                       <option value="warden">Warden</option>
@@ -300,7 +300,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.maxDurationHours || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, maxDurationHours: e.target.value ? Number(e.target.value) : null })}
                       placeholder="e.g. 24"
-                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                 </div>
@@ -309,14 +309,14 @@ export default function ExitReasonsPage() {
                   <button
                     type="button"
                     onClick={() => setEditingReason(null)}
-                    className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bg-bg-elevated transition"
+                    className="surface-card px-4 py-2 min-h-11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bg-bg-elevated transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={!editingReason.code || !editingReason.name}
-                    className="surface-card px-4 py-2 min-h11 bg-action-warning text-black text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
+                    className="surface-card px-4 py-2 min-h-11 bg-action-warning text-black text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Save Exit Reason
                   </button>

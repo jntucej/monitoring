@@ -169,7 +169,7 @@ export function FocusMode({
             <button
               onClick={onClose}
               aria-label="Close"
-              className="flex size-4 min-h11 min-w11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
+              className="flex size-4 min-h-11 min-w-11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
             >
               ✕
             </button>
@@ -190,7 +190,7 @@ export function FocusMode({
             </p>
             <button
               onClick={onClose}
-              className="surface-card mt-6 min-h11 bg-action-primary px-5 py-2 text-sm font-medium text-white"
+              className="surface-card mt-6 min-h-11 bg-action-primary px-5 py-2 text-sm font-medium text-white"
             >
               Exit Focus Mode
             </button>
@@ -226,7 +226,7 @@ export function FocusMode({
                 <button
                   disabled={busy}
                   onClick={() => act("resolve")}
-                  className="surface-card flex min-h11 flex-1 items-center justify-center gap-2 bg-action-primary py-3 text-sm font-medium text-white transition hover:bg-action-primary/90 disabled:opacity-50"
+                  className="surface-card flex min-h-11 flex-1 items-center justify-center gap-2 bg-action-primary py-3 text-sm font-medium text-white transition hover:bg-action-primary/90 disabled:opacity-50"
                 >
                   <Check className="size-4" />
                   Resolve / Clear (A)
@@ -234,7 +234,7 @@ export function FocusMode({
                 <button
                   disabled={busy}
                   onClick={() => act("escalate")}
-                  className="surface-card flex min-h11 flex-1 items-center justify-center gap-2 bg-bg-base py-3 text-sm font-medium text-text-primary transition hover:bg-bg-elevated disabled:opacity-50"
+                  className="surface-card flex min-h-11 flex-1 items-center justify-center gap-2 bg-bg-base py-3 text-sm font-medium text-text-primary transition hover:bg-bg-elevated disabled:opacity-50"
                 >
                   <ArrowUpRight className="size-4" />
                   Escalate higher (E)

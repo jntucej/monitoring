@@ -542,7 +542,7 @@ function AdminStudentsInner() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, roll, or email…"
-              className="surface-card w-full min-h11 pl-9 pr-3 bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
+              className="surface-card w-full min-h-11 pl-9 pr-3 bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
             />
           </div>
 

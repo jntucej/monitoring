@@ -117,7 +117,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card min-h-11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -189,7 +189,7 @@ function MessIssuesInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h11 items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
+        className="inline-flex min-h-11 items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         Back to Mess Overview
       </Link>
@@ -204,7 +204,7 @@ function MessIssuesInner() {
         <button
           type="button"
           onClick={() => setRaiseOpen((o) => !o)}
-          className="surface-card inline-flex min-h11 items-center gap-2 bg-emerald-500/10 px-4 py-2 text-sm text-action-success hover:bg-emerald-500/20 shrink-0"
+          className="surface-card inline-flex min-h-11 items-center gap-2 bg-emerald-500/10 px-4 py-2 text-sm text-action-success hover:bg-emerald-500/20 shrink-0"
         >
           <Plus className="w-4 h-4" /> Raise Issue
         </button>
@@ -246,7 +246,7 @@ function MessIssuesInner() {
                 <select
                   value={eventType}
                   onChange={(e) => setEventType(e.target.value)}
-                  className="surface-card mt-1 w-full min-h11 bg-bg-surface px-3 py-2 text-sm text-white focus:outline-none focus:"
+                  className="surface-card mt-1 w-full min-h-11 bg-bg-surface px-3 py-2 text-sm text-white focus:outline-none focus:"
                 >
                   <option value="NO_SHOW_FLAGGED">No-show flagged</option>
                   <option value="TOKEN_REVOKED">Token revoked</option>
@@ -271,7 +271,7 @@ function MessIssuesInner() {
               <button
                 type="submit"
                 disabled={raising || !description.trim()}
-                className="surface-card inline-flex min-h11 items-center gap-2 bg-action-success hover:bg-action-success disabled:opacity-40 px-4 py-2 text-sm font-semibold text-white transition"
+                className="surface-card inline-flex min-h-11 items-center gap-2 bg-action-success hover:bg-action-success disabled:opacity-40 px-4 py-2 text-sm font-semibold text-white transition"
               >
                 {raising ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 Raise Issue
@@ -279,7 +279,7 @@ function MessIssuesInner() {
               <button
                 type="button"
                 onClick={() => setRaiseOpen(false)}
-                className="surface-card inline-flex min-h11 items-center px-3 py-2 text-xs text-text-muted hover:bg-bg-elevated"
+                className="surface-card inline-flex min-h-11 items-center px-3 py-2 text-xs text-text-muted hover:bg-bg-elevated"
               >
                 Cancel
               </button>
@@ -356,7 +356,7 @@ function MessIssuesInner() {
                               locationOrScope: issue.channel,
                             });
                           }}
-                          className="surface-card min-h11 px-2 py-0.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
+                          className="surface-card min-h-11 px-2 py-0.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
                         >
                           Verify
                         </button>

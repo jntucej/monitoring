@@ -32,7 +32,7 @@ export function ImpactCard({
         </div>
         <Link
           href="/hod/students"
-          className="inline-flex min-h11 items-center text-xs text-action-primary hover:underline"
+          className="inline-flex min-h-11 items-center text-xs text-action-primary hover:underline"
         >
           All {studentsTotal}
         </Link>

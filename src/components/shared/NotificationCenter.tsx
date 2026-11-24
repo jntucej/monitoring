@@ -274,7 +274,7 @@ export function NotificationCenter({
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close notifications"
-                className="surface-card p-2 min-w11 min-h11 flex items-center justify-center text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
+                className="surface-card p-2 min-w-11 min-h-11 flex items-center justify-center text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
               </button>

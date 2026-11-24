@@ -172,7 +172,7 @@ export function FrontlineSubjectSheet({
               <button
                 type="button"
                 onClick={handleDone}
-                className="surface-card w-full min-h11 inline-flex items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 transition active:scale-[0.99]"
+                className="surface-card w-full min-h-11 inline-flex items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 transition active:scale-[0.99]"
               >
                 <ClipboardCheck className="h-4 w-4" />
                 Done

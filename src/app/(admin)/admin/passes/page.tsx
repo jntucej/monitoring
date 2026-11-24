@@ -208,13 +208,13 @@ function AdminPassesInner() {
 
       <WidgetBoundary title="Pass records">
         <div className="glass-card">
-          <div className="surface-card p-4 flex items-center gap-2 min-h11">
+          <div className="surface-card p-4 flex items-center gap-2 min-h-11">
             <Search className="w-4 h-4 text-text-muted" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter by roll, name, type, or status…"
-              className="flex-1 min-h11 bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
+              className="flex-1 min-h-11 bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
             />
           </div>
           <div className="overflow-x-auto">

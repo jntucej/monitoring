@@ -74,7 +74,7 @@ export default function VerifyTokenPage() {
                   key={ev.id}
                   type="button"
                   onClick={() => setActiveEventId(ev.id)}
-                  className="surface-card flex min-h11 items-center justify-between px-3 py-2 text-left text-sm hover:bg-bg-elevated"
+                  className="surface-card flex min-h-11 items-center justify-between px-3 py-2 text-left text-sm hover:bg-bg-elevated"
                 >
                   <span>
                     <span className="font-medium text-text-primary">{ev.title}</span>
@@ -93,7 +93,7 @@ export default function VerifyTokenPage() {
             <button
               type="button"
               onClick={() => setActiveEventId(null)}
-              className="mb-3 inline-flex min-h11 items-center text-sm text-text-secondary underline"
+              className="mb-3 inline-flex min-h-11 items-center text-sm text-text-secondary underline"
             >
               ← Change event
             </button>

@@ -183,7 +183,7 @@ function ScanPageInner() {
       <WidgetBoundary title="Scanner">
         <button
           onClick={() => setShowScanner(true)}
-          className="surface-card w-full inline-flex min-h11 items-center justify-center gap-2 px-4 py-4 bg-action-success hover:bg-action-success text-white text-sm font-black uppercase tracking-wider transition"
+          className="surface-card w-full inline-flex min-h-11 items-center justify-center gap-2 px-4 py-4 bg-action-success hover:bg-action-success text-white text-sm font-black uppercase tracking-wider transition"
         >
           <ScanLine className="w-4 h-4" /> Open Camera Scanner
         </button>
@@ -205,7 +205,7 @@ function ScanPageInner() {
           </p>
           <button
             onClick={() => setManualOpen((o) => !o)}
-            className="surface-card inline-flex min-h11 items-center gap-1.5 px-3 py-2 bg-bg-elevated hover:bg-bg-elevated text-text-secondary text-xs font-bold transition"
+            className="surface-card inline-flex min-h-11 items-center gap-1.5 px-3 py-2 bg-bg-elevated hover:bg-bg-elevated text-text-secondary text-xs font-bold transition"
           >
             <KeyRound className="w-3.5 h-3.5 text-action-success" />
             {manualOpen ? "Hide entry form" : "Enter token code"}
@@ -219,12 +219,12 @@ function ScanPageInner() {
                 onChange={(e) => setManualCode(e.target.value)}
                 placeholder="e.g. M2610-4F7A2"
                 autoFocus
-                className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-surface text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:"
+                className="surface-card w-full min-h-11 px-3 py-2.5 bg-bg-surface text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:"
               />
               <button
                 type="submit"
                 disabled={manualChecking || !manualCode.trim()}
-                className="surface-card w-full inline-flex min-h11 items-center justify-center gap-2 px-3 py-2.5 bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition"
+                className="surface-card w-full inline-flex min-h-11 items-center justify-center gap-2 px-3 py-2.5 bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition"
               >
                 {manualChecking ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -276,7 +276,7 @@ function ScanPageInner() {
               </div>
               <button
                 onClick={reset}
-                className="surface-card inline-flex min-h11 items-center gap-1.5 px-3 py-2 bg-bg-elevated hover:bg-bg-elevated text-text-secondary text-xs font-bold transition"
+                className="surface-card inline-flex min-h-11 items-center gap-1.5 px-3 py-2 bg-bg-elevated hover:bg-bg-elevated text-text-secondary text-xs font-bold transition"
               >
                 <RotateCcw className="w-3.5 h-3.5" /> Try again
               </button>

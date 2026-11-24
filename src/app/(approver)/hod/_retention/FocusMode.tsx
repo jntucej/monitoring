@@ -148,7 +148,7 @@ export function FocusMode({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex size-4 min-h11 min-w11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
+              className="flex size-4 min-h-11 min-w-11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
               aria-label="Exit focus mode"
             >
               <X className="size-4" />
@@ -238,7 +238,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("APPROVE")}
-                    className="surface-card flex min-h11 items-center justify-center gap-2 bg-action-primary px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
+                    className="surface-card flex min-h-11 items-center justify-center gap-2 bg-action-primary px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
                   >
                     {busy ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                     Approve
@@ -246,7 +246,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("REJECT")}
-                    className="surface-card flex min-h11 items-center justify-center gap-2 bg-action-danger/5 px-4 py-3 text-sm font-medium text-action-danger transition disabled:opacity-50"
+                    className="surface-card flex min-h-11 items-center justify-center gap-2 bg-action-danger/5 px-4 py-3 text-sm font-medium text-action-danger transition disabled:opacity-50"
                   >
                     <X className="size-4" />
                     Reject
@@ -254,7 +254,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("ESCALATE")}
-                    className="surface-card flex min-h11 items-center justify-center gap-2 bg-bg-surface px-4 py-3 text-sm font-medium text-text-primary transition disabled:opacity-50"
+                    className="surface-card flex min-h-11 items-center justify-center gap-2 bg-bg-surface px-4 py-3 text-sm font-medium text-text-primary transition disabled:opacity-50"
                   >
                     <ArrowUpRight className="size-4" />
                     Escalate

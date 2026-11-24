@@ -532,7 +532,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                           <td className="px-4 py-3 font-mono text-action-danger">{u.uniqueId || "—"}</td>
                           <td className="px-4 py-3 text-white">{u.name}</td>
                           <td className="px-4 py-3 text-text-secondary">{u.role || "—"}</td>
-                          <td className="px-4 py-3 text-xs text-text-muted max-w55 truncate" title={u.reason || ""}>
+                          <td className="px-4 py-3 text-xs text-text-muted max-w-55 truncate" title={u.reason || ""}>
                             {u.reason || "—"}
                           </td>
                           <td className="px-4 py-3 text-right">

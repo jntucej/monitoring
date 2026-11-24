@@ -97,7 +97,7 @@ export function RoleFlash({ role, onNavigate, label, icon: Icon }: RoleFlashProp
         "border-border bg-bg-surface",
         "hover:bordertext-muted hover:bg-bg-elevated",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ringfocus-ring",
-        "active:scale-[0.98] min-h11 min-w11"
+        "active:scale-[0.98] min-h-11 min-w-11"
       )}
     >
       <motion.span

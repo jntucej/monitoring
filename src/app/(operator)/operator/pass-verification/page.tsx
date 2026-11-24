@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { Suspense, useCallback, useState } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
@@ -147,7 +147,7 @@ function PassVerificationInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card min-h-11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -224,14 +224,14 @@ function PassVerificationInner() {
                           value={rejectComment}
                           onChange={(e) => setRejectComment(e.target.value)}
                           placeholder="Reason for rejection (required)"
-                          className="surface-card w-full sm:w-56 min-h11 bg-bg-base px-2.5 py-1.5 text-xs text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-rose-500/40 outline-none"
+                          className="surface-card w-full sm:w-56 min-h-11 bg-bg-base px-2.5 py-1.5 text-xs text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-rose-500/40 outline-none"
                         />
                         <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
                             onClick={() => handleRejectConfirm(ticket)}
                             disabled={!rejectComment.trim() || actingTicket === rejectKey}
-                            className="surface-card inline-flex min-h11 items-center gap-1.5 bg-action-danger px-3 py-1.5 text-xs font-bold text-white hover:bg-action-danger disabled:opacity-50 transition-colors"
+                            className="surface-card inline-flex min-h-11 items-center gap-1.5 bg-action-danger px-3 py-1.5 text-xs font-bold text-white hover:bg-action-danger disabled:opacity-50 transition-colors"
                           >
                             {actingTicket === rejectKey ? (
                               <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" />
@@ -246,7 +246,7 @@ function PassVerificationInner() {
                               setRejectingTicket(null);
                               setRejectComment("");
                             }}
-                            className="surface-card min-h11 inline-flex items-center px-3 py-1.5 text-xs font-semibold text-text-muted hover:text-text-primary transition-colors"
+                            className="surface-card min-h-11 inline-flex items-center px-3 py-1.5 text-xs font-semibold text-text-muted hover:text-text-primary transition-colors"
                           >
                             Cancel
                           </button>
@@ -258,7 +258,7 @@ function PassVerificationInner() {
                           type="button"
                           onClick={() => void act(ticket, "APPROVE")}
                           disabled={actingTicket === key}
-                          className="surface-card inline-flex min-h11 items-center gap-1.5 bg-action-success px-3 py-1.5 text-xs font-bold text-black hover:bg-action-success disabled:opacity-50 transition-colors"
+                          className="surface-card inline-flex min-h-11 items-center gap-1.5 bg-action-success px-3 py-1.5 text-xs font-bold text-black hover:bg-action-success disabled:opacity-50 transition-colors"
                         >
                           {actingTicket === key ? (
                             <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" />
@@ -273,7 +273,7 @@ function PassVerificationInner() {
                             setRejectingTicket(ticket);
                             setRejectComment("");
                           }}
-                          className="surface-card inline-flex min-h11 items-center gap-1.5 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/20 transition-colors"
+                          className="surface-card inline-flex min-h-11 items-center gap-1.5 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/20 transition-colors"
                         >
                           <X className="size-3.5" />
                           Reject

@@ -62,7 +62,7 @@ export default function MessReviewsPage() {
         subtitle="Satisfaction distribution and recent student comments."
         actions={
           <button type="button" onClick={() => void load()}
-            className="surface-card inline-flex min-h11 items-center gap-2 px-3 py-2 text-sm text-text-secondary">
+            className="surface-card inline-flex min-h-11 items-center gap-2 px-3 py-2 text-sm text-text-secondary">
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
         }

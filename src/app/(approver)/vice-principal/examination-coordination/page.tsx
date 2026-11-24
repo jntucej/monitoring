@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { Suspense, useMemo } from "react";
 import Link from "next/link";
@@ -154,7 +154,7 @@ function VpExaminationInner() {
               </p>
               <Link
                 href="/vice-principal/pending-approvals"
-                className="surface-card mt-3 inline-flex min-h11 items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-action-info hover:bg-sky-500/20 transition-colors"
+                className="surface-card mt-3 inline-flex min-h-11 items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-action-info hover:bg-sky-500/20 transition-colors"
               >
                 Open Pending Approvals <ArrowRight className="w-3.5 h-3.5" />
               </Link>

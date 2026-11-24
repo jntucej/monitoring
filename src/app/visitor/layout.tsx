@@ -14,6 +14,7 @@ const MANIFEST = {
   rootHref: "/visitor",
   storageKey: NAV_STORAGE_KEY,
   nav: VISITOR_NAV,
+  hasProfile: false,
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

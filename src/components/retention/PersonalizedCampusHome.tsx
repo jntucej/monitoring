@@ -324,7 +324,7 @@ export function PersonalizedCampusHome() {
               <button
                 key={label}
                 type="button"
-                className="surface-card min-h11 flex items-center gap-1.5 bg-bg-elevated/30 px-3 text-xs text-text-secondary hover:bg-bg-elevated/40 transition-colors motion-reduce:transition-none"
+                className="surface-card min-h-11 flex items-center gap-1.5 bg-bg-elevated/30 px-3 text-xs text-text-secondary hover:bg-bg-elevated/40 transition-colors motion-reduce:transition-none"
               >
                 <Icon className="h-3.5 w-3.5" />
                 {label}

@@ -128,7 +128,7 @@ const api = useApi();
                 order: navItems.length + 1,
               })
             }
-            className="surface-card px-4 py-2 min-h11 bg-action-primary hover:bg-blue-600 text-white font-semibold text-xs flex items-center gap-2 transition"
+            className="surface-card px-4 py-2 min-h-11 bg-action-primary hover:bg-blue-600 text-white font-semibold text-xs flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4" /> Add Nav Item
           </button>
@@ -154,7 +154,7 @@ const api = useApi();
               type="button"
               key={role}
               onClick={() => setSelectedRole(role)}
-              className={`px-4 py-2 min-h11 rounded-xl text-xs font-bold uppercase tracking-wider transition ${
+              className={`px-4 py-2 min-h-11 rounded-xl text-xs font-bold uppercase tracking-wider transition ${
                 selectedRole === role
                   ? "bg-action-primary text-white shadow-lg shadow-blue-500/20"
                   : "bg-bg-surface border border-border text-text-muted hover:text-white"
@@ -279,7 +279,7 @@ const api = useApi();
                       value={editingItem.icon || ""}
                       onChange={(e) => setEditingItem({ ...editingItem, icon: e.target.value })}
                       placeholder="e.g. DoorOpen"
-                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                   <div>
@@ -291,7 +291,7 @@ const api = useApi();
                       required
                       value={editingItem.order ?? 1}
                       onChange={(e) => setEditingItem({ ...editingItem, order: Number(e.target.value) })}
-                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                 </div>
@@ -300,13 +300,13 @@ const api = useApi();
                   <button
                     type="button"
                     onClick={() => setEditingItem(null)}
-                    className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bg-bg-elevated transition"
+                    className="surface-card px-4 py-2 min-h-11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bg-bg-elevated transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="surface-card px-4 py-2 min-h11 bg-action-primary text-white text-xs font-semibold hover:bg-blue-600 transition"
+                    className="surface-card px-4 py-2 min-h-11 bg-action-primary text-white text-xs font-semibold hover:bg-blue-600 transition"
                   >
                     Save Item
                   </button>

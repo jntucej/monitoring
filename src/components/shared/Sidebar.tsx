@@ -138,7 +138,7 @@ function DesktopSidebar({
                   <div key={item.href} className="relative group flex items-center justify-center">
                     <Link
                       href={item.href}
-                      className={` min-h11 min-w11 flex items-center justify-center rounded-xl text-xs font-medium transition-all "bg-action-primary/15 text-action-primary font-semibold" "text-text-secondary hover:text-text-primary hover:bg-bg-elevated" `}
+                      className={` min-h-11 min-w-11 flex items-center justify-center rounded-xl text-xs font-medium transition-all "bg-action-primary/15 text-action-primary font-semibold" "text-text-secondary hover:text-text-primary hover:bg-bg-elevated" `}
                       aria-label={item.label}
                     >
                       <Icon className="w-4 h-4 shrink-0" />
@@ -151,7 +151,7 @@ function DesktopSidebar({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={` min-h11 flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all "text-action-primary font-semibold" "text-text-secondary hover:text-text-primary hover:bg-bg-elevated" `}
+                    className={` min-h-11 flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all "text-action-primary font-semibold" "text-text-secondary hover:text-text-primary hover:bg-bg-elevated" `}
                   >
                     <Icon className="w-4 h-4 shrink-0" />
                     <div className="flex-1 flex items-center justify-between truncate">
@@ -352,7 +352,7 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchPara
         <button
           type="button"
           onClick={toggleMobileSidebar}
-          className="flex flex-col items-center justify-center h-full w-full py-1 text-text-muted hover:text-text-primary active-tap transition-all min-h11"
+          className="flex flex-col items-center justify-center h-full w-full py-1 text-text-muted hover:text-text-primary active-tap transition-all min-h-11"
           aria-label="Open Navigation Drawer"
           title="Navigation Menu"
         >
@@ -370,7 +370,7 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchPara
               key={item.href}
               href={item.href}
               title={item.label}
-              className={`relative flex flex-col items-center justify-center h-full w-full py-1 active-tap transition-all min-h11 ${
+              className={`relative flex flex-col items-center justify-center h-full w-full py-1 active-tap transition-all min-h-11 ${
                 active
                   ? "text-action-primary font-bold"
                   : "text-text-muted hover:text-text-primary"

@@ -45,7 +45,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open navigation menu"
-        className="md:hidden fixed top-3 left-3 z-50 min-w11 min-h11 rounded-xl flex items-center justify-center border border-border bg-bg-elevated/95 backdrop-blur-md text-text-secondary active:scale-95 transition-transform"
+        className="md:hidden fixed top-3 left-3 z-50 min-w-11 min-h-11 rounded-xl flex items-center justify-center border border-border bg-bg-elevated/95 backdrop-blur-md text-text-secondary active:scale-95 transition-transform"
       >
         <Menu className="w-4 h-4" />
       </button>
@@ -80,7 +80,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close navigation menu"
-            className="min-w11 min-h11 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-surface transition-colors"
+            className="min-w-11 min-h-11 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-surface transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

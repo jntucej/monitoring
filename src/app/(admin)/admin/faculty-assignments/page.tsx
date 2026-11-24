@@ -169,7 +169,7 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.facultyId}
               onChange={(e) => setDraft((d) => ({ ...d, facultyId: e.target.value }))}
-              className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm"
+              className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm"
               required
             >
               <option value="">Select</option>
@@ -181,7 +181,7 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.classId}
               onChange={(e) => setDraft((d) => ({ ...d, classId: e.target.value }))}
-              className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm"
+              className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm"
               required
             >
               <option value="">Select</option>
@@ -193,7 +193,7 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.subjectCode}
               onChange={(e) => setDraft((d) => ({ ...d, subjectCode: e.target.value }))}
-              className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm"
+              className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm"
               required
             >
               <option value="">Select</option>
@@ -205,14 +205,14 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.role}
               onChange={(e) => setDraft((d) => ({ ...d, role: e.target.value as FacultyAssignment["role"] }))}
-              className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm"
+              className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm"
             >
               <option value="subject_faculty">Subject faculty</option>
               <option value="assistant">Assistant</option>
             </select>
           </label>
           <button type="submit" disabled={saving}
-            className="surface-card inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h11 bg-action-primary text-white text-xs font-semibold disabled:opacity-50">
+            className="surface-card inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-11 bg-action-primary text-white text-xs font-semibold disabled:opacity-50">
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Assign
           </button>
         </form>
@@ -229,7 +229,7 @@ function AdminFacultyAssignmentsInner() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter…"
-                className="surface-card pl-8 pr-3 py-1.5 min-h11 bg-bg-elevated text-xs w-full sm:w-40"
+                className="surface-card pl-8 pr-3 py-1.5 min-h-11 bg-bg-elevated text-xs w-full sm:w-40"
               />
             </div>
           </div>
@@ -266,7 +266,7 @@ function AdminFacultyAssignmentsInner() {
                     </td>
                     <td className="p-3 text-right">
                       <button onClick={() => unassign(r.id)} aria-label="Unassign"
-                        className="p-2 min-h11 min-w11 inline-flex items-center justify-center text-text-muted hover:text-action-danger transition-colors">
+                        className="p-2 min-h-11 min-w-11 inline-flex items-center justify-center text-text-muted hover:text-action-danger transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </td>

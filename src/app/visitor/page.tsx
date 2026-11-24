@@ -78,7 +78,7 @@ export default function VisitorLandingPage() {
             <Link
               key={href}
               href={href}
-              className="surface-card group min-h11 flex items-center justify-between p-4 hover:bg-[var(--bg-elev-1)] transition-colors"
+              className="surface-card group min-h-11 flex items-center justify-between p-4 hover:bg-[var(--bg-elev-1)] transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Icon className="w-5 h-5 shrink-0" />

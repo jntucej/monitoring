@@ -511,7 +511,7 @@ export function ApproverStageDrawer({
               <div className="flex items-center gap-2">
                 <Link
                   href={`/permissions/${item.ticketId}`}
-                  className="surface-card flex-1 min-h11 inline-flex items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-white hover:brightness-110 transition active:scale-[0.99]"
+                  className="surface-card flex-1 min-h-11 inline-flex items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-white hover:brightness-110 transition active:scale-[0.99]"
                 >
                   <ExternalLink className="h-4 w-4" />
                   Open Full Ticket &amp; Actions
@@ -519,7 +519,7 @@ export function ApproverStageDrawer({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="surface-card min-h11 inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-text-secondary bg-bg-elevated hover:bg-bg-surface transition"
+                  className="surface-card min-h-11 inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-text-secondary bg-bg-elevated hover:bg-bg-surface transition"
                 >
                   Close
                 </button>

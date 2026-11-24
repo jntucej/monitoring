@@ -179,7 +179,7 @@ function StudentAttendanceCalendarInner() {
             <button
               type="button"
               onClick={prevMonth}
-              className="surface-card min-h11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
+              className="surface-card min-h-11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
             >
               ← Prev
             </button>
@@ -189,7 +189,7 @@ function StudentAttendanceCalendarInner() {
             <button
               type="button"
               onClick={nextMonth}
-              className="surface-card min-h11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
+              className="surface-card min-h-11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
             >
               Next →
             </button>

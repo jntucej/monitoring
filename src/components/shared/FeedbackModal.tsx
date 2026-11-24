@@ -42,7 +42,7 @@ export function FeedbackModal({ theme, onClose, onSubmit }: FeedbackModalProps) 
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-text-primary">Theme Feedback</h3>
-            <button onClick={onClose} aria-label="Close modal" className="surface-card p-2 min-w11 min-h11 flex items-center justify-center hover:bg-bg-elevated">
+            <button onClick={onClose} aria-label="Close modal" className="surface-card p-2 min-w-11 min-h-11 flex items-center justify-center hover:bg-bg-elevated">
               <X className="w-5 h-5 text-text-muted" />
             </button>
           </div>

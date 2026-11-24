@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import Link from "next/link";
 import { Suspense } from "react";
@@ -72,7 +72,7 @@ function OperatorDeskHero() {
         </div>
         <Link
           href={gateId ? `/gate/${gateId}` : "/operator/claim"}
-          className="surface-card inline-flex min-h11 items-center justify-center gap-2 bg-action-primary px-5 text-sm font-bold text-black transition-colors"
+          className="surface-card inline-flex min-h-11 items-center justify-center gap-2 bg-action-primary px-5 text-sm font-bold text-black transition-colors"
         >
           {gateId ? "Open gate desk" : "Claim your gate"}
         </Link>

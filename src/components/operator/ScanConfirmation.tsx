@@ -178,7 +178,7 @@ export function ScanConfirmation({
                 alt.payload.buttonId ?? undefined
               )
             }
-            className="w-full min-h11 rounded-xl bg-bg-elevated border border-border text-text-secondary font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40"
+            className="w-full min-h-11 rounded-xl bg-bg-elevated border border-border text-text-secondary font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40"
           >
             <Check className="w-4 h-4" />
             {alt.label}

@@ -227,7 +227,7 @@ function AdminAnalyticsInner() {
                   key={days}
                   type="button"
                   onClick={() => setRange(days)}
-                  className={`px-3 py-1 min-h11 rounded-lg font-medium transition flex items-center justify-center ${
+                  className={`px-3 py-1 min-h-11 rounded-lg font-medium transition flex items-center justify-center ${
                     range === days
                       ? "bg-action-primary text-white shadow"
                       : "text-text-muted hover:text-text-primary"
@@ -241,14 +241,14 @@ function AdminAnalyticsInner() {
               type="button"
               onClick={exportCsv}
               disabled={!data || data.daily.length === 0}
-              className="surface-card inline-flex items-center gap-1.5 px-3.5 py-2 min-h11 bg-bg-surface text-xs font-semibold text-text-primary hover:bg-bg-elevated disabled:opacity-50"
+              className="surface-card inline-flex items-center gap-1.5 px-3.5 py-2 min-h-11 bg-bg-surface text-xs font-semibold text-text-primary hover:bg-bg-elevated disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
             <button
               type="button"
               onClick={load}
-              className="surface-card p-2 min-h11 min-w11 flex items-center justify-center bg-bg-surface text-text-muted hover:text-text-primary"
+              className="surface-card p-2 min-h-11 min-w-11 flex items-center justify-center bg-bg-surface text-text-muted hover:text-text-primary"
               title="Refresh"
             >
               <RefreshCw className="w-4 h-4" />

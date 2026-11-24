@@ -307,7 +307,7 @@ const api = useApi();
             <p className="text-sm text-text-muted mt-1">Manage faculty, operators, admins, and all non-student personnel. {staffList.length} records.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => setShowCreateModal(true)} className="surface-card flex items-center gap-2 px-4 py-2.5 min-h11 bg-action-success text-white text-sm font-semibold hover:bg-action-success">
+            <button onClick={() => setShowCreateModal(true)} className="surface-card flex items-center gap-2 px-4 py-2.5 min-h-11 bg-action-success text-white text-sm font-semibold hover:bg-action-success">
               <UserPlus className="w-4 h-4" /> Add Staff
             </button>
           </div>
@@ -317,11 +317,11 @@ const api = useApi();
           <div className="relative flex-1 min-w55">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input type="text" placeholder="Search by name, ID, email..." value={search} onChange={(e) => setSearch(e.target.value)}
-              className="surface-card w-full min-h11 pl-10 pr-4 py-2.5 bg-bg-surface text-sm text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:" />
+              className="surface-card w-full min-h-11 pl-10 pr-4 py-2.5 bg-bg-surface text-sm text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:" />
           </div>
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
             <SlidersHorizontal className="w-3.5 h-3.5 text-text-muted" />
-            <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="surface-card bg-bg-surface px-3 py-2 min-h11 text-xs text-text-secondary">
+            <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="surface-card bg-bg-surface px-3 py-2 min-h-11 text-xs text-text-secondary">
               <option value="ALL">All Roles</option>
               <option value="sysadmin">SysAdmin</option><option value="admin">Admin</option>
               <option value="faculty">Faculty</option><option value="operator">Operator</option>
@@ -338,10 +338,10 @@ const api = useApi();
                 <option value="exam_branch">Exam Branch</option>
               </optgroup>
             </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="surface-card bg-bg-surface px-3 py-2 min-h11 text-xs text-text-secondary">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="surface-card bg-bg-surface px-3 py-2 min-h-11 text-xs text-text-secondary">
               <option value="ALL">All Status</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option>
             </select>
-            <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} className="surface-card bg-bg-surface px-3 py-2 min-h11 text-xs text-text-secondary">
+            <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} className="surface-card bg-bg-surface px-3 py-2 min-h-11 text-xs text-text-secondary">
               <option value="ALL">All Departments</option>
               {(stats?.byDepartment ?? []).map((d) => <option key={d.code} value={d.code}>{d.name}</option>)}
             </select>
@@ -446,10 +446,10 @@ const api = useApi();
                       <td className="px-4 py-3"><span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${s.status === "ACTIVE" ? "bg-entry-subtle" : "bg-exit-subtle"}`}>{s.status}</span></td>
                       <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-success" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
-                          <button onClick={() => openEditModal(s)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-info" title="Edit"><Edit className="w-4 h-4" /></button>
-                          <button onClick={() => handleToggleStatus(s)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated" title={s.status === "ACTIVE" ? "Suspend" : "Activate"}>{s.status === "ACTIVE" ? <Ban className="w-4 h-4 text-action-warning" /> : <CheckCircle2 className="w-4 h-4 text-action-primary" />}</button>
-                          <button onClick={() => handleDeleteStaff(s)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-danger" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="surface-card p-2 min-h-11 min-w-11 flex items-center justify-center hover:bg-bg-elevated text-action-success" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
+                          <button onClick={() => openEditModal(s)} className="surface-card p-2 min-h-11 min-w-11 flex items-center justify-center hover:bg-bg-elevated text-action-info" title="Edit"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => handleToggleStatus(s)} className="surface-card p-2 min-h-11 min-w-11 flex items-center justify-center hover:bg-bg-elevated" title={s.status === "ACTIVE" ? "Suspend" : "Activate"}>{s.status === "ACTIVE" ? <Ban className="w-4 h-4 text-action-warning" /> : <CheckCircle2 className="w-4 h-4 text-action-primary" />}</button>
+                          <button onClick={() => handleDeleteStaff(s)} className="surface-card p-2 min-h-11 min-w-11 flex items-center justify-center hover:bg-bg-elevated text-action-danger" title="Delete"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>
@@ -475,33 +475,33 @@ const api = useApi();
             <div className="bg-bg-surface border border-border rounded-2xl w-full max-w-lg shadow-2xl">
               <div className="surface-card flex items-center justify-between px-5 py-4">
                 <h2 className="text-lg font-bold text-text-primary">Add New Staff</h2>
-                <button onClick={() => setShowCreateModal(false)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-text-muted"><X className="w-4 h-4" /></button>
+                <button onClick={() => setShowCreateModal(false)} className="surface-card p-2 min-h-11 min-w-11 flex items-center justify-center hover:bg-bg-elevated text-text-muted"><X className="w-4 h-4" /></button>
               </div>
               <form onSubmit={handleCreateStaff} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Employee ID <span className="font-normal text-text-muted">(optional — auto-generated if blank)</span></label>
-                    <input type="text" value={createForm.employeeId} onChange={(e) => setCreateForm({ ...createForm, employeeId: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" placeholder="EMP-001 (leave blank to auto-generate)" />
+                    <input type="text" value={createForm.employeeId} onChange={(e) => setCreateForm({ ...createForm, employeeId: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" placeholder="EMP-001 (leave blank to auto-generate)" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Full Name *</label>
-                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
+                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Email</label>
-                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
+                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Phone</label>
-                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
+                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Role</label>
-                    <select value={createForm.role} onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:">
+                    <select value={createForm.role} onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:">
                   <option value="faculty">Faculty</option><option value="operator">Operator</option>
                   <option value="staff">Staff</option><option value="worker">Worker</option>
                   <option value="admin">Admin</option><option value="sysadmin">SysAdmin</option>
@@ -565,22 +565,22 @@ const api = useApi();
               <UserRolesPanel userId={editingStaff.id} />
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Full Name</label>
-                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
+                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Email</label>
-                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
+                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Phone</label>
-                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
+                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Role</label>
-                    <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:">
+                    <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:">
                   <option value="faculty">Faculty</option><option value="operator">Operator</option>
                   <option value="staff">Staff</option><option value="worker">Worker</option>
                   <option value="admin">Admin</option><option value="sysadmin">SysAdmin</option>
@@ -599,12 +599,12 @@ const api = useApi();
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Department</label>
-                    <input type="text" value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
+                    <input type="text" value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Designation</label>
-                  <input type="text" value={editForm.designation} onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
+                  <input type="text" value={editForm.designation} onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:" />
                 </div>
             {["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(editForm.role) && (
               <div>
@@ -614,18 +614,18 @@ const api = useApi();
                   placeholder="e.g. MH-1, LH-2, or ALL"
                   value={editForm.hostelScope}
                   onChange={(e) => setEditForm({ ...editForm, hostelScope: e.target.value })}
-                  className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
+                  className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                 />
               </div>
             )}
                 <div className="surface-card grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-bg-elevated/60">
                   <div>
                     <label className="text-xs font-semibold text-action-warning block mb-1">Reset Password (Optional)</label>
-                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-xs text-text-primary focus:outline-none focus:" />
+                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-xs text-text-primary focus:outline-none focus:" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-action-warning block mb-1">Reset Kiosk PIN (Optional)</label>
-                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-xs text-text-primary focus:outline-none focus:" />
+                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-xs text-text-primary focus:outline-none focus:" />
                   </div>
                 </div>
                 <div>
@@ -633,8 +633,8 @@ const api = useApi();
                   <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="surface-card w-full px-3 py-2 bg-bg-elevated text-xs font-mono text-text-secondary focus:outline-none focus:" />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
-                  <button type="button" onClick={() => setEditingStaff(null)} className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
-                  <button type="submit" disabled={busy} className="surface-card px-4 py-2 min-h11 bg-action-primary text-white text-xs font-semibold hover:opacity-90 disabled:opacity-50">{busy ? "Saving..." : "Update Staff"}</button>
+                  <button type="button" onClick={() => setEditingStaff(null)} className="surface-card px-4 py-2 min-h-11 bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
+                  <button type="submit" disabled={busy} className="surface-card px-4 py-2 min-h-11 bg-action-primary text-white text-xs font-semibold hover:opacity-90 disabled:opacity-50">{busy ? "Saving..." : "Update Staff"}</button>
                 </div>
               </form>
             </div>

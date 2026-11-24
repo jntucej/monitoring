@@ -28,7 +28,7 @@ export function FacultyCare({
         </div>
         <Link
           href="/hod/faculty/attendance"
-          className="inline-flex min-h11 items-center text-xs text-action-primary hover:underline"
+          className="inline-flex min-h-11 items-center text-xs text-action-primary hover:underline"
         >
           Details
         </Link>

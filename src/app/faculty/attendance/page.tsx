@@ -95,7 +95,7 @@ function FacultyAttendanceInner() {
           </p>
         </div>
         <div className="flex items-center gap-3 text-xs text-text-muted">
-          {user?.name && <span className="truncate max-w55">{user.name}</span>}
+          {user?.name && <span className="truncate max-w-55">{user.name}</span>}
         </div>
       </div>
 

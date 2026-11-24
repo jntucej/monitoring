@@ -94,7 +94,7 @@ export default function SysadminConsoleLayout({
             <main className="flex-1 overflow-y-auto">
               <div className="surface-card flex items-center justify-between gap-3 bg-bg-surface px-4 py-2 sm:px-6">
                 <span className="text-xs font-semibold tracking-wide text-text-muted">
-                  JNTU CEEJ · SysAdmin
+                  JNTUH UCEJ · SysAdmin
                 </span>
               </div>
               {main}

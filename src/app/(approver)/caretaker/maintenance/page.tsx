@@ -189,7 +189,7 @@ function CaretakerMaintenanceInner() {
                           locationOrScope: t.hostelBlock ? `Block ${t.hostelBlock}` : undefined,
                         });
                       }}
-                      className="surface-card min-h11 px-2 py-0.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
+                      className="surface-card min-h-11 px-2 py-0.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
                     >
                       Verify
                     </button>

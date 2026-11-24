@@ -29,7 +29,7 @@ const Row = memo(function Row({
     <button
       type="button"
       onClick={() => onSelect?.(scan)}
-      className="surface-card w-full flex items-center justify-between text-xs py-3 px-2 last: hover:bg-bg-base transition-colors text-left min-h11"
+      className="surface-card w-full flex items-center justify-between text-xs py-3 px-2 last: hover:bg-bg-base transition-colors text-left min-h-11"
     >
       <div className="flex items-center gap-3 min-w-0">
         <div className={`size-6 rounded-xl flex items-center justify-center shrink-0 ${scan.direction === "IN" ? "bg-emerald-500/10 text-action-success" : "bg-action-danger/10 text-action-danger"}`}>

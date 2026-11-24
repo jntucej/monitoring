@@ -76,7 +76,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card min-h-11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -155,7 +155,7 @@ function MessMenuInner() {
                   <div className="flex-1" />
                   <Link
                     href="/mess/scan"
-                    className="surface-card inline-flex min-h11 items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 shrink-0"
+                    className="surface-card inline-flex min-h-11 items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 shrink-0"
                   >
                     <Eye className="w-3.5 h-3.5" /> Token Scanner
                   </Link>

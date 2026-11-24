@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
@@ -85,7 +85,7 @@ function OperatorAnnouncementsInner() {
           type="button"
           onClick={() => void loadAnnouncements()}
           disabled={loading}
-          className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-elevated transition shrink-0 disabled:opacity-50"
+          className="surface-card min-h-11 inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-elevated transition shrink-0 disabled:opacity-50"
         >
           {loading ? (
             <span className="flex items-center gap-1.5"><Loader2 className="size-3.5 animate-spin" />Loading</span>

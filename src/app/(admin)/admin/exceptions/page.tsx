@@ -166,7 +166,7 @@ function AdminExceptionsInner() {
                 type="button"
                 onClick={() => setFilter(f)}
                 aria-pressed={filter === f}
-                className={` min-h11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 "bg-action-primary/10 text-action-primary" "text-text-muted hover:text-text-primary" `}
+                className={` min-h-11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 "bg-action-primary/10 text-action-primary" "text-text-muted hover:text-text-primary" `}
               >
                 {f === "ALL"
                   ? "All"
@@ -291,7 +291,7 @@ function AdminExceptionsInner() {
                               )}
                             </div>
                           </td>
-                          <td className="px-3 py-2.5 text-text-muted text-xs max-w55 truncate">
+                          <td className="px-3 py-2.5 text-text-muted text-xs max-w-55 truncate">
                             {r.reason || "—"}
                           </td>
                           <td className="px-3 py-2.5 text-text-muted text-xs whitespace-nowrap">

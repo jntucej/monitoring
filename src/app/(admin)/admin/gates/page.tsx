@@ -177,7 +177,7 @@ export default function AdminGatesPage() {
         <button
           type="button"
           onClick={() => setShowCreate((v) => !v)}
-          className="surface-card flex items-center gap-2 px-3.5 py-2 min-h11 bg-action-success hover:bg-action-success text-white text-xs font-bold shrink-0"
+          className="surface-card flex items-center gap-2 px-3.5 py-2 min-h-11 bg-action-success hover:bg-action-success text-white text-xs font-bold shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           {showCreate ? "Hide Create Form" : "Create Gate"}
@@ -221,7 +221,7 @@ export default function AdminGatesPage() {
                 type="button"
                 disabled={updatingMode}
                 onClick={() => handleSetGateMode("OPEN")}
-                className={`px-3 py-2 min-h11 text-xs font-bold transition flex items-center gap-1.5 "OPEN" "text-white "text-text-muted hover:text-text-primary" "OPEN" "text-white" "text-text-muted hover:text-text-primary"`}
+                className={`px-3 py-2 min-h-11 text-xs font-bold transition flex items-center gap-1.5 "OPEN" "text-white "text-text-muted hover:text-text-primary" "OPEN" "text-white" "text-text-muted hover:text-text-primary"`}
               >
                 <Check className="w-3.5 h-3.5" />
                 Normal (OPEN)
@@ -230,7 +230,7 @@ export default function AdminGatesPage() {
                 type="button"
                 disabled={updatingMode}
                 onClick={() => handleSetGateMode("CURFEW")}
-                className={`px-3 py-2 min-h11 text-xs font-bold transition flex items-center gap-1.5 "CURFEW" "text-white "text-text-muted hover:text-text-primary" "CURFEW" "text-white" "text-text-muted hover:text-text-primary"`}
+                className={`px-3 py-2 min-h-11 text-xs font-bold transition flex items-center gap-1.5 "CURFEW" "text-white "text-text-muted hover:text-text-primary" "CURFEW" "text-white" "text-text-muted hover:text-text-primary"`}
               >
                 <Moon className="w-3.5 h-3.5" />
                 Curfew
@@ -239,7 +239,7 @@ export default function AdminGatesPage() {
                 type="button"
                 disabled={updatingMode}
                 onClick={() => handleSetGateMode("MAINTENANCE")}
-                className={`px-3 py-2 min-h11 text-xs font-bold transition flex items-center gap-1.5 "MAINTENANCE" "text-white "text-text-muted hover:text-text-primary" "MAINTENANCE" "text-white" "text-text-muted hover:text-text-primary"`}
+                className={`px-3 py-2 min-h-11 text-xs font-bold transition flex items-center gap-1.5 "MAINTENANCE" "text-white "text-text-muted hover:text-text-primary" "MAINTENANCE" "text-white" "text-text-muted hover:text-text-primary"`}
               >
                 <Wrench className="w-3.5 h-3.5" />
                 Maintenance
@@ -262,7 +262,7 @@ export default function AdminGatesPage() {
                   onChange={(e) => setCreateForm({ ...createForm, gateCode: e.target.value })}
                   required
                   placeholder="e.g. G-MAIN"
-                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
+                  className="surface-card mt-1 w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 />
               </label>
               <label className="block">
@@ -271,7 +271,7 @@ export default function AdminGatesPage() {
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                   placeholder="Main Gate"
-                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
+                  className="surface-card mt-1 w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 />
               </label>
               <label className="block">
@@ -280,7 +280,7 @@ export default function AdminGatesPage() {
                   value={createForm.location}
                   onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
                   placeholder="Campus"
-                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
+                  className="surface-card mt-1 w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 />
               </label>
               <label className="block">
@@ -288,7 +288,7 @@ export default function AdminGatesPage() {
                 <select
                   value={createForm.type}
                   onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}
-                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
+                  className="surface-card mt-1 w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 >
                   <option value="standard">standard</option>
                   <option value="staff">staff</option>
@@ -301,7 +301,7 @@ export default function AdminGatesPage() {
                 <select
                   value={createForm.audience}
                   onChange={(e) => setCreateForm({ ...createForm, audience: e.target.value })}
-                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
+                  className="surface-card mt-1 w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 >
                   <option value="all">all</option>
                   <option value="staff">staff</option>
@@ -312,7 +312,7 @@ export default function AdminGatesPage() {
             <button
               type="submit"
               disabled={creating || !createForm.gateCode.trim()}
-              className="surface-card px-4 py-2 min-h11 bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2"
+              className="surface-card px-4 py-2 min-h-11 bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               {creating ? "Creating..." : "Create Gate"}
@@ -370,7 +370,7 @@ export default function AdminGatesPage() {
                         <td className="py-3 px-4 text-text-muted">
                           <Link
                             href={`/admin/gates/${g.id}`}
-                            className="surface-card px-2.5 py-1 min-h11 inline-flex items-center bg-bg-elevated text-xs font-semibold text-text-primary hover:bg-bg-base transition"
+                            className="surface-card px-2.5 py-1 min-h-11 inline-flex items-center bg-bg-elevated text-xs font-semibold text-text-primary hover:bg-bg-base transition"
                           >
                             Details & Status
                           </Link>

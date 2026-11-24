@@ -135,7 +135,7 @@ export function BetweenClasses({
       {pendingCount > 0 && (
         <a
           href="/hod/approvals/pending"
-          className="surface-card mt-3 flex min-h11 items-center justify-center gap-1 bg-action-primary/5 px-3 py-2 text-xs font-medium text-action-primary transition hover:bg-action-primary/10"
+          className="surface-card mt-3 flex min-h-11 items-center justify-center gap-1 bg-action-primary/5 px-3 py-2 text-xs font-medium text-action-primary transition hover:bg-action-primary/10"
         >
           Clear {pendingCount} approval{pendingCount === 1 ? "" : "s"} now
           <ArrowRight className="size-3" />

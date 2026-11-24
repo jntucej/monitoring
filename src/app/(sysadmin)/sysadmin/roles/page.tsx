@@ -644,7 +644,7 @@ export default function RolesManagementPage() {
                 default_redirect: "/profile",
               })
             }
-            className="surface-card px-4 py-2 min-h11 bg-unit-c hover:bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 transition shrink-0"
+            className="surface-card px-4 py-2 min-h-11 bg-unit-c hover:bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 transition shrink-0"
           >
             <Plus className="w-4 h-4" /> Define System Role
           </button>
@@ -670,19 +670,19 @@ export default function RolesManagementPage() {
               <button
                 onClick={() => void refreshGraph()}
                 disabled={countLoading}
-                className="surface-card inline-flex items-center gap-1 px-3 py-1.5 min-h11 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-unit-c transition disabled:opacity-50"
+                className="surface-card inline-flex items-center gap-1 px-3 py-1.5 min-h-11 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-unit-c transition disabled:opacity-50"
               >
                 <RefreshCw className="size-3.5" /> Refresh
               </button>
               <button
                 onClick={expandAll}
-                className="surface-card px-3 py-1.5 min-h11 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-unit-c transition"
+                className="surface-card px-3 py-1.5 min-h-11 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-unit-c transition"
               >
                 Expand All
               </button>
               <button
                 onClick={collapseAll}
-                className="surface-card px-3 py-1.5 min-h11 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-unit-c transition"
+                className="surface-card px-3 py-1.5 min-h-11 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-unit-c transition"
               >
                 Collapse All
               </button>
@@ -876,7 +876,7 @@ export default function RolesManagementPage() {
                   value={grantSearch}
                   onChange={(e) => searchUsers(e.target.value)}
                   placeholder="Search by name, email, or ID…"
-                  className="surface-card w-full min-h11 pl-9 pr-3 py-2.5 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
+                  className="surface-card w-full min-h-11 pl-9 pr-3 py-2.5 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                 />
                 {grantSearch && (
                   <button
@@ -884,7 +884,7 @@ export default function RolesManagementPage() {
                       setGrantSearch("");
                       setGrantResults([]);
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 min-h11 min-w11 flex items-center justify-center text-text-muted hover:text-action-danger transition"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-action-danger transition"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -912,7 +912,7 @@ export default function RolesManagementPage() {
                         <button
                           onClick={() => grantRole(u)}
                           disabled={grantBusy || hasRole}
-                          className={`px-3 py-1.5 min-h11 rounded-lg text-xs font-bold transition flex items-center justify-center ${
+                          className={`px-3 py-1.5 min-h-11 rounded-lg text-xs font-bold transition flex items-center justify-center ${
                             hasRole
                               ? "bg-bg-elevated text-text-muted cursor-not-allowed"
                               : "bg-action-success hover:bg-action-success text-white"
@@ -929,7 +929,7 @@ export default function RolesManagementPage() {
                               ? "Role graph unavailable — assign a replacement role manually"
                               : `Demote to '${roleParents[grantRoleCode]}'`
                           }
-                          className="surface-card px-3 py-1.5 min-h11 text-xs font-bold transition flex items-center justify-center bg-rose-500/15 text-action-danger hover:bg-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="surface-card px-3 py-1.5 min-h-11 text-xs font-bold transition flex items-center justify-center bg-rose-500/15 text-action-danger hover:bg-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           Revoke
                         </button>
@@ -1025,7 +1025,7 @@ export default function RolesManagementPage() {
                         setEditingRole({ ...editingRole, icon_name: e.target.value })
                       }
                       placeholder="e.g. Shield"
-                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                   <div>
@@ -1039,7 +1039,7 @@ export default function RolesManagementPage() {
                         setEditingRole({ ...editingRole, default_redirect: e.target.value })
                       }
                       placeholder="e.g. /admin"
-                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                 </div>
@@ -1048,13 +1048,13 @@ export default function RolesManagementPage() {
                   <button
                     type="button"
                     onClick={() => setEditingRole(null)}
-                    className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bgborder transition"
+                    className="surface-card px-4 py-2 min-h-11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bgborder transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="surface-card px-4 py-2 min-h11 bg-unit-c text-white text-xs font-semibold hover:bg-purple-600 transition"
+                    className="surface-card px-4 py-2 min-h-11 bg-unit-c text-white text-xs font-semibold hover:bg-purple-600 transition"
                   >
                     Save Role
                   </button>

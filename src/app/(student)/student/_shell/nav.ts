@@ -25,6 +25,7 @@ export const STUDENT_NAV: NavEntry[] = [
   },
   {
     kind: "group", id: "mess", label: "Mess & Dining", icon: UtensilsCrossed,
+    when: isHosteller,
     children: [
       { href: "/student/mess", label: "Mess Overview" },
       { href: "/student/mess/token", label: "Meal Token & Menu" },

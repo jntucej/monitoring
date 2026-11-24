@@ -97,7 +97,7 @@ const api = useApi();
               <motion.div
                 variants={isGlossyMotion ? fadeInUp : {}}
                 key={student.id}
-                className="surface-card flex items-center justify-between p-2.5 hover:bg-white/5 transition min-h11"
+                className="surface-card flex items-center justify-between p-2.5 hover:bg-white/5 transition min-h-11"
               >
                 <div className="flex items-center gap-3">
                   <div className={`size-6 rounded-full flex items-center justify-center ${colorClass}`}>

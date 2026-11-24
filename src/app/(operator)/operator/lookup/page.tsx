@@ -1,5 +1,5 @@
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 "use client";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -203,7 +203,7 @@ function OperatorLookupInner() {
                 placeholder="e.g. 24JJ1A0501"
                 aria-label="Roll, employee, or ID number to look up (required)"
                 required
-                className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-base font-mono text-sm text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
+                className="surface-card w-full min-h-11 px-3 py-2.5 bg-bg-base font-mono text-sm text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
               />
             </div>
             <div className="space-y-1.5 min-w-0">
@@ -217,7 +217,7 @@ function OperatorLookupInner() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Aditi Sharma"
                 aria-label="Name on the ID, optional"
-                className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
+                className="surface-card w-full min-h-11 px-3 py-2.5 bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
               />
             </div>
           </div>
@@ -225,7 +225,7 @@ function OperatorLookupInner() {
             type="button"
             onClick={() => void runLookup()}
             disabled={lookupState === "loading" || !idNumber.trim()}
-            className="surface-card w-full sm:w-auto inline-flex min-h11 items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="surface-card w-full sm:w-auto inline-flex min-h-11 items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {lookupState === "loading" ? (
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
@@ -285,7 +285,7 @@ function OperatorLookupInner() {
                   <div className="ml-auto flex items-center gap-2">
                     <Link
                       href={`/operator/manual-entry?id=${encodeURIComponent(result.uniqueId)}`}
-                      className="surface-card min-h11 inline-flex items-center px-3 py-1 text-xs font-semibold bg-bg-surface text-action-primary hover:bg-bg-elevated transition-colors"
+                      className="surface-card min-h-11 inline-flex items-center px-3 py-1 text-xs font-semibold bg-bg-surface text-action-primary hover:bg-bg-elevated transition-colors"
                     >
                       Manual Entry &rarr;
                     </Link>
@@ -300,7 +300,7 @@ function OperatorLookupInner() {
                           locationOrScope: result.department ?? undefined,
                         })
                       }
-                      className="surface-card min-h11 px-3 py-1 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
+                      className="surface-card min-h-11 px-3 py-1 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
                     >
                       Verify
                     </button>

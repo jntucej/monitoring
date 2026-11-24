@@ -100,12 +100,12 @@ export default function RepsPage() {
           placeholder="Student UUID"
           value={form.studentId}
           onChange={(e) => setForm({ ...form, studentId: e.target.value })}
-          className="surface-card p-2 text-sm min-h11"
+          className="surface-card p-2 text-sm min-h-11"
         />
         <select
           value={form.scopeType}
           onChange={(e) => setForm({ ...form, scopeType: e.target.value })}
-          className="surface-card p-2 text-sm min-h11"
+          className="surface-card p-2 text-sm min-h-11"
         >
           <option value="class">Class</option>
           <option value="department">Department</option>
@@ -119,24 +119,24 @@ export default function RepsPage() {
           placeholder="Scope ID (e.g. CSE-3-A, BlockA)"
           value={form.scopeId}
           onChange={(e) => setForm({ ...form, scopeId: e.target.value })}
-          className="surface-card p-2 text-sm min-h11"
+          className="surface-card p-2 text-sm min-h-11"
         />
         <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="date"
             value={form.validFrom}
             onChange={(e) => setForm({ ...form, validFrom: e.target.value })}
-            className="surface-card p-2 text-sm flex-1 min-h11"
+            className="surface-card p-2 text-sm flex-1 min-h-11"
           />
           <input
             type="date"
             required
             value={form.validTo}
             onChange={(e) => setForm({ ...form, validTo: e.target.value })}
-            className="surface-card p-2 text-sm flex-1 min-h11"
+            className="surface-card p-2 text-sm flex-1 min-h-11"
           />
         </div>
-        <button type="submit" className="surface-card px-4 py-2 bg-bg-surface text-white text-sm col-span-1 sm:col-span-2 font-medium min-h11">
+        <button type="submit" className="surface-card px-4 py-2 bg-bg-surface text-white text-sm col-span-1 sm:col-span-2 font-medium min-h-11">
           Appoint representative
         </button>
       </form>
