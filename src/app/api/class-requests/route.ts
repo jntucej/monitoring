@@ -6,6 +6,7 @@
 
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 import { query } from "@/lib/postgres";
@@ -163,5 +164,5 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   return fail("FORBIDDEN", "Not permitted to view class requests", 403);
 }
 
-export const POST = withAuthorization(implPost, {});
+export const POST = withMutationGuard(implPost, {});
 export const GET = withAuthorization(implGet, {});

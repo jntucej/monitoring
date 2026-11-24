@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok } from "@/server/http/response";
 
@@ -136,6 +137,6 @@ export const GET = withAuthorization(withRateLimit(handleGet), {
   requiredRole: ["sysadmin", "admin"],
 });
 
-export const POST = withAuthorization(withRateLimit(handleGet), {
+export const POST = withMutationGuard(handleGet, {
   requiredRole: ["sysadmin", "admin"],
 });

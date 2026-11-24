@@ -7,8 +7,7 @@
 
 import { NextRequest } from "next/server";
 import { query } from "@/lib/postgres";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { TIER } from "@/server/policy/roles";
 import type { AuthContext } from "@/lib/authContext";
@@ -48,7 +47,7 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ logId: id, category, reason, at: new Date().toISOString() });
 }
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: TIER.OPERATOR }),
-  { keyPrefix: "operator-scan-category", maxRequests: 30, windowMs: 60_000 }
-);
+export const PATCH = withMutationGuard(handlePatch, {
+  requiredRole: TIER.OPERATOR,
+  rateLimit: { maxRequests: 30, windowMs: 60_000 },
+});

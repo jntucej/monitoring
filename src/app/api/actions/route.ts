@@ -9,7 +9,7 @@
 
 import { NextRequest } from "next/server";
 import { query } from "@/lib/postgres";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -86,4 +86,4 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ status: "ok", recordId: result.rows[0]?.id } as ActionResultShape);
 }
 
-export const POST = withAuthorization(implPost, {});
+export const POST = withMutationGuard(implPost, {});

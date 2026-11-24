@@ -9,6 +9,7 @@
 
 import { NextRequest } from "next/server";
 import { withAuthorization, type AuthContext } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
 
@@ -85,7 +86,7 @@ export const GET = withRateLimit(
   { keyPrefix: "disputes-get", maxRequests: 60, windowMs: 60_000 },
 );
 
-export const POST = withRateLimit(
-  withAuthorization(implPost, { requiredRole: ["student", "guardian", "parent"] }),
-  { keyPrefix: "disputes-create", maxRequests: 20, windowMs: 60_000 },
-);
+export const POST = withMutationGuard(implPost, {
+  requiredRole: ["student", "guardian", "parent"],
+  rateLimit: { maxRequests: 20, windowMs: 60_000 },
+});
