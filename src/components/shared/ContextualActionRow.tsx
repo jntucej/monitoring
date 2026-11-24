@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { WorkflowChainTracker } from "@/components/shared/WorkflowChainTracker";
+import { ActorTimelineFeed } from "@/components/shared/ActorTimelineFeed";
 
 export interface ActorEventContext {
   actorName: string;
@@ -34,6 +35,7 @@ export interface ContextualRowData<TAction extends string> {
     actorName?: string | null;
     actorRole?: string | null;
     actionTaken?: string | null;
+    reason?: string | null;
     atLabel?: string | null;
   }>;
   actions: RowActionSpec<TAction>[];
@@ -115,9 +117,9 @@ export function ContextualActionRow<TAction extends string>({
         />
       )}
 
-      {/* Actor rationale block */}
+      {/* Actor rationale block + expandable full timeline */}
       {row.latestActorEvent && (
-        <div className="bg-bg-elevated px-3 py-2 text-xs space-y-0.5">
+        <div className="bg-bg-elevated px-3 py-2 text-xs space-y-1.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="font-semibold text-text-primary">
               {row.latestActorEvent.actorName} ({row.latestActorEvent.actorRole}) ·{" "}
@@ -134,6 +136,16 @@ export function ContextualActionRow<TAction extends string>({
             <p className="text-text-secondary">
               &ldquo;{row.latestActorEvent.reason}&rdquo;
             </p>
+          )}
+          {row.workflowEvents && row.workflowEvents.length > 1 && (
+            <details className="pt-1">
+              <summary className="cursor-pointer text-[11px] font-medium text-action-primary">
+                View full actor trail ({row.workflowEvents.length})
+              </summary>
+              <div className="mt-2">
+                <ActorTimelineFeed events={row.workflowEvents} />
+              </div>
+            </details>
           )}
         </div>
       )}

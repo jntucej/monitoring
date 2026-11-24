@@ -363,6 +363,7 @@ export function ApproverDecisionQueue({
                       actorName: h.actor_name ?? h.actorName ?? null,
                       actorRole: h.actor_role ?? h.actorRole ?? null,
                       actionTaken: h.action ?? null,
+                      reason: h.comment ?? h.reason ?? null,
                       atLabel: (h.at ?? h.timestamp)
                         ? new Date(h.at ?? h.timestamp ?? "").toLocaleString("en-IN", {
                             day: "2-digit",
