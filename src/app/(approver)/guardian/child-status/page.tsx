@@ -5,6 +5,7 @@ import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { WorkflowChainTracker } from "@/components/shared/WorkflowChainTracker";
 import { useAuthStore } from "@/stores/authStore";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -292,6 +293,12 @@ function ChildStatusInner() {
         primaryAction={{ label: "Submit Pass / Leave", href: "/guardian/pass-leave-submission" }}
         secondaryAction={{ label: "Movement Records", href: "/guardian/movement-info" }}
       />
+      <div className="surface-card bg-bg-surface p-3">
+        <WorkflowChainTracker
+          currentStage="guardian"
+          ticketStatus={wards.length > 0 ? "APPROVED" : "PENDING"}
+        />
+      </div>
 
       {personsError && (
         <div className="surface-card bg-action-danger/10 p-3 text-sm text-action-danger flex items-center justify-between gap-3">

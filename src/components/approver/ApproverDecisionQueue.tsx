@@ -357,6 +357,21 @@ export function ApproverDecisionQueue({
                     situationSummary: reason,
                     latestActorEvent,
                     historyCount: history.length,
+                    workflowStage: stage,
+                    workflowStatus: row.status ?? "PENDING",
+                    workflowEvents: history.map((h) => ({
+                      actorName: h.actor_name ?? h.actorName ?? null,
+                      actorRole: h.actor_role ?? h.actorRole ?? null,
+                      actionTaken: h.action ?? null,
+                      atLabel: (h.at ?? h.timestamp)
+                        ? new Date(h.at ?? h.timestamp ?? "").toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : null,
+                    })),
                     actions: [
                       {
                         action: "APPROVE",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { WorkflowChainTracker } from "@/components/shared/WorkflowChainTracker";
 
 export interface ActorEventContext {
   actorName: string;
@@ -27,6 +28,14 @@ export interface ContextualRowData<TAction extends string> {
   situationSummary: string;
   latestActorEvent?: ActorEventContext;
   historyCount?: number;
+  workflowStage?: string | null;
+  workflowStatus?: string | null;
+  workflowEvents?: Array<{
+    actorName?: string | null;
+    actorRole?: string | null;
+    actionTaken?: string | null;
+    atLabel?: string | null;
+  }>;
   actions: RowActionSpec<TAction>[];
 }
 
@@ -95,6 +104,16 @@ export function ContextualActionRow<TAction extends string>({
       <p className="text-xs leading-relaxed text-text-secondary">
         {row.situationSummary}
       </p>
+
+      {/* Compact workflow stage pipeline */}
+      {(row.workflowStage || row.workflowStatus) && (
+        <WorkflowChainTracker
+          currentStage={row.workflowStage}
+          ticketStatus={row.workflowStatus}
+          events={row.workflowEvents}
+          compact
+        />
+      )}
 
       {/* Actor rationale block */}
       {row.latestActorEvent && (

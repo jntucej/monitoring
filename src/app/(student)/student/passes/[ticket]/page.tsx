@@ -9,6 +9,7 @@ import { RequestTimeline } from "@/components/shared/RequestTimeline";
 import { ArrowLeft } from "lucide-react";
 import { PermissionTicketCard } from "@/components/student/PermissionTicketCard";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { WorkflowChainTracker } from "@/components/shared/WorkflowChainTracker";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 
 interface Payload {
@@ -59,8 +60,14 @@ export default function PassLifecyclePage() {
               : `Current pass status is ${pass.status ?? "unknown"}.`
         }
         primaryAction={{ label: "All Gate Passes", href: "/student/passes" }}
-        secondaryAction={{ label: "New Request", href: "/student/permissions/new" }}
+        secondaryActions={[{ label: "New Request", href: "/student/permissions/new" }]}
       />
+      <div className="surface-card bg-bg-surface p-3">
+        <WorkflowChainTracker
+          currentStage={pass.current_stage}
+          ticketStatus={pass.status}
+        />
+      </div>
       <PermissionTicketCard ticket={pass} />
       <RequestTimeline ticket={ticket} />
     </div>
