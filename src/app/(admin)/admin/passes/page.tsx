@@ -75,6 +75,35 @@ function AdminPassesInner() {
   const active = rows.filter((r) => ["APPROVED", "ACTIVE", "GRANTED"].includes(r.status.toUpperCase())).length;
 
   const [activePass, setActivePass] = useState<PassRow | null>(null);
+  const [revokeReason, setRevokeReason] = useState("");
+  const [revoking, setRevoking] = useState(false);
+  const [revokeMsg, setRevokeMsg] = useState<string | null>(null);
+
+  const handleRevoke = async (ticketId: string) => {
+    if (!revokeReason.trim() || revoking) return;
+    setRevoking(true);
+    setRevokeMsg(null);
+    try {
+      const res = await fetch(`/api/permissions/${encodeURIComponent(ticketId)}/revoke`, {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: revokeReason.trim() }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || body?.success === false) {
+        setRevokeMsg(body?.error?.message ?? "Failed to revoke pass.");
+        return;
+      }
+      setRows((prev) =>
+        prev.map((r) => (r.id === ticketId ? { ...r, status: "CANCELLED" } : r)),
+      );
+      setActivePass((prev) => (prev && prev.id === ticketId ? { ...prev, status: "CANCELLED" } : prev));
+      setRevokeReason("");
+      setRevokeMsg("Pass revoked and student notified.");
+    } finally {
+      setRevoking(false);
+    }
+  };
 
   /** Standardized inspection model for a pass (overview → context → history → actions). */
   const passInspection = activePass
@@ -124,19 +153,44 @@ function AdminPassesInner() {
           {
             title: "Actions",
             content: (
-              <div className="flex flex-wrap gap-2">
-                <InspectorButton
-                  href={`/admin/students/${activePass.roll ?? activePass.id}`}
-                  variant="ghost"
-                >
-                  <ChevronRight className="size-3.5" /> Student profile
-                </InspectorButton>
-                <InspectorButton
-                  href="/admin/institutional/cases"
-                  variant="ghost"
-                >
-                  <ChevronRight className="size-3.5" /> Linked cases
-                </InspectorButton>
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  <InspectorButton
+                    href={`/admin/students/${activePass.roll ?? activePass.id}`}
+                    variant="ghost"
+                  >
+                    <ChevronRight className="size-3.5" /> Student profile
+                  </InspectorButton>
+                  <InspectorButton
+                    href="/admin/institutional/cases"
+                    variant="ghost"
+                  >
+                    <ChevronRight className="size-3.5" /> Linked cases
+                  </InspectorButton>
+                </div>
+                {["APPROVED", "ACTIVE", "GRANTED"].includes(activePass.status.toUpperCase()) && (
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    <input
+                      type="text"
+                      value={revokeReason}
+                      onChange={(e) => setRevokeReason(e.target.value)}
+                      placeholder="Revocation reason (required)…"
+                      aria-label="Revocation reason"
+                      className="w-full min-h-11 rounded-lg bg-bg-elevated px-3 py-1.5 text-xs text-text-primary"
+                    />
+                    <button
+                      type="button"
+                      disabled={!revokeReason.trim() || revoking}
+                      onClick={() => void handleRevoke(activePass.id)}
+                      className="min-h-11 w-full rounded-lg bg-action-danger px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                    >
+                      {revoking ? "Revoking…" : "Revoke Active Pass"}
+                    </button>
+                  </div>
+                )}
+                {revokeMsg && (
+                  <p className="text-xs font-medium text-action-primary">{revokeMsg}</p>
+                )}
               </div>
             ),
           },

@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { getAuthHeaders } from "@/lib/utils";
 import {
   UtensilsCrossed,
   CalendarDays,
@@ -86,6 +87,35 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
 
 function MessMenuInner() {
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [newCode, setNewCode] = useState("");
+  const [newLabel, setNewLabel] = useState("");
+  const [addingItem, setAddingItem] = useState(false);
+  const [addMsg, setAddMsg] = useState<string | null>(null);
+
+  const handleAddMenuItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCode.trim() || !newLabel.trim() || addingItem) return;
+    setAddingItem(true);
+    setAddMsg(null);
+    try {
+      const res = await fetch("/api/mess/menu-items", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ code: newCode.trim().toUpperCase(), label: newLabel.trim() }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || body?.success === false) {
+        setAddMsg(body?.error?.message ?? "Failed to add menu item.");
+        return;
+      }
+      setNewCode("");
+      setNewLabel("");
+      setAddMsg("Menu item added to catalog.");
+      await refreshMenu();
+    } finally {
+      setAddingItem(false);
+    }
+  };
   const {
     data: menu,
     loading: menuLoading,
@@ -126,6 +156,40 @@ function MessMenuInner() {
           { label: "Mess Overview", href: "/mess" },
         ]}
       />
+      <form onSubmit={handleAddMenuItem} className="surface-card bg-bg-surface p-4 flex flex-wrap items-end gap-3">
+        <div className="min-w-[120px]">
+          <label htmlFor="menu-code" className="block text-xs font-medium text-text-muted mb-1">Item Code</label>
+          <input
+            id="menu-code"
+            type="text"
+            required
+            value={newCode}
+            onChange={(e) => setNewCode(e.target.value)}
+            placeholder="e.g. IDLI"
+            className="min-h-11 w-full rounded-lg bg-bg-elevated px-3 py-1.5 text-xs text-text-primary"
+          />
+        </div>
+        <div className="flex-1 min-w-[180px]">
+          <label htmlFor="menu-label" className="block text-xs font-medium text-text-muted mb-1">Item Label</label>
+          <input
+            id="menu-label"
+            type="text"
+            required
+            value={newLabel}
+            onChange={(e) => setNewLabel(e.target.value)}
+            placeholder="e.g. Steamed Idli & Sambar"
+            className="min-h-11 w-full rounded-lg bg-bg-elevated px-3 py-1.5 text-xs text-text-primary"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={addingItem}
+          className="min-h-11 rounded-lg bg-action-primary px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+        >
+          {addingItem ? "Adding…" : "Add Menu Item"}
+        </button>
+        {addMsg && <p className="w-full text-xs font-medium text-action-primary">{addMsg}</p>}
+      </form>
       <WidgetBoundary title="Menu Management">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
           <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">
