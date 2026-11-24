@@ -162,9 +162,9 @@ export function ExamSuperintendentCommandBar({ role, open, onClose }: ExamSuperi
     }
   }, [open]);
 
+  const router = useRouter();
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
-  const router = useRouter();
       // ── candidates: navigate to the candidate access list ──
       if (parsed.action === "CANDIDATES") {
         router.push("/exam/superintendent/schedule");

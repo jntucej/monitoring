@@ -13,6 +13,7 @@ import { getAuthHeaders } from "@/lib/utils";
  * links here, not to the decorative /security posture infographic.
  */
 export default function SessionsPage() {
+  const router = useRouter();
   const [rows, setRows] = useState<Array<Record<string, unknown>> | null>(null);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -26,7 +27,6 @@ export default function SessionsPage() {
   }, []);
 
   const signOutAll = async () => {
-  const router = useRouter();
     setSigningOut(true);
     try {
       await fetch("/api/auth/logout-all", { method: "POST", headers: getAuthHeaders() });

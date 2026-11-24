@@ -115,7 +115,8 @@ export interface UsePassTypesConfig {
  * const { configs } = usePassTypesV2({ staffOnBehalf: true });
  */
 export function usePassTypesV2(opts: UsePassTypesConfig = {}) {
-  const persona = opts.persona ?? usePersona();
+  const detectedPersona = usePersona();
+  const persona = opts.persona ?? detectedPersona;
   const [configs, setConfigs] = useState<PassTypeConfig[]>([]);
   const [loading, setLoading] = useState(false);
 

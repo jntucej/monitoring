@@ -48,9 +48,9 @@ export function MiniSparkline({
     return `${path} L${width - 2},${height} L2,${height} Z`;
   }, [path, filled, width, height]);
 
-  if (data.length < 2) return null;
-
   const gradId = useMemo(() => `spark-${Math.random().toString(36).slice(2, 8)}`, []);
+
+  if (data.length < 2) return null;
 
   return (
     <svg

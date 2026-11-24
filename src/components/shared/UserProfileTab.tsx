@@ -10,11 +10,11 @@ import { User, Mail, Shield, CheckCircle, Tag, LogOut, Smartphone, ShieldCheck }
 import Link from "next/link";
 
 export function UserProfileTab() {
+  const router = useRouter();
   const { user, role, logout } = useAuthStore();
 const { addToast } = useUIStore();
 
   const handleLogout = async () => {
-  const router = useRouter();
     try {
       await logout();
       addToast({

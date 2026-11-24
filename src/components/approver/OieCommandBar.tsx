@@ -170,9 +170,9 @@ export function OieCommandBar({ role, open, onClose }: OieCommandBarProps) {
     }
   }, [open]);
 
+  const router = useRouter();
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
-  const router = useRouter();
       // ── exceptions: navigate to the access-exceptions page ──
       if (parsed.action === "EXCEPTIONS") {
         router.push("/oie/access-exceptions");
