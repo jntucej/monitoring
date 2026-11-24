@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { WorkflowChainTracker } from "@/components/shared/WorkflowChainTracker";
 import { ActorTimelineFeed } from "@/components/shared/ActorTimelineFeed";
+import { ActionConsequencePreview } from "@/components/shared/ActionConsequencePreview";
 
 export interface ActorEventContext {
   actorName: string;
@@ -153,9 +154,12 @@ export function ContextualActionRow<TAction extends string>({
       {/* Action bar with consequence preview or inline reason prompt */}
       {pendingSpec ? (
         <div className="space-y-2 pt-1">
-          <p className="text-[11px] text-text-muted">
-            Consequence: <span className="text-text-primary font-medium">{pendingSpec.consequence}</span>
-          </p>
+          <ActionConsequencePreview
+            nextState={pendingSpec.consequence}
+            sideEffects={["Notifies student & guardian", "Writes audit log entry"]}
+            requiresReason={pendingSpec.requiresReason}
+            tone={pendingSpec.tone}
+          />
           <input
             type="text"
             value={reasonText}
@@ -206,9 +210,11 @@ export function ContextualActionRow<TAction extends string>({
             })}
           </div>
           {row.actions[0]?.consequence && (
-            <p className="text-[11px] text-text-muted">
-              Next: {row.actions.map((a) => `${a.label} → ${a.consequence}`).join(" · ")}
-            </p>
+            <ActionConsequencePreview
+              nextState={row.actions.map((a) => `${a.label} → ${a.consequence}`).join(" · ")}
+              sideEffects={["Updates workflow stage", "Writes audit entry"]}
+              requiresReason={row.actions.some((a) => a.requiresReason)}
+            />
           )}
         </div>
       )}
