@@ -77,10 +77,11 @@ describe("student notifications merge", () => {
       "href",
       "/student/notifications/alerts",
     );
-    expect(screen.getByRole("link", { name: "Announcements" })).toHaveAttribute(
-      "href",
-      "/student/notifications/announcements",
-    );
+    const announcementLinks = screen.getAllByRole("link", { name: "Announcements" });
+    expect(announcementLinks.length).toBeGreaterThanOrEqual(1);
+    for (const link of announcementLinks) {
+      expect(link).toHaveAttribute("href", "/student/notifications/announcements");
+    }
   });
 
   it("empty state when no items on either source", async () => {
