@@ -6,7 +6,6 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { VPDesktopShell } from "./_shell/VPDesktopShell";
-import { VPMobileShell } from "./_shell/VPMobileShell";
 
 export default function VicePrincipalLayout({
   children,
@@ -16,12 +15,7 @@ export default function VicePrincipalLayout({
   return (
     <AuthGuard allowedRoles={["vice_principal", "principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
-        <div className="hidden lg:block">
-          <VPDesktopShell>{children}</VPDesktopShell>
-        </div>
-        <div className="block lg:hidden">
-          <VPMobileShell>{children}</VPMobileShell>
-        </div>
+        <VPDesktopShell>{children}</VPDesktopShell>
         <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>

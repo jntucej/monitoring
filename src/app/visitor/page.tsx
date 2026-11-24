@@ -6,8 +6,6 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import type { VisitorsMineResponse } from "./types";
 
 // 1.8 — status home: shows the visitor's live visit state + check-in/out CTA,
@@ -91,13 +89,6 @@ export default function VisitorLandingPage() {
             </Link>
           ))}
         </div>
-      </WidgetBoundary>
-
-      <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-        <PersonalizedCampusHome />
-      </WidgetBoundary>
-      <WidgetBoundary name="TaskContinuity" title="Task Continuity">
-        <TaskContinuity />
       </WidgetBoundary>
     </div>
   );

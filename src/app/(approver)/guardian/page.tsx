@@ -377,23 +377,29 @@ function GuardianOverviewInner() {
         />
       </div>
 
-      {/* shared + retention panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <QuickActions />
-        <NotificationCenter />
-      </div>
-      <PersonalizedCampusHome />
-      <AttentionQueue />
-      <ActivityTimeline />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <TaskContinuity />
-        <UnifiedCampusCalendar />
-      </div>
-
       <Suspense fallback={null}>
-        <ParentWeeklyDigest />
         <ParentConsentInbox />
+        <ParentWeeklyDigest />
       </Suspense>
+
+      <details className="surface-card bg-bg-surface p-4">
+        <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-text-muted">
+          More campus activity &amp; calendar
+        </summary>
+        <div className="mt-4 space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <QuickActions />
+            <NotificationCenter />
+          </div>
+          <PersonalizedCampusHome />
+          <AttentionQueue />
+          <ActivityTimeline />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <TaskContinuity />
+            <UnifiedCampusCalendar />
+          </div>
+        </div>
+      </details>
 
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>

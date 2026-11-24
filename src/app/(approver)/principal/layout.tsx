@@ -6,7 +6,6 @@ import { PageLoading } from "@/components/principal/shared/PrincipalLoadingState
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { PrincipalDesktopShell } from "./_shell/PrincipalDesktopShell";
-import { PrincipalMobileShell } from "./_shell/PrincipalMobileShell";
 
 export default function PrincipalLayout({
   children,
@@ -16,12 +15,7 @@ export default function PrincipalLayout({
   return (
     <AuthGuard allowedRoles={["principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
-        <div className="hidden lg:block">
-          <PrincipalDesktopShell>{children}</PrincipalDesktopShell>
-        </div>
-        <div className="block lg:hidden">
-          <PrincipalMobileShell>{children}</PrincipalMobileShell>
-        </div>
+        <PrincipalDesktopShell>{children}</PrincipalDesktopShell>
         <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>

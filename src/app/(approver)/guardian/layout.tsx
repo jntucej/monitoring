@@ -5,18 +5,20 @@ import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { RoleConsole } from "@/components/shared/RoleConsole";
+import { RoleResponsiveShell } from "@/components/shell/RoleResponsiveShell";
 import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
+import { GUARDIAN_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
 import type { Role } from "@/lib/types";
 
-/**
- * Guardian console layout — mirrors the principal/supervisor mount pattern.
- *
- * The legacy sticky tab bar (TABS / GuardianTabbedNav) is replaced by the
- * RoleConsole shell: IconRail + Board feed (/api/parents/me, self-scoped to
- * the caller's own linked children) + ticket ContextPanel + ParentStatusBar +
- * ParentCommandBar. Sub-pages pass their content through `children`.
- */
+const MANIFEST = {
+  role: "guardian",
+  brand: { short: "Guardian", long: "Parent & Guardian Portal" },
+  rootHref: "/guardian",
+  hasProfile: false,
+  storageKey: NAV_STORAGE_KEY,
+  nav: GUARDIAN_NAV,
+};
+
 export default function GuardianConsoleLayout({
   children,
 }: {
@@ -27,13 +29,10 @@ export default function GuardianConsoleLayout({
       allowedRoles={["guardian", "parent", "admin", "sysadmin"] as Role[]}
     >
       <Suspense fallback={<PageLoading />}>
-        <div className="min-w-0">
-          <RoleConsole role="guardian" roleRoot="/guardian">
-            {children}
-          </RoleConsole>
-          <GlobalEntityInspector />
-
-        </div>
+        <RoleResponsiveShell manifest={MANIFEST}>
+          {children}
+        </RoleResponsiveShell>
+        <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>
   );

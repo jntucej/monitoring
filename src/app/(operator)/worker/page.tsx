@@ -6,13 +6,6 @@ import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoadin
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
-import { QuickActions } from "@/components/operator/shared/QuickActions";
-import { OperatorNotifications } from "@/components/operator/shared/OperatorNotifications";
-import { AttentionQueue } from "@/components/engagement/AttentionQueue";
-import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
 export default function WorkerPage() {
@@ -48,13 +41,6 @@ export default function WorkerPage() {
               }}
             />
           </OperatorWidgetBoundary>
-          <OperatorWidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary name="OperatorNotifications" title="Operator Notifications"><OperatorNotifications /></OperatorWidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

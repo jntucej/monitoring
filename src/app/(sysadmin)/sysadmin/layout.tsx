@@ -87,50 +87,48 @@ export default function SysadminConsoleLayout({
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"] as Role[]}>
       <React.Suspense fallback={<PageLoading />}>
-        <div className="h-dvh overflow-hidden bg-bg-base">
-          {/* ── Desktop shell: fixed rail + scrollable main ───────────── */}
+        <div className="relative flex h-dvh overflow-hidden bg-bg-base">
+          {/* ── Desktop rail ─────────────────────────────────────────── */}
           <div className="hidden md:flex md:h-full">
             <Sidebar overview={overview} />
-            <main className="flex-1 overflow-y-auto">
-              <div className="surface-card flex items-center justify-between gap-3 bg-bg-surface px-4 py-2 sm:px-6">
-                <span className="text-xs font-semibold tracking-wide text-text-muted">
-                  JNTUH UCEJ · SysAdmin
-                </span>
-              </div>
-              {main}
-            </main>
           </div>
 
-          {/* ── Mobile shell: floating hamburger + scrollable main + drawer ─ */}
-          <div className="relative flex h-full flex-col md:hidden">
-            <button
-              ref={hamburgerRef}
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open navigation"
-              aria-expanded={mobileOpen}
-              className={cn(
-                "absolute left-3 top-3 z-30 inline-flex size-6 items-center justify-center rounded-lg",
-                "border border-border bg-bg-surface/90 backdrop-blur",
-                "text-text-muted hover:text-text-primary",
-                "shadow-sm pt-safe"
-              )}
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+          {/* ── Mobile floating nav trigger ──────────────────────────── */}
+          <button
+            ref={hamburgerRef}
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open navigation"
+            aria-expanded={mobileOpen}
+            className={cn(
+              "md:hidden absolute left-3 top-3 z-30 inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg",
+              "border border-border bg-bg-surface/90 backdrop-blur",
+              "text-text-muted hover:text-text-primary",
+              "shadow-sm pt-safe"
+            )}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
 
-            <main className="flex-1 overflow-y-auto">{main}</main>
+          {/* ── Single-mounted main content ──────────────────────────── */}
+          <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
+            <div className="hidden md:flex surface-card items-center justify-between gap-3 bg-bg-surface px-4 py-2 sm:px-6">
+              <span className="text-xs font-semibold tracking-wide text-text-muted">
+                JNTUH UCEJ · SysAdmin
+              </span>
+            </div>
+            {main}
+          </main>
 
-            {/* Left-anchored off-canvas drawer (shared component) */}
-            <MobileNavDrawer
-              open={mobileOpen}
-              onClose={closeMobile}
-              triggerRef={hamburgerRef}
-              label="SysAdmin navigation"
-            >
-              <Sidebar overview={overview} forceExpanded onNavigate={closeMobile} />
-            </MobileNavDrawer>
-          </div>
+          {/* ── Mobile off-canvas drawer ─────────────────────────────── */}
+          <MobileNavDrawer
+            open={mobileOpen}
+            onClose={closeMobile}
+            triggerRef={hamburgerRef}
+            label="SysAdmin navigation"
+          >
+            <Sidebar overview={overview} forceExpanded onNavigate={closeMobile} />
+          </MobileNavDrawer>
           <GlobalEntityInspector />
         </div>
       </React.Suspense>

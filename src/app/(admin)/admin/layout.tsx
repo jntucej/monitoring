@@ -95,49 +95,47 @@ export default function AdminConsoleLayout({
   return (
     <AuthGuard allowedRoles={["admin", "sysadmin"] as Role[]}>
       <React.Suspense fallback={<PageLoading />}>
-        <div className="h-dvh overflow-hidden bg-bg-base">
-          {/* ── Desktop shell: fixed rail + scrollable main ───────────── */}
+        <div className="relative flex h-dvh overflow-hidden bg-bg-base">
+          {/* ── Desktop rail ─────────────────────────────────────────── */}
           <div className="hidden md:flex md:h-full">
             <AdminSidebar overview={overview} />
-            <main className="flex-1 overflow-y-auto">{main}</main>
           </div>
 
-          {/* ── Mobile shell: floating hamburger + scrollable main + drawer ─ */}
-          <div className="relative flex h-full flex-col md:hidden">
-            {/* Minimal floating nav trigger — no full-width header band, so the
-                admin console never shows two stacked headers on mobile. */}
-            <button
-              ref={hamburgerRef}
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open navigation"
-              aria-expanded={mobileOpen}
-              className={cn(
-                "absolute left-3 top-3 z-30 inline-flex size-6 items-center justify-center rounded-lg",
-                "border border-border bg-bg-surface/90 backdrop-blur",
-                "text-text-muted hover:text-text-primary",
-                "shadow-sm pt-safe"
-              )}
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+          {/* ── Mobile floating nav trigger ──────────────────────────── */}
+          <button
+            ref={hamburgerRef}
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open navigation"
+            aria-expanded={mobileOpen}
+            className={cn(
+              "md:hidden absolute left-3 top-3 z-30 inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg",
+              "border border-border bg-bg-surface/90 backdrop-blur",
+              "text-text-muted hover:text-text-primary",
+              "shadow-sm pt-safe"
+            )}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
 
-            <main className="flex-1 overflow-y-auto">{main}</main>
+          {/* ── Single-mounted main content ──────────────────────────── */}
+          <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
+            {main}
+          </main>
 
-            {/* Left-anchored off-canvas drawer (shared component) */}
-            <MobileNavDrawer
-              open={mobileOpen}
-              onClose={closeMobile}
-              triggerRef={hamburgerRef}
-              label="Admin navigation"
-            >
-              <AdminSidebar
-                overview={overview}
-                forceExpanded
-                onNavigate={closeMobile}
-              />
-            </MobileNavDrawer>
-          </div>
+          {/* ── Mobile off-canvas drawer ─────────────────────────────── */}
+          <MobileNavDrawer
+            open={mobileOpen}
+            onClose={closeMobile}
+            triggerRef={hamburgerRef}
+            label="Admin navigation"
+          >
+            <AdminSidebar
+              overview={overview}
+              forceExpanded
+              onNavigate={closeMobile}
+            />
+          </MobileNavDrawer>
           <GlobalEntityInspector />
         </div>
       </React.Suspense>

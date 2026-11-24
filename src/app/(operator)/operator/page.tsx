@@ -10,12 +10,8 @@ import { EntityInspector } from "@/components/shared/EntityInspector";
 import { gateLiveInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import { DoorOpen, ChevronRight } from "lucide-react";
 
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { QuickActions } from "@/components/operator/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { PageHeader } from "@/components/operator/shared/PageHeader";
 import { useAuthStore } from "@/stores/authStore";
 import { useGateStore } from "@/stores/gateStore";
@@ -97,23 +93,11 @@ export default function OperatorPage() {
             secondaryAction={{ label: "Pass Verification", href: "/operator/pass-verification" }}
           />
           <OperatorDeskHero />
-          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-            <PersonalizedCampusHome />
-          </WidgetBoundary>
-          <WidgetBoundary name="TaskContinuity" title="Task Continuity">
-            <TaskContinuity />
-          </WidgetBoundary>
-          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
-            <UnifiedCampusCalendar />
-          </WidgetBoundary>
           <WidgetBoundary name="DigitalHandover" title="Digital Handover">
             <DigitalHandover />
           </WidgetBoundary>
           <WidgetBoundary name="QuickActions" title="Quick Actions">
             <QuickActions />
-          </WidgetBoundary>
-          <WidgetBoundary name="NotificationCenter" title="Notification Center">
-            <NotificationCenter />
           </WidgetBoundary>
 
         </div>

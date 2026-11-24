@@ -10,14 +10,6 @@ import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/us
 import { mealDayInspection } from "@/components/approver/wardenConsoleModels";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
-import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { AttentionQueue } from "@/components/engagement/AttentionQueue";
-import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
-
 interface MessAnalytics {
   declaredPresent: number;
   confirmedPresent: number;
@@ -105,28 +97,6 @@ function MessDashboardInner() {
             hint="Active mess day"
           />
         </div>
-      </WidgetBoundary>
-
-      <WidgetBoundary name="AttentionQueue" title="Attention Queue">
-        <AttentionQueue />
-      </WidgetBoundary>
-      <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-        <PersonalizedCampusHome />
-      </WidgetBoundary>
-      <WidgetBoundary name="TaskContinuity" title="Task Continuity">
-        <TaskContinuity />
-      </WidgetBoundary>
-      <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
-        <UnifiedCampusCalendar />
-      </WidgetBoundary>
-      <WidgetBoundary name="ActivityTimeline" title="Activity Timeline">
-        <ActivityTimeline />
-      </WidgetBoundary>
-      <WidgetBoundary name="QuickActions" title="Quick Actions">
-        <QuickActions />
-      </WidgetBoundary>
-      <WidgetBoundary name="NotificationCenter" title="Notification Center">
-        <NotificationCenter />
       </WidgetBoundary>
 
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
