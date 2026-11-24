@@ -12,6 +12,7 @@ import { SlaCountdownPill } from "@/components/shared/SlaCountdownPill";
 import { WhatHappenedReceipt } from "@/components/shared/WhatHappenedReceipt";
 import { LiveFreshnessBar } from "@/components/shared/LiveFreshnessBar";
 import { SmartCrossLinkChip } from "@/components/shared/SmartCrossLinkChip";
+import { mapPermissionToActionableVM } from "@/lib/view-models/actionableItem";
 import { clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -143,7 +144,12 @@ export function ApproverDecisionQueue({
         : Array.isArray(permJson?.permissions)
           ? permJson.permissions
           : [];
-      setItems(rows);
+      const sorted = [...rows].sort(
+        (a, b) =>
+          mapPermissionToActionableVM(a, forwardLabel).urgencyRank -
+          mapPermissionToActionableVM(b, forwardLabel).urgencyRank,
+      );
+      setItems(sorted);
       setLastUpdatedAt(Date.now());
 
       if (alertRes && alertRes.ok) {
