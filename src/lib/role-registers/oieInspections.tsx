@@ -38,7 +38,7 @@ export function buildOieAccessExceptionInspection(
   const candidate = row.candidate_name || row.roll || "Candidate";
   const sections: InspectionSection[] = [
     kv("Overview", [
-      ["Ticket Number", <span className="font-mono">{row.ticket_number}</span>],
+      ["Ticket Number", <span key="ticket" className="font-mono">{row.ticket_number}</span>],
       ["Candidate Name", row.candidate_name || "—"],
       ["Roll Number", row.roll || row.candidate_unique_id || "—"],
       ["Current Stage", row.current_stage],
@@ -190,7 +190,7 @@ export function buildOieDecisionHistoryInspection(
 
   const sections: InspectionSection[] = [
     kv("Overview", [
-      ["Ticket Number", <span className="font-mono">{row.ticket_number}</span>],
+      ["Ticket Number", <span key="ticket" className="font-mono">{row.ticket_number}</span>],
       ["Student", studentName],
       ["Roll Number", roll || "—"],
       ["Status", row.status],

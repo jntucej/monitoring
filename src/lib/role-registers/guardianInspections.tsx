@@ -79,7 +79,7 @@ export function buildGuardianChildRequestInspection(
 
   const sections: InspectionSection[] = [
     kv("Overview", [
-      ["Ticket Number", <span className="font-mono">{ticket}</span>],
+      ["Ticket Number", <span key="ticket" className="font-mono">{ticket}</span>],
       ["Ward", roll ? `${wardName} (${roll})` : wardName],
       ["Workflow Type", workflow],
       ["Current Stage", row.current_stage ?? "—"],
@@ -172,7 +172,7 @@ export function buildGuardianWardStatusInspection(
   const sections: InspectionSection[] = [
     kv("Overview", [
       ["Student Name", name],
-      ["Roll / Unique ID", <span className="font-mono">{roll}</span>],
+      ["Roll / Unique ID", <span key="roll" className="font-mono">{roll}</span>],
       ["Campus Status", presenceText],
       ["Last Gate Activity", lastSeen],
       ["Department", ward.department ?? "—"],
@@ -253,7 +253,7 @@ export function buildGuardianScanActivityInspection(
   const sections: InspectionSection[] = [
     kv("Overview", [
       ["Ward", student],
-      ["Roll Number", <span className="font-mono">{scan.roll || scan.uniqueId || "—"}</span>],
+      ["Roll Number", <span key="roll" className="font-mono">{scan.roll || scan.uniqueId || "—"}</span>],
       ["Gate", scan.gateName || "Campus Gate"],
       ["Direction", dirLabel],
       ["Timestamp", when(scan.timestamp)],
