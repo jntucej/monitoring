@@ -1,24 +1,50 @@
 {
   "task_id": "TASK-0004",
   "title": "Prune ContextSituationBar where it restates PageHeader + hero CTA",
-  "status": "PENDING",
+  "status": "VERIFIED",
   "priority": "P2",
   "severity": "MEDIUM",
-  "role_ids": ["all"],
-  "finding_ids": ["UX-009"],
+  "role_ids": [
+    "all"
+  ],
+  "finding_ids": [
+    "UX-009"
+  ],
   "source_version": "99380d0d",
   "dependencies": [],
   "blocked_by": [],
-  "owned_resources": ["src/components/shared/ContextSituationBar.tsx", "src/app/**/page.tsx (pruned instances)"],
+  "owned_resources": [
+    "src/components/shared/ContextSituationBar.tsx",
+    "src/app/**/page.tsx (pruned instances)"
+  ],
   "shared_resources": [],
   "worker_profile": "IMPLEMENTER",
   "acceptance_criteria": [
     "ContextSituationBar shown only where live status changes next action; removed where it restates header+hero",
     "typecheck + lint pass"
   ],
-  "required_tests": ["typecheck", "lint"],
-  "verification_policy": {"independent_verifier": true, "original_failure_backtrack": true, "security_review": false},
-  "retry_count": 0, "max_retries": 3,
-  "created_at": "2026-11-24T12:00:00Z", "updated_at": "2026-11-24T12:00:00Z",
-  "lease": null, "evidence": [], "result": null
+  "required_tests": [
+    "typecheck",
+    "lint"
+  ],
+  "verification_policy": {
+    "independent_verifier": true,
+    "original_failure_backtrack": true,
+    "security_review": false
+  },
+  "retry_count": 0,
+  "max_retries": 3,
+  "created_at": "2026-11-24T12:00:00Z",
+  "updated_at": "2026-11-24T15:39:08.615372+00:00",
+  "lease": null,
+  "evidence": [],
+  "result": {
+    "verdict": "PASS",
+    "commit": "a447b0ca",
+    "gates": [
+      "typecheck PASS",
+      "eslint PASS",
+      "build PASS"
+    ]
+  }
 }
