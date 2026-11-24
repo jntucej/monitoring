@@ -137,9 +137,12 @@ export default function OperatorActionsPage() {
     void refresh();
   }, [refresh]);
 
+  const [decisionError, setDecisionError] = useState<{ id: string; decision: "approve" | "reject"; message: string } | null>(null);
+
   const decide = useCallback(
     async (id: string, decision: "approve" | "reject") => {
       setBusy((b) => ({ ...b, [id]: true }));
+      setDecisionError(null);
       try {
         const res = await request<{ status: string }>(`/api/sysadmin/actions/${id}`, {
           method: "PATCH",
@@ -148,7 +151,11 @@ export default function OperatorActionsPage() {
         if (res.success) {
           await refresh();
         } else {
-          alert(`Decision failed: ${res.error ?? res.code ?? "unknown"}`);
+          setDecisionError({
+            id,
+            decision,
+            message: `Decision failed: ${res.error ?? res.code ?? "unknown"}`,
+          });
         }
       } finally {
         setBusy((b) => ({ ...b, [id]: false }));
@@ -166,6 +173,32 @@ export default function OperatorActionsPage() {
         subtitle="Approval gate for automated & manual operator actions — one-tap approve/reject"
         onRefresh={refresh}
       />
+
+      {decisionError && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="surface-card mb-3 flex flex-wrap items-center justify-between gap-2 bg-rose-500/10 px-4 py-2.5 text-xs font-medium text-action-danger"
+        >
+          <span>{decisionError.message}</span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => void decide(decisionError.id, decisionError.decision)}
+              className="underline font-semibold"
+            >
+              Retry
+            </button>
+            <button
+              type="button"
+              onClick={() => setDecisionError(null)}
+              className="text-text-muted hover:text-text-primary"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       {health && (
         <div
