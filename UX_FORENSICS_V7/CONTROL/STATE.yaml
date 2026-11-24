@@ -1,21 +1,21 @@
 system:
   version: V7
-  status: running
+  status: terminal_b_decisions_only
 
 repository:
   base_commit: "4bbfae4a"
   branch: "v7/lint-and-hooks-remediation"
 
 queue:
-  pending: 6
-  active: 1
-  verified: 0
+  pending: 0
+  active: 0
+  verified: 6
   blocked: 0
   needs_decision: 1
 
 active_task:
-  id: "V7-01"
-  phase: "investigating"
+  id: "none"
+  phase: "complete"
 
 roles:
   completed: 17
@@ -25,4 +25,5 @@ health:
   repository: clean
   tests: passing
   ci: passing
-  lint: failing_34_errors
+  lint: passing_0_errors
+  build: passing
