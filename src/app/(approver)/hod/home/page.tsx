@@ -72,14 +72,43 @@ interface HodOverviewResponse {
 }
 
 
-function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
-  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : "text-text-primary";
-  return (
+function KpiTile({
+  label,
+  value,
+  tone = "ok",
+  linkHref,
+}: {
+  label: string;
+  value: string | number;
+  tone?: "ok" | "warn" | "bad";
+  /** (UX-006) Drill-down target: makes the tile a link to the underlying
+   *  records so "I see a number, now what?" is answered in one click. */
+  linkHref?: string;
+}) {
+  const toneClass =
+    tone === "bad"
+      ? "text-red-400"
+      : tone === "warn"
+        ? "text-action-warning"
+        : "text-text-primary";
+  const tile = (
     <div className="surface-card bg-[var(--bg-elev-1)] p-4 min-w-0">
       <div className="text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</div>
       <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
     </div>
   );
+  if (linkHref) {
+    return (
+      <a
+        href={linkHref}
+        aria-label={`${label}: ${value}. View records`}
+        className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary transition-colors hover:bg-[var(--bg-elev-2)]"
+      >
+        {tile}
+      </a>
+    );
+  }
+  return tile;
 }
 
 export default function HodTodayPage() {
@@ -161,10 +190,10 @@ export default function HodTodayPage() {
       <LivePulseStrip items={[{ id: "queue", label: "HOD Queue", valueLabel: "Live", tone: "warn", benchmark: "Review pending department requests" }, { id: "sla", label: "SLA Target", valueLabel: "< 2h", tone: "info", benchmark: "Forward approved passes to VP" }]} />
         <WidgetBoundary name="HodKpis" title="HOD KPIs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiTile label="Pending approvals" value={d?.counts.pending ?? 0} />
-            <KpiTile label="Escalated" value={d?.counts.escalated ?? 0} tone={(d?.counts.escalated ?? 0) > 0 ? "warn" : "ok"} />
-            <KpiTile label="Faculty present" value={d?.faculty.total ? `${d.faculty.presentToday}/${d.faculty.total}` : "—"} />
-            <KpiTile label="Dept rank" value={d?.pulse.myRank ? `#${d.pulse.myRank}/${d.pulse.totalDepts}` : "—"} />
+            <KpiTile label="Pending approvals" value={d?.counts.pending ?? 0} linkHref="/hod/approvals" />
+            <KpiTile label="Escalated" value={d?.counts.escalated ?? 0} tone={(d?.counts.escalated ?? 0) > 0 ? "warn" : "ok"} linkHref="/hod/approvals" />
+            <KpiTile label="Faculty present" value={d?.faculty.total ? `${d.faculty.presentToday}/${d.faculty.total}` : "—"} linkHref="/hod/faculty/directory" />
+            <KpiTile label="Dept rank" value={d?.pulse.myRank ? `#${d.pulse.myRank}/${d.pulse.totalDepts}` : "—"} linkHref="/hod/reports" />
           </div>
         </WidgetBoundary>
                 {/* 1. Morning brief — greeting + dual streaks + progress */}
