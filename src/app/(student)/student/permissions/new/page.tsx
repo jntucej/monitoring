@@ -11,6 +11,7 @@ import { FilePlus2 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PassCreateFormV2 } from "@/components/shared/pass/PassCreateFormV2";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { RoleStarterGuide } from "@/components/shared/RoleStarterGuide";
 
 export default function NewPermissionPage() {
   const hour = new Date().getHours();
@@ -43,6 +44,17 @@ export default function NewPermissionPage() {
           }
           primaryAction={{ label: "My Requests", href: "/student/permissions" }}
           secondaryAction={{ label: "Active Gate Passes", href: "/student/passes" }}
+        />
+
+        <RoleStarterGuide
+          guideId="student-new-pass"
+          title="How Pass Requests Work"
+          summary="Submit your outing or leave details once; your mentor or warden reviews it in order."
+          steps={[
+            "Pick pass type & times",
+            "Submit to HOD / Warden",
+            "Scan QR at gate once approved",
+          ]}
         />
 
         <PassCreateFormV2 mode="student" />

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { RoleStarterGuide } from "@/components/shared/RoleStarterGuide";
 
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -218,6 +219,17 @@ function PassLeaveSubmissionInner() {
         statusSummary="Guardian submissions initiate official approval workflows. Track submitted tickets in Request Status."
         primaryAction={{ label: "Request Status", href: "/guardian/request-status" }}
         secondaryAction={{ label: "Ward Status", href: "/guardian/child-status" }}
+      />
+
+      <RoleStarterGuide
+        guideId="guardian-submit"
+        title="How Guardian Submissions Work"
+        summary="Select your ward and submit a pass or leave request into the campus approval chain."
+        steps={[
+          "Select ward & dates",
+          "Submit to campus approvers",
+          "Track status in Request Status",
+        ]}
       />
 
       <div className="surface-card bg-amber-400/10 p-3 text-sm text-action-warning flex items-start gap-2.5">

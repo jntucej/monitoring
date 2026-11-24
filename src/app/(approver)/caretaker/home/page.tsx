@@ -25,6 +25,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { RoleStarterGuide } from "@/components/shared/RoleStarterGuide";
 import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 
 export default function CaretakerPage() {
@@ -53,6 +54,21 @@ export default function CaretakerPage() {
             forwardLabel="Forward to Deputy Warden"
             relatedHref="/caretaker/maintenance"
             relatedLabel="Maintenance Queue"
+          />
+          <RoleStarterGuide
+            guideId="caretaker-home"
+            title="How Caretaker Triage Works"
+            summary="Review hostel maintenance or pass escalations, act inline, or use quick commands."
+            steps={[
+              "Review actor reason & SLA",
+              "Approve, Forward, or Reject",
+              "Track worker resolution",
+            ]}
+            examples={[
+              "resolve TKT-104 Fixed fan",
+              "escalate TKT-109",
+              "assign TKT-112 Electrician",
+            ]}
           />
           <WidgetBoundary name="RoleDashboardPanel" title="Caretaker Dashboard">
             <RoleDashboardPanel
