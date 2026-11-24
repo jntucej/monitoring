@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowUpRight, RefreshCw } from "lucide-react";
+import { AlertTriangle, ArrowUpRight } from "lucide-react";
 import {
   ContextualActionRow,
   type ActorEventContext,
@@ -10,6 +10,7 @@ import {
 import { LifefulZeroState } from "@/components/shared/LifefulZeroState";
 import { SlaCountdownPill } from "@/components/shared/SlaCountdownPill";
 import { WhatHappenedReceipt } from "@/components/shared/WhatHappenedReceipt";
+import { LiveFreshnessBar } from "@/components/shared/LiveFreshnessBar";
 import { clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -102,6 +103,7 @@ export function ApproverDecisionQueue({
   const [bulkBusy, setBulkBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [lastDiff, setLastDiff] = useState<{ label: string; before: string; after: string } | null>(null);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
 
   const loadQueue = useCallback(async () => {
     setLoading(true);
@@ -141,6 +143,7 @@ export function ApproverDecisionQueue({
           ? permJson.permissions
           : [];
       setItems(rows);
+      setLastUpdatedAt(Date.now());
 
       if (alertRes && alertRes.ok) {
         const alertJson = await alertRes.json().catch(() => ({}));
@@ -222,7 +225,7 @@ export function ApproverDecisionQueue({
             Approve, forward, or reject with reason directly from this queue.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           {relatedHref && (
             <Link
               href={relatedHref}
@@ -232,15 +235,12 @@ export function ApproverDecisionQueue({
               <ArrowUpRight className="size-3.5" />
             </Link>
           )}
-          <button
-            type="button"
-            onClick={() => void loadQueue()}
-            disabled={loading}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-bg-elevated px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-50"
-          >
-            <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
+          <LiveFreshnessBar
+            lastUpdatedAt={lastUpdatedAt}
+            loading={loading}
+            pollingActive
+            onRefresh={() => void loadQueue()}
+          />
         </div>
       </div>
 
