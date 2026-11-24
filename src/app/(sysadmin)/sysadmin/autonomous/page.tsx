@@ -166,7 +166,28 @@ function sevClass(sev: string): string {
 function AutonomousInner() {
   const [data, setData] = useState<AutonomousData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sweeping, setSweeping] = useState(false);
+  const [sweepMsg, setSweepMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const runSweep = async () => {
+    setSweeping(true);
+    setSweepMsg(null);
+    try {
+      const res = await fetch("/api/sysadmin/autonomous-monitoring", {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json: { success: boolean; data: AutonomousData } = await res.json();
+      setData(json.data ?? json);
+      setSweepMsg("Autonomous health sweep completed.");
+    } catch (err) {
+      setSweepMsg(`Sweep failed: ${String(err)}`);
+    } finally {
+      setSweeping(false);
+    }
+  };
 
   const loadData = useCallback(async () => {
     try {
@@ -230,14 +251,28 @@ function AutonomousInner() {
             deployment state, and backup verification.
           </p>
         </div>
-        <button
-          onClick={loadData}
-          className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary"
-        >
-          <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={sweeping}
+            onClick={() => void runSweep()}
+            className="min-h-11 rounded-lg bg-action-primary px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+          >
+            {sweeping ? "Running Sweep…" : "Run Health Sweep"}
+          </button>
+          <button
+            type="button"
+            onClick={loadData}
+            className="min-h-11 flex items-center gap-2 text-sm text-text-muted hover:text-text-primary px-2"
+          >
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+            Refresh
+          </button>
+        </div>
       </div>
+      {sweepMsg && (
+        <p className="text-xs font-medium text-action-primary">{sweepMsg}</p>
+      )}
 
       {/* Top stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

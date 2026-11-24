@@ -135,3 +135,7 @@ async function handleGet(_req: NextRequest) {
 export const GET = withAuthorization(withRateLimit(handleGet), {
   requiredRole: ["sysadmin", "admin"],
 });
+
+export const POST = withAuthorization(withRateLimit(handleGet), {
+  requiredRole: ["sysadmin", "admin"],
+});
