@@ -9,6 +9,7 @@ import {
 } from "@/components/shared/ContextualActionRow";
 import { LifefulZeroState } from "@/components/shared/LifefulZeroState";
 import { InlineDiffBadge } from "@/components/shared/InlineDiffBadge";
+import { SlaCountdownPill } from "@/components/shared/SlaCountdownPill";
 import { clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -376,7 +377,12 @@ export function ApproverDecisionQueue({
                     id: ticket,
                     primaryTitle: `${student} (${roll}) · ${ticket}`,
                     secondaryMeta: `${wf} · Stage: ${stage} · ${campus}`,
-                    liveStateBadge: sla,
+                    liveStateBadge: (
+                      <SlaCountdownPill
+                        deadline={row.sla_deadline ?? row.slaDeadline}
+                        fallbackLabel={sla}
+                      />
+                    ),
                     situationSummary: reason,
                     latestActorEvent,
                     historyCount: history.length,

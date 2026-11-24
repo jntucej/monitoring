@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { WorkflowChainTracker } from "@/components/shared/WorkflowChainTracker";
 import { ActorTimelineFeed } from "@/components/shared/ActorTimelineFeed";
 import { ActionConsequencePreview } from "@/components/shared/ActionConsequencePreview";
@@ -26,7 +26,7 @@ export interface ContextualRowData<TAction extends string> {
   id: string;
   primaryTitle: string;
   secondaryMeta: string;
-  liveStateBadge: string;
+  liveStateBadge: ReactNode;
   situationSummary: string;
   latestActorEvent?: ActorEventContext;
   historyCount?: number;
@@ -98,9 +98,15 @@ export function ContextualActionRow<TAction extends string>({
           </h3>
           <p className="text-xs text-text-muted truncate">{row.secondaryMeta}</p>
         </div>
-        <span className="px-2.5 py-0.5 rounded-full bg-bg-elevated text-xs font-medium text-text-secondary shrink-0">
-          {row.liveStateBadge}
-        </span>
+        <div className="shrink-0">
+          {typeof row.liveStateBadge === "string" ? (
+            <span className="px-2.5 py-0.5 rounded-full bg-bg-elevated text-xs font-medium text-text-secondary">
+              {row.liveStateBadge}
+            </span>
+          ) : (
+            row.liveStateBadge
+          )}
+        </div>
       </div>
 
       {/* Situation line */}
