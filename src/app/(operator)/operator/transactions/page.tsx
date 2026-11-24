@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { scanInspection } from "@/components/shared/inspectionModels";
+import { WhatHappenedReceipt } from "@/components/shared/WhatHappenedReceipt";
+import { getAuthHeaders } from "@/lib/utils";
 import {
   Loader2,
   ListOrdered,
@@ -77,6 +79,40 @@ function OperatorTransactionsInner() {
 
   const [filter, setFilter] = useState<DirectionFilter>("ALL");
   const [activeTxn, setActiveTxn] = useState<TransactionRow | null>(null);
+  const [reclassCategory, setReclassCategory] = useState("DAY_OUT");
+  const [reclassReason, setReclassReason] = useState("");
+  const [reclassBusy, setReclassBusy] = useState(false);
+  const [reclassError, setReclassError] = useState<string | null>(null);
+  const [reclassReceipt, setReclassReceipt] = useState<string | null>(null);
+
+  const handleReclassify = async () => {
+    if (!activeTxn) return;
+    if (!reclassReason.trim()) {
+      setReclassError("Reason is required to reclassify a scan.");
+      return;
+    }
+    setReclassBusy(true);
+    setReclassError(null);
+    try {
+      const res = await fetch(`/api/operator/scans/${encodeURIComponent(activeTxn.id)}/category`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ category: reclassCategory, reason: reclassReason.trim() }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json?.success === false) {
+        throw new Error(json?.error?.message || json?.error || `HTTP ${res.status}`);
+      }
+      setReclassReceipt(`Scan ${activeTxn.roll || activeTxn.id} reclassified to ${reclassCategory} (${reclassReason.trim()}).`);
+      setReclassReason("");
+      setActiveTxn(null);
+      await refreshAll();
+    } catch (err) {
+      setReclassError(err instanceof Error ? err.message : "Failed to reclassify scan");
+    } finally {
+      setReclassBusy(false);
+    }
+  };
   const busy = loading && !data;
   const rows = data?.data?.transactions ?? [];
   const counts = data?.data?.counts;
@@ -365,6 +401,63 @@ function OperatorTransactionsInner() {
       
       <EntityInspector inspection={activeTxn ? scanInspection(activeTxn) : null} onClose={() => setActiveTxn(null)} />
 </OperatorWidgetBoundary>
+
+      {reclassReceipt ? (
+        <WhatHappenedReceipt
+          summary={reclassReceipt}
+          onDismiss={() => setReclassReceipt(null)}
+        />
+      ) : null}
+
+      {activeTxn ? (
+        <div className="border-t border-border pt-4 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-text-primary">
+              Quick Reclassify Scan: {activeTxn.name || activeTxn.roll || activeTxn.id}
+            </p>
+            <button
+              type="button"
+              onClick={() => { setActiveTxn(null); setReclassError(null); }}
+              className="text-xs text-text-muted hover:text-text-primary"
+            >
+              Close
+            </button>
+          </div>
+          {reclassError ? (
+            <p role="alert" className="text-xs text-action-danger">{reclassError}</p>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={reclassCategory}
+              onChange={(e) => setReclassCategory(e.target.value)}
+              aria-label="Scan category"
+              className="px-2.5 py-1.5 border-b border-border bg-transparent text-xs text-text-primary"
+            >
+              <option value="REGULAR">REGULAR</option>
+              <option value="DAY_OUT">DAY_OUT</option>
+              <option value="LEAVE">LEAVE</option>
+              <option value="EMERGENCY">EMERGENCY</option>
+              <option value="CORRECTION">CORRECTION</option>
+            </select>
+            <input
+              type="text"
+              value={reclassReason}
+              onChange={(e) => setReclassReason(e.target.value)}
+              placeholder="Mandatory audit reason..."
+              aria-label="Reclassification reason"
+              className="flex-1 min-w-[180px] px-2.5 py-1.5 border-b border-border bg-transparent text-xs text-text-primary"
+            />
+            <button
+              type="button"
+              disabled={reclassBusy}
+              onClick={handleReclassify}
+              className="px-3 py-1.5 rounded-lg bg-action-primary text-white text-xs font-semibold disabled:opacity-50"
+            >
+              {reclassBusy ? "Saving..." : "Reclassify Scan"}
+            </button>
+          </div>
+        </div>
+      ) : null}
 
     </div>
   );
