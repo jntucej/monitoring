@@ -1,0 +1,24 @@
+{
+  "task_id": "TASK-0003",
+  "title": "Mount NotificationBell once in RoleResponsiveShell (CSS-hide instead of dual-mount)",
+  "status": "PENDING",
+  "priority": "P2",
+  "severity": "MEDIUM",
+  "role_ids": ["all_role_responsive_shell_roles"],
+  "finding_ids": ["UX-010"],
+  "source_version": "99380d0d",
+  "dependencies": [],
+  "blocked_by": [],
+  "owned_resources": ["src/components/shell/RoleResponsiveShell.tsx"],
+  "shared_resources": ["src/components/shared/NotificationBell.tsx"],
+  "worker_profile": "IMPLEMENTER",
+  "acceptance_criteria": [
+    "Exactly one NotificationBell instance mounted per console; responsive CSS controls visibility",
+    "typecheck + lint pass"
+  ],
+  "required_tests": ["unit", "typecheck", "lint"],
+  "verification_policy": {"independent_verifier": true, "original_failure_backtrack": true, "security_review": false},
+  "retry_count": 0, "max_retries": 3,
+  "created_at": "2026-11-24T12:00:00Z", "updated_at": "2026-11-24T12:00:00Z",
+  "lease": null, "evidence": [], "result": null
+}

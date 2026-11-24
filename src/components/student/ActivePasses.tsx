@@ -33,7 +33,13 @@ function statusStyle(s: string) {
   return { text: "text-action-warning", bg: "bg-amber-500/10", icon: <Clock className="size-4 text-action-warning" /> };
 }
 
-export function ActivePasses() {
+export interface ActivePassesProps {
+  /** Fired when a pass row is selected, so the page can surface the
+   * "focus a document" pivot (SelfActionLoop). */
+  onSelectPass?: (ticketId: string) => void;
+}
+
+export function ActivePasses({ onSelectPass }: ActivePassesProps) {
   const [passes, setPasses] = useState<GatePass[]>([]);
   const [history, setHistory] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,7 +161,10 @@ export function ActivePasses() {
               <div
                 key={pass.id}
                 className={`p-3 rounded-lg ${s.bg} cursor-pointer hover:opacity-90 transition-opacity`}
-                onClick={() => setActivePass(pass.id)}
+                onClick={() => {
+                  setActivePass(pass.id);
+                  onSelectPass?.(pass.id);
+                }}
               >
                 <div className="flex items-center gap-4">
                   {s.icon}

@@ -33,9 +33,12 @@ export interface PassHubProps {
   /** Hide the create form (e.g. parent view). */
   hideCreate?: boolean;
   className?: string;
+  /** Fired when the user selects a pass row (ticket id), enabling the
+   * page-level "focus a document" pivot / SelfActionLoop. */
+  onSelectPass?: (ticketId: string) => void;
 }
 
-export function PassHub({ initialCode, hideCreate, className }: PassHubProps) {
+export function PassHub({ initialCode, hideCreate, className, onSelectPass }: PassHubProps) {
   const persona = usePersona();
   const isSakuga = useIsSakuga();
   const { configs } = usePassTypesV2({ persona });
@@ -71,7 +74,7 @@ export function PassHub({ initialCode, hideCreate, className }: PassHubProps) {
 
       {/* Active passes */}
       <WidgetBoundary name="active-passes">
-        <ActivePasses />
+        <ActivePasses onSelectPass={onSelectPass} />
       </WidgetBoundary>
 
       {/* Quota card */}

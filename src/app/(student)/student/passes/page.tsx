@@ -69,7 +69,7 @@ export default function StudentPassesPage() {
       {/* PassHub (active + curfew + quota + create + history toggle) */}
       <WidgetBoundary name="pass-hub">
         <Suspense fallback={<PageLoading />}>
-          <PassHub />
+          <PassHub onSelectPass={setSelectedTicket} />
         </Suspense>
       </WidgetBoundary>
 
