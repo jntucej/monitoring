@@ -58,7 +58,6 @@ export function RoleResponsiveShell({
             {manifest.brand.short}
           </span>
         </div>
-        <RoleNotificationBell />
       </header>
 
       {/* Single-mounted main content */}
@@ -70,8 +69,10 @@ export function RoleResponsiveShell({
         >
           {children}
         </main>
+        {/* One bell instance; CSS places it per breakpoint (UX-010: was
+            dual-mounted, doubling polling + badge state). */}
+        <RoleNotificationBell className="fixed right-6 top-6 z-20 lg:right-6 lg:top-6" />
         <div className="hidden lg:block">
-          <RoleNotificationBell className="fixed right-6 top-6 z-20" />
           <RoleChrome role={manifest.role} variant="footer" />
         </div>
         <div className="lg:hidden">
