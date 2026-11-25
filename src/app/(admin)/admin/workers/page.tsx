@@ -9,6 +9,7 @@ import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { WorkerTypeAndBlockPanel } from "@/components/admin/WorkerTypeAndBlockPanel";
 
 const WorkerMonthlyReviewPanel = lazy(
   () => import("@/components/admin/WorkerMonthlyReviewPanel")
@@ -95,6 +96,7 @@ const api = useApi();
           <Suspense fallback={null}>
             <WorkerMonthlyReviewPanel />
           </Suspense>
+          <WorkerTypeAndBlockPanel />
         </>
       )}
     </div>

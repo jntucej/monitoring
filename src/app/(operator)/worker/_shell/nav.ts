@@ -1,6 +1,6 @@
 import type { NavEntry, NavGroup } from "@/components/shell/types";
 import type { IconRailGroup } from "@/components/shared/IconRail";
-import { LayoutDashboard, ClipboardList, History } from "lucide-react";
+import { LayoutDashboard, ClipboardList, History, User } from "lucide-react";
 
 export const WORKER_NAV: NavEntry[] = [
   { kind: "link", href: "/worker", label: "Today", icon: LayoutDashboard },
@@ -23,6 +23,7 @@ export const WORKER_NAV: NavEntry[] = [
       { href: "/worker/history", label: "History" },
     ],
   },
+  { kind: "link", href: "/worker/profile", label: "Profile", icon: User },
 ];
 
 export const WORKER_GROUPS: IconRailGroup[] = WORKER_NAV.filter(

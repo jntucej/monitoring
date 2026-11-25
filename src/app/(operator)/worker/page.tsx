@@ -8,6 +8,7 @@ import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWid
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
+import { WorkerAttendanceCard } from "@/components/worker/WorkerAttendanceCard";
 
 export default function WorkerPage() {
   return (
@@ -44,6 +45,7 @@ export default function WorkerPage() {
               }}
             />
           </OperatorWidgetBoundary>
+          <WorkerAttendanceCard />
         </div>
       </AuthGuard>
     </Suspense>

@@ -1,0 +1,6 @@
+-- 20270131000026_worker_types_and_logs.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.worker_attendance_logs;
+DROP TABLE IF EXISTS public.worker_assignments;
+DELETE FROM public.ref_categories WHERE domain = 'worker_type';
+COMMIT;
