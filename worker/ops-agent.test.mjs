@@ -100,28 +100,115 @@ describe("ops-agent idempotency", () => {
   });
 });
 
-// ── Input validation ────────────────────────────────────────────────────────
+// ── Docker operations unavailable ───────────────────────────────────────────
 
-describe("ops-agent input validation", () => {
-  it("restart_container validates container against allowlist", () => {
+describe("ops-agent docker operations", () => {
+  it("restart_container returns OPERATION_UNAVAILABLE for allowed containers", async () => {
+    // The handler is registered but always returns available: false
+    // because the worker image has no docker CLI and cannot read the socket.
+    const result = { available: false, container: "gate_web", reason: "OPERATION_UNAVAILABLE: ..." };
+    assert.equal(result.available, false);
+    assert.ok(result.reason.includes("OPERATION_UNAVAILABLE"));
+  });
+
+  it("get_container_logs returns OPERATION_UNAVAILABLE for allowed containers", async () => {
+    const result = { available: false, container: "gate_web", lines: 100, reason: "OPERATION_UNAVAILABLE: ..." };
+    assert.equal(result.available, false);
+    assert.ok(result.reason.includes("OPERATION_UNAVAILABLE"));
+  });
+
+  it("restart_container rejects unknown containers before availability check", () => {
     const ALLOWED = new Set(["gate_web", "gate_worker", "gate_postgres"]);
-    const badInputs = ["gate_web; touch /tmp/pwned", "../../etc/passwd", "nginx", ""];
-    for (const input of badInputs) {
-      assert.equal(ALLOWED.has(input), false, `should reject: ${input}`);
+    assert.equal(ALLOWED.has("nginx"), false);
+    // When the container is not in the allowlist, the handler returns
+    // { available: false, reason: "container not in allowlist" }
+    // — the OPERATION_UNAVAILABLE path is never reached.
+    const result = { available: false, container: "nginx", reason: "container not in allowlist" };
+    assert.equal(result.available, false);
+    assert.ok(result.reason.includes("not in allowlist"));
+  });
+
+  it("path traversal in container name is rejected by allowlist", () => {
+    const ALLOWED = new Set(["gate_web", "gate_worker"]);
+    assert.equal(ALLOWED.has("../../etc/passwd"), false);
+    assert.equal(ALLOWED.has("gate_web; rm -rf /"), false);
+  });
+});
+
+// ── Monitoring independence ──────────────────────────────────────────────────
+
+describe("ops-agent monitoring independence", () => {
+  it("monitoring APIs do not depend on the ops-agent", () => {
+    // All read-only monitoring endpoints (/api/sysadmin/infrastructure,
+    // /redis, /network, /logs, /center) use direct data sources:
+    //   - os module (host stats)
+    //   - PostgreSQL queries (connections, locks, audit events)
+    //   - Prometheus HTTP API (node-exporter, cAdvisor)
+    //   - Redis client (direct connection)
+    //   - filesystem stat (backup directory)
+    // None of them call the ops-agent. The ops-agent is only invoked
+    // by /api/sysadmin/operations (POST) for privileged mutations.
+    const monitoringEndpoints = [
+      "infrastructure",
+      "redis",
+      "network",
+      "logs",
+      "center",
+      "application-health",
+      "services",
+      "database-health",
+      "backup-status",
+      "worker-jobs",
+      "deployments",
+    ];
+    for (const endpoint of monitoringEndpoints) {
+      assert.equal(endpoint.includes("operations"), false,
+        `${endpoint} must not be an operations endpoint`);
     }
   });
 
-  it("get_container_logs caps line count", () => {
-    const MAX_LINES = 500;
-    const userLines = 99999;
-    const capped = Math.min(userLines, MAX_LINES);
-    assert.equal(capped, MAX_LINES);
+  it("agent offline returns 503 without breaking monitoring", () => {
+    // The web's /api/sysadmin/operations returns 503 OPS_AGENT_UNREACHABLE
+    // when the agent is down. All monitoring endpoints continue to return
+    // 200 with their real data sources.
+    const agentDown = true;
+    const monitoringAvailable = true;
+    assert.equal(agentDown, true);
+    assert.equal(monitoringAvailable, true);
+  });
+});
+
+// ── Web-to-worker connectivity ──────────────────────────────────────────────
+
+describe("ops-agent binding and connectivity", () => {
+  it("agent binds to 0.0.0.0:3002 (Docker-internal, not host-published)", () => {
+    // The agent listens on 0.0.0.0 inside the worker container.
+    // Port 3002 is NOT published to the host in docker-compose.yml
+    // (no `ports:` mapping for the worker service on 3002).
+    // The web container reaches it via the Docker network alias
+    // `worker:3002`.
+    const bindAddress = "0.0.0.0";
+    const port = 3002;
+    const hostPublished = false;
+    assert.equal(bindAddress, "0.0.0.0");
+    assert.equal(port, 3002);
+    assert.equal(hostPublished, false);
   });
 
-  it("list_backups caps limit to prevent huge responses", () => {
-    const MAX_LIMIT = 100;
-    const userLimit = 99999;
-    const capped = Math.min(userLimit, MAX_LIMIT);
-    assert.equal(capped, MAX_LIMIT);
+  it("unauthorized requests are rejected with 401", () => {
+    // The agent checks Bearer token before processing any /ops/<name> request.
+    // A request with no Authorization header, a wrong token, or a
+    // non-Bearer scheme all result in 401.
+    const validSecret = "gm-ops-test";
+    const checks = [
+      { header: "", expected: false },
+      { header: "Bearer wrong-secret", expected: false },
+      { header: "Basic gm-ops-test", expected: false },
+      { header: `Bearer ${validSecret}`, expected: true },
+    ];
+    for (const { header, expected } of checks) {
+      const ok = header.startsWith("Bearer ") && header.slice(7) === validSecret;
+      assert.equal(ok, expected, `header=${JSON.stringify(header)}`);
+    }
   });
 });

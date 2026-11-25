@@ -443,9 +443,6 @@ export default function SysadminAdminCenterPage() {
                 <button type="button" onClick={() => runOp("host_diagnostics")} className="px-3 py-1 text-xs underline">
                   Host Diagnostics
                 </button>
-                <button type="button" onClick={() => runOp("get_container_logs", { container: "gate_web", lines: 50 })} className="px-3 py-1 text-xs underline">
-                  gate_web Logs (50)
-                </button>
               </div>
             )}
             {!opsAgent?.reachable && (
@@ -453,6 +450,16 @@ export default function SysadminAdminCenterPage() {
                 Operations agent is offline. Monitoring data above remains available. Retry when the worker container recovers.
               </p>
             )}
+          </div>
+
+          <div className="p-4">
+            <p className="text-sm font-bold">Docker Operations</p>
+            <p className="mt-1 text-xs">
+              Container restart and log inspection are not available in the current deployment.
+              The worker image does not contain the Docker CLI and the Docker socket is not
+              readable by the worker user. See <code className="font-mono text-xs">docs/future-docker-broker.md</code>
+              for the planned restricted broker design.
+            </p>
           </div>
         </div>
       )}

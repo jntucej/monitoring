@@ -3,17 +3,23 @@
 // Restricted Infrastructure Operations Agent
 //
 // Exposes a small, allowlisted set of infrastructure operations to the
-// Gate Monitor web container. The agent binds to 127.0.0.1:3002 and
-// authenticates every request against a shared OPS_AGENT_SECRET.
+// Gate Monitor web container. The agent binds to 0.0.0.0:3002 inside the
+// worker container (Docker-internal only — port 3002 is NOT published to
+// the host) and authenticates every request against a shared
+// OPS_AGENT_SECRET.
 //
 // Design constraints:
 //   • No arbitrary shell access.
-//   • No Docker socket access.
+//   • No Docker socket access (the worker cannot read the socket).
 //   • No unrestricted filesystem read.
 //   • No raw environment-variable exposure.
 //   • No arbitrary SQL execution.
 //   • Every handler is a predefined function with strict input validation.
 //   • All operations are audit-logged to the database.
+//   • Docker operations (restart_container, get_container_logs) are
+//     registered but return OPERATION_UNAVAILABLE — the worker image does
+//     not contain the docker CLI and cannot read the socket. See
+//     docs/future-docker-broker.md for the planned design.
 //
 // The web container's /api/sysadmin/operations endpoint proxies to this
 // agent for long-running or privileged tasks. The agent itself performs
@@ -182,11 +188,13 @@ async function opListBackups({ limit = 20 } = {}) {
 
 /**
  * restart_container
- * Body: { container: string } → { restarted: boolean, container: string }
+ * Body: { container: string } → { available: false, reason: string }
  *
- * Uses docker CLI (available inside the worker container via the mounted
- * socket) to restart a single named container. The container name is
- * validated against a strict allowlist of known gate_* / mon_* names.
+ * NOT FUNCTIONAL: the worker image does not contain the docker CLI and
+ * the nextjs user cannot read /var/run/docker.sock (root:docker owned,
+ * mode srw-rw----, no group membership). This handler is registered so
+ * the UI can show the capability as "planned" but always returns
+ * OPERATION_UNAVAILABLE. See docs/future-docker-broker.md.
  */
 const ALLOWED_CONTAINERS = new Set([
   "gate_web", "gate_worker", "gate_postgres", "gate_redis",
@@ -196,30 +204,32 @@ const ALLOWED_CONTAINERS = new Set([
 
 async function opRestartContainer({ container } = {}) {
   if (!ALLOWED_CONTAINERS.has(container)) {
-    return { restarted: false, container, error: "container not in allowlist" };
+    return { available: false, container, reason: "container not in allowlist" };
   }
-  const out = execFileSyncSafe(["docker", "restart", container], 30_000);
-  if (out === null) {
-    return { restarted: false, container, error: "docker restart timed out or failed" };
-  }
-  return { restarted: true, container, output: out.trim() };
+  return {
+    available: false,
+    container,
+    reason: "OPERATION_UNAVAILABLE: docker CLI not installed in worker image and Docker socket is not readable by the nextjs user. See docs/future-docker-broker.md for the planned restricted broker design.",
+  };
 }
 
 /**
  * get_container_logs
- * Body: { container: string, lines?: number } → { logs: string }
+ * Body: { container: string, lines?: number } → { available: false, reason: string }
  *
- * Returns the last N lines of a container's stdout/stderr.
- * Log content is truncated to 50 KB to avoid response bloat.
+ * NOT FUNCTIONAL: same constraint as restart_container.
  */
 async function opGetContainerLogs({ container, lines = 100 } = {}) {
   if (!ALLOWED_CONTAINERS.has(container)) {
-    return { logs: "", error: "container not in allowlist" };
+    return { available: false, container, reason: "container not in allowlist" };
   }
   const n = Math.min(Number(lines) || 100, 500);
-  const out = execFileSyncSafe(["docker", "logs", "--tail", String(n), container], 15_000);
-  if (out === null) return { logs: "", error: "docker logs failed" };
-  return { logs: out.slice(0, 50_000), container, lines: n };
+  return {
+    available: false,
+    container,
+    lines: n,
+    reason: "OPERATION_UNAVAILABLE: docker CLI not installed in worker image and Docker socket is not readable by the nextjs user. See docs/future-docker-broker.md for the planned restricted broker design.",
+  };
 }
 
 /**
@@ -335,8 +345,8 @@ const server = http.createServer(async (req, res) => {
   res.end(JSON.stringify({ error: "not found" }));
 });
 
-server.listen(AGENT_PORT, "127.0.0.1", () => {
-  console.log(`[ops-agent] listening on 127.0.0.1:${AGENT_PORT} — ${Object.keys(OPS).length} operations registered`);
+server.listen(AGENT_PORT, "0.0.0.0", () => {
+  console.log(`[ops-agent] listening on 0.0.0.0:${AGENT_PORT} — ${Object.keys(OPS).length} operations registered (Docker-internal only, port not published to host)`);
 });
 
 export { server as opsAgentServer, OPS, opsAgentServer };
