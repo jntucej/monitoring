@@ -26,6 +26,8 @@ import {
 } from "@/lib/sysadmin/permissions";
 import { query } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
+import { validateBody } from "@/lib/validate-body";
+import { BackupCenterActionSchema } from "@/lib/schemas/sysadmin";
 
 type BackupCenterData = {
   policies: unknown[];
@@ -148,7 +150,16 @@ const handler = withAuthorization(
     // POST: CSRF + permission + allowlist check
     const csrfFail = assertCsrf(req);
     if (csrfFail) return csrfFail;
-    const body = await req.json();
+
+    // U5: shared Zod validation owns the size cap + the allowlist enum.
+    // Malformed JSON → 400 BAD_REQUEST; unknown action → 400 VALIDATION_ERROR
+    // (the route still re-checks the allowlist below and 403s, so a schema
+    // change can't widen it).
+    const bodyRes = await validateBody(req, BackupCenterActionSchema, {
+      route: "/api/sysadmin/backup-maintenance-center",
+    });
+    if (!bodyRes.ok) return bodyRes.response;
+    const body = bodyRes.data as { action: string; policy_id?: string; limit?: number };
     const action: string = body.action;
 
     if (!ALLOWLISTED_SYSADMIN_ACTIONS.includes(action as never)) {

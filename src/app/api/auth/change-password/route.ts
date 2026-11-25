@@ -1,6 +1,8 @@
 // src/app/api/auth/change-password/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
+import { validateBody } from "@/lib/validate-body";
+import { ChangePasswordSchema } from "@/lib/schemas/auth";
 import { query } from "@/lib/postgres";
 import { hashPassword, verifyPassword } from "@/lib/auth-token";
 import { addAudit } from "@/lib/db";
@@ -23,11 +25,17 @@ async function handleChangePassword(
   const csrf = assertCsrf(req);
   if (csrf) return csrf;
 
-  // 2. Body — accept both camelCase (new) and snake_case (legacy) keys.
-  const body = await req.json().catch(() => null);
-  if (!body || typeof body !== "object") {
-    return NextResponse.json(err("BAD_REQUEST", "Invalid request body").body, { status: 400 });
-  }
+  // 2. Body — U5 shared Zod validation. Accepts both camelCase and snake_case
+  //    keys (the route reads currentPassword ?? current_password ??
+  //    oldPassword and newPassword ?? new_password ?? password). Malformed
+  //    JSON → 400 BAD_REQUEST; missing current/new password → 400
+  //    VALIDATION_ERROR with safe field paths.
+  const bodyRes = await validateBody(req, ChangePasswordSchema, {
+    route: "/api/auth/change-password",
+  });
+  if (!bodyRes.ok) return bodyRes.response;
+  const body = bodyRes.data;
+
   const currentPassword = String(
     body.currentPassword ?? body.current_password ?? body.oldPassword ?? ""
   );
@@ -36,6 +44,7 @@ async function handleChangePassword(
   );
 
   if (!currentPassword || !newPassword) {
+    // Belt-and-suspenders: schema already enforces presence.
     return NextResponse.json(err("BAD_REQUEST", "Current password and new password are required").body, { status: 400 });
   }
   try {

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
+import { validateBody } from "@/lib/validate-body";
+import { BotChatSchema } from "@/lib/schemas/bot";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -33,20 +35,24 @@ async function handler(req: NextRequest, { auth }: { auth: AuthContext }): Promi
     throw e;
   }
 
-  const body = await req.json().catch(() => null) as
-    { conversationId?: string; message?: string; lang?: BotLang; sourceLang?: BotLang | "auto" } | null;
+  // U5: shared Zod validation. Malformed JSON → 400 BAD_REQUEST; missing or
+  // over-4000-char message → 400 VALIDATION_ERROR with safe field paths.
+  const bodyRes = await validateBody(req, BotChatSchema, { route: "/api/bot/chat" });
+  if (!bodyRes.ok) return bodyRes.response;
+  const body = bodyRes.data;
 
-  const message = (body?.message ?? "").trim();
-  const lang: BotLang = body?.lang === "te" ? "te" : "en";
-  const sourceLang: BotLang | "auto" = body?.sourceLang ?? "auto";
+  const message = (body.message ?? "").trim();
+  const lang: BotLang = body.lang === "te" ? "te" : "en";
+  const sourceLang: BotLang | "auto" = body.sourceLang ?? "auto";
 
   if (!message || message.length > 4000) {
+    // Belt-and-suspenders: schema already enforces min(1)/max(4000).
     return NextResponse.json(err("BAD_REQUEST", "invalid_message").body, { status: 400 });
   }
 
   await query(`UPDATE public.users SET bot_lang=$1 WHERE id=$2`, [lang, auth.userId]);
 
-  let conversationId = body?.conversationId;
+  let conversationId = body.conversationId;
   if (conversationId) {
     const { rows } = await query<{ id: string }>(
       `SELECT id FROM public.bot_conversations WHERE id=$1 AND user_id=$2`,

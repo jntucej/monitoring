@@ -4,6 +4,8 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withTransaction } from "@/lib/postgres";
 import { ok, fail } from "@/server/http/response";
+import { validateBody } from "@/lib/validate-body";
+import { AnnouncementSchema } from "@/lib/schemas/admin";
 import { addAudit } from "@/lib/db";
 import { assertLength, LIMITS } from "@/lib/validation";
 import { RATE_LIMITS } from "@/config/app-constants";
@@ -51,28 +53,29 @@ async function handlePost(
   req: NextRequest,
   { auth }: { auth: AuthContext },
 ): Promise<Response> {
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return fail("INVALID_JSON", "request body must be JSON", 400);
-  }
-  if (!body || typeof body !== "object") return fail("INVALID_BODY", "body must be an object", 400);
-  const payload = body as Record<string, unknown>;
+  // U5: shared Zod validation owns both the size cap and the field checks
+  // in a single streamed read. Malformed JSON → 400; oversize → 413;
+  // missing/over-long fields → 400 VALIDATION_ERROR with safe paths.
+  const bodyRes = await validateBody(req, AnnouncementSchema, { route: "/api/admin/announcements" });
+  if (!bodyRes.ok) return bodyRes.response;
+  const payload = bodyRes.data;
 
   try {
-    assertLength(String(payload.title ?? ""), LIMITS.ANNOUNCEMENT_TITLE, "title");
-    assertLength(String(payload.message ?? payload.body ?? ""), LIMITS.ANNOUNCEMENT_MESSAGE, "message");
+    // Belt-and-suspenders: the schema already bounds title/message, but keep
+    // the route's own limit check so a schema change can't silently allow
+    // over-long fields.
+    assertLength(payload.title, LIMITS.ANNOUNCEMENT_TITLE, "title");
+    assertLength(payload.message ?? payload.body ?? "", LIMITS.ANNOUNCEMENT_MESSAGE, "message");
   } catch (e) {
     return fail("VALIDATION_FAILED", e instanceof Error ? e.message : "invalid input", 400);
   }
 
-  const title = String(payload.title ?? "");
-  const message = String(payload.message ?? payload.body ?? "");
-  const audience = typeof payload.audience === "string" ? payload.audience : "all";
-  const priority = typeof payload.priority === "string" ? payload.priority : "medium";
+  const title = payload.title;
+  const message = payload.message ?? payload.body ?? "";
+  const audience = payload.audience ?? "all";
+  const priority = payload.priority ?? "medium";
   const publishNow = payload.publishNow === true;
-  const publishAt = typeof payload.publishAt === "string" ? payload.publishAt : null;
+  const publishAt = payload.publishAt ?? null;
 
   const isPublished = publishNow || (!publishAt || new Date(publishAt) <= new Date());
   const scheduledAt = !publishNow && publishAt && new Date(publishAt) > new Date() ? publishAt : null;

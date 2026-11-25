@@ -3,6 +3,8 @@ import crypto from "crypto";
 import { randomUUID } from "crypto";
 import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 import { Policies } from "@/lib/rate-limit-policies";
+import { validateBody } from "@/lib/validate-body";
+import { LoginSchema } from "@/lib/schemas/auth";
 import { query } from "@/lib/postgres";
 import { signAccessToken, signRefreshToken, verifyPassword, signPasswordResetToken } from "@/lib/auth-token";
 import { verifyDPoPProof } from "@/lib/dpop";
@@ -31,22 +33,18 @@ async function handleLoginInner(req: NextRequest) {
   if (csrfError) return csrfError;
 
   try {
-    const body = await req.json().catch(() => null);
-    if (!body || typeof body !== "object") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "BAD_REQUEST", message: "Request body must be valid JSON." },
-        },
-        { status: 400 }
-      );
-    }
+    // U5: shared Zod validation. Malformed JSON → 400 BAD_REQUEST; missing
+    // identifier/password → 400 VALIDATION_ERROR with safe field paths.
+    const bodyRes = await validateBody(req, LoginSchema, { route: "/api/auth/login" });
+    if (!bodyRes.ok) return bodyRes.response;
+    const { login, email, password } = bodyRes.data;
 
-    const { login, email, password } = body as Record<string, unknown>;
     const rawIdentifier = ((login || email || "") as string);
     const rawPassword = ((password || "") as string);
 
     if (!rawIdentifier.trim() || !rawPassword) {
+      // Belt-and-suspenders: the schema already rejects this, but keep the
+      // route's own guard so a schema change can't silently weaken it.
       return NextResponse.json(
         {
           success: false,
