@@ -1,0 +1,16 @@
+-- 20270131000039_usb_backup_hardening.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.recovery_points;
+DROP TABLE IF EXISTS public.backup_locks;
+DROP TABLE IF EXISTS public.backup_classifications;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS filesystem_uuid;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS device_transport;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS last_discovered_at;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS last_validated_at;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS last_validation_result;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS registered_by;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS mount_path;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS is_mounted;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS mount_options;
+ALTER TABLE public.storage_devices DROP COLUMN IF EXISTS filesystem_driver;
+COMMIT;

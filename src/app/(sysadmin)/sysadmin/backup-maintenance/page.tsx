@@ -69,6 +69,36 @@ type MaintPolicy = {
   last_result: string | null;
 };
 
+type DiscoveredUSB = {
+  device_name: string;
+  device_model: string;
+  device_serial: string;
+  device_transport: string;
+  partition: string;
+  filesystem: string;
+  filesystem_uuid: string;
+  label: string;
+  total_bytes: number;
+  available_bytes: number;
+  mounted: boolean;
+  mount_point: string;
+  mount_options: string;
+  writable: boolean;
+  smart_health: string;
+  device_state: string;
+};
+
+type Classification = {
+  resource_name: string;
+  resource_type: string;
+  source_path: string;
+  category: string;
+  backup_included: boolean;
+  backup_method: string | null;
+  retention_days: number | null;
+  notes: string | null;
+};
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 function fmtBytes(n: number | null | undefined): string {
@@ -107,6 +137,8 @@ export default function BackupMaintenancePage() {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [manifests, setManifests] = useState<Manifest[]>([]);
   const [maintPols, setMaintPols] = useState<MaintPolicy[]>([]);
+  const [usbDevices, setUsbDevices] = useState<DiscoveredUSB[]>([]);
+  const [classifications, setClassifications] = useState<Classification[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionMsg, setActionMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -126,10 +158,11 @@ export default function BackupMaintenancePage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [devRes, repoRes, centerRes] = await Promise.all([
+      const [devRes, repoRes, centerRes, usbRes] = await Promise.all([
         api("/api/sysadmin/storage-devices"),
         api("/api/sysadmin/backup-repo"),
         api("/api/sysadmin/backup-maintenance-center"),
+        api("/api/sysadmin/usb-discovery"),
       ]);
       if (devRes.ok) setDevices((await devRes.json()).devices ?? []);
       if (repoRes.ok) {
@@ -138,6 +171,10 @@ export default function BackupMaintenancePage() {
         setManifests(d.manifests ?? []);
       }
       if (centerRes.ok) setMaintPols((await centerRes.json()).maintenance_policies ?? []);
+      if (usbRes.ok) {
+        const usb = await usbRes.json();
+        setUsbDevices(usb.discovered ?? []);
+      }
     } catch { /* ignore */ }
     setLoading(false);
   }, []);
@@ -476,6 +513,76 @@ export default function BackupMaintenancePage() {
             </table>
           </div>
         )}
+      </section>
+
+      {/* USB Hardware Discovery */}
+      <section>
+        <h2 className="mb-2 text-sm font-semibold text-foreground">
+          USB Hardware Discovery
+        </h2>
+        {usbDevices.length === 0 ? (
+          <p className="text-sm text-foreground">No USB storage devices detected. Connect a drive and refresh.</p>
+        ) : (
+          <div className="divide-y divide-border">
+            {usbDevices.map((u, i) => (
+              <div key={`${u.device_serial}-${i}`} className="flex flex-wrap items-center gap-4 py-3">
+                <div className="flex-1 min-w-40">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-foreground">{u.device_name}</span>
+                    <span className={`text-xs ${u.mounted ? "text-action-success" : "text-foreground"}`}>
+                      ● {u.mounted ? `mounted at ${u.mount_point}` : "not mounted"}
+                    </span>
+                    <span className={`text-xs ${
+                      u.smart_health === "healthy" ? "text-action-success" :
+                      u.smart_health === "failing" ? "text-action-danger" : "text-foreground"
+                    }`}>
+                      SMART: {u.smart_health}
+                    </span>
+                  </div>
+                  <div className="mt-0.5 text-xs text-foreground">
+                    {u.filesystem} ({u.filesystem_uuid}) · SN: {u.device_serial} · {u.label}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-foreground">{fmtBytes(u.available_bytes)}</div>
+                  <div className="text-xs text-foreground">free of {fmtBytes(u.total_bytes)}</div>
+                </div>
+                <div className="text-right text-xs">
+                  <div className={u.writable ? "text-action-success" : "text-action-danger"}>
+                    {u.writable ? "read-write" : "read-only"}
+                  </div>
+                  <div className="text-foreground">{u.device_state}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Resource Classification */}
+      <section>
+        <h2 className="mb-2 text-sm font-semibold text-foreground">
+          Resource Classification
+        </h2>
+        <p className="mb-2 text-xs text-foreground">
+          Backups include only resources classified as CRITICAL or IMPORTANT.
+          REPRODUCIBLE and TEMPORARY resources are excluded. UNKNOWN resources require explicit review.
+        </p>
+        <div className="divide-y divide-border">
+          {[
+            { label: "CRITICAL", desc: "PostgreSQL, uploads, auth data — always backed up", color: "text-action-danger" },
+            { label: "IMPORTANT", desc: "Config, migrations, Caddy, Cloudflare — versioned", color: "text-foreground" },
+            { label: "CONDITIONAL", desc: "Redis, Loki, Prometheus — on-demand only", color: "text-foreground" },
+            { label: "REPRODUCIBLE", desc: "Docker images, node_modules, build cache — excluded", color: "text-foreground" },
+            { label: "TEMPORARY", desc: "Disposable exports, expired uploads — retention-managed", color: "text-foreground" },
+            { label: "UNKNOWN", desc: "Unclassified persistent resources — require admin review", color: "text-action-warning" },
+          ].map((c) => (
+            <div key={c.label} className="flex items-center gap-3 py-2">
+              <span className={`w-24 text-xs font-bold ${c.color}`}>{c.label}</span>
+              <span className="flex-1 text-xs text-foreground">{c.desc}</span>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Maintenance Policies */}
