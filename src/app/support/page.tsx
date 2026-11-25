@@ -128,7 +128,7 @@ export default function UserSupportPage() {
         <Card className="surface-card p-4 bg-bg-elevated dark:bg-bg-elevated/40">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-lg flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-action-primary" /> New Support Request</h3>
+              <h3 className="font-semibold text-lg flex items-center gap-2"><LifeBuoy className="h-4 w-4 text-action-primary" /> New Support Request</h3>
               <HelpTip text="Tickets are dispatched directly to gate supervisors and administrative personnel." />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -137,7 +137,7 @@ export default function UserSupportPage() {
                   <label className="text-xs text-text-muted">Issue Category</label>
                   <HelpTip text="Select gate access, ID scanning, pass questions, or platform bug." />
                 </div>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated">
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full p-2 text-sm text-text-primary">
                   <option value="gate_access">Gate Access Issue</option>
                   <option value="id_card">ID Card / Scanner</option>
                   <option value="pass_request">Pass Query</option>
@@ -149,7 +149,7 @@ export default function UserSupportPage() {
                   <label className="text-xs text-text-muted">Urgency Level</label>
                   <HelpTip text="High priority triggers faster supervisor triage." />
                 </div>
-                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated">
+                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full p-2 text-sm text-text-primary">
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
@@ -158,11 +158,11 @@ export default function UserSupportPage() {
             </div>
             <div>
               <label className="text-xs text-text-muted block mb-1">Subject</label>
-              <input value={subject} onChange={(e) => setSubject(e.target.value)} required className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated" placeholder="Short description of the problem" />
+              <input value={subject} onChange={(e) => setSubject(e.target.value)} required className="w-full p-2 text-sm text-text-primary" placeholder="Short description of the problem" />
             </div>
             <div>
               <label className="text-xs text-text-muted block mb-1">Details & Context</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated" placeholder="Include gate number, approximate time, and what went wrong..." />
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} className="w-full p-2 text-sm text-text-primary" placeholder="Include gate number, approximate time, and what went wrong..." />
             </div>
             <div className="flex items-center gap-2">
               <Button type="submit" size="sm">Submit Ticket</Button>
@@ -187,7 +187,7 @@ export default function UserSupportPage() {
             rows={3}
             maxLength={2000}
             required
-            className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated"
+            className="w-full p-2 text-sm text-text-primary"
             placeholder="e.g. The gate page would load faster if…"
           />
           <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ export default function UserSupportPage() {
       <div className="space-y-4">
         {tickets.length === 0 ? (
           <Card className="surface-card p-8 text-center bg-bg-surface">
-            <LifeBuoy className="w-8 h-8 text-text-muted mx-auto mb-2" />
+            <LifeBuoy className="h-4 w-4 text-text-muted mx-auto mb-2" />
             <h4 className="text-sm font-semibold text-text-primary">No support tickets</h4>
             <p className="text-xs text-text-muted mt-1 max-w-sm mx-auto">
               You haven&apos;t raised any tickets yet. If you run into gate access issues or scanning errors, click &ldquo;Raise Ticket&rdquo; above.
@@ -215,7 +215,7 @@ export default function UserSupportPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="surface-card font-bold text-xs bg-bg-elevated dark:bg-bg-elevated px-2 py-0.5">{t.ticket_number}</span>
+                    <span className="bg-bg-elevated dark:bg-bg-elevated px-2 py-0.5 font-bold text-xs">{t.ticket_number}</span>
                     <h3 className="font-semibold text-base">{t.subject}</h3>
                     <Badge variant={t.status === "open" ? "entry" : "success"} className="capitalize">{t.status}</Badge>
                   </div>

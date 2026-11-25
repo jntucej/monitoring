@@ -113,11 +113,11 @@ function BootstrapPageInner() {
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-bg-base p-4 sm:p-8 relative overflow-x-hidden">
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-6 h-6 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 h-8 w-8 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="w-full max-w-md space-y-5">
         <div className="text-center space-y-1.5">
-          <div className="size-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-action-success mx-auto flex items-center justify-center shadow-xs">
-            <KeyRound className="w-6 h-6" />
+          <div className="mx-auto flex size-8 items-center justify-center rounded-lg bg-emerald-500/10 text-action-success">
+            <KeyRound className="size-4" />
           </div>
           <h1 className="text-2xl font-bold text-text-primary">Activate Your Account</h1>
           <p className="text-xs text-text-muted max-w-sm mx-auto">
@@ -126,15 +126,15 @@ function BootstrapPageInner() {
               : "Enter your university ID and the one-time activation code from your administrator to set your password."}
           </p>
           <ol className="flex flex-wrap items-center justify-center gap-1.5 pt-1 text-[11px] text-text-muted">
-            <li className="rounded-full bg-bg-surface border border-border px-2.5 py-0.5 font-medium text-text-primary">
+            <li className="font-medium text-text-primary">
               1. Verify ID &amp; Code
             </li>
             <span aria-hidden="true">→</span>
-            <li className="rounded-full bg-bg-surface border border-border px-2.5 py-0.5 font-medium text-text-primary">
+            <li className="font-medium text-text-primary">
               2. Set Password
             </li>
             <span aria-hidden="true">→</span>
-            <li className="rounded-full bg-bg-surface border border-border px-2.5 py-0.5 font-medium text-text-primary">
+            <li className="font-medium text-text-primary">
               3. Sign In
             </li>
           </ol>

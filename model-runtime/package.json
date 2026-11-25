@@ -1,0 +1,21 @@
+{
+  "name": "@gate/ai-model-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Resource-efficient 3-model AI layer (M1 conversation, M2 OCR, M3 document-intelligence) for the Gate Monitor SaaS.",
+  "type": "module",
+  "main": "conversation/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "bench": "node ../scripts/benchmark-ai/run.mjs",
+    "test:ai": "vitest run ../tests/ai"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "pino": "^9.0.0",
+    "typescript": "^5.5.0",
+    "@types/node": "^20.0.0"
+  }
+}

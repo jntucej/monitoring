@@ -216,7 +216,7 @@ export default function StudentPermissionsPage() {
         />
 
         {error && (
-          <div className="surface-card p-4 bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] text-action-danger text-xs md:text-sm flex items-center justify-between gap-3">
+          <div className="border border-action-danger/20 bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] p-4 text-action-danger text-xs md:text-sm flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error} — Check your connection and try again.</span>
@@ -224,7 +224,7 @@ export default function StudentPermissionsPage() {
             <button
               type="button"
               onClick={fetchTickets}
-              className="shrink-0 rounded-lg border border-current px-2.5 py-1 text-xs font-semibold hover:opacity-80"
+              className="shrink-0 border border-current px-2.5 py-1 text-xs font-semibold hover:opacity-80"
             >
               Retry
             </button>
@@ -282,14 +282,14 @@ export default function StudentPermissionsPage() {
                 <button
                   type="button"
                   onClick={() => setFilter("ALL")}
-                  className="rounded-lg border border-border bg-bg-surface px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-elevated"
+                  className="border border-border bg-bg-surface px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-elevated"
                 >
                   Show all requests
                 </button>
               ) : (
                 <Link
                   href="/student/permissions/new"
-                  className="rounded-lg bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                  className="bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
                 >
                   New Permission Request
                 </Link>
