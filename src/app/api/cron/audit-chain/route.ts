@@ -110,7 +110,11 @@ export async function POST(req: NextRequest) {
     if (!verifyOk) {
       await query(
         `INSERT INTO public.alerts (severity, resource_type, title, detail, created_by)
-         VALUES ('critical', 'audit_chain', $1, $2, NULL)`,
+         SELECT 'critical', 'audit_chain', $1, $2, NULL
+          WHERE NOT EXISTS (
+            SELECT 1 FROM public.alerts
+             WHERE resource_type = 'audit_chain' AND resolved = false
+          )`,
         [`AUDIT CHAIN BROKEN at link ${maxSeq} — manual review required`,
          `Chain verification failed; hash continuity lost. Integrity review needed before accreditation export.`],
       ).catch(() => undefined);

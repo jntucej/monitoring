@@ -125,11 +125,15 @@ export async function POST(req: NextRequest) {
         dupFlagged += 1;
       }
 
-      // 4. SLA breach escalation.
+      // 4. SLA breach escalation (deduplicated: at most 1 unresolved alert per complaint).
       if (comp.sla_deadline && new Date(comp.sla_deadline).getTime() < Date.now()) {
         await query(
           `INSERT INTO public.alerts (severity, resource_type, title, detail, created_by)
-           VALUES ('high', 'complaint_sla', $1, $2, NULL)`,
+           SELECT 'high', 'complaint_sla', $1, $2, NULL
+            WHERE NOT EXISTS (
+              SELECT 1 FROM public.alerts
+               WHERE resource_type = 'complaint_sla' AND title = $1 AND resolved = false
+            )`,
           [comp.id, `Complaint SLA breached: ${comp.title}`],
         ).catch(() => undefined);
         slaEscalated += 1;
