@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { randomUUID } from "crypto";
 import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
+import { Policies } from "@/lib/rate-limit-policies";
 import { query } from "@/lib/postgres";
 import { signAccessToken, signRefreshToken, verifyPassword, signPasswordResetToken } from "@/lib/auth-token";
 import { verifyDPoPProof } from "@/lib/dpop";
@@ -440,9 +441,12 @@ async function handleLoginInner(req: NextRequest) {
 // Structured observability: auto-log the request lifecycle and attach the correlation ID.
 const handleLogin = log.wrap("/api/auth/login", handleLoginInner);
 
+// U4: named policy reference. The `login:` keyPrefix (not `auth:`) preserves
+// today's per-route behavior — the legacy AUTH_SENSITIVE_KEY_PREFIXES list
+// still fail-closes on `login:` keys, so this is a documentation change,
+// not a behavior change. Inline override kept for clarity.
 export const POST = withRateLimit(handleLogin, {
-  keyPrefix: "login",
-  maxRequests: 100,
-  windowMs: 60 * 1000,
+  ...Policies.auth,
+  keyPrefix: "login",  // preserve existing key namespace (legacy fail-closed)
 });
 

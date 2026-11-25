@@ -2,6 +2,7 @@ import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { withRateLimit, rateLimitByKey } from "@/lib/rate-limit";
+import { Policies } from "@/lib/rate-limit-policies";
 import { query } from "@/lib/postgres";
 import { signPasswordResetToken, verifyPasswordResetToken, hashPassword, verifyPassword } from "@/lib/auth-token";
 import { assertPasswordPolicy } from "@/server/policy/passwords";
@@ -228,8 +229,11 @@ async function handleResetPassword(req: NextRequest) {
   }
 }
 
+// U4: OTP policy reference. windowMs=15min is intentionally longer than the
+// 1-minute OTP default (reset-password email has a longer expiry window).
+// keyPrefix preserved as "auth_reset_password" (route-specific namespace).
 export const POST = withRateLimit(handleResetPassword, {
+  ...Policies.otp,
+  windowMs: 15 * 60 * 1000,  // 15-minute window (longer than OTP default)
   keyPrefix: "auth_reset_password",
-  maxRequests: 5,
-  windowMs: 15 * 60 * 1000,
 });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { withRateLimit } from "@/lib/rate-limit";
+import { Policies } from "@/lib/rate-limit-policies";
 import { query } from "@/lib/postgres";
 import { rpID, origin, assertProductionWebAuthnConfig } from "@/lib/webauthn";
 import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
@@ -139,8 +140,9 @@ async function handlePost(req: NextRequest) {
   return res;
 }
 
+// U4: OTP policy (5/min) — passkey auth verify is an OTP-class endpoint.
+// keyPrefix preserved as "passkey-auth" (route-specific namespace).
 export const POST = withRateLimit(handlePost, {
-  windowMs: 60_000,
-  maxRequests: 10,
+  ...Policies.otp,
   keyPrefix: "passkey-auth",
 });

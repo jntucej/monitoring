@@ -1,18 +1,36 @@
+// src/lib/rate-limit.ts
+//
+// Layered API rate limiter.
+//
+// Store order (U4):
+//   1. Primary — configured via RATELIMIT_PRIMARY_STORE (default "postgres"):
+//        postgres: atomic upsert on public.rate_limit_buckets (cross-replica)
+//        redis:    atomic Lua INCR+PEXPIRE (single round-trip, no leak window)
+//   2. Secondary — the other available store (resilience: a Redis outage
+//      cannot take the limiter offline; same for Postgres).
+//   3. Last resort — per-instance in-memory. Auth-sensitive categories
+//      fail CLOSED (503) when no shared store is reachable; everything
+//      else fails OPEN (availability > strictness for non-auth).
+//
+// Identity:
+//   - Authenticated: x-user-id — injected by withAuthorization() from the
+//     VERIFIED JWT; client-supplied copies are overwritten + HMAC-signed,
+//     so it cannot be spoofed or rotated to bypass limits.
+//   - Unauthenticated: trusted client IP via extractClientIp()
+//     (Caddy sets X-Client-IP from {remote_host} and strips client-supplied
+//     forwarding headers; see docs/u4-audit-and-proposal.md Step 4).
+//
+// Security:
+//   - 429/503 bodies never carry Redis/Postgres error text (U3 contract).
+//   - No tokens, passwords, cookies or PII in keys or logs — keys are
+//     keyPrefix:pathname:u:<userId> or keyPrefix:pathname:<ip>.
+
 import { NextRequest, NextResponse } from "next/server";
 import { poolQuery } from "@/lib/postgres";
+import { createHash } from "node:crypto";
+import { routeFailsClosed } from "@/lib/rate-limit-policies";
 
-// Shared-key fallback store. When Postgres (rate_limit_buckets) is
-// unreachable, a per-replica in-memory Map silently doubles (or triples)
-// the effective limit across replicas — N replicas => N x the configured
-// limit, which is exactly the window an abuser/bot exploits. Redis is
-// already in the stack (REDIS_URL), so the fallback path below routes
-// through a real INCR+EXPIRE against a shared key: the limit stays
-// correct across replicas even while Postgres is down.
-//
-// Redis is only reached on the Postgres-failure path, so a Redis outage
-// alone cannot take the limiter offline — it degrades back to the
-// per-instance memory fallback (auth-sensitive keys still fail closed).
-
+// ── Redis client (lazy singleton, reconnect strategy, no-crash handler) ────
 type RedisClient = Awaited<ReturnType<typeof import("redis").createClient>>;
 let redisClientPromise: Promise<RedisClient> | null = null;
 
@@ -34,13 +52,11 @@ function getRedisSharedStore(): Promise<RedisClient> {
   return redisClientPromise!;
 }
 
-interface RateLimitConfig {
+export interface RateLimitConfig {
   windowMs?: number;
   maxRequests?: number;
   keyPrefix?: string;
 }
-
-export type { RateLimitConfig };
 
 export interface RateLimitResult {
   limited: boolean;
@@ -102,24 +118,12 @@ function bucketKey(req: NextRequest, cfg: Required<RateLimitConfig>): string {
   return `${cfg.keyPrefix}:${path}:${identifier}`;
 }
 
-/**
- * Atomic increment-and-read. Single SQL statement means it's safe under
- * concurrency across replicas. Accepts either a NextRequest (keyed by
- * keyPrefix:pathname:clientIp) or an explicit bucket key string (used by
- * per-identifier / per-user lockouts in auth, mobile, and kiosk routes).
- */
-// In-memory fallback bucket store if database is unreachable (degrades gracefully per-instance, never fails open blindly)
-interface MemoryBucket {
-  count: number;
-  resetAt: number;
-}
-const fallbackMemoryStore = new Map<string, MemoryBucket>();
-
-// Auth-sensitive key prefixes that MUST fail closed when the shared
-// Postgres store is unreachable: with 2+ web replicas the per-instance
-// in-memory fallback degrades the limit to near-useless, and an auth
-// limiter that silently stops limiting is a credential-guessing hole.
-// Everything else stays fail-open (availability > strictness for non-auth).
+// ── Failure policy (U4 gap E) ────────────────────────────────────────────────
+// Auth-sensitive key prefixes that MUST fail closed when no shared store is
+// reachable: with 2+ web replicas the per-instance in-memory fallback
+// degrades the limit to near-useless, and an auth limiter that silently
+// stops limiting is a credential-guessing hole. Everything else stays
+// fail-open (availability > strictness for non-auth).
 const AUTH_SENSITIVE_KEY_PREFIXES = [
   "login:",
   "pin:",
@@ -132,31 +136,94 @@ function isAuthSensitiveKey(key: string): boolean {
   return AUTH_SENSITIVE_KEY_PREFIXES.some((p) => key.startsWith(p));
 }
 
+/**
+ * U4 gap E: fail-closed key test.
+ *  1. Legacy auth-sensitive prefixes (login/pin/kiosk-session/bootstrap/
+ *     password_reset_email) — always fail closed.
+ *  2. Rate-limit policies with failClosed=true whose keyPrefix is one of
+ *     the known policy prefixes (auth/otp/admin-mutation) — fail closed.
+ *  3. RATELIMIT_FAIL_CLOSED_CATEGORIES env override (comma list) —
+ *     additional prefixes that fail closed.
+ */
+export function isFailClosedKey(key: string): boolean {
+  if (isAuthSensitiveKey(key)) return true;
+  const configured = (process.env.RATELIMIT_FAIL_CLOSED_CATEGORIES ?? "")
+    .split(",").map(s => s.trim()).filter(Boolean);
+  // Policy keyPrefixes that are fail-closed: "auth", "otp", "admin-mutation"
+  const policyPrefixes = ["auth:", "otp:", "admin-mutation:"];
+  return policyPrefixes.concat(
+    configured.map((p) => `${p}:`)
+  ).some((p) => key.startsWith(p));
+}
+
 let authSensitiveFallbackWarned = false;
 
+// ── Postgres store (atomic single-statement upsert, cross-replica) ──────────
+async function checkPostgresLimit(key: string, cfg: Required<RateLimitConfig>): Promise<RateLimitResult> {
+  const { rows } = await poolQuery<{ count: number; reset_at: Date }>(
+    `
+    INSERT INTO public.rate_limit_buckets (key, count, reset_at)
+    VALUES ($1, 1, NOW() + make_interval(secs => $2::float / 1000))
+    ON CONFLICT (key) DO UPDATE
+      SET count = CASE
+            WHEN rate_limit_buckets.reset_at <= NOW() THEN 1
+            ELSE rate_limit_buckets.count + 1
+          END,
+          reset_at = CASE
+            WHEN rate_limit_buckets.reset_at <= NOW()
+              THEN NOW() + make_interval(secs => $2::float / 1000)
+            ELSE rate_limit_buckets.reset_at
+          END
+    RETURNING count, reset_at;
+    `,
+    [key, cfg.windowMs]
+  );
+  const row = rows[0];
+  const remaining = Math.max(0, cfg.maxRequests - row.count);
+  const limited = row.count > cfg.maxRequests;
+  const retryAfter = limited
+    ? Math.max(1, Math.ceil((new Date(row.reset_at).getTime() - Date.now()) / 1000))
+    : undefined;
+  return { limited, remaining, resetTime: new Date(row.reset_at), retryAfter };
+}
+
+// ── Redis store (U4 gap B: atomic Lua INCR + PEXPIRE, single round-trip) ────
+// INCR + PEXPIRE in one EVALSHA (script cached in Redis by SHA1): one
+// round-trip, atomic — no crash window between the two commands, so a
+// counter can never be left without a TTL (the old 2-RTT INCR→EXPIRE path
+// leaked a key-without-expiry if the process died between the commands).
+const INCR_PEXPIRE_LUA = `
+    local c = redis.call('INCR', KEYS[1])
+    if c == 1 then redis.call('PEXPIRE', KEYS[1], ARGV[1]) end
+    local ttl = redis.call('PTTL', KEYS[1])
+    return {c, ttl < 0 and ARGV[1] or ttl}
+  `;
+
+/** SHA1 of the script source — used in EVALSHA (Redis caches by SHA1;
+ *  computed locally so we don't need the redis client's helper types). */
+const INCR_PEXPIRE_SHA1 = createHash("sha1").update(INCR_PEXPIRE_LUA).digest("hex");
+
 /**
- * Shared-redis rate-limit check. Used when the Postgres bucket table is
- * unreachable but a redis connection is available: a real INCR+EXPIRE on
- * a global key, so the limit is not multiplied by replica count.
- * Falls through to the per-instance memory store if redis is also down.
+ * Shared-redis rate-limit check (atomic). Returns null when Redis is
+ * unreachable — the caller decides fallback.
  */
 async function checkSharedRedisLimit(key: string, cfg: Required<RateLimitConfig>): Promise<RateLimitResult | null> {
   try {
     const client = await getRedisSharedStore();
     const redisKey = `rl:${cfg.keyPrefix}:${key}`;
-    const windowSec = Math.max(1, Math.ceil(cfg.windowMs / 1000));
-    const count = await client.incr(redisKey);
-    if (count === 1) {
-      await client.expire(redisKey, windowSec);
-    }
-    const ttl = await client.ttl(redisKey);
-    const remaining = Math.max(0, cfg.maxRequests - Number(count));
-    const limited = Number(count) > cfg.maxRequests;
-    const retryAfter = limited ? Math.max(1, ttl) : undefined;
+    const windowMs = Math.max(1, cfg.windowMs);
+    const [count, ttlMsRaw] = await client.sendCommand([
+      "EVALSHA", INCR_PEXPIRE_SHA1, "1", redisKey, String(windowMs),
+    ]) as unknown as [number, number];
+    const c = Number(count);
+    const ttlMs = Number(ttlMsRaw);
+    const remaining = Math.max(0, cfg.maxRequests - c);
+    const limited = c > cfg.maxRequests;
+    const retryAfter = limited ? Math.max(1, Math.ceil(ttlMs / 1000)) : undefined;
     return {
       limited,
       remaining,
-      resetTime: new Date(Date.now() + (ttl <= 0 ? windowSec : ttl) * 1000),
+      resetTime: new Date(Date.now() + ttlMs),
       retryAfter,
     };
   } catch {
@@ -164,16 +231,23 @@ async function checkSharedRedisLimit(key: string, cfg: Required<RateLimitConfig>
   }
 }
 
+// ── In-memory last resort ─────────────────────────────────────────────────────
+interface MemoryBucket {
+  count: number;
+  resetAt: number;
+}
+const fallbackMemoryStore = new Map<string, MemoryBucket>();
+
 function checkFallbackMemoryLimit(key: string, cfg: Required<RateLimitConfig>, failClosed = false): RateLimitResult {
   if (failClosed) {
-    // Auth-sensitive key with no shared store: deny the request. Loud log so
-    // the operator sees the shared-store outage instead of discovering it
-    // when auth locks silently stop working.
+    // Shared store unreachable for a fail-closed key: deny. Loud log so the
+    // operator sees the outage instead of discovering it when auth locks
+    // silently stop working.
     if (!authSensitiveFallbackWarned) {
       authSensitiveFallbackWarned = true;
       console.error(
-        `[rate-limit] FAIL-CLOSED: shared rate-limit store (Postgres rate_limit_buckets) unreachable ` +
-        `for auth-sensitive key '${key}' — denying request (503). This is not a per-replica fallback; ` +
+        `[rate-limit] FAIL-CLOSED: shared rate-limit store unreachable ` +
+        `for fail-closed key '${key}' — denying request (503). This is not a per-replica fallback; ` +
         `the limiter cannot bound credential-guessing across replicas.`
       );
       // Clear the latch so a subsequent recovery + re-outage logs again.
@@ -195,64 +269,54 @@ function checkFallbackMemoryLimit(key: string, cfg: Required<RateLimitConfig>, f
   return { limited, remaining, resetTime: new Date(bucket.resetAt), retryAfter };
 }
 
+// ── Primary store selection (U4 gap A) ────────────────────────────────────────
+// RATELIMIT_PRIMARY_STORE=redis makes Redis the primary and Postgres the
+// secondary. Default "postgres" = today's behavior (zero change on deploy).
+function primaryStore(): "postgres" | "redis" {
+  return process.env.RATELIMIT_PRIMARY_STORE === "redis" ? "redis" : "postgres";
+}
+
 /**
- * Enforce a rate limit using PostgreSQL `rate_limit_buckets` table for shared
- * concurrency across replicas. If the DB fails, degrades to shared Redis
- * (INCR+EXPIRE on a global key — limit stays correct across replicas).
- * Only when both Postgres and Redis are unreachable does it fall back to
- * local in-memory enforcement (auth-sensitive keys fail closed instead).
+ * Enforce a rate limit. Store order:
+ *   RATELIMIT_PRIMARY_STORE=postgres (default): postgres → redis → memory
+ *   RATELIMIT_PRIMARY_STORE=redis:              redis → postgres → memory
+ * Fail-closed keys (auth-sensitive + RATELIMIT_FAIL_CLOSED_CATEGORIES) deny
+ * with a synthetic "limited" result when no shared store is reachable.
  */
 export async function checkRateLimit(
   reqOrKey: NextRequest | string,
   config: RateLimitConfig = {}
 ): Promise<RateLimitResult> {
   const cfg = resolveConfig(config);
-  const key =
-    typeof reqOrKey === "string" ? reqOrKey : bucketKey(reqOrKey, cfg);
-  try {
-    const { rows } = await poolQuery<{ count: number; reset_at: Date }>(
-      `
-      INSERT INTO public.rate_limit_buckets (key, count, reset_at)
-      VALUES ($1, 1, NOW() + make_interval(secs => $2::float / 1000))
-      ON CONFLICT (key) DO UPDATE
-        SET count = CASE
-              WHEN rate_limit_buckets.reset_at <= NOW() THEN 1
-              ELSE rate_limit_buckets.count + 1
-            END,
-            reset_at = CASE
-              WHEN rate_limit_buckets.reset_at <= NOW()
-                THEN NOW() + make_interval(secs => $2::float / 1000)
-              ELSE rate_limit_buckets.reset_at
-            END
-      RETURNING count, reset_at;
-      `,
-      [key, cfg.windowMs]
-    );
-    const row = rows[0];
-    const remaining = Math.max(0, cfg.maxRequests - row.count);
-    const limited = row.count > cfg.maxRequests;
-    const retryAfter = limited
-      ? Math.max(1, Math.ceil((new Date(row.reset_at).getTime() - Date.now()) / 1000))
-      : undefined;
-    return { limited, remaining, resetTime: new Date(row.reset_at), retryAfter };
-  } catch (err) {
-    if (isAuthSensitiveKey(key)) {
-      // Auth-sensitive key (login/pin/kiosk/bootstrap/password-reset): the
-      // shared store is the ONLY thing bounding credential-guessing across
-      // replicas — the per-instance memory fallback cannot replace it.
-      // Try redis first (still shared across replicas); fail closed only
-      // if redis is also unreachable.
-      const redisResult = await checkSharedRedisLimit(key, cfg);
-      if (redisResult) return redisResult;
-      return checkFallbackMemoryLimit(key, cfg, true);
+  const key = typeof reqOrKey === "string" ? reqOrKey : bucketKey(reqOrKey, cfg);
+  const primary = primaryStore();
+
+  const stores = primary === "postgres"
+    ? [checkPostgresLimit.bind(null, key, cfg), () => checkSharedRedisLimit(key, cfg)]
+    : [() => checkSharedRedisLimit(key, cfg), () => {
+        // Postgres secondary path — only reached when primary is redis.
+        try {
+          return checkPostgresLimit(key, cfg);
+        } catch {
+          return null;
+        }
+      }];
+
+  for (const attempt of stores) {
+    try {
+      const result = await (attempt as () => Promise<RateLimitResult | null>)();
+      if (result) return result;
+    } catch {
+      // store unavailable → next store
     }
-    // Non-auth key: prefer shared redis (correct limit across replicas)
-    // over per-instance memory. Last resort is the memory fallback.
-    const redisResult = await checkSharedRedisLimit(key, cfg);
-    if (redisResult) return redisResult;
-    console.warn("[rate-limit] Postgres + Redis stores unavailable, degrading to local memory store:", err);
-    return checkFallbackMemoryLimit(key, cfg);
   }
+
+  // No shared store reachable.
+  if (isFailClosedKey(key)) {
+    return checkFallbackMemoryLimit(key, cfg, true);
+  }
+  console.warn("[rate-limit] Postgres + Redis stores unavailable, degrading to local memory store (fail-open)");
+  return checkFallbackMemoryLimit(key, cfg, false);
 }
 
 function attachHeaders(res: Response, cfg: Required<RateLimitConfig>, r: RateLimitResult) {
@@ -268,9 +332,8 @@ function attachHeaders(res: Response, cfg: Required<RateLimitConfig>, r: RateLim
 }
 
 /**
- * Wraps a route handler. Enforces the limit AND reflects real state on the
- * success path — this is what the old version was missing (it set headers
- * from config, never from the store).
+ * Wraps a route handler. Enforces the limit AND reflects real store state on
+ * the success path. 429/503 bodies follow the U3 canonical error contract.
  */
 export function withRateLimit<TArgs extends unknown[] = unknown[]>(
   handler: (req: NextRequest, ...args: TArgs) => Promise<Response>,
@@ -283,16 +346,15 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
     try {
       result = await checkRateLimit(req, cfg);
     } catch (err) {
-      // Store failure that checkRateLimit could not absorb. For
-      // auth-sensitive keys this is an exception (they are handled by the
-      // catch inside checkRateLimit and never reach here); fail closed
-      // here as well for the belt-and-braces case.
-      if (isAuthSensitiveKey(bucketKey(req, cfg))) {
+      // Store failure that checkRateLimit could not absorb (should be rare —
+      // it catches all store errors internally). Fail-closed keys deny;
+      // everything else fails open (a limiter that 500s takes the whole
+      // auth flow down — worse than no limiter).
+      const key = bucketKey(req, cfg);
+      if (isFailClosedKey(key)) {
         failClosed = true;
-        result = checkFallbackMemoryLimit(bucketKey(req, cfg), cfg, true);
+        result = checkFallbackMemoryLimit(key, cfg, true);
       } else {
-        // If the DB is unreachable, fail-open but log loudly. A limiter that
-        // 500s is worse than no limiter — it takes the whole auth flow down.
         console.error("[rate-limit] store failure, failing open", err);
         return handler(req, ...args);
       }
@@ -300,14 +362,15 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
     if (result.limited) {
       const status = failClosed ? 503 : 429;
       const code = failClosed ? "RATE_LIMIT_STORE_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED";
+      // U3 canonical contract: safe generic messages; no store error text.
       return NextResponse.json(
         {
           success: false,
           error: {
             code,
             message: failClosed
-              ? "Rate-limit store unavailable; auth request denied (fail-closed)"
-              : "Too many requests",
+              ? "Service temporarily unavailable. Please retry later."
+              : "Too many requests. Please wait a moment and retry.",
           },
         },
         {
@@ -317,8 +380,8 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
             "x-ratelimit-limit": String(cfg.maxRequests),
             "x-ratelimit-remaining": "0",
             "x-ratelimit-reset": result.resetTime.toISOString(),
-            // Batch I4: the metrics middleware reads this to set
-            // api_metrics.rate_limit_hit for forensic 429 drill-down.
+            // Metrics middleware reads this to set api_metrics.rate_limit_hit
+            // for forensic 429 drill-down.
             "x-ratelimit-hit": "1",
           },
         }
@@ -331,8 +394,7 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
 /**
  * Enforce a limit for an explicit bucket key. Some routes lock out per
  * identifier (login attempts, bootstrap, mobile login, kiosk sessions)
- * rather than per client IP, so they pass a key like
- * `bootstrap:9150010505`. This delegates to the same Postgres-backed store.
+ * rather than per client IP, so they pass a key like `bootstrap:9150010505`.
  */
 export async function rateLimitByKey(
   key: string,
