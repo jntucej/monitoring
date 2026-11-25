@@ -349,4 +349,4 @@ server.listen(AGENT_PORT, "0.0.0.0", () => {
   console.log(`[ops-agent] listening on 0.0.0.0:${AGENT_PORT} — ${Object.keys(OPS).length} operations registered (Docker-internal only, port not published to host)`);
 });
 
-export { server as opsAgentServer, OPS, opsAgentServer };
+export { server as opsAgentServer, OPS };
