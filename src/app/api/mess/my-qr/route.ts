@@ -4,12 +4,23 @@ import { query } from "@/lib/postgres";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 import { buildQr, currentTotp, issueDailySecret } from "@/lib/mess/totp";
+import { resolveScope } from "@/lib/student/scope";
 
 /**
  * GET /api/mess/my-qr?session_id=
  * Returns the student's rotating 30s TOTP QR for the active (or requested) meal session.
  */
 async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
+  if (auth.role === "student") {
+    const scope = await resolveScope(auth.userId);
+    if (!scope.scopes.mess_token_available) {
+      return fail(
+        "MESS_TOKEN_UNAVAILABLE",
+        scope.reasons.mess_token_available ?? "Mess token unavailable outside hostel",
+        403,
+      );
+    }
+  }
   const sessionIdParam = req.nextUrl.searchParams.get("session_id");
 
   const { rows: sessionRows } = await query<{

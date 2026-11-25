@@ -1,0 +1,5 @@
+-- 20270131000021_campus_feed.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.campus_feed_receipts;
+DROP TABLE IF EXISTS public.campus_feed_items;
+COMMIT;

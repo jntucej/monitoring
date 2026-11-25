@@ -1,0 +1,8 @@
+-- 20270131000018_student_presence.sql.down
+BEGIN;
+DROP TRIGGER IF EXISTS trg_presence_from_leave ON public.permissions;
+DROP TRIGGER IF EXISTS trg_presence_from_movement ON public.movement_logs;
+DROP FUNCTION IF EXISTS public.update_student_presence();
+DROP TABLE IF EXISTS public.student_presence;
+DROP TABLE IF EXISTS public.library_memberships;
+COMMIT;

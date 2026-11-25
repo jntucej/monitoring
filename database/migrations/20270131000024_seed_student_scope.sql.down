@@ -1,0 +1,6 @@
+-- 20270131000024_seed_student_scope.sql.down
+BEGIN;
+DELETE FROM public.ref_categories WHERE domain = 'class_request_type';
+DELETE FROM public.ops_rules WHERE domain = 'campus_feed_expiry';
+DELETE FROM public.achievement_templates WHERE code IN ('attendance_95', 'best_poster', 'nss_40h');
+COMMIT;

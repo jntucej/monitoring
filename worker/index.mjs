@@ -104,6 +104,10 @@ import { runSosLease } from './jobs/sos_lease.js';
 import { runSosEscalate } from './jobs/sos_escalate.js';
 import { runGuardPingCheck } from './jobs/guard_ping_check.js';
 import { runShiftAutoClose } from './jobs/shift_auto_close.js';
+import { runFeedExpire } from './jobs/feed_expire.js';
+import { runAchievementAuto } from './jobs/achievement_auto.js';
+import { runLeaderboardRefresh } from './jobs/leaderboard_refresh.js';
+import { runPresenceReconcile } from './jobs/presence_reconcile.js';
 import collectInfraSnapshot from './jobs/infra_snapshot_collector.js';
 import runInfraForecaster from './jobs/infra_forecaster.js';
 import completeRearmRequests from './jobs/rearm_automation_controls.js';
@@ -226,6 +230,10 @@ const jobs = [
   { name: 'sos-escalate', ms: 30 * 1000, run: () => runJob('sos-escalate', runSosEscalate) },
   { name: 'guard-ping-check', ms: 2 * 60 * 1000, run: () => runJob('guard-ping-check', runGuardPingCheck) },
   { name: 'shift-auto-close', ms: 5 * 60 * 1000, run: () => runJob('shift-auto-close', runShiftAutoClose) },
+  { name: 'feed-expire', ms: 15 * 60 * 1000, run: () => runJob('feed-expire', runFeedExpire) },
+  { name: 'achievement-auto', ms: 24 * 60 * 60 * 1000, run: () => runJob('achievement-auto', runAchievementAuto) },
+  { name: 'leaderboard-refresh', ms: 60 * 60 * 1000, run: () => runJob('leaderboard-refresh', runLeaderboardRefresh) },
+  { name: 'presence-reconcile', ms: 5 * 60 * 1000, run: () => runJob('presence-reconcile', runPresenceReconcile) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client

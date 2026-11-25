@@ -1,0 +1,6 @@
+-- 20270131000022_activity_feed.sql.down
+BEGIN;
+DROP TRIGGER IF EXISTS trg_activity_from_movement ON public.movement_logs;
+DROP FUNCTION IF EXISTS public.emit_activity_from_movement();
+DROP TABLE IF EXISTS public.student_activity;
+COMMIT;

@@ -1,0 +1,5 @@
+-- 20270131000019_student_identity_qr.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.student_qr_scan_log;
+DROP TABLE IF EXISTS public.student_qr_salts;
+COMMIT;

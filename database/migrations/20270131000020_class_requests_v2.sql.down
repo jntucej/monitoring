@@ -1,0 +1,12 @@
+-- 20270131000020_class_requests_v2.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.class_request_interest;
+ALTER TABLE public.class_requests
+  DROP COLUMN IF EXISTS status_v2,
+  DROP COLUMN IF EXISTS linked_timetable_slot_id,
+  DROP COLUMN IF EXISTS min_interest_pct,
+  DROP COLUMN IF EXISTS interest_window_end,
+  DROP COLUMN IF EXISTS interest_window_start,
+  DROP COLUMN IF EXISTS posted_by_role,
+  DROP COLUMN IF EXISTS request_type;
+COMMIT;

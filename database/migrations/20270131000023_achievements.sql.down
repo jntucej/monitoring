@@ -1,0 +1,12 @@
+-- 20270131000023_achievements.sql.down
+BEGIN;
+DROP MATERIALIZED VIEW IF EXISTS public.class_leaderboards;
+ALTER TABLE public.user_achievements
+  DROP COLUMN IF EXISTS revoked_at,
+  DROP COLUMN IF EXISTS scope,
+  DROP COLUMN IF EXISTS note,
+  DROP COLUMN IF EXISTS evidence_url,
+  DROP COLUMN IF EXISTS awarded_by_role,
+  DROP COLUMN IF EXISTS template_id;
+DROP TABLE IF EXISTS public.achievement_templates;
+COMMIT;
