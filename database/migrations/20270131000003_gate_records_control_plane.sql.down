@@ -1,0 +1,67 @@
+-- 20270131000003_gate_records_control_plane.sql.down
+--
+-- Reverts the control-plane tables + the extension columns added by
+-- 20270131000003. Order matters: drop the blueprint/ref tables first, then
+-- drop the added columns (each guarded so a partial state still reverts).
+
+BEGIN;
+
+-- Drop the new satellite + control-plane tables
+DROP TABLE IF EXISTS public.exam_access_log;
+DROP TABLE IF EXISTS public.curfew_returns;
+DROP TABLE IF EXISTS public.vehicle_entries;
+DROP TABLE IF EXISTS public.vehicles;
+DROP TABLE IF EXISTS public.gate_device_events;
+DROP TABLE IF EXISTS public.gate_devices;
+DROP TABLE IF EXISTS public.gate_exceptions;
+DROP TABLE IF EXISTS public.gate_field_blueprints;
+DROP TABLE IF EXISTS public.ref_categories;
+
+-- Drop the extension columns from the existing event tables
+ALTER TABLE public.movement_logs
+  DROP COLUMN IF EXISTS event_type,
+  DROP COLUMN IF EXISTS device_id,
+  DROP COLUMN IF EXISTS shift_id,
+  DROP COLUMN IF EXISTS verification_method,
+  DROP COLUMN IF EXISTS purpose_code,
+  DROP COLUMN IF EXISTS outcome,
+  DROP COLUMN IF EXISTS photo_url,
+  DROP COLUMN IF EXISTS geo,
+  DROP COLUMN IF EXISTS subject_ref,
+  DROP COLUMN IF EXISTS watchlist_hit,
+  DROP COLUMN IF EXISTS curfew_violation,
+  DROP COLUMN IF EXISTS duplicate_scan,
+  DROP COLUMN IF EXISTS payload;
+
+ALTER TABLE public.visitor_logs
+  DROP COLUMN IF EXISTS visitor_category,
+  DROP COLUMN IF EXISTS id_document_type,
+  DROP COLUMN IF EXISTS id_number,
+  DROP COLUMN IF EXISTS visitor_phone,
+  DROP COLUMN IF EXISTS vehicle_type,
+  DROP COLUMN IF EXISTS expected_duration,
+  DROP COLUMN IF EXISTS badge_no,
+  DROP COLUMN IF EXISTS host_ack_at,
+  DROP COLUMN IF EXISTS photo_url,
+  DROP COLUMN IF EXISTS payload;
+
+ALTER TABLE public.gate_passes
+  DROP COLUMN IF EXISTS verification_method,
+  DROP COLUMN IF EXISTS verification_result,
+  DROP COLUMN IF EXISTS override_reason,
+  DROP COLUMN IF EXISTS payload;
+
+ALTER TABLE public.visitor_watchlist
+  DROP COLUMN IF EXISTS subject_type,
+  DROP COLUMN IF EXISTS subject_ref,
+  DROP COLUMN IF EXISTS severity,
+  DROP COLUMN IF EXISTS expires_at;
+
+ALTER TABLE public.shifts
+  DROP COLUMN IF EXISTS handover_reason,
+  DROP COLUMN IF EXISTS open_issues,
+  DROP COLUMN IF EXISTS scan_count,
+  DROP COLUMN IF EXISTS exception_count,
+  DROP COLUMN IF EXISTS payload;
+
+COMMIT;
