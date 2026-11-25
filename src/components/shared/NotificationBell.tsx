@@ -96,11 +96,45 @@ export function NotificationBell() {
     if (bellSupported && user?.id) {
       loadNotifications();
 
-      // Realtime Server-Sent Events (SSE) stream for instant alerts
+      // Realtime Server-Sent Events (SSE) stream for instant alerts.
+      // Auth rides the httpOnly access_token cookie (bearer() in
+      // src/middleware/authorization.ts) — the browser sends it
+      // automatically for same-origin requests, so EventSource needs no
+      // Authorization header.
       let eventSource: EventSource | null = null;
+      let pollTimer: ReturnType<typeof setInterval> | null = null;
+      // A hard 401/403 (expired session, role not allowed, cookie missing in
+      // this context) makes EventSource close permanently (readyState CLOSED)
+      // and the browser auto-reconnects on a tight backoff — every attempt 401s
+      // and re-fires onerror, flooding the console. We stop after a few attempts
+      // and fall back to quiet polling instead of reconnecting forever.
+      let attempts = 0;
+      const MAX_SSE_ATTEMPTS = 3;
+
+      const startPolling = () => {
+        // Polling fallback keeps the bell live when the SSE stream is
+        // unavailable (401, 403, or a dropped connection). loadNotifications
+        // already exists and is idempotent.
+        if (pollTimer) return;
+        pollTimer = setInterval(loadNotifications, 30000);
+      };
+
+      const stopPolling = () => {
+        if (pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      };
+
       try {
         const streamUrl = `/api/notifications/stream?userId=${encodeURIComponent(user.id)}&role=${encodeURIComponent(user.role || 'user')}`;
         eventSource = new EventSource(streamUrl);
+
+        eventSource.onopen = () => {
+          // SSE connected — stop polling, clear the attempt counter.
+          attempts = 0;
+          stopPolling();
+        };
 
         eventSource.onmessage = (event) => {
           try {
@@ -114,17 +148,29 @@ export function NotificationBell() {
           }
         };
 
-        eventSource.onerror = (err) => {
-          console.warn('Notification SSE connection error (falling back to polling):', err);
+        eventSource.onerror = () => {
+          attempts++;
+          // Don't let the browser auto-reconnect in a tight loop. Close it and
+          // fall back to polling. After a few consecutive failures (e.g. a hard
+          // 401/403), stop retrying entirely to avoid console spam.
+          eventSource?.close();
+          eventSource = null;
+          startPolling();
+          if (attempts >= MAX_SSE_ATTEMPTS) {
+            console.warn(
+              `Notification SSE unavailable after ${attempts} attempts — using poll fallback. ` +
+                'If this persists, your session may have expired; re-login to restore realtime alerts.'
+            );
+          }
         };
       } catch (err) {
         console.error('SSE stream setup error:', err);
+        startPolling();
       }
 
       return () => {
-        if (eventSource) {
-          eventSource.close();
-        }
+        if (eventSource) eventSource.close();
+        stopPolling();
       };
     }
   }, [bellSupported, user?.id, user?.role]);
