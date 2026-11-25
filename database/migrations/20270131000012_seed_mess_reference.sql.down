@@ -1,0 +1,4 @@
+-- 20270131000012_seed_mess_reference.sql.down
+BEGIN;
+DELETE FROM public.ref_categories WHERE domain IN ('mess_vote', 'mess_scan_outcome');
+COMMIT;

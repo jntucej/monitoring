@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit, withTransaction } from "@/lib/db";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
-import { TIER } from "@/server/policy/roles";
 import type { AuthContext } from "@/lib/authContext";
 import { getMyStudentDetails, isMessEligible } from "../_helpers";
+import { verifyAndRedeem, recordManualOverride } from "@/lib/mess/scan";
+import { recordSseEvent } from "@/lib/sse-ring-buffer";
 
 /**
  * CAS-consume a mess meal token.
@@ -17,6 +18,69 @@ import { getMyStudentDetails, isMessEligible } from "../_helpers";
 async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const body = await req.json().catch(() => null);
+
+    // Mess v2 rotating TOTP QR or manual override path
+    if (body && (typeof body.qr === "string" || body.manual_override === true)) {
+      const counterId = String(body.counter_id ?? "").trim();
+      const sessionId = String(body.session_id ?? "").trim();
+      const deviceId = String(body.device_id ?? auth.gateId ?? "").trim();
+
+      if (!counterId || !sessionId) {
+        return fail("MISSING_PARAM", "counter_id and session_id are required", 400);
+      }
+
+      // Station-type guard: operator at a gate station cannot hit /api/mess/serve
+      if (auth.role === "operator") {
+        if (!deviceId) {
+          return NextResponse.json({ outcome: "wrong_device", error: "Mess device required" }, { status: 403 });
+        }
+        const { rows: devRows } = await query<{
+          id: string;
+          station_type: string;
+          counter_id: string | null;
+        }>(
+          `SELECT id, station_type, counter_id FROM public.gate_devices WHERE id = $1::uuid LIMIT 1`,
+          [deviceId],
+        ).catch(() => ({ rows: [] as { id: string; station_type: string; counter_id: string | null }[] }));
+        const dev = devRows[0];
+        if (!dev || dev.station_type !== "mess" || (dev.counter_id && dev.counter_id !== counterId)) {
+          return NextResponse.json({ outcome: "wrong_device", error: "Device not bound to this mess counter" }, { status: 403 });
+        }
+      }
+
+      const effectiveDeviceId = deviceId || "00000000-0000-4000-8000-000000000001";
+
+      if (body.manual_override === true) {
+        const studentId = String(body.student_id ?? "").trim();
+        const reasonText = String(body.reason_text ?? "").trim();
+        if (!studentId || !reasonText) {
+          return fail("MISSING_PARAM", "student_id and reason_text are required for manual override", 400);
+        }
+        await recordManualOverride({
+          student_id: studentId,
+          session_id: sessionId,
+          counter_id: counterId,
+          operator_id: auth.userId,
+          device_id: effectiveDeviceId,
+          reason_text: reasonText,
+        });
+        recordSseEvent("gate-stream", { station_type: "mess", counter_id: counterId, session_id: sessionId, outcome: "manual_override", student_id: studentId }, "mess_scan");
+        return NextResponse.json({ outcome: "manual_override", student_id: studentId });
+      }
+
+      const result = await verifyAndRedeem({
+        qr: String(body.qr),
+        session_id: sessionId,
+        counter_id: counterId,
+        operator_id: auth.userId,
+        device_id: effectiveDeviceId,
+      });
+      recordSseEvent("gate-stream", { station_type: "mess", counter_id: counterId, session_id: sessionId, ...result }, "mess_scan");
+      const status =
+        result.outcome === "ok" ? 200 : result.outcome === "duplicate" ? 409 : 400;
+      return NextResponse.json(result, { status });
+    }
+
     const tokenCode: string = (body?.tokenCode ?? "").toString().trim();
     if (!tokenCode) return fail("MISSING_PARAM", "tokenCode is required", 400);
 
@@ -132,4 +196,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const POST = withMutationGuard(async (req, ctx) => handlePost(req, ctx), {requiredRole: TIER.MESS_INCHARGE, rateLimit: { keyPrefix: "mess_serve_post", maxRequests: 120 },});
+export const POST = withMutationGuard(async (req, ctx) => handlePost(req, ctx), {
+  requiredRole: ["operator", "mess_incharge", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "mess_serve_post", maxRequests: 300 },
+});

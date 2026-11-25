@@ -98,6 +98,8 @@ import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
 import hardDeleteExpired from './jobs/hard_delete_expired.js';
 import sloSnapshot from './jobs/slo_snapshot.js';
 import { startOperatorActionListener, runOperatorActionMaintenance } from './jobs/operator_actions.js';
+import { runMessSecretRotate } from './jobs/mess_secret_rotate.js';
+import { runMessConversionTrack } from './jobs/mess_conversion_track.js';
 import collectInfraSnapshot from './jobs/infra_snapshot_collector.js';
 import runInfraForecaster from './jobs/infra_forecaster.js';
 import completeRearmRequests from './jobs/rearm_automation_controls.js';
@@ -214,6 +216,8 @@ const jobs = [
   { name: 'confirmation-sla', ms: 5 * 60 * 1000, run: () => runJob('confirmation-sla', confirmationSla) },
   { name: 'mess-poll-close', ms: 1 * 60 * 1000, run: () => runJob('mess-poll-close', messPollClose) },
   { name: 'mess-anomaly-daily', ms: 60 * 60 * 1000, run: () => runJob('mess-anomaly-daily', messAnomalyDaily) },
+  { name: 'mess-secret-rotate', ms: 6 * 60 * 60 * 1000, run: () => runJob('mess-secret-rotate', runMessSecretRotate) },
+  { name: 'mess-conversion-track', ms: 15 * 60 * 1000, run: () => runJob('mess-conversion-track', runMessConversionTrack) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client

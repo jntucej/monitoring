@@ -1,0 +1,6 @@
+-- 20270131000011_mess_interest_v2.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.mess_interest_conversions;
+DROP TABLE IF EXISTS public.mess_interest_votes;
+DROP TABLE IF EXISTS public.mess_interest_polls;
+COMMIT;

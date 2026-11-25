@@ -1,0 +1,14 @@
+-- 20270131000009_mess_tokens_v2.sql.down
+BEGIN;
+
+DROP TABLE IF EXISTS public.mess_session_counters;
+DROP TABLE IF EXISTS public.mess_scan_events;
+DROP TABLE IF EXISTS public.mess_totp_state;
+DROP TABLE IF EXISTS public.mess_totp_secrets;
+DROP TABLE IF EXISTS public.mess_counters;
+
+ALTER TABLE public.gate_devices
+  DROP COLUMN IF EXISTS counter_id,
+  DROP COLUMN IF EXISTS station_type;
+
+COMMIT;

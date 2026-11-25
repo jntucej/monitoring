@@ -1,0 +1,4 @@
+-- 20270131000010_mess_special_schedules.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.mess_special_schedules;
+COMMIT;

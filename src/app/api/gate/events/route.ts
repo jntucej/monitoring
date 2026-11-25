@@ -4,6 +4,7 @@ import { errMsg } from "@/lib/err-msg";
 import { withAuthorization } from "@/middleware/authorization";
 import { getBlueprint, getRefCategories, type GateEventType, type GateContext } from "@/lib/gate/blueprints";
 import { recordGateEvent, GateValidationError } from "@/lib/gate/events";
+import { query } from "@/lib/postgres";
 
 /**
  * GET /api/gate/events?role=&gateType=&eventType=&context=
@@ -64,6 +65,21 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
     body = await req.json();
   } catch {
     return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  // Hard guard: an operator at a mess station cannot post gate events.
+  const deviceId = (body.deviceId as string | undefined) ?? null;
+  if (deviceId) {
+    const { rows: devRows } = await query<{ station_type: string }>(
+      `SELECT station_type FROM public.gate_devices WHERE id = $1::uuid LIMIT 1`,
+      [deviceId],
+    ).catch(() => ({ rows: [] as { station_type: string }[] }));
+    if (devRows[0]?.station_type === "mess") {
+      return NextResponse.json(
+        { success: false, error: "Mess station device cannot post gate events" },
+        { status: 403 },
+      );
+    }
   }
 
   try {
