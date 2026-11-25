@@ -68,6 +68,16 @@ export function WorkerAttendanceCard() {
     }
   }
 
+  async function clearPings() {
+    setBusy(true);
+    try {
+      await fetch("/api/workers/attendance", { method: "DELETE" });
+      load();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-4 border-t border-border pt-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -75,7 +85,7 @@ export function WorkerAttendanceCard() {
           <h2 className="text-base font-semibold text-foreground">
             My Assignment & In/Out Logs
           </h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-foreground">
             {assignment
               ? `${assignment.worker_type_label ?? assignment.worker_type_code} • Block: ${assignment.block_id ?? "Campus"} • ${assignment.shift_name} (${assignment.starts_at.slice(0, 5)}–${assignment.ends_at.slice(0, 5)})`
               : "No block assignment yet — contact Admin / Supervisor"}
@@ -110,6 +120,14 @@ export function WorkerAttendanceCard() {
             className="border border-border px-3 py-1.5 text-xs font-semibold text-foreground disabled:opacity-40"
           >
             Clock OUT
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={clearPings}
+            className="px-2 py-1.5 text-xs text-muted-foreground underline disabled:opacity-40"
+          >
+            Clear Pings
           </button>
         </div>
       </div>

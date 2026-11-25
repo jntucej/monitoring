@@ -77,9 +77,27 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok(rows[0], 201);
 }
 
+async function handleDelete(_req: NextRequest, { auth }: { auth: AuthContext }) {
+  await query(
+    `DELETE FROM public.worker_attendance_logs
+      WHERE worker_id = $1::uuid AND notes = 'Location ping'`,
+    [auth.userId],
+  );
+  await query(
+    `UPDATE public.worker_attendance_logs
+        SET lat = NULL, lng = NULL
+      WHERE worker_id = $1::uuid AND (lat IS NOT NULL OR lng IS NOT NULL)`,
+    [auth.userId],
+  );
+  return ok({ cleared: true });
+}
+
 export const GET = withAuthorization(handleGet, {
   requiredRole: ["worker", "supervisor", "hostel_manager", "principal", "admin", "sysadmin"],
 });
 export const POST = withAuthorization(handlePost, {
   requiredRole: ["worker", "supervisor", "hostel_manager", "principal", "admin", "sysadmin"],
+});
+export const DELETE = withAuthorization(handleDelete, {
+  requiredRole: ["worker"],
 });
