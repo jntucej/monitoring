@@ -86,12 +86,17 @@ async function opRefreshInfraSnapshot() {
   } catch { /* table absent */ }
 
   try {
-    const dfLine = execSyncSafe("df -P / 2>/dev/null | tail -1");
-    if (dfLine) {
-      const cols = dfLine.trim().split(/\s+/);
-      const blocks = Number(cols[1]);
-      const avail = Number(cols[3]);
-      if (blocks > 0) signals.disk_free_pct = Math.round((avail / blocks) * 100);
+    const dfOut = execFileSyncSafe(["df", "-P", "/"], 5_000);
+    if (dfOut) {
+      // df -P output: header line + data line
+      const lines = dfOut.trim().split("\n");
+      if (lines.length >= 2) {
+        const cols = lines[1].trim().split(/\s+/);
+        // cols: Filesystem 1024-blocks Used Available Capacity Mounted-on
+        const blocks = Number(cols[1]);
+        const avail = Number(cols[3]);
+        if (blocks > 0) signals.disk_free_pct = Math.round((avail / blocks) * 100);
+      }
     }
   } catch { /* ignore */ }
 
@@ -193,7 +198,7 @@ async function opRestartContainer({ container } = {}) {
   if (!ALLOWED_CONTAINERS.has(container)) {
     return { restarted: false, container, error: "container not in allowlist" };
   }
-  const out = execSyncSafe(`docker restart ${container}`, 30_000);
+  const out = execFileSyncSafe(["docker", "restart", container], 30_000);
   if (out === null) {
     return { restarted: false, container, error: "docker restart timed out or failed" };
   }
@@ -212,7 +217,7 @@ async function opGetContainerLogs({ container, lines = 100 } = {}) {
     return { logs: "", error: "container not in allowlist" };
   }
   const n = Math.min(Number(lines) || 100, 500);
-  const out = execSyncSafe(`docker logs --tail ${n} ${container} 2>&1`, 15_000);
+  const out = execFileSyncSafe(["docker", "logs", "--tail", String(n), container], 15_000);
   if (out === null) return { logs: "", error: "docker logs failed" };
   return { logs: out.slice(0, 50_000), container, lines: n };
 }
@@ -249,10 +254,13 @@ const OPS = {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function execSyncSafe(cmd, timeoutMs = 10_000) {
+function execFileSyncSafe(args, timeoutMs = 10_000) {
   try {
-    const { execSync } = require("node:child_process");
-    return execSync(cmd, { timeout: timeoutMs, stdio: "pipe", shell: "/bin/sh" }).toString();
+    const { execFileSync } = require("node:child_process");
+    return execFileSync(args[0], args.slice(1), {
+      timeout: timeoutMs,
+      stdio: "pipe",
+    }).toString();
   } catch {
     return null;
   }
