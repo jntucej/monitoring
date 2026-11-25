@@ -5,8 +5,8 @@
 // and stopped afterwards so it holds no resident memory.
 
 import { spawn } from "node:child_process";
-import type { AiConfig } from "../config.js";
-import { log } from "../logger.js";
+import type { AiConfig } from "../config";
+import { log } from "../logger";
 
 const logger = log("m2-ocr");
 

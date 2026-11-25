@@ -7,8 +7,8 @@
 // only inside executeTool(). It is never placed in any model prompt and is
 // redacted from all logs.
 
-import type { ToolAction } from "./schemas/m1.js";
-import { log } from "./logger.js";
+import type { ToolAction } from "./schemas/m1";
+import { log } from "./logger";
 
 const logger = log("permission-engine");
 

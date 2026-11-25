@@ -1,7 +1,7 @@
-import type { ToolAction, ToolSpec } from "../schemas/m1.js";
-import { parseToolAction } from "../schemas/m1.js";
-import type { AiConfig } from "../config.js";
-import { log } from "../logger.js";
+import type { ToolAction, ToolSpec } from "../schemas/m1";
+import { parseToolAction } from "../schemas/m1";
+import type { AiConfig } from "../config";
+import { log } from "../logger";
 
 const logger = log("m1-conversation");
 

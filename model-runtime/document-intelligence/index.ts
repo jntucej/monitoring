@@ -1,8 +1,8 @@
-import type { DocumentExtraction } from "../schemas/doc.js";
-import { parseDocumentExtraction } from "../schemas/doc.js";
-import { extractJson as extractM1Json } from "../schemas/m1.js";
-import type { AiConfig } from "../config.js";
-import { log } from "../logger.js";
+import type { DocumentExtraction } from "../schemas/doc";
+import { parseDocumentExtraction } from "../schemas/doc";
+import { extractJson as extractM1Json } from "../schemas/m1";
+import type { AiConfig } from "../config";
+import { log } from "../logger";
 
 const logger = log("m3-doc-intel");
 

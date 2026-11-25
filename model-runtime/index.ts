@@ -8,14 +8,14 @@
 // a stopped worker genuinely releases its resident memory (the core
 // resource-efficiency requirement).
 
-import { loadConfig, type AiConfig } from "./config.js";
-import { ModelManager, type WorkerName, type WorkerBackend } from "./manager.js";
-import { ConversationWorker } from "./conversation/index.js";
-import { runOcr, hasUsableTextLayer } from "./ocr/index.js";
-import { DocumentIntelligenceWorker } from "./document-intelligence/index.js";
-import { parseToolAction, type ToolAction, type ToolSpec } from "./schemas/m1.js";
-import type { DocumentExtraction } from "./schemas/doc.js";
-import { log } from "./logger.js";
+import { loadConfig, type AiConfig } from "./config";
+import { ModelManager, type WorkerName, type WorkerBackend } from "./manager";
+import { ConversationWorker } from "./conversation/index";
+import { runOcr, hasUsableTextLayer } from "./ocr/index";
+import { DocumentIntelligenceWorker } from "./document-intelligence/index";
+import { parseToolAction, type ToolAction, type ToolSpec } from "./schemas/m1";
+import type { DocumentExtraction } from "./schemas/doc";
+import { log } from "./logger";
 
 const logger = log("ai-runtime");
 

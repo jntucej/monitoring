@@ -5,11 +5,15 @@ import { assertCsrf } from "@/lib/csrf";
 import { requireEnabled, KillSwitchDisabledError } from "@/lib/kill-switch";
 import type { AuthContext } from "@/lib/authContext";
 import { ROLES, type Role } from "@/lib/roles";
+// The 3-model AI runtime lives at the repo root (model-runtime/). The app's
+// tsconfig has an @model-runtime alias for editor/type-checking; at build
+// time the relative path is the most portable (works with webpack,
+// Turbopack, and the standalone output without bundler-alias config).
 import {
   createAiRuntime,
   type AiRuntime,
-} from "@model-runtime";
-import type { DocumentExtraction } from "@model-runtime/schemas/doc";
+} from "../../../../../model-runtime";
+import type { DocumentExtraction } from "../../../../../model-runtime/schemas/doc";
 
 // The AI runtime is a process-level singleton: one ModelManager, one backend.
 // Ollama is a host daemon (M1/M3) and the OCR sidecar is per-burst (M2), so
