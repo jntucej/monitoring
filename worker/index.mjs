@@ -100,6 +100,10 @@ import sloSnapshot from './jobs/slo_snapshot.js';
 import { startOperatorActionListener, runOperatorActionMaintenance } from './jobs/operator_actions.js';
 import { runMessSecretRotate } from './jobs/mess_secret_rotate.js';
 import { runMessConversionTrack } from './jobs/mess_conversion_track.js';
+import { runSosLease } from './jobs/sos_lease.js';
+import { runSosEscalate } from './jobs/sos_escalate.js';
+import { runGuardPingCheck } from './jobs/guard_ping_check.js';
+import { runShiftAutoClose } from './jobs/shift_auto_close.js';
 import collectInfraSnapshot from './jobs/infra_snapshot_collector.js';
 import runInfraForecaster from './jobs/infra_forecaster.js';
 import completeRearmRequests from './jobs/rearm_automation_controls.js';
@@ -218,6 +222,10 @@ const jobs = [
   { name: 'mess-anomaly-daily', ms: 60 * 60 * 1000, run: () => runJob('mess-anomaly-daily', messAnomalyDaily) },
   { name: 'mess-secret-rotate', ms: 6 * 60 * 60 * 1000, run: () => runJob('mess-secret-rotate', runMessSecretRotate) },
   { name: 'mess-conversion-track', ms: 15 * 60 * 1000, run: () => runJob('mess-conversion-track', runMessConversionTrack) },
+  { name: 'sos-lease', ms: 30 * 1000, run: () => runJob('sos-lease', runSosLease) },
+  { name: 'sos-escalate', ms: 30 * 1000, run: () => runJob('sos-escalate', runSosEscalate) },
+  { name: 'guard-ping-check', ms: 2 * 60 * 1000, run: () => runJob('guard-ping-check', runGuardPingCheck) },
+  { name: 'shift-auto-close', ms: 5 * 60 * 1000, run: () => runJob('shift-auto-close', runShiftAutoClose) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client

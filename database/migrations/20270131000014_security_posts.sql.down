@@ -1,0 +1,4 @@
+-- 20270131000014_security_posts.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.security_posts;
+COMMIT;

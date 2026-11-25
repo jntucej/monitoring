@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { AuthContext } from "@/lib/authContext";
 import { errMsg } from "@/lib/err-msg";
 import { withAuthorization } from "@/middleware/authorization";
+import { withActiveShift } from "@/middleware/activeShift";
 import { getBlueprint, getRefCategories, type GateEventType, type GateContext } from "@/lib/gate/blueprints";
 import { recordGateEvent, GateValidationError } from "@/lib/gate/events";
 import { query } from "@/lib/postgres";
@@ -121,14 +122,21 @@ export const GET = withAuthorization(handleGet, {
   ],
 });
 
-export const POST = withAuthorization(handlePost, {
-  requiredRole: [
-    "operator",
-    "supervisor",
-    "deputy_warden",
-    "exam_superintendent",
-    "oie",
-    "admin",
-    "sysadmin",
-  ],
-});
+export const POST = withAuthorization(
+  withActiveShift(handlePost, {
+    need: "gate_scan",
+    gateFrom: "body",
+    operatorOnly: true,
+  }),
+  {
+    requiredRole: [
+      "operator",
+      "supervisor",
+      "deputy_warden",
+      "exam_superintendent",
+      "oie",
+      "admin",
+      "sysadmin",
+    ],
+  },
+);

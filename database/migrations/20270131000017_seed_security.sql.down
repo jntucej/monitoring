@@ -1,0 +1,5 @@
+-- 20270131000017_seed_security.sql.down
+BEGIN;
+DELETE FROM public.ref_categories WHERE domain = 'sos_category';
+DELETE FROM public.ops_rules WHERE domain = 'sos_escalation' AND rule_key = 'default';
+COMMIT;

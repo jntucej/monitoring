@@ -1,0 +1,7 @@
+-- 20270131000015_security_shifts.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.guard_live_location;
+DROP TABLE IF EXISTS public.shift_post_assignments;
+DROP TABLE IF EXISTS public.security_shifts;
+DROP TABLE IF EXISTS public.security_shift_templates;
+COMMIT;

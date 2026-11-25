@@ -1,0 +1,4 @@
+-- 20270131000013_campus_locations.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.campus_locations;
+COMMIT;

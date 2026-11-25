@@ -1,0 +1,6 @@
+-- 20270131000016_sos.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.sos_events;
+DROP TABLE IF EXISTS public.sos_dispatch;
+DROP TABLE IF EXISTS public.sos_requests;
+COMMIT;
