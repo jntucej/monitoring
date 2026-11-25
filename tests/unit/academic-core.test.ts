@@ -18,21 +18,23 @@ describe("Versioned Academic Core & Schedule Exceptions", () => {
   });
 
   it("resolves student academic state from student_academic_history at a historical timestamp", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          academic_year_code: "2025-26",
-          program_code: "BTECH",
-          branch_code: "12",
-          branch_short_name: "IT",
-          entry_mode_code: "1A",
-          regulation_code: "R22",
-          year_of_study: 2,
-          section: "A",
-          academic_status: "active",
-        },
-      ],
-    });
+    mockQuery
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            academic_year_code: "2025-26",
+            program_code: "BTECH",
+            branch_code: "12",
+            branch_short_name: "IT",
+            entry_mode_code: "1A",
+            regulation_code: "R22",
+            year_of_study: 2,
+            section: "A",
+            academic_status: "active",
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [{ unique_id: "24JJ1A1201" }] });
 
     const state = await resolveStudentAcademicState("00000000-0000-4000-8000-000000000010", "2025-10-01T10:00:00Z");
     expect(state?.source).toBe("history");

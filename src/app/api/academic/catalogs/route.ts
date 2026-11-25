@@ -7,19 +7,23 @@ import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 
 async function handleGet() {
-  const [years, programs, branches, entryModes, regulations] = await Promise.all([
+  const [years, semesters, programs, branches, entryModes, regulations, courses] = await Promise.all([
     query(`SELECT * FROM public.academic_years ORDER BY start_date DESC`),
+    query(`SELECT * FROM public.academic_semesters ORDER BY academic_year_code DESC, semester_number ASC`),
     query(`SELECT * FROM public.academic_programs WHERE is_active = true ORDER BY code ASC`),
     query(`SELECT * FROM public.academic_branches WHERE is_active = true ORDER BY code ASC`),
     query(`SELECT * FROM public.entry_modes ORDER BY code ASC`),
     query(`SELECT * FROM public.academic_regulations WHERE is_active = true ORDER BY effective_from DESC`),
+    query(`SELECT * FROM public.academic_courses WHERE is_active = true ORDER BY semester_number ASC, code ASC`),
   ]);
   return ok({
     academic_years: years.rows,
+    semesters: semesters.rows,
     programs: programs.rows,
     branches: branches.rows,
     entry_modes: entryModes.rows,
     regulations: regulations.rows,
+    courses: courses.rows,
   });
 }
 
@@ -60,7 +64,46 @@ async function handlePost(req: NextRequest) {
     return ok(rows[0], 201);
   }
 
-  return fail("INVALID_KIND", "kind must be branch or academic_year", 400);
+  if (kind === "semester") {
+    const ay = String(b?.academic_year_code ?? "").trim();
+    const num = Number(b?.semester_number);
+    const name = String(b?.name ?? "").trim();
+    const startDate = String(b?.start_date ?? "").trim();
+    const endDate = String(b?.end_date ?? "").trim();
+    if (!ay || !num || !name || !startDate || !endDate) {
+      return fail("INVALID_INPUT", "academic_year_code, semester_number, name, start_date, end_date required", 400);
+    }
+    const { rows } = await query(
+      `INSERT INTO public.academic_semesters (academic_year_code, semester_number, name, start_date, end_date, status)
+       VALUES ($1, $2, $3, $4::date, $5::date, $6)
+       ON CONFLICT (academic_year_code, semester_number) DO UPDATE
+         SET name = EXCLUDED.name, start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date, status = EXCLUDED.status
+       RETURNING *`,
+      [ay, num, name, startDate, endDate, String(b?.status ?? "upcoming")],
+    );
+    return ok(rows[0], 201);
+  }
+
+  if (kind === "course") {
+    const code = String(b?.code ?? "").trim().toUpperCase();
+    const title = String(b?.title ?? "").trim();
+    const branchCode = String(b?.branch_code ?? "").trim();
+    const regCode = String(b?.regulation_code ?? "R22").trim();
+    const semNum = Number(b?.semester_number ?? 1);
+    if (!code || !title || !branchCode) {
+      return fail("INVALID_INPUT", "code, title, branch_code required", 400);
+    }
+    const { rows } = await query(
+      `INSERT INTO public.academic_courses (code, title, branch_code, regulation_code, semester_number, credits)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (code) DO UPDATE SET title = EXCLUDED.title, credits = EXCLUDED.credits, is_active = true
+       RETURNING *`,
+      [code, title, branchCode, regCode, semNum, Number(b?.credits ?? 3)],
+    );
+    return ok(rows[0], 201);
+  }
+
+  return fail("INVALID_KIND", "kind must be branch, academic_year, semester, or course", 400);
 }
 
 export const GET = withAuthorization(handleGet, {

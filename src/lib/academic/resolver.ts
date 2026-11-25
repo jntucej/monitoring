@@ -10,6 +10,8 @@ export interface ResolvedAcademicState {
   entry_mode_code: string;
   regulation_code: string | null;
   year_of_study: number;
+  expected_year_of_study?: number;
+  progression_delta?: number;
   section: string | null;
   academic_status: string;
 }
@@ -45,7 +47,21 @@ export async function resolveStudentAcademicState(
   );
 
   if (rows[0]) {
-    return { source: "history", ...rows[0] };
+    const { rows: uRows } = await query<{ unique_id: string | null }>(
+      `SELECT unique_id FROM public.users WHERE id = $1::uuid LIMIT 1`,
+      [studentId],
+    ).catch(() => ({ rows: [] as { unique_id: string | null }[] }));
+    const decoded = uRows[0]?.unique_id ? parseRollNumber(uRows[0].unique_id) : null;
+    const refYear = atTimestamp ? new Date(atTimestamp).getFullYear() : new Date().getFullYear();
+    const expectedYear = decoded
+      ? Math.min(4, Math.max(1, refYear - decoded.admissionYear + (decoded.entryModeCode === "5A" ? 2 : 1)))
+      : rows[0].year_of_study;
+    return {
+      source: "history",
+      ...rows[0],
+      expected_year_of_study: expectedYear,
+      progression_delta: rows[0].year_of_study - expectedYear,
+    };
   }
 
   // Fallback to rollNumber.ts only when student_academic_history has not been backfilled

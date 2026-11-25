@@ -1,0 +1,6 @@
+-- 20270131000036_v4_semesters_courses_and_ay_lifecycle.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.academic_courses;
+DROP TABLE IF EXISTS public.academic_semesters;
+ALTER TABLE public.academic_years DROP COLUMN IF EXISTS status;
+COMMIT;
