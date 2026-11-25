@@ -45,6 +45,8 @@ interface ComplianceData {
 
 export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boolean }) {
   const [rawText, setRawText] = useState("");
+  const [fileBase64, setFileBase64] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [title, setTitle] = useState("");
@@ -76,13 +78,30 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
     load();
   }, [load]);
 
+  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = String(reader.result ?? "");
+      const b64 = res.includes(",") ? res.split(",")[1] : res;
+      setFileBase64(b64);
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function runOcrClassify(e: React.FormEvent) {
     e.preventDefault();
-    if (!rawText.trim()) return;
+    if (!rawText.trim() && !fileBase64) return;
     const r = await fetch("/api/circulars/ocr-classify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ raw_text: rawText, attachment_url: attachmentUrl || null }),
+      body: JSON.stringify({
+        raw_text: rawText,
+        base64: fileBase64,
+        attachment_url: attachmentUrl || null,
+      }),
     });
     const j = await r.json();
     if (j?.data) {
@@ -136,13 +155,21 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
         <h2 className="text-sm font-semibold text-foreground">
           1. Scan / Paste Circular Text (OCR & Target Classification)
         </h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="file"
+            accept=".pdf,image/*"
+            onChange={onFileChange}
+            className="text-xs text-foreground"
+          />
+          {fileName && <span className="text-xs text-muted-foreground">{fileName}</span>}
+        </div>
         <textarea
           value={rawText}
           onChange={(e) => setRawText(e.target.value)}
-          placeholder="Paste OCR text from circular scan/PDF (e.g. Circular No: JNTUH/2026/14 — Mandatory for 3rd Year CSE & IT hostellers. Deadline: 2026-11-28)"
+          placeholder="Or paste OCR text from circular scan/PDF (e.g. Circular No: JNTUH/2026/14 — Mandatory for 3rd Year CSE & IT hostellers. Deadline: 2026-11-28)"
           className="w-full border-b border-border py-2 text-sm text-foreground"
           rows={4}
-          required
         />
         <div className="flex flex-wrap gap-2">
           <input
