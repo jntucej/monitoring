@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+import { createRequire } from "node:module";
+const req = createRequire(import.meta.url);
+const path = req("node:path");
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
@@ -22,6 +25,17 @@ const nextConfig = {
     "sysadmin-console-kit",
     "admin-console-kit",
   ],
+  // Resolve the internal @model-runtime alias to the local 3-model AI layer.
+  // It is a NodeNext/ESM TypeScript package that doesn't resolve under the
+  // app's `bundler` moduleResolution; the alias lets Next/esbuild import it
+  // directly from source (the runtime is small, pure, and ships no node_modules).
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@model-runtime": path.resolve(process.cwd(), "model-runtime"),
+    };
+    return config;
+  },
   output: "standalone",
   serverExternalPackages: ["bcryptjs", "pg"],
   images: {

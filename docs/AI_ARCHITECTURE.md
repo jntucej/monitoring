@@ -96,8 +96,14 @@ Per-worker behavior:
 
 ## 5. Integration points (existing project)
 
-- **Entry:** `/api/bot/chat` (conversation) and a new `/api/ai/documents` route
-  (document pipeline) both go through the same `ModelManager` + `permission-engine`.
+- **Entry:** `/api/bot/chat` (conversation, existing RAG) **and**
+  `/api/ai/documents` (new) both go through the same `ModelManager` +
+  `permission-engine`. The new route is wired in
+  `src/app/api/ai/documents/route.ts`: it reuses `withAuthorization`,
+  `assertCsrf`, and the `requireEnabled("ai_models_enabled")` kill-switch,
+  base64-decodes the PDF, and calls `runDocumentPipeline`. The `@model-runtime`
+  webpack alias (in `next.config.mjs` + `tsconfig.json` `paths`) points at the
+  local `model-runtime/` source so the route imports it directly.
 - **Config:** new env vars are read in `model-runtime/config.ts` (see §7).
 - **Kill-switch:** reuses the existing `automation_controls` table — a new row
   `ai_models_enabled` so a sysadmin can stop the AI layer with one SQL update, no
