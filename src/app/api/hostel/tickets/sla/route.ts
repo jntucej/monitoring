@@ -4,7 +4,7 @@ import { ok } from "@/server/http/response";
 
 async function handleGet() {
   const { rows } = await query(
-    `SELECT id, title, category, status, priority, created_at,
+    `SELECT id, ticket_code, subject AS title, category, status, created_at,
             EXTRACT(EPOCH FROM (created_at + INTERVAL '24 hours' - NOW()))::int AS seconds_remaining,
             (NOW() > created_at + INTERVAL '24 hours') AS sla_breached
        FROM public.hostel_tickets
