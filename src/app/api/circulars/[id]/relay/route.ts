@@ -5,6 +5,7 @@ import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
+import { publishNotification } from "@/lib/notifications/bus";
 
 async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const csrfErr = assertCsrf(req);
@@ -16,6 +17,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const relayChain = b?.relay_chain === "operational" ? "operational" : "academic";
   const targetLabel = String(b?.target_label ?? "").trim();
   const notes = b?.notes ? String(b.notes).trim() : null;
+  const escalateTo = b?.escalate_to ? String(b.escalate_to).trim() : null;
 
   if (!targetLabel) {
     return fail("INVALID_INPUT", "target_label (e.g. CSE-3A, Lab 1 Prep) is required", 400);
@@ -28,6 +30,20 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
      RETURNING *`,
     [circularId, auth.userId, auth.role, relayChain, targetLabel, notes],
   );
+
+  if (escalateTo && ["hod", "vice_principal", "principal"].includes(escalateTo)) {
+    await publishNotification({
+      eventType: "circular.escalated",
+      actorId: auth.userId,
+      actorRole: auth.role,
+      scope: "global",
+      title: `Circular escalated to ${escalateTo.replace("_", " ")}`,
+      message: notes || `Escalated from ${auth.role} (${targetLabel}).`,
+      payload: { circular_id: circularId, escalate_to: escalateTo, target_label: targetLabel },
+      priority: "high",
+      channels: ["in_app"],
+    }).catch(() => {});
+  }
 
   await addAudit({
     action: "CIRCULAR_RELAYED",

@@ -3,7 +3,10 @@ import { query } from "@/lib/postgres";
 import { ok } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 
-async function handleGet(_req: Request, { auth }: { auth: AuthContext }) {
+async function handleGet(req: Request, { auth }: { auth: AuthContext }) {
+  const url = new URL(req.url);
+  const pendingOnly = url.searchParams.get("pending_only") === "1";
+
   const { rows } = await query(
     `SELECT c.id, c.title, c.circular_no, c.issued_by, c.deadline, c.summary,
             c.action_required, c.faculty_relay_required, c.staff_duty_required,
@@ -13,9 +16,10 @@ async function handleGet(_req: Request, { auth }: { auth: AuthContext }) {
        FROM public.circular_requests c
        JOIN public.campus_feed_receipts r ON r.feed_id = c.feed_item_id AND r.user_id = $1::uuid
       WHERE c.status = 'published'
-      ORDER BY c.approved_at DESC NULLS LAST
+        AND ($2::boolean = false OR r.noted_at IS NULL)
+      ORDER BY c.action_required DESC, c.deadline ASC NULLS LAST, c.approved_at DESC NULLS LAST
       LIMIT 50`,
-    [auth.userId],
+    [auth.userId, pendingOnly],
   );
 
   return ok({

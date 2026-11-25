@@ -1,0 +1,4 @@
+-- 20270131000030_seed_circular_routing_rules.sql.down
+BEGIN;
+DELETE FROM public.ops_rules WHERE domain = 'circular_routing';
+COMMIT;

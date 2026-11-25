@@ -39,11 +39,24 @@ async function handleGet(req: NextRequest) {
     [circ.feed_item_id],
   );
 
+  const { rows: pendingRecipients } = await query(
+    `SELECT u.name, u.unique_id AS code, u.role,
+            sd.department, COALESCE(sd.hostel_block, u.hostel_block) AS hostel_block
+       FROM public.campus_feed_receipts r
+       JOIN public.users u ON u.id = r.user_id
+       LEFT JOIN public.student_details sd ON sd.user_id = u.id
+      WHERE r.feed_id = $1::uuid AND r.noted_at IS NULL
+      ORDER BY u.role ASC, u.name ASC
+      LIMIT 100`,
+    [circ.feed_item_id],
+  );
+
   return ok({
     circular_id: circularId,
     title: circ.title,
     ...(totals[0] ?? { delivered: 0, viewed: 0, noted: 0 }),
     by_role: byRole,
+    pending_recipients: pendingRecipients,
   });
 }
 

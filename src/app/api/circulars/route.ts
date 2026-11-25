@@ -7,6 +7,7 @@ import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 import { publishNotification } from "@/lib/notifications/bus";
 import { resolveTargetUserIds } from "@/lib/circulars/pipeline";
+import { getRule } from "@/lib/rules/service";
 
 async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   const isApprover = ["vice_principal", "principal", "admin", "sysadmin"].includes(auth.role);
@@ -38,7 +39,14 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const headcount = (await resolveTargetUserIds(targets)).length;
   const enrichedTargets = { ...targets, estimated_headcount: headcount };
 
-  const initialStatus = b?.route_via_vp ? "pending_vp" : "pending_principal";
+  const routingKey =
+    Array.isArray(targets.departments) && targets.departments.length > 0
+      ? "departmental"
+      : "campus_wide";
+  const routingRule = await getRule<{ chain?: string[] }>("circular_routing", routingKey).catch(() => null);
+  const chain = routingRule?.chain ?? ["vice_principal", "principal"];
+  const initialStatus =
+    b?.route_via_vp || chain[0] === "vice_principal" ? "pending_vp" : "pending_principal";
 
   const { rows } = await query<{ id: string; status: string }>(
     `INSERT INTO public.circular_requests
