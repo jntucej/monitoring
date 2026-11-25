@@ -112,6 +112,7 @@ import { runPresenceReconcile } from './jobs/presence_reconcile.js';
 import collectInfraSnapshot from './jobs/infra_snapshot_collector.js';
 import runInfraForecaster from './jobs/infra_forecaster.js';
 import completeRearmRequests from './jobs/rearm_automation_controls.js';
+import runBackupMaintenance from './jobs/backup_maintenance.js';
 import confirmationSla from './jobs/confirmation_sla.js';
 import messPollClose from './jobs/mess_poll_close.js';
 import messAnomalyDaily from './jobs/mess_anomaly_daily.js';
@@ -235,6 +236,8 @@ const jobs = [
   { name: 'achievement-auto', ms: 24 * 60 * 60 * 1000, run: () => runJob('achievement-auto', runAchievementAuto) },
   { name: 'leaderboard-refresh', ms: 60 * 60 * 1000, run: () => runJob('leaderboard-refresh', runLeaderboardRefresh) },
   { name: 'presence-reconcile', ms: 5 * 60 * 1000, run: () => runJob('presence-reconcile', runPresenceReconcile) },
+  // Backup & Maintenance Center (20270131000037):
+  { name: 'backup-maintenance', ms: 30 * 60 * 1000, run: () => runJob('backup-maintenance', runBackupMaintenance) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client

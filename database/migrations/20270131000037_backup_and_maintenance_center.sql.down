@@ -1,0 +1,11 @@
+-- 20270131000037_backup_and_maintenance_center.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.system_maintenance_alerts;
+DROP TABLE IF EXISTS public.storage_inventory;
+DROP TABLE IF EXISTS public.maintenance_executions;
+DROP TABLE IF EXISTS public.maintenance_policies;
+DROP TABLE IF EXISTS public.restore_tests;
+DROP TABLE IF EXISTS public.backup_artifacts;
+DROP TABLE IF EXISTS public.backup_executions;
+DROP TABLE IF EXISTS public.backup_policies;
+COMMIT;

@@ -32,6 +32,7 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/sysadmin/alerts/rules": { title: "Alert Rules", description: "Configure alert rules and thresholds" },
   "/sysadmin/audit": { title: "Audit Logs", description: "System audit trail and telemetry" },
   "/sysadmin/backup": { title: "Backup", description: "Database backup and restore operations" },
+  "/sysadmin/backup-maintenance": { title: "Backup & Maintenance", description: "Hardware backup, storage devices, restic snapshots, and autonomous maintenance" },
   "/sysadmin/compliance": { title: "Compliance", description: "Data compliance and retention policies" },
   "/sysadmin/actions": { title: "Automation Actions", description: "Approval gate for automated and operator actions" },
   "/sysadmin/data": { title: "Data Management", description: "Data export, anonymization, and compliance" },

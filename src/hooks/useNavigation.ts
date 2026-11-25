@@ -220,6 +220,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/sysadmin/docker-services", label: "Services", icon: "Server" },
             { href: "/sysadmin/deployments", label: "Deployments", icon: "Rocket" },
             { href: "/sysadmin/backup", label: "Backup", icon: "HardDrive" },
+            { href: "/sysadmin/backup-maintenance", label: "Backup & Maintenance", icon: "Wrench", badge: "NEW" },
             { href: "/sysadmin/audit", label: "Audit", icon: "ShieldAlert" },
             { href: "/sysadmin/sms/templates", label: "SMS Templates", icon: "FileText" },
           ],

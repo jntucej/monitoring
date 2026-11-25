@@ -7,6 +7,15 @@ export const SYSTEM_PERMISSIONS = [
   "system.backups.read",
   "system.backups.create",
   "system.backups.restore",
+  "system.backups.configure",
+  "system.backups.delete",
+  "system.backups.verify",
+  "system.maintenance.view",
+  "system.maintenance.configure",
+  "system.maintenance.execute",
+  "system.storage.view",
+  "system.storage.manage",
+  "system.recovery.manage",
   "system.logs.read",
   "system.workers.read",
   "system.workers.retry",
@@ -24,6 +33,11 @@ export const ALLOWLISTED_SYSADMIN_ACTIONS = [
   "retry_failed_notifications",
   "refresh_infra_snapshot",
   "verify_latest_backup",
+  "run_backup_now",
+  "list_backups",
+  "list_policies",
+  "run_maintenance_now",
+  "list_storage_inventory",
 ] as const;
 
 export type AllowlistedSysadminAction = (typeof ALLOWLISTED_SYSADMIN_ACTIONS)[number];

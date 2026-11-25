@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { BackupMaintenanceCenter } from "@/components/sysadmin/backup-maintenance/BackupMaintenanceCenter";
+import { Suspense } from "react";
 
-type TabKey = "overview" | "services" | "database" | "redis" | "network" | "logs" | "workers" | "backups" | "deployments" | "security" | "operations";
+type TabKey = "overview" | "services" | "database" | "redis" | "network" | "logs" | "workers" | "backups" | "deployments" | "security" | "operations" | "maintenance";
 
 interface OpsAgentStatus {
   reachable: boolean;
@@ -130,7 +132,7 @@ export default function SysadminAdminCenterPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-1">
-          {(["overview", "services", "database", "redis", "network", "logs", "workers", "backups", "deployments", "security"] as const).map((k) => (
+          {(["overview", "services", "database", "redis", "network", "logs", "workers", "backups", "deployments", "security", "operations", "maintenance"] as const).map((k) => (
             <button
               key={k}
               type="button"
@@ -463,6 +465,8 @@ export default function SysadminAdminCenterPage() {
           </div>
         </div>
       )}
+
+      {tab === "maintenance" && <BackupMaintenanceCenter />}
     </div>
   );
 }

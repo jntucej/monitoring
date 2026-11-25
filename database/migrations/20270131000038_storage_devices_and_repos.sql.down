@@ -1,0 +1,6 @@
+-- 20270131000038_storage_devices_and_repos.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.backup_manifests;
+DROP TABLE IF EXISTS public.repos_snapshots;
+DROP TABLE IF EXISTS public.storage_devices;
+COMMIT;
