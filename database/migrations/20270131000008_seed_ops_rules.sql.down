@@ -1,0 +1,5 @@
+-- rollback the ops_rules seed rows (they live in the ops_rules table; the
+-- table itself is dropped by 20270131000005.down, which runs first in reverse
+-- order). If ops_rules still exists, clear the seeded rows.
+DELETE FROM public.ops_rules
+ WHERE created_by = '00000000-0000-4000-8000-000000000001';

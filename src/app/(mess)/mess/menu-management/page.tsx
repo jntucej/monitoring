@@ -23,6 +23,7 @@ import {
   type MessMenuItem,
 } from "@/components/approver/wardenConsoleModels";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { MenuEditor } from "@/components/mess/MenuEditor";
 
 interface MenuResponse {
   success: boolean;
@@ -277,6 +278,11 @@ function MessMenuInner() {
           </div>
         </div>
       </WidgetBoundary>
+
+      <div className="surface-card p-4">
+        <h3 className="text-sm font-semibold mb-2 text-text-secondary">Weekly menu planning</h3>
+        <MenuEditor />
+      </div>
 
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>

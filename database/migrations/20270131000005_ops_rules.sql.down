@@ -1,0 +1,2 @@
+-- rollback ops_rules (newest)
+DROP TABLE IF EXISTS public.ops_rules;

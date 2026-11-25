@@ -72,6 +72,13 @@ const STAGE_LABELS: Record<string, string> = {
   vice_principal: "Vice Principal",
   principal: "Principal",
   faculty: "Faculty",
+  // Academic/Hostel/Mess subsystem stages (20270131000005–08).
+  guardian: "Guardian",
+  supervisor: "Supervisor",
+  exam_branch: "Exam Branch",
+  exam_superintendent: "Exam Superintendent",
+  controller_examinations: "Controller of Examinations",
+  mess_incharge: "Mess In-charge",
   completed: "Completed",
 };
 

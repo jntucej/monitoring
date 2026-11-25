@@ -1,0 +1,6 @@
+-- rollback the mess menu / interest-poll / scan-log tables.
+DROP TABLE IF EXISTS public.mess_scan_log;
+DROP TABLE IF EXISTS public.mess_item_interest_votes;
+DROP TABLE IF EXISTS public.mess_item_interest_polls;
+DROP TABLE IF EXISTS public.mess_weekly_items;
+DROP TABLE IF EXISTS public.mess_menus;

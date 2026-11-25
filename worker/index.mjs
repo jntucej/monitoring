@@ -101,6 +101,9 @@ import { startOperatorActionListener, runOperatorActionMaintenance } from './job
 import collectInfraSnapshot from './jobs/infra_snapshot_collector.js';
 import runInfraForecaster from './jobs/infra_forecaster.js';
 import completeRearmRequests from './jobs/rearm_automation_controls.js';
+import confirmationSla from './jobs/confirmation_sla.js';
+import messPollClose from './jobs/mess_poll_close.js';
+import messAnomalyDaily from './jobs/mess_anomaly_daily.js';
 
 /**
  * Job heartbeat sentinel: after each scheduled run, upsert a row in
@@ -203,6 +206,14 @@ const jobs = [
   // Batch J2: dual-control re-arm — complete rearm requests that have two
   // distinct approvals and flip the auto_* automation_controls back on.
   { name: 'rearm-automation-controls', ms: 60 * 1000, run: () => runJob('rearm-automation-controls', completeRearmRequests) },
+  // Academic/Hostel/Mess subsystems (20270131000005–08):
+  //  - confirmation SLA: escalate overdue permission stages (reads
+  //    ops_rules('leave_threshold','auto_escalation')).
+  //  - mess poll close: finalize interest polls at closes_at, notify committee.
+  //  - mess anomaly: flag scripted / reverse-engineered scan patterns.
+  { name: 'confirmation-sla', ms: 5 * 60 * 1000, run: () => runJob('confirmation-sla', confirmationSla) },
+  { name: 'mess-poll-close', ms: 1 * 60 * 1000, run: () => runJob('mess-poll-close', messPollClose) },
+  { name: 'mess-anomaly-daily', ms: 60 * 60 * 1000, run: () => runJob('mess-anomaly-daily', messAnomalyDaily) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client
