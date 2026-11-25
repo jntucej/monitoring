@@ -84,4 +84,42 @@ Proposed strategy (**reuse + extend + add-only-missing**):
 - **(c)** The existing `notifications` table is legacy-shaped (id is `text`,
   `recipient_type` not `scope`). Do you want a thin new `notification_events`
   *alongside* it (cleaner for the bus) or extend the existing one? This is the
-  one place "reuse" gets genuinely awkward.
+  one place "reuse" gets genuinely awkward. → **Resolved (a): extend the
+  existing table** (see §4).
+
+## 4. Shipped (20270131000005–08 + commits 55aa3016, 8e042605)
+
+The "reuse + extend + add-only-missing" strategy was executed in this pass:
+
+- **ops_rules** (new table + 22 seed rows) — versioned operational
+  thresholds: curfew windows, leave thresholds, meal cutoffs, attendance
+  minimums, confirmation chains, notification-scope grants. `lib/rules/
+  service.ts` reads/writes it; `POST /api/rules` + `GET /api/rules`.
+- **notifications extend** (+`event_type`, `scope`, `actor_role`) — the bus
+  discriminator. `lib/notifications/bus.ts` resolves a scope (global/dept/
+  hostel/class/mess/user) and fans out over the EXISTING
+  `notification-service.sendNotification` (no parallel store).
+- **mess_tokens extend** (+`nonce`, `token_hash` HMAC, `redeem_device_id`,
+  `single_use`) — anti-tamper. `lib/mess/token.ts`: HMAC-SHA256
+  issue/verify + atomic single-use redeem. `POST /api/mess/tokens/redeem`.
+- **class_periods extend** (+`version_id`, `slot_status`,
+  `substitute_faculty_id`, `substitution_reason`) — timetable versioning.
+- **Genuinely-new mess tables** — `mess_menus`, `mess_weekly_items`,
+  `mess_item_interest_polls`, `mess_item_interest_votes`, `mess_scan_log`.
+  Menu/poll routes + `MenuEditor` / `InterestPollCard` UI wired into
+  `/mess/menu-management`.
+- **Unified confirmations** — `GET /api/confirmations/me` +
+  `POST /api/confirmations/[id]/decide` (forwards to the existing
+  `/api/permissions/[ticket]`), `lib/confirmations/chains.ts` hostel-vs-
+  academic guard. `ApprovalInbox` extended with the new stage labels.
+- **Workers** — `confirmation-sla`, `mess-poll-close`,
+  `mess-anomaly-daily` registered in `worker/index.mjs`.
+- **Tests** — `tests/unit/mess-token-security`, `tests/unit/
+  confirmation-chain-guard`, `tests/gate/service/mess-token-redeem`
+  (HMAC mutation, chain segregation, atomic-redeem race).
+
+Verified: tsc 0 errors · unslop-ui 100/100 (0 findings) · vitest unit
+344/344 · jest gate:node 161/161 · migrations applied to live DB, down
+migrations validated in rollback. **No deploy** (build gate + your go-ahead
+still pending, per the no-deploy policy).
+
