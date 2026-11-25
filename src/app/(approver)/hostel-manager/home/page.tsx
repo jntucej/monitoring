@@ -11,16 +11,18 @@ import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver/wardenConsoleModels";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { Greeting } from "@/components/Greeting";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 export default function HostelManagerPage() {
+const user = useAuthStore((s) => s.user);
     const [active, setActive] = useState<HMBoardRow | null>(null);
 return (
 <>
-<Greeting />
+<CustomRoleGreeting name={user?.name} role="hostel_manager" />
 <RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["hostel_manager", "principal"]}>

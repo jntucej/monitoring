@@ -13,7 +13,8 @@ import {
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { GridBoard } from "@/components/shared/GridBoard";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { Greeting } from "@/components/Greeting";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
@@ -21,10 +22,11 @@ import { RoleStarterGuide } from "@/components/shared/RoleStarterGuide";
 import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 
 export default function CaretakerPage() {
+const user = useAuthStore((s) => s.user);
   const { inspection, inspect, closeInspection } = useEntityInspector();
   return (
 <>
-<Greeting />
+<CustomRoleGreeting name={user?.name} role="caretaker" />
 <RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
         <div className="space-y-6">

@@ -19,7 +19,8 @@ import { VpBridgeFlagCard } from "@/components/vp/VpBridgeFlagCard";
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { Greeting } from "@/components/Greeting";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
@@ -61,6 +62,7 @@ interface VPOverview {
 
 
 export default function VPTodayPage() {
+const user = useAuthStore((s) => s.user);
   const [focusOpen, setFocusOpen] = useState(false);
   const { inspection, inspect, closeInspection } = useEntityInspector();
 
@@ -163,7 +165,7 @@ export default function VPTodayPage() {
 
   return (
 <>
-<Greeting />
+<CustomRoleGreeting name={user?.name} role="vice_principal" />
 <RoleOnboarding />
     <>
       <CelebrateOverlay queueEmpty={queueEmpty && sessionDecisions > 0} />

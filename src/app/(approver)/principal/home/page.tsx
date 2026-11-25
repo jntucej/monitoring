@@ -29,7 +29,8 @@ import { PrincipalDigest } from "@/components/retention/PrincipalDigest";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
-import { Greeting } from "@/components/Greeting";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 
@@ -101,6 +102,7 @@ function KpiTile({ label, value, tone = "ok", hint, linkHref }: KpiTileProps) {
 const InboxReviewPanel = lazy(() => import("@/components/principal/InboxReviewPanel"));
 
 export default function PrincipalTodayPage() {
+const user = useAuthStore((s) => s.user);
   const [focusOpen, setFocusOpen] = useState(false);
   const [lastFetched, setLastFetched] = useState<number | null>(null);
   const { data, loading, error, refresh } = useApiResource<PrincipalOverview>("/api/principal/dashboard", {
@@ -164,7 +166,7 @@ export default function PrincipalTodayPage() {
 
   return (
 <>
-<Greeting />
+<CustomRoleGreeting name={user?.name} role="principal" />
 <RoleOnboarding />
     <>
       <CelebrateOverlay queueEmpty={pending === 0 && sessionDecisions > 0} />

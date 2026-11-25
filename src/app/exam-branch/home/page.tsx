@@ -12,14 +12,16 @@ import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import type { BoardRow } from "@/components/shared/Board";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { scanInspection } from "@/components/shared/inspectionModels";
-import { Greeting } from "@/components/Greeting";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function ExamBranchPage() {
+const user = useAuthStore((s) => s.user);
   const [active, setActive] = useState<BoardRow | null>(null);
   return (
 <>
-<Greeting />
+<CustomRoleGreeting name={user?.name} role="exam_branch" />
 <RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["exam_branch"]}>

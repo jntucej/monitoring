@@ -21,7 +21,8 @@ import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPrevie
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { Greeting } from "@/components/Greeting";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
@@ -107,6 +108,7 @@ function KpiTile({
 }
 
 export default function HodTodayPage() {
+const user = useAuthStore((s) => s.user);
   const [focusOpen, setFocusOpen] = useState(false);
   const { data, refresh } = useApiResource<HodOverviewResponse>("/api/hod/dashboard", {
     ttlMs: 20_000,
@@ -162,7 +164,7 @@ export default function HodTodayPage() {
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
       <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
-<Greeting />
+<CustomRoleGreeting name={user?.name} role="hod" />
         <RoleOnboarding />
 <PageHeader title="Head of Department" subtitle="Department leadership console" />
         <ContextSituationBar

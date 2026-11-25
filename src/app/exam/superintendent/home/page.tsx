@@ -8,13 +8,15 @@ import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
-import { Greeting } from "@/components/Greeting";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function ExamSuperintendentPage() {
+const user = useAuthStore((s) => s.user);
   return (
 <>
-<Greeting />
+<CustomRoleGreeting name={user?.name} role="exam_superintendent" />
 <RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["exam_superintendent"]}>

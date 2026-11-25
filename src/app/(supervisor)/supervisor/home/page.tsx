@@ -19,7 +19,8 @@ import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { Greeting } from "@/components/Greeting";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
@@ -97,6 +98,7 @@ interface SupervisorOverview {
 }
 
 export default function SupervisorTodayPage() {
+const user = useAuthStore((s) => s.user);
   const [focusOpen, setFocusOpen] = useState(false);
   const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
   const { data, refresh } = useApiResource<{ data: SupervisorOverview }>(
@@ -190,7 +192,7 @@ export default function SupervisorTodayPage() {
 
   return (
 <>
-<Greeting />
+<CustomRoleGreeting name={user?.name} role="supervisor" />
 <RoleOnboarding />
     <>
       <CelebrateOverlay queueEmpty={pending === 0 && sessionDecisions > 0} />
