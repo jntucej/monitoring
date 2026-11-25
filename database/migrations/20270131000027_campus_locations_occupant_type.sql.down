@@ -1,0 +1,4 @@
+-- 20270131000027_campus_locations_occupant_type.sql.down
+BEGIN;
+ALTER TABLE public.campus_locations DROP COLUMN IF EXISTS occupant_type;
+COMMIT;

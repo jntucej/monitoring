@@ -14,6 +14,14 @@ interface WorkerUser {
   name: string;
 }
 
+interface PlaceRow {
+  id: string;
+  code: string;
+  name: string;
+  kind: string;
+  occupant_type: string;
+}
+
 interface AssignmentRow {
   id: string;
   worker_name: string;
@@ -21,6 +29,7 @@ interface AssignmentRow {
   worker_type_label: string | null;
   worker_type_code: string;
   block_id: string | null;
+  occupant_type?: string | null;
   shift_name: string;
 }
 
@@ -37,20 +46,35 @@ interface AttendanceLog {
 export function WorkerTypeAndBlockPanel() {
   const [types, setTypes] = useState<WorkerType[]>([]);
   const [workers, setWorkers] = useState<WorkerUser[]>([]);
+  const [places, setPlaces] = useState<PlaceRow[]>([]);
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
   const [logs, setLogs] = useState<AttendanceLog[]>([]);
 
   const [newCode, setNewCode] = useState("");
   const [newLabel, setNewLabel] = useState("");
+
+  const [placeCode, setPlaceCode] = useState("");
+  const [placeName, setPlaceName] = useState("");
+  const [placeKind, setPlaceKind] = useState("hostel_block");
+  const [occupantType, setOccupantType] = useState("students");
+
   const [workerId, setWorkerId] = useState("");
   const [typeCode, setTypeCode] = useState("kitchen");
-  const [blockId, setBlockId] = useState("Block A");
+  const [blockId, setBlockId] = useState("");
   const [shiftName, setShiftName] = useState("Morning");
 
   const load = useCallback(() => {
     fetch("/api/workers/types")
       .then((r) => r.json())
       .then((j) => setTypes(j?.data?.types ?? []))
+      .catch(() => {});
+    fetch("/api/security/locations")
+      .then((r) => r.json())
+      .then((j) => {
+        const list: PlaceRow[] = j?.data?.locations ?? [];
+        setPlaces(list);
+        if (list[0]?.name && !blockId) setBlockId(list[0].name);
+      })
       .catch(() => {});
     fetch("/api/workers/assignments")
       .then((r) => r.json())
@@ -65,7 +89,7 @@ export function WorkerTypeAndBlockPanel() {
       .then((r) => r.json())
       .then((j) => setLogs(j?.data?.logs ?? []))
       .catch(() => {});
-  }, [workerId]);
+  }, [workerId, blockId]);
 
   useEffect(() => {
     load();
@@ -81,6 +105,24 @@ export function WorkerTypeAndBlockPanel() {
     });
     setNewCode("");
     setNewLabel("");
+    load();
+  }
+
+  async function addPlace(e: React.FormEvent) {
+    e.preventDefault();
+    if (!placeCode.trim() || !placeName.trim()) return;
+    await fetch("/api/security/locations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code: placeCode.trim(),
+        name: placeName.trim(),
+        kind: placeKind,
+        occupant_type: occupantType,
+      }),
+    });
+    setPlaceCode("");
+    setPlaceName("");
     load();
   }
 
@@ -103,8 +145,52 @@ export function WorkerTypeAndBlockPanel() {
   return (
     <div className="space-y-6 pt-6">
       <h2 className="text-base font-semibold text-foreground">
-        Worker Types, Block Assignments & In/Out Logs
+        Worker Types, Places of Work, Block Assignments & In/Out Logs
       </h2>
+
+      <form onSubmit={addPlace} className="grid gap-2 sm:grid-cols-5">
+        <input
+          type="text"
+          value={placeCode}
+          onChange={(e) => setPlaceCode(e.target.value)}
+          placeholder="Place code (e.g. BLOCK_A)"
+          className="border-b border-border py-1.5 text-xs text-foreground"
+          required
+        />
+        <input
+          type="text"
+          value={placeName}
+          onChange={(e) => setPlaceName(e.target.value)}
+          placeholder="Place name (e.g. Boys Hostel Block A)"
+          className="border-b border-border py-1.5 text-xs text-foreground"
+          required
+        />
+        <select
+          value={placeKind}
+          onChange={(e) => setPlaceKind(e.target.value)}
+          className="border-b border-border py-1.5 text-xs text-foreground"
+        >
+          <option value="hostel_block">Hostel Block</option>
+          <option value="building">Academic / Faculty Block</option>
+          <option value="canteen">Kitchen / Canteen</option>
+          <option value="lab">Lab</option>
+          <option value="library">Library</option>
+          <option value="open_area">Campus Grounds</option>
+        </select>
+        <select
+          value={occupantType}
+          onChange={(e) => setOccupantType(e.target.value)}
+          className="border-b border-border py-1.5 text-xs text-foreground"
+        >
+          <option value="students">Occupants: Students</option>
+          <option value="faculty">Occupants: Faculty</option>
+          <option value="staff">Occupants: Staff</option>
+          <option value="mixed">Occupants: Mixed</option>
+        </select>
+        <button type="submit" className="bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
+          Define Place
+        </button>
+      </form>
 
       <form onSubmit={addType} className="flex flex-wrap gap-2">
         <input
@@ -151,13 +237,27 @@ export function WorkerTypeAndBlockPanel() {
             </option>
           ))}
         </select>
-        <input
-          type="text"
-          value={blockId}
-          onChange={(e) => setBlockId(e.target.value)}
-          placeholder="Block (e.g. Block A)"
-          className="border-b border-border py-1.5 text-xs text-foreground"
-        />
+        {places.length > 0 ? (
+          <select
+            value={blockId}
+            onChange={(e) => setBlockId(e.target.value)}
+            className="border-b border-border py-1.5 text-xs text-foreground"
+          >
+            {places.map((p) => (
+              <option key={p.id} value={p.name}>
+                {p.name} ({p.occupant_type})
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type="text"
+            value={blockId}
+            onChange={(e) => setBlockId(e.target.value)}
+            placeholder="Place / Block"
+            className="border-b border-border py-1.5 text-xs text-foreground"
+          />
+        )}
         <select
           value={shiftName}
           onChange={(e) => setShiftName(e.target.value)}
@@ -168,20 +268,21 @@ export function WorkerTypeAndBlockPanel() {
           <option value="Night">Night (22:00–06:00)</option>
         </select>
         <button type="submit" className="bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
-          Assign Block & Shift
+          Assign Place & Shift
         </button>
       </form>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-            Active Block Assignments ({assignments.length})
+            Active Place Assignments ({assignments.length})
           </h3>
           <div className="mt-2 divide-y divide-border">
             {assignments.map((a) => (
               <div key={a.id} className="py-1.5 text-xs text-foreground">
                 <strong>{a.worker_name}</strong> ({a.worker_code}) —{" "}
-                {a.worker_type_label ?? a.worker_type_code} • {a.block_id ?? "Campus"} • {a.shift_name}
+                {a.worker_type_label ?? a.worker_type_code} • {a.block_id ?? "Campus"}
+                {a.occupant_type ? ` (${a.occupant_type})` : ""} • {a.shift_name}
               </div>
             ))}
           </div>

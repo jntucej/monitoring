@@ -8,16 +8,20 @@ import type { AuthContext } from "@/lib/authContext";
 async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   const { rows } = await query(
     auth.role === "worker"
-      ? `SELECT wa.*, rc.label AS worker_type_label, u.name AS worker_name, u.unique_id AS worker_code
+      ? `SELECT wa.*, rc.label AS worker_type_label, u.name AS worker_name, u.unique_id AS worker_code,
+                cl.kind AS location_kind, cl.occupant_type
            FROM public.worker_assignments wa
            JOIN public.users u ON u.id = wa.worker_id
            LEFT JOIN public.ref_categories rc ON rc.domain = 'worker_type' AND rc.code = wa.worker_type_code
+           LEFT JOIN public.campus_locations cl ON (cl.name = wa.block_id OR cl.code = wa.block_id)
           WHERE wa.worker_id = $1::uuid AND wa.active = true
           ORDER BY wa.created_at DESC`
-      : `SELECT wa.*, rc.label AS worker_type_label, u.name AS worker_name, u.unique_id AS worker_code
+      : `SELECT wa.*, rc.label AS worker_type_label, u.name AS worker_name, u.unique_id AS worker_code,
+                cl.kind AS location_kind, cl.occupant_type
            FROM public.worker_assignments wa
            JOIN public.users u ON u.id = wa.worker_id
            LEFT JOIN public.ref_categories rc ON rc.domain = 'worker_type' AND rc.code = wa.worker_type_code
+           LEFT JOIN public.campus_locations cl ON (cl.name = wa.block_id OR cl.code = wa.block_id)
           WHERE wa.active = true
           ORDER BY wa.block_id NULLS LAST, u.name ASC`,
     auth.role === "worker" ? [auth.userId] : [],

@@ -7,8 +7,9 @@ import type { AuthContext } from "@/lib/authContext";
 
 async function handleGet() {
   const { rows } = await query(
-    `SELECT id, code, name, kind, parent_id, lat::float8, lng::float8, radius_m, gate_id, active, created_at
+    `SELECT id, code, name, kind, occupant_type, parent_id, lat::float8, lng::float8, radius_m, gate_id, active, created_at
        FROM public.campus_locations
+      WHERE active = true
       ORDER BY name ASC`,
   );
   return ok({ locations: rows });
@@ -21,22 +22,27 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const b = await req.json().catch(() => null);
   const code = String(b?.code ?? "").trim().toUpperCase();
   const name = String(b?.name ?? "").trim();
-  const kind = String(b?.kind ?? "").trim();
-  const lat = Number(b?.lat);
-  const lng = Number(b?.lng);
+  const kind = String(b?.kind ?? "building").trim();
+  const occupantType = ["students", "faculty", "staff", "mixed"].includes(String(b?.occupant_type))
+    ? String(b.occupant_type)
+    : "mixed";
+  const lat = b?.lat != null && Number.isFinite(Number(b.lat)) ? Number(b.lat) : 17.9784;
+  const lng = b?.lng != null && Number.isFinite(Number(b.lng)) ? Number(b.lng) : 79.5942;
   const radiusM = Number(b?.radius_m ?? 30);
   const gateId = b?.gate_id ? String(b.gate_id) : null;
   const parentId = b?.parent_id ? String(b.parent_id) : null;
 
-  if (!code || !name || !kind || !Number.isFinite(lat) || !Number.isFinite(lng)) {
-    return fail("INVALID_INPUT", "code, name, kind, lat, lng are required", 400);
+  if (!code || !name || !kind) {
+    return fail("INVALID_INPUT", "code, name, and kind are required", 400);
   }
 
   const { rows } = await query(
-    `INSERT INTO public.campus_locations (code, name, kind, parent_id, lat, lng, radius_m, gate_id, created_by)
-     VALUES ($1, $2, $3, $4::uuid, $5, $6, $7, $8::uuid, $9::uuid)
-     RETURNING id, code, name, kind, lat::float8, lng::float8, radius_m, gate_id, active`,
-    [code, name, kind, parentId, lat, lng, radiusM, gateId, auth.userId],
+    `INSERT INTO public.campus_locations (code, name, kind, occupant_type, parent_id, lat, lng, radius_m, gate_id, created_by)
+     VALUES ($1, $2, $3, $4, $5::uuid, $6, $7, $8, $9::uuid, $10::uuid)
+     ON CONFLICT (code) DO UPDATE
+       SET name = EXCLUDED.name, kind = EXCLUDED.kind, occupant_type = EXCLUDED.occupant_type, active = true
+     RETURNING id, code, name, kind, occupant_type, lat::float8, lng::float8, radius_m, gate_id, active`,
+    [code, name, kind, occupantType, parentId, lat, lng, radiusM, gateId, auth.userId],
   );
   return ok(rows[0], 201);
 }
@@ -76,10 +82,10 @@ async function handleDelete(req: NextRequest) {
 }
 
 export const GET = withAuthorization(handleGet, {
-  requiredRole: ["student", "operator", "supervisor", "admin", "sysadmin"],
+  requiredRole: ["student", "worker", "operator", "supervisor", "hostel_manager", "principal", "admin", "sysadmin"],
 });
 export const POST = withAuthorization(handlePost, {
-  requiredRole: ["supervisor", "admin", "sysadmin"],
+  requiredRole: ["supervisor", "hostel_manager", "principal", "admin", "sysadmin"],
 });
 export const PATCH = withAuthorization(handlePatch, {
   requiredRole: ["supervisor", "admin", "sysadmin"],

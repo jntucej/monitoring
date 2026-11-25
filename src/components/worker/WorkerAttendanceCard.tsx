@@ -7,6 +7,8 @@ interface AssignmentRow {
   worker_type_label: string | null;
   worker_type_code: string;
   block_id: string | null;
+  location_kind?: string | null;
+  occupant_type?: string | null;
   shift_name: string;
   starts_at: string;
   ends_at: string;
@@ -87,7 +89,7 @@ export function WorkerAttendanceCard() {
           </h2>
           <p className="text-xs text-foreground">
             {assignment
-              ? `${assignment.worker_type_label ?? assignment.worker_type_code} • Block: ${assignment.block_id ?? "Campus"} • ${assignment.shift_name} (${assignment.starts_at.slice(0, 5)}–${assignment.ends_at.slice(0, 5)})`
+              ? `${assignment.worker_type_label ?? assignment.worker_type_code} • Place: ${assignment.block_id ?? "Campus"}${assignment.occupant_type ? ` (${assignment.occupant_type})` : ""} • ${assignment.shift_name} (${assignment.starts_at.slice(0, 5)}–${assignment.ends_at.slice(0, 5)})`
               : "No block assignment yet — contact Admin / Supervisor"}
           </p>
         </div>
