@@ -53,6 +53,7 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
   const [deadline, setDeadline] = useState("");
   const [roles, setRoles] = useState<string[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
+  const [branchOptions, setBranchOptions] = useState<string[]>(["CSE", "IT", "ECE", "EEE", "MECH"]);
   const [circulars, setCirculars] = useState<CircularRow[]>([]);
   const [compliance, setCompliance] = useState<Record<string, ComplianceData>>({});
 
@@ -76,6 +77,13 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
 
   useEffect(() => {
     load();
+    fetch("/api/academic/catalogs")
+      .then((r) => r.json())
+      .then((j) => {
+        const list = (j?.data?.branches ?? []).map((b: { short_name: string }) => b.short_name);
+        if (list.length > 0) setBranchOptions(list);
+      })
+      .catch(() => {});
   }, [load]);
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -222,7 +230,7 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
                 {r}
               </button>
             ))}
-            {["CSE", "IT", "ECE", "EEE", "MECH"].map((d) => (
+            {branchOptions.map((d) => (
               <button
                 key={d}
                 type="button"

@@ -1,0 +1,5 @@
+-- 20270131000035_pass_and_visitor_snapshots.sql.down
+BEGIN;
+ALTER TABLE public.visitor_logs DROP COLUMN IF EXISTS academic_snapshot;
+ALTER TABLE public.gate_passes DROP COLUMN IF EXISTS academic_snapshot;
+COMMIT;
