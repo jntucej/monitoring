@@ -132,8 +132,9 @@ Proposed order = dependency order. **Each unit: implement → verify → stop �
 
 ---
 
-## 7. Progress Ledger (starts here)
+## 7. Progress Ledger
 
 | Unit | Status | Commit | Notes |
 |---|---|---|---|
-| (none started) | — | — | Awaiting U1 approval |
+| U1 — Migrations 37–39 | **deployed** | 65365c4f | 2026-11-25. Scratch rollback test passed (37→38→39 forward, 39→38→37 down, idempotency re-apply, 303 originals intact). Production: 306 migrations, 14 new tables, WD seed updated with UUID. Pre-deploy backup: /opt/monitoring/backups/daily/pre-u1-migrate.dump. |
+| U2 — Seed backup_policies | pending | — | Next: seed daily-postgres policy row + force one cycle run |
