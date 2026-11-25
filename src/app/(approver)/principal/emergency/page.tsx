@@ -108,6 +108,7 @@ export default function EmergencyPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Emergency command plane bypassing standard workflows with strict authorization and audit guarantees"
+        why="Direct executive intervention overrides standard approval chains during active perimeter lockdowns, evacuations, or security crises."
         contextLabel="Emergency Command Plane"
         statusSummary="Direct perimeter lockdown controls, instant student recall directives, and campus-wide alerts."
         severity="critical"

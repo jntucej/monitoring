@@ -187,6 +187,7 @@ const api = useApi();
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor reasons for campus operations."
+        why="Reasons edited here appear in operator and student forms immediately."
         contextLabel="Reasons"
         statusSummary="Review current reasons state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

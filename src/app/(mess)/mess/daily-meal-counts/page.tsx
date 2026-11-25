@@ -147,6 +147,7 @@ function MessDailyMealCountsInner() {
             ? `${d.declaredPresent} declared present (${d.confirmed} served, ${d.noShows} no-shows) for today's scheduled meal.`
             : "No student meal selections recorded yet for this meal day."
         }
+        why="Tracking meal opt-ins vs actual counter redemptions identifies no-show patterns and prevents dining prep shortfalls."
         severity={d && d.noShows > 10 ? "warn" : "info"}
         primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
         secondaryActions={[

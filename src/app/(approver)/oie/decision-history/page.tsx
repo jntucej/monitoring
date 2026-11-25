@@ -238,6 +238,7 @@ function DecisionHistoryInner() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Audit past clearance decisions, approval rationales, and timestamps."
+        why="Auditing clearance records provides proof of candidate eligibility and defends against examination disputes or appeals."
         contextLabel="Decision Archive"
         statusTone="info"
         statusPill={`${allRows.length} decisions`}

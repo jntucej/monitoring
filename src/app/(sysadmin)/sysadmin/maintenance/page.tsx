@@ -16,6 +16,7 @@ export default function MaintenancePage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor maintenance for campus operations."
+        why="Windows scheduled here automatically suppress false-positive alerts during the maintenance period."
         contextLabel="Maintenance"
         statusSummary="Review current maintenance state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

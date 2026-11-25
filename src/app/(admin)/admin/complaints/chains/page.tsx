@@ -121,6 +121,7 @@ export default function ChainsPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor complaints chains for campus operations."
+        why="The chain here defines the real-time status students see under their open complaint tickets."
         contextLabel="Complaints Chains"
         statusSummary="Review current complaints chains state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

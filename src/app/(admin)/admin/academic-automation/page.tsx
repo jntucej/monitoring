@@ -141,11 +141,18 @@ function AutonomyPanel() {
     <div className="grid gap-6 lg:grid-cols-2">
       <ContextSituationBar
         roleLabel="Campus Admin"
-        purpose="Configuration-driven workflow engine: rules, autonomy levels, kill-switch, and explain-why audit. No deploy for policy changes."
-        contextLabel="Configuration-driven workflow engine: rules, autonomy levels, kill-switch, and explain-why audit. No deploy for policy changes."
-        statusSummary="Review current configuration-driven workflow engine: rules, autonomy levels, kill-switch, and explain-why audit. no deploy for policy changes. state and take action below."
+        purpose="Configure automated academic intervention workflows, event-driven rules, and autonomy thresholds without code deployments."
+        contextLabel="Academic Automation Engine"
+        why="Automating policy interventions ensures prompt notification of attendance risks, escalations, and task generation across departments."
+        statusTone={controls.some((c) => !c.enabled) ? "warn" : "ok"}
+        statusPill={`${rules.length} rule${rules.length === 1 ? "" : "s"} · ${agents.length} agent${agents.length === 1 ? "" : "s"}`}
+        statusSummary={
+          controls.some((c) => !c.enabled)
+            ? `${rules.length} automation rules loaded; one or more agent kill-switches are currently active.`
+            : `${rules.length} policy rules active across ${agents.length} autonomous agents with full audit logging.`
+        }
         primaryAction={{ label: "Admin Overview", href: "/admin" }}
-        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+        secondaryAction={{ label: "Audit Logs", href: "/admin/audit-logs" }}
       />
       {/* Rule Builder */}
       <WidgetBoundary title="Rule Builder">

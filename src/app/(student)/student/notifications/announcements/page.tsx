@@ -50,6 +50,7 @@ function Inner() {
             ? `${list.length} official campus circular${list.length === 1 ? "" : "s"} and bulletins published.`
             : "No active announcements published at this time."
         }
+        why="Campus circulars broadcast authoritative updates regarding exam schedules, hostel regulations, and institutional events."
         primaryAction={{ label: "All Notifications", href: "/student/notifications" }}
         secondaryAction={{ label: "Campus Feed", href: "/student/campus" }}
       />

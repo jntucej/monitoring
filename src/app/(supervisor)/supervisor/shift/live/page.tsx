@@ -11,6 +11,7 @@ export default function ShiftLivePage() {
         purpose="Live shift tracking, active guard allocations, and real-time station roster monitoring"
         contextLabel="Active Shift Operations"
         statusSummary="Monitor current guard post coverage, station check-ins, and shift duration countdowns."
+        why="Tracking guard presence in real time prevents unmanned perimeter posts and manages meal or relief rotations smoothly."
         primaryAction={{ label: "Shift Handover", href: "/supervisor/shift/handover" }}
         secondaryAction={{ label: "Guard Roster", href: "/supervisor/team/shifts" }}
       />

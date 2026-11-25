@@ -148,6 +148,7 @@ function MessMenuInner() {
             ? `${menuItems.length} menu items scheduled (${menuItems.filter((i) => i.isAvailable).length} available). Window: ${fmtTime(menuData?.windowOpens)} – ${fmtTime(menuData?.windowCloses)}.`
             : "No active mess menu published for today. Review upcoming meal day catalogs."
         }
+        why="Publishing daily menus informs students of meal choices and locks serving window timetables for automatic token validation."
         severity="info"
         primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
         secondaryActions={[

@@ -271,6 +271,7 @@ const api = useApi();
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor profile for campus operations."
+        why="Changes here apply only to your account; other sysadmins keep their own settings."
         contextLabel="Profile"
         statusSummary="Review current profile state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

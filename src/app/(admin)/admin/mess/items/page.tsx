@@ -14,6 +14,7 @@ export default function AdminMessItemsPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Items students can select as their primary or sub-item"
+        why="Item edits propagate to active menus and the student mess dashboard within minutes."
         contextLabel="Items students can select as their primary or sub-item"
         statusSummary="Review current items students can select as their primary or sub-item state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

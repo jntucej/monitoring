@@ -14,7 +14,8 @@ import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { EntityInspector, type EntityInspection } from "@/components/shared/EntityInspector";
 import { visitorVisitInspection } from "@/components/shared/visitorInspection";
 import type { VisitorLogRow } from "../types";
-import { Clock, MapPin, Loader2, Search } from "lucide-react";
+import { Clock, MapPin, Loader2, Search, HelpCircle, CheckCircle } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 interface VisitorsMineResponse {
   success: boolean;
@@ -131,21 +132,27 @@ export default function VisitorVisitPage() {
         />
         <h1 className="text-lg font-semibold">Your visit</h1>
         <div className="surface-card space-y-2 bg-bg-surface p-4">
-          <p className="text-sm text-text-secondary">
-            Host: <strong>{d.hostInfo.name ?? "—"}</strong>
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-text-secondary">
+              Host: <strong>{d.hostInfo.name ?? "—"}</strong>
+            </p>
+            <HelpTip text="The designated sponsor hosting your campus visit." />
+          </div>
           <p className="text-sm text-text-secondary">
             Purpose: {d.visitDetails.purpose ?? "—"}
           </p>
-          <p className="text-sm text-text-secondary">
-            Status: {state === "ACTIVE" ? "Checked in" : "Completed"}
-            {d.approvalStatus.checkedInAt && (
-              <span className="ml-2 inline-flex items-center gap-1 text-xs text-text-muted">
-                <Clock className="size-3.5" />
-                {new Date(d.approvalStatus.checkedInAt).toLocaleString()}
-              </span>
-            )}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-text-secondary">
+              Status: {state === "ACTIVE" ? "Checked in" : "Completed"}
+              {d.approvalStatus.checkedInAt && (
+                <span className="ml-2 inline-flex items-center gap-1 text-xs text-text-muted">
+                  <Clock className="size-3.5" />
+                  {new Date(d.approvalStatus.checkedInAt).toLocaleString()}
+                </span>
+              )}
+            </p>
+            <HelpTip text="Checked In indicates you are physically recorded inside the gate perimeter." />
+          </div>
         </div>
         <button
           onClick={act}

@@ -11,11 +11,12 @@ export default function DataManagementHubPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor data for campus operations."
-        contextLabel="Data"
-        statusSummary="Review current data state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Data Governance & Disaster Recovery"
+        purpose="Manage data retention policies, automated database snapshots, disaster recovery protocols, and archive lifecycle."
+        statusSummary="Automated PostgreSQL snapshot policies active with encrypted retention enforcement and verification tooling."
+        why="Robust data management ensures disaster recovery readiness and enforces regulatory data retention limits across all records."
+        primaryAction={{ label: "Backup Status", href: "/sysadmin/backup" }}
+        secondaryAction={{ label: "Database Health", href: "/sysadmin/database-health" }}
       />
       <div>
         <p className="text-2xl font-bold tracking-tight text-text-primary">Data Governance & Backups</p>

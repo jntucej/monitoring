@@ -81,6 +81,7 @@ function FacultyNotificationsInner() {
       <ContextSituationBar
         roleLabel="Faculty · Alerts"
         purpose="Stay updated on institutional broadcasts, approval notices, and schedule updates."
+        why="Institutional notices convey critical changes in academic dates, exam coordination, and campus safety advisories."
         contextLabel="Notification Inbox"
         statusTone={announcements.length > 0 ? "info" : "ok"}
         statusPill={`${announcements.length} updates`}

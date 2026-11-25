@@ -102,6 +102,7 @@ function DeputyWardenGatemovementInner() {
       <ContextSituationBar
         roleLabel="Deputy Warden"
         purpose="Monitor live campus gate movements, track entry/exit throughput, and identify perimeter anomalies"
+        why="Tracking live entry and exit traffic highlights abnormal perimeter behavior and curfew violations in real time."
         contextLabel={`Gate Movement & Presence · ${onCampusTotal} Inside`}
         statusSummary={`${onCampusTotal} person(s) currently on campus across ${gates.length} reporting gate(s).`}
         severity="info"

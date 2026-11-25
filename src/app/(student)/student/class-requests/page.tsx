@@ -115,6 +115,7 @@ export default function StudentClassRequestsPage() {
               : "No requests"
         }
         statusSummary="Raise academic or classroom issues that automatically route to your class representative and faculty."
+        why="Category selections dictate automatic routing to your HOD, lab in-charge, or CR to resolve batch-wide issues."
         primaryAction={{ label: "Coordinator Portal", href: "/student/coordinator" }}
         secondaryAction={{ label: "General Complaints", href: "/student/complaints" }}
       />

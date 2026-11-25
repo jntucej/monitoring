@@ -84,6 +84,7 @@ function AdminSubjectsInner() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Subject catalog across departments (read-only)"
+        why="Use this view to audit subject data before running a bulk academic data migration."
         contextLabel="Subject catalog across departments (read-only)"
         statusSummary="Review current subject catalog across departments (read-only) state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

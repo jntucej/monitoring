@@ -88,6 +88,7 @@ function ExamBranchCalendarInner() {
       <ContextSituationBar
         roleLabel="Exam Branch"
         purpose="Review institutional academic schedules, examination sessions, and hall booking calendars."
+        why="Tracking exam dates and session timetables prevents hall scheduling overlaps and facilitates logistics coordination."
         contextLabel="Exam Calendar"
         statusTone="info"
         statusPill={`${events.length} sessions`}

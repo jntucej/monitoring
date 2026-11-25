@@ -93,6 +93,7 @@ export default function PrincipalGateDetailPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Detailed operational audit and guard coverage inspection for this specific campus portal"
+        why="Inspecting specific gate telemetry verifies turnstile hardware reliability, scanner latency, and guard staffing integrity."
         contextLabel={gate ? `Portal Telemetry · ${gate.gateName || gate.gateCode}` : "Portal Telemetry"}
         statusSummary={gate ? `Status: ${gate.status || "Operational"} · Scans today: ${gate.scansToday ?? "Normal"} · Guard coverage active.` : "Loading portal telemetry..."}
         primaryAction={{ label: "All Campus Gates", href: "/principal/operations/gates" }}

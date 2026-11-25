@@ -10,6 +10,7 @@ export default function HodPendingPage() {
       <ContextSituationBar
         roleLabel="Head of Department"
         purpose="Review and adjudicate pending student permissions and department requests."
+        why="Adjudicating pending department approvals prevents student schedule blockers and enforces academic gate requirements."
         contextLabel="Pending Approvals"
         statusTone="info"
         statusSummary="Evaluate student leave, pass, and permission requests waiting for HOD approval."

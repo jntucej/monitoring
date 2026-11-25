@@ -77,6 +77,7 @@ function AdminFacultyDetail() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Class assignments and attendance summary"
+        why="Edit fields here to correct academic records; changes are logged and visible to HOD and OIE."
         contextLabel="Class assignments and attendance summary"
         statusSummary="Review current class assignments and attendance summary state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

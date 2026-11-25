@@ -28,6 +28,7 @@ export default function PrincipalAssignmentTreePage() {
         <ContextSituationBar
           roleLabel="Principal"
           purpose="Visualize and manage institutional reporting hierarchy, academic departments, and hostel allocations"
+          why="Visualizing reporting structures ensures clear leadership hierarchy, mentor assignments, and departmental accountability."
           contextLabel="Institutional Hierarchy Tree"
           statusSummary="Interactive hierarchy connecting governance roles, academic departments, hostel wings, and students."
           primaryAction={{ label: "People Directory", href: "/principal/people" }}

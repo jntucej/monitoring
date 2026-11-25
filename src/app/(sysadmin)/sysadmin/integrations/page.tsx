@@ -13,6 +13,7 @@ export default function IntegrationsPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor integrations for campus operations."
+        why="Disconnecting an integration here stops the corresponding background jobs until reconnected."
         contextLabel="Integrations"
         statusSummary="Review current integrations state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

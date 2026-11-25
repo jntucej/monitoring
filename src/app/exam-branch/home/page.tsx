@@ -28,6 +28,7 @@ export default function ExamBranchPage() {
           <ContextSituationBar
             roleLabel="Exam Branch"
             purpose="Coordinate exam hall clearances, prepare OIE submissions, and track candidate passes."
+            why="Daily exam operations oversight ensures candidate verification, desk coverage, and OIE submissions remain synchronized."
             contextLabel="Today Overview"
             statusTone="info"
             statusSummary="Monitor daily examination desk metrics, candidate queues, and verification logs."

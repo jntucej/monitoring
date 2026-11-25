@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { UserCheck, FileText, History, MapPin, ArrowRight } from "lucide-react";
+import { UserCheck, FileText, History, MapPin, ArrowRight, HelpCircle } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
+import { HelpTip } from "@/components/ui/help-tip";
 import type { VisitorsMineResponse } from "./types";
 
 // 1.8 — status home: shows the visitor's live visit state + check-in/out CTA,
@@ -56,16 +57,19 @@ export default function VisitorLandingPage() {
           <PageLoading />
         ) : (
           <div className="surface-card bg-bg-surface p-4 space-y-3">
-            <div className="text-sm text-text-secondary">
-              Status: <strong>{state ?? "No visit"}</strong>
-              {host && <> · Host: <strong>{host}</strong></>}
-              {purpose && <> · {purpose}</>}
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-text-secondary">
+                Status: <strong>{state ?? "No visit"}</strong>
+                {host && <> · Host: <strong>{host}</strong></>}
+                {purpose && <> · {purpose}</>}
+              </div>
+              <HelpTip text="Security guards verify this active clearance before permitting entry or exit." />
             </div>
             <Link
               href="/visitor/visit"
-              className="surface-card flex items-center justify-between bg-action-primary px-4 py-2.5 text-sm font-semibold text-white"
+              className="surface-card flex items-center justify-between bg-action-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
             >
-              {state === "ACTIVE" ? "Check out" : "Check in"}
+              <span>{state === "ACTIVE" ? "Check out from campus" : "Check in at gate"}</span>
               <MapPin className="w-4 h-4" />
             </Link>
           </div>

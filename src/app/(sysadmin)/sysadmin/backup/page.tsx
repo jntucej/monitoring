@@ -69,11 +69,12 @@ function BackupReinforcedInner() {
     <div className="space-y-6 max-w-7xl mx-auto min-w-0">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor backup for campus operations."
-        contextLabel="Backup"
-        statusSummary="Review current backup state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Disaster Recovery & Backups"
+        purpose="Verify database snapshot freshness, run on-demand database dumps, and validate backup recovery archives."
+        statusSummary={`${d?.daily?.length ?? 0} daily and ${d?.weekly?.length ?? 0} weekly snapshot archives verified on disk; latest backup age ${d?.lastBackupAgeHours != null ? d.lastBackupAgeHours + "h" : "unknown"}.`}
+        why="Regularly verified database backups guarantee zero data loss and enable rapid recovery in case of volume or database failure."
+        primaryAction={{ label: "Database Health", href: "/sysadmin/database-health" }}
+        secondaryAction={{ label: "Data Governance", href: "/sysadmin/data" }}
       />
       <div>
         <p className="text-2xl font-bold text-text-primary flex items-center gap-2">

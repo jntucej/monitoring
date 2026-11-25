@@ -203,6 +203,7 @@ export default function SupervisorTodayPage() {
           purpose="Coordinate campus gate operations, active security shifts, and perimeter incident response"
           contextLabel="Supervisor Command Center"
           statusSummary={escalationsOpen > 0 || incidentsOpen > 0 ? `${escalationsOpen} escalations and ${incidentsOpen} incidents requiring supervisor attention.` : "All supervised gates active and shift coverage operational."}
+          why="Supervisors maintain overall campus perimeter safety by resolving frontline guard escalations and tracking shift handovers."
           severity={incidentsOpen > 0 ? "critical" : escalationsOpen > 0 ? "warn" : "ok"}
           primaryAction={{ label: "Live Gate Desk", href: "/supervisor/gates/live" }}
           secondaryAction={{ label: "Shift Handover", href: "/supervisor/shift/handover" }}

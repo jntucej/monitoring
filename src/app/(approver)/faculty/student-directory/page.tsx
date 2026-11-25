@@ -82,6 +82,7 @@ function FacultyStudentDirectoryInner() {
       <ContextSituationBar
         roleLabel="Faculty · Students"
         purpose="Search and inspect student academic standings, contact records, and roll details."
+        why="Student lookups provide verified roll numbers, mentor mappings, and academic standing history."
         contextLabel="Student Directory"
         statusTone="info"
         statusPill={`${students.length} students`}

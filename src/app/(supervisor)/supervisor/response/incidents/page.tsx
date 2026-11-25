@@ -15,6 +15,7 @@ export default function IncidentsPage() {
         purpose="Investigate and record security incidents, unauthorized perimeter crossings, and contraband alerts"
         contextLabel="Security Incident Center"
         statusSummary="Active register of campus perimeter violations, security breaches, and emergency response actions."
+        why="Logging and responding to active incidents triggers containment protocols and alerts executive security personnel."
         severity="critical"
         primaryAction={{ label: "Escalations Desk", href: "/supervisor/response/escalations" }}
         secondaryAction={{ label: "Live Gates", href: "/supervisor/gates/live" }}

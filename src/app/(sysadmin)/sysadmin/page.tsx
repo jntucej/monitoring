@@ -102,6 +102,7 @@ function CommandCenterSkeleton() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Live operational state"
+        why="Treat this as the first page to check when anything on campus stops working as expected."
         contextLabel="Live operational state"
         statusSummary="Review current live operational state state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

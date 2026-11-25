@@ -83,11 +83,12 @@ function AlertsInner() {
     <div className="space-y-4 min-w-0">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Live feed, rule heat, and severity KPIs for the alerts domain"
-        contextLabel="Live feed, rule heat, and severity KPIs for the alerts domain"
-        statusSummary="Review current live feed, rule heat, and severity kpis for the alerts domain state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Live Alert Stream"
+        purpose="Monitor live incoming security, gateway, and operational events, triage severity anomalies, and dispatch on-call responses."
+        statusSummary={`${data?.open?.critical ?? 0} critical and ${data?.open?.high ?? 0} high-severity alerts currently open across real-time system monitoring feeds.`}
+        why="Instant visibility into operational and security telemetry allows rapid containment of campus infrastructure and gate failure events."
+        primaryAction={{ label: "Alert Rules", href: "/sysadmin/alerts/rules" }}
+        secondaryAction={{ label: "Application Health", href: "/sysadmin/application-health" }}
       />
       <PageHeader
         title="Alerts"

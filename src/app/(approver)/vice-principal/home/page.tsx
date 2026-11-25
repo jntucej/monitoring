@@ -174,6 +174,7 @@ export default function VPTodayPage() {
         <ContextSituationBar
           roleLabel="Vice Principal"
           purpose="Executive cockpit for campus operations, academic departments, examinations, and urgent approvals"
+          why="The VP command center centralizes urgent academic escalations, gate pass reviews, and departmental pulse indicators."
           contextLabel="Vice Principal Command Center"
           statusSummary={(d?.counts.escalated ?? 0) > 0 ? `${d?.counts.escalated} escalated approvals and ${pending} total requests awaiting action.` : `${pending} approval requests in queue. Exam day state: ${d?.counts.examDayState ?? "normal"}.`}
           severity={(d?.counts.escalated ?? 0) > 0 ? "warn" : "ok"}

@@ -12,11 +12,12 @@ export default function SysAdminAnnouncementsPage() {
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Publish, schedule, and manage campus-wide notices"
-        contextLabel="Publish, schedule, and manage campus-wide notices"
-        statusSummary="Review current publish, schedule, and manage campus-wide notices state and take action below."
+        contextLabel="Campus Announcements Desk"
+        purpose="Draft, schedule, and broadcast official campus-wide advisories across student feeds, staff consoles, and gate displays."
+        statusSummary="Broadcast pipeline operational for general student notices, emergency alerts, and gate operational bulletins."
+        why="Centralized announcements broadcast urgent curfew changes, safety advisories, and facility alerts to all stakeholders in real time."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        secondaryAction={{ label: "Telegram Bot", href: "/sysadmin/bot" }}
       />
         <PageHeader
           title="Campus Announcements"

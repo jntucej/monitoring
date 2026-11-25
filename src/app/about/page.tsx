@@ -9,6 +9,8 @@ import {
   BookOpen,
   Building2,
   Users,
+  ShieldCheck,
+  ExternalLink,
 } from "lucide-react";
 import { COLLEGE } from "@/lib/college-config";
 import {
@@ -17,6 +19,7 @@ import {
   organizationJsonLd,
 } from "@/lib/seo";
 import { EmailLink, PhoneLink } from "@/components/shared/ContactLink";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "About the Campus Portal",
@@ -58,10 +61,23 @@ export default function AboutPage() {
       />
       <Link
         href="/"
-        className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-action-primary"
+        className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-action-primary transition-colors"
       >
         <ArrowLeft className="h-4 w-4" /> Back to home
       </Link>
+
+      <div className="mt-4 mb-6">
+        <ContextSituationBar
+          roleLabel="Campus Community & Visitors"
+          purpose="Institutional accreditation, degree programmes, campus overview, and access portal mission."
+          contextLabel="About the Portal"
+          statusTone="ok"
+          statusPill="Autonomous · NAAC A+"
+          statusSummary={`Official gate monitoring and digital access gateway for ${COLLEGE.officialName}.`}
+          primaryAction={{ label: "Campus Life", href: "/campus" }}
+          secondaryAction={{ label: "Visitor Portal", href: "/visitor" }}
+        />
+      </div>
 
       <h1 className="mt-6 text-3xl font-bold md:text-4xl">
         About {COLLEGE.officialName}

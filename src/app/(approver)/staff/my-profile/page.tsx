@@ -64,6 +64,7 @@ function StaffMyProfileInner() {
       <ContextSituationBar
         roleLabel="Campus Staff"
         purpose="Manage profile information, role credentials, preferences, and security settings."
+        why="Keeping staff profiles up to date ensures correct notification routing and emergency phone contact."
         contextLabel="Staff Profile & Settings"
         statusTone="info"
         statusSummary="View your personal staff credentials, campus contact information, and role configuration."

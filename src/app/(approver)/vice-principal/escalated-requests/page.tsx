@@ -71,6 +71,7 @@ function VpEscalatedInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Review urgent requests escalated beyond normal departmental resolution thresholds"
+        why="Executive intervention on escalated requests unblocks students facing urgent extenuating circumstances or timeline constraints."
         contextLabel="Escalated Requests Queue"
         statusSummary={rows.length > 0 ? `${rows.length} urgent escalations requiring executive review.` : "All escalated items resolved."}
         severity={rows.length > 0 ? "warn" : "ok"}

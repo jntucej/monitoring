@@ -18,11 +18,12 @@ function SysadminAuditInner() {
     <div className="space-y-6 min-w-0">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor audit for campus operations."
-        contextLabel="Audit"
-        statusSummary="Review current audit state and take action below."
+        contextLabel="Security & Administrative Audit"
+        purpose="Inspect immutable chronological event logs across authentication events, role grants, configuration changes, and gate actions."
+        statusSummary="Cryptographically verified audit trail actively recording administrative mutations and perimeter security operations."
+        why="Unbreakable audit trails protect against insider tampering, substantiate disciplinary inquiries, and satisfy legal compliance mandates."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        secondaryAction={{ label: "Access Governance", href: "/sysadmin/access" }}
       />
       <div>
         <p className="text-2xl font-bold text-text-primary">Technical Audit Logs</p>

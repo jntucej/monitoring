@@ -98,6 +98,7 @@ function DeputyWardenIncidentsInner() {
       <ContextSituationBar
         roleLabel="Deputy Warden"
         purpose="Review and record hostel security incidents, track emergency alerts, and coordinate escalations"
+        why="Documenting safety incidents provides crucial audit trails and triggers timely escalation to chief wardens and security."
         contextLabel={`Incident Reporting & Safety Alerts · ${openCount} Open`}
         statusSummary={
           openCount > 0

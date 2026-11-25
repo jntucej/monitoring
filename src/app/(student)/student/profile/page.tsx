@@ -36,6 +36,7 @@ function StudentProfileInner() {
         severity="ok"
         statusPill={user?.role?.toUpperCase() ?? "STUDENT"}
         statusSummary="Verify your registered personal records, adjust theme settings, and inspect academic information."
+        why="Your profile data drives gate pass validation, curfew checks, and notifications. Keep your contact and security details current."
         primaryAction={{ label: "Account Security", href: "/student/profile-security" }}
         secondaryAction={{ label: "Digital ID Card", href: "/student/id" }}
       />

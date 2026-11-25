@@ -249,6 +249,7 @@ function ChildRequestsInner() {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Monitor and inspect pending pass and leave applications submitted by linked wards."
+        why="Keeping track of pending applications ensures parents can provide parental consent before outpass deadlines pass."
         contextLabel="Ward Request Queue"
         statusTone={rows.length > 0 ? "warn" : "ok"}
         statusPill={rows.length > 0 ? `${rows.length} Pending` : "Queue Clear"}

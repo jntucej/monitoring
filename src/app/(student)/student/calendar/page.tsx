@@ -57,6 +57,7 @@ export default function StudentCalendarPage() {
         contextLabel="Schedule & Events"
         statusPill={`${layers.length} active layers`}
         statusSummary="Consolidated campus calendar showing classes, exam dates, pass windows, and extracurricular events."
+        why="Toggle layer filters to declutter your schedule or tap individual dates to view period details and event RSVPs."
         primaryAction={{ label: "Attendance Calendar", href: "/student/attendance-calendar" }}
         secondaryAction={{ label: "My Events", href: "/student/my-events" }}
       />

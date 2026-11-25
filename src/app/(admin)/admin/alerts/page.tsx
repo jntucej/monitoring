@@ -218,10 +218,17 @@ function AdminAlertsInner() {
     <div className="space-y-6">
       <ContextSituationBar
         roleLabel="Campus Admin"
-        purpose="Manage and monitor alerts for campus operations."
-        contextLabel="Alerts"
-        statusSummary="Review current alerts state and take action below."
-        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        purpose="Triage real-time campus perimeter, attendance, hardware, and curfew security incidents across all gates."
+        contextLabel="Alert Center"
+        why="Investigating security and operational alerts promptly maintains perimeter integrity and safeguards campus safety protocols."
+        statusTone={alerts.some((a) => !a.resolved && a.severity === "critical") ? "critical" : alerts.some((a) => !a.resolved) ? "warn" : "ok"}
+        statusPill={`${alerts.filter((a) => !a.resolved).length} unresolved`}
+        statusSummary={
+          alerts.filter((a) => !a.resolved).length > 0
+            ? `${alerts.filter((a) => !a.resolved).length} active alert${alerts.filter((a) => !a.resolved).length === 1 ? "" : "s"} requiring resolution or monitoring.`
+            : "All operational and perimeter alerts are currently resolved."
+        }
+        primaryAction={{ label: "Exceptions Log", href: "/admin/exceptions" }}
         secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
       />
       <div className="flex items-center justify-between">

@@ -169,6 +169,7 @@ function VpHostelSecurityInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Institutional oversight of hostel curfews, warden night reports, and campus security logs"
+        why="Supervising residential security and curfew reports protects student welfare and prevents repeat perimeter breaches."
         contextLabel="Hostel & Security Overview"
         statusSummary="Review residential hostel occupancy, curfew adherence rates, and overnight security escalations."
         primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}

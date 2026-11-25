@@ -90,6 +90,7 @@ function SecurityReinforcedInner() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Zero-trust posture: identity, keys, sessions and service health"
+        why="This page is the first place to check when a security incident is suspected on the portal."
         contextLabel="Zero-trust posture: identity, keys, sessions and service health"
         statusSummary="Review current zero-trust posture: identity, keys, sessions and service health state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

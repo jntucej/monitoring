@@ -61,11 +61,12 @@ function ApplicationHealthInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 sm:py-6 min-w-0">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor application health for campus operations."
-        contextLabel="Application Health"
-        statusSummary="Review current application health state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Application Health & Latency"
+        purpose="Monitor real-time application throughput, request latencies, active user sessions, and service response health."
+        statusSummary={`${data?.data?.status ?? "System"} operational with ${data?.data?.metrics?.requestsPerMinute ?? 0} rpm and ${data?.data?.metrics?.errorRate ?? 0}% error rate.`}
+        why="Tracking runtime latency and API failure rates detects performance degradation before it impacts gate turnaround times."
+        primaryAction={{ label: "Database Health", href: "/sysadmin/database-health" }}
+        secondaryAction={{ label: "Docker Services", href: "/sysadmin/docker-services" }}
       />
       <div>
         <p className="text-2xl font-bold text-text-primary flex items-center gap-2">

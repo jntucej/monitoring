@@ -86,6 +86,7 @@ export default function SysAdminReportsPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Generate and download campus reports"
+        why="Reports generated here reflect the live database state at generation time, not a snapshot."
         contextLabel="Generate and download campus reports"
         statusSummary="Review current generate and download campus reports state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

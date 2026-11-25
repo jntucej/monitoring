@@ -16,6 +16,7 @@ function StaffLeavesInner() {
       <ContextSituationBar
         roleLabel="Campus Staff"
         purpose="Submit, approve, or track teaching and non-teaching staff leave applications."
+        why="Formal leave applications ensure administrative staffing cover and maintain institutional attendance compliance."
         contextLabel="Leave Permission Management"
         statusTone="info"
         statusSummary="Manage staff leave submissions, track multi-level approvals, and review leave records."

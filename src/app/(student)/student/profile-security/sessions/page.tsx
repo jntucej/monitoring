@@ -51,6 +51,7 @@ export default function SessionsPage() {
             ? `You are signed in on ${rows.length} device${rows.length === 1 ? "" : "s"}. Sign out unfamiliar sessions.`
             : "No active device sessions detected."
         }
+        why="Terminating unrecognized sessions revokes cached portal tokens on those devices and requires re-authentication."
         primaryAction={{ label: "Profile & Security", href: "/student/profile-security" }}
         secondaryAction={{ label: "Student Home", href: "/student" }}
       />

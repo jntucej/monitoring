@@ -34,6 +34,7 @@ export default function HostelTicketsAdminPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor hostel tickets for campus operations."
+        why="Ticket resolution times here feed the hostel performance report for the vice-principal."
         contextLabel="Hostel Tickets"
         statusSummary="Review current hostel tickets state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

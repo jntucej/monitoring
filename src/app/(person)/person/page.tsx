@@ -8,7 +8,8 @@ import { ActivePasses } from "@/components/student/ActivePasses";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 
-import { QrCode, FileCheck, Clock, User } from "lucide-react";
+import { QrCode, FileCheck, Clock, User, ShieldCheck } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 function PersonDashboardInner() {
   const searchParams = useSearchParams();
@@ -65,6 +66,33 @@ function PersonDashboardInner() {
   return (
     <div className="space-y-6 pb-12">
       {/* Dynamic Tab Heading */}
+      <ContextSituationBar
+        roleLabel="Campus Member"
+        purpose="Access digital identity card, monitor gate pass approvals, and inspect entrance telemetry."
+        contextLabel={
+          currentTab === "idcard"
+            ? "Digital Campus Pass"
+            : currentTab === "passes"
+              ? "Pass Requests Desk"
+              : currentTab === "history"
+                ? "Entrance History"
+                : "Account Center"
+        }
+        statusTone="ok"
+        statusPill="Active Pass"
+        statusSummary={
+          currentTab === "idcard"
+            ? "Your dynamic cryptographic QR code refreshes every 60 seconds to prevent spoofing at turnstiles."
+            : currentTab === "passes"
+              ? "Review pass request approvals from wardens, faculty, and security personnel."
+              : currentTab === "history"
+                ? "Full immutable timeline of your campus turnstile and gate check-in/outs."
+                : "Manage account metadata, login preferences, and personal details."
+        }
+        primaryAction={{ label: "Campus Life", href: "/campus" }}
+        secondaryAction={{ label: "Settings", href: "/settings" }}
+      />
+
       <div className="surface-card text-center sm:text-left pb-4 space-y-1">
         <p className="text-2xl font-extrabold tracking-tight text-text-primary">
           {currentTab === "idcard" && "Campus Pass Hub"}

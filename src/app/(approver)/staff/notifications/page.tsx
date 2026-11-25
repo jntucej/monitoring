@@ -80,6 +80,7 @@ function StaffNotificationsInner() {
       <ContextSituationBar
         roleLabel="Campus Staff"
         purpose="Receive operational notices, approval stage alerts, and system broadcasts."
+        why="System notifications alert staff to shift changes, new task assignments, and time-critical institutional advisories."
         contextLabel="Alerts & Notices"
         statusTone={notifs.some((n) => !n.read) ? "warn" : "info"}
         statusPill={`${notifs.length} Total`}

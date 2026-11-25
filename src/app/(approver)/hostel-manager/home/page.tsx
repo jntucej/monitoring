@@ -29,6 +29,7 @@ return (
           <ContextSituationBar
             roleLabel="Hostel Manager"
             purpose="Oversee hostel facilities, manage room allocations, and direct housekeeping operations"
+            why="Central operational oversight maintains clean, functional residential blocks and rapid incident triage."
             contextLabel="Hostel Operations & Allocation Dashboard"
             statusSummary="Track block occupancy, monitor resident maintenance tickets, and coordinate daily facilities workflow."
             severity="info"

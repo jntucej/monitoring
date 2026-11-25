@@ -10,8 +10,9 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import { Loader2, UserCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { Loader2, UserCheck, AlertTriangle, ArrowRight, ShieldCheck, HelpCircle } from "lucide-react";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { HelpTip } from "@/components/ui/help-tip";
 
 /* response shapes */
 
@@ -131,6 +132,7 @@ function VisitorRegistrationInner() {
             <div className="flex items-center gap-2 min-w-0">
               <UserCheck className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Your registration</span>
+              <HelpTip text="Registration records are maintained in compliance with campus security regulations." />
             </div>
             <span className="text-xs text-text-muted shrink-0">
               {data?.data?.logs?.length ?? 0} visit(s) on record
@@ -144,23 +146,35 @@ function VisitorRegistrationInner() {
             <div className="p-4 min-w-0 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Name</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-text-muted uppercase tracking-wide">Name</p>
+                    <HelpTip text="Official full name associated with your identity ID." />
+                  </div>
                   <p className="mt-1 text-base font-semibold text-text-primary">
                     {reg?.name ?? (user?.name ?? "—")}
                   </p>
                 </div>
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Visitor ID</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-text-muted uppercase tracking-wide">Visitor ID</p>
+                    <HelpTip text="Unique identifier scanned at gate barriers." />
+                  </div>
                   <p className="mt-1 text-base font-mono text-action-info">
                     {reg?.uniqueId ?? (user?.id?.slice(0, 8) ?? "—")}
                   </p>
                 </div>
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Account</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-text-muted uppercase tracking-wide">Account</p>
+                    <HelpTip text="Indicates active permission to be granted campus entry." />
+                  </div>
                   <p className="mt-1 text-base font-bold text-action-success">{reg?.status ?? "—"}</p>
                 </div>
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Role</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-text-muted uppercase tracking-wide">Role</p>
+                    <HelpTip text="Assigned clearance tier in the gate access control matrix." />
+                  </div>
                   <p className="mt-1 text-base font-bold text-action-warning">{reg?.role ?? "visitor"}</p>
                 </div>
               </div>

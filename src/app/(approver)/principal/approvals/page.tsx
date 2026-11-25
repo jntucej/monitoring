@@ -13,6 +13,7 @@ export default function PrincipalApprovalsPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Highest-level authority for campus leaves, institutional permissions, and security overrides"
+        why="Principal approval is required for institutional leaves, external activities, and high-tier security overrides across campus."
         contextLabel="Institutional Approvals Register"
         statusSummary="Review, approve, or delegate pending student leave, gate pass, and event permission tickets."
         primaryAction={{ label: "Attention Queue", href: "/principal/attention" }}

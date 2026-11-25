@@ -139,6 +139,7 @@ function VisitScheduleInner() {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Plan and coordinate campus visits around institutional events, holidays, and deadlines."
+        why="Checking institutional event dates and holiday schedules prevents traveling during closed campus periods."
         contextLabel="Campus Calendar & Visits"
         statusTone="info"
         statusPill={`${events.length} Event${events.length === 1 ? "" : "s"}`}

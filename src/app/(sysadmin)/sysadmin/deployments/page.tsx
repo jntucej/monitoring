@@ -15,11 +15,12 @@ export default function DeploymentsPage() {
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor deployments for campus operations."
-        contextLabel="Deployments"
-        statusSummary="Review current deployments state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Deployment Telemetry & Release History"
+        purpose="Track release pipeline history, inspect automated health gates, measure lead times, and monitor active container commits."
+        statusSummary="Deployment history and release gate metrics streaming live from container automation logs."
+        why="Auditing release versions and automated health gates ensures rapid rollback capability when faulty builds reach production."
+        primaryAction={{ label: "Docker Services", href: "/sysadmin/docker-services" }}
+        secondaryAction={{ label: "Autonomous Monitoring", href: "/sysadmin/autonomous" }}
       />
         <div className="flex items-center gap-2">
           <GitBranch className="w-5 h-5 text-action-primary" />

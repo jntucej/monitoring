@@ -170,6 +170,7 @@ function ScanPageInner() {
         purpose="Scan and validate student meal QR tokens at the dining counter, verify diet preference, and record meal delivery"
         contextLabel="Live Token Validation & Serving"
         statusSummary="Scan student QR tokens or enter code manually to verify meal entitlement (Veg / Non-Veg) and log servings."
+        why="Scanning tokens instantly authenticates student dining eligibility, confirms meal selections, and prevents double serving."
         severity="info"
         primaryAction={{ label: "Daily Meal Counts", href: "/mess/daily-meal-counts" }}
         secondaryActions={[

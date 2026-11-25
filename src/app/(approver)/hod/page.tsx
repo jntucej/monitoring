@@ -9,6 +9,7 @@ export default function PendingApprovalsPage() {
       <ContextSituationBar
         roleLabel="Head of Department"
         purpose="Review and adjudicate pending student permissions and department requests."
+        why="HOD endorsement is required for multi-day leaves, academic exemptions, and external project permissions."
         contextLabel="Pending Approvals"
         statusTone="info"
         statusSummary="Evaluate student leave, pass, and permission requests waiting for HOD approval."

@@ -117,6 +117,7 @@ function StudentAttendanceCalendarInner() {
             ? `Current month shows ${summary.present} days present and ${summary.absent} absences across ${summary.total} marked days.`
             : "Reviewing daily attendance stamps and campus gate records."
         }
+        why="Click on any marked date in the calendar below to see detailed in/out timestamps, check status, or report attendance discrepancies."
         primaryAction={{ label: "Attendance Summary", href: "/student/attendance" }}
         secondaryAction={{ label: "Gate Scan Log", href: "/student/history" }}
       />

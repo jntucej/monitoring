@@ -73,6 +73,7 @@ function SysadminExamDayInner() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Clearance desk + candidate attendance for exam-day gate access"
+        why="Exam-day rules here override normal curfew and gate hours for the duration of the examination window."
         contextLabel="Clearance desk + candidate attendance for exam-day gate access"
         statusSummary="Review current clearance desk + candidate attendance for exam-day gate access state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

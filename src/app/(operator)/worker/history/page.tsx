@@ -14,6 +14,7 @@ export default function WorkerHistoryPage() {
           contextLabel="Operator History"
           statusTone="info"
           statusSummary="Browse historical task completions, verify resolved work orders, or return to active duties."
+          why="Past service logs provide proof of job completion, resolution timestamps, and verification for shift auditing."
           primaryAction={{ label: "Today's Dashboard", href: "/worker" }}
           secondaryAction={{ label: "Active Work Orders", href: "/worker/work-orders" }}
         />

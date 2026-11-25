@@ -60,6 +60,7 @@ function FacultyClassIndexInner() {
       <ContextSituationBar
         roleLabel="Faculty · Classes"
         purpose="Navigate assigned class sections and view capacity and subject associations."
+        why="Selecting a specific section lets you inspect enrolled students, subject timetables, and section statistics."
         contextLabel={role === "class_teacher" ? "Taught Classes" : "All Assigned Classes"}
         statusTone="info"
         statusPill={`${classes.length} classes`}

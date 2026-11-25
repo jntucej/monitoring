@@ -108,6 +108,7 @@ function AdminParentsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor parents & guardians for campus operations."
+        why="Unlinking a parent here immediately removes their live movement visibility for that student."
         contextLabel="Parents & Guardians"
         statusSummary="Review current parents & guardians state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

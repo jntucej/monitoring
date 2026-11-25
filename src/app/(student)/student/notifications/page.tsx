@@ -205,6 +205,7 @@ function Inner() {
               ? `You have ${all.length} total notifications across alerts and announcements.`
               : "All caught up! No unread notifications or announcements."
         }
+        why="Priority alerts relate to curfew deadlines or gate passes, while announcements broadcast department circulars and campus events."
         primaryAction={{ label: "Curfew & Alerts", href: "/student/notifications/alerts" }}
         secondaryAction={{ label: "Announcements", href: "/student/notifications/announcements" }}
       />

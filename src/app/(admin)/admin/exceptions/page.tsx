@@ -121,6 +121,7 @@ function AdminExceptionsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Today's flagged, denied, manual, and corrected gate scans across every gate"
+        why="Decisions you make here update student statuses and gate logs in real time."
         contextLabel="Today's flagged, denied, manual, and corrected gate scans across every gate"
         statusSummary="Review current today's flagged, denied, manual, and corrected gate scans across every gate state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

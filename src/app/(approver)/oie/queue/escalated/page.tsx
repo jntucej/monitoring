@@ -17,6 +17,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Address escalated exam-day exceptions and urgent verification hold-ups."
+        why="Escalated clearance tickets involve identity flags, attendance shortages, or payment holds that require OIE adjudication."
         contextLabel="Escalated Exam Queue"
         statusTone="warn"
         statusSummary="Resolve escalated clearance requests requiring executive OIE intervention."

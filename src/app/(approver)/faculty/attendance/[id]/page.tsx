@@ -82,6 +82,7 @@ function ClassAttendanceInner() {
       <ContextSituationBar
         roleLabel="Faculty · Attendance"
         purpose="Monitor class presence rates and daily check-in counts for assigned students."
+        why="Tracking daily roll call preserves reliable attendance benchmarks and flags students nearing low-attendance debarment."
         contextLabel={details ? `Year ${details.year} · ${details.section}` : "Class Attendance"}
         statusTone={rate < 75 ? "warn" : "ok"}
         statusPill={`${rate}% attendance`}

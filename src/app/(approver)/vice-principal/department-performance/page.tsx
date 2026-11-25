@@ -73,6 +73,7 @@ function VpDepartmentPerformanceInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Cross-departmental academic performance monitoring, attendance rates, and KPI evaluation"
+        why="Comparative departmental radar analytics identify underperforming programs and highlight best practices across faculties."
         contextLabel="Department Performance Radar"
         statusSummary="Evaluate academic metrics, department attendance benchmarks, and faculty workload distributions."
         primaryAction={{ label: "Academic Departments", href: "/vice-principal/academics/departments" }}

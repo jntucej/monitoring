@@ -182,6 +182,7 @@ function DeputyWardenDecisionHistoryInner() {
       <ContextSituationBar
         roleLabel="Deputy Warden"
         purpose="Audit past approval decisions, track decision latency, and review resolved hostel permissions"
+        why="Auditing past outcomes verifies SLA compliance, tracks denial reasons, and aids accountability across shifts."
         contextLabel={`Decision Audit Log · ${decidedCount} Decided`}
         statusSummary={`${decidedCount} decision${decidedCount === 1 ? "" : "s"} logged (${approvedCount} approved, ${rejectedCount} rejected/escalated).`}
         severity="info"

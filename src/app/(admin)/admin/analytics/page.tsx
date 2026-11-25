@@ -210,10 +210,17 @@ function AdminAnalyticsInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
       <ContextSituationBar
         roleLabel="Campus Admin"
-        purpose="Manage and monitor campus analytics for campus operations."
+        purpose="Analyze campus entry/exit traffic volume, peak occupancy periods, and department activity trends."
         contextLabel="Campus Analytics"
-        statusSummary="Review current campus analytics state and take action below."
-        primaryAction={{ label: "Admin Overview", href: "/admin" }}
+        why="Evaluating aggregate transit volume and peak occupancy hours informs security staffing and campus facility planning."
+        statusTone="info"
+        statusPill={`${range}d window`}
+        statusSummary={
+          data
+            ? `${data.daily.reduce((sum, d) => sum + d.entries, 0).toLocaleString()} entries and ${data.daily.reduce((sum, d) => sum + d.exits, 0).toLocaleString()} exits recorded over the last ${range} days.`
+            : "Aggregating daily gate turnstile movements and occupancy metrics."
+        }
+        primaryAction={{ label: "Traffic Breakdown", href: "/admin/analytics/traffic" }}
         secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
       />
       <PageHeader

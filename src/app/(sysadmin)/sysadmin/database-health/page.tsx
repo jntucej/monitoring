@@ -43,11 +43,12 @@ function DatabaseHealthInner() {
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor database health for campus operations."
-        contextLabel="Database Health"
-        statusSummary="Review current database health state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="PostgreSQL Database Telemetry"
+        purpose="Inspect database latency, active connection pool utilization, cache hit ratio, and slow-running queries."
+        statusSummary={`${data?.data?.status ?? "Database"} status with latency ${data?.data?.latencyMs != null ? data.data.latencyMs + "ms" : "optimal"} and cache hit ratio ${data?.data?.cacheHitRatio != null ? data.data.cacheHitRatio + "%" : "healthy"}.`}
+        why="PostgreSQL database responsiveness is essential for real-time turnstile validation, pass issuance, and audit record writes."
+        primaryAction={{ label: "Backup Status", href: "/sysadmin/backup" }}
+        secondaryAction={{ label: "Docker Services", href: "/sysadmin/docker-services" }}
       />
       <div>
         <p className="text-2xl font-bold text-text-primary flex items-center gap-2">

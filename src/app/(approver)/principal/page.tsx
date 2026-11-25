@@ -158,6 +158,7 @@ export default function PrincipalCommandCenter() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Institutional command plane for top-tier approvals, policy escalations, and campus governance"
+        why="Centralizing executive determinations ensures consistent enforcement of institutional policy and timely resolution of critical items."
         contextLabel="Executive Command Center"
         statusSummary={counts.escalated > 0 || counts.overdue > 0 ? `${counts.overdue} SLA breached items and ${counts.escalated} policy escalations requiring your determination.` : `${counts.pending} pending decisions across all campus workflows.`}
         severity={counts.overdue > 0 ? "critical" : counts.escalated > 0 ? "warn" : "ok"}

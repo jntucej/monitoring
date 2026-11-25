@@ -153,6 +153,7 @@ function MovementInfoInner() {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Inspect gate entry and exit timeline records for your linked wards."
+        why="Auditing gate scans lets parents verify whether their ward is safely inside campus or departed for approved leave."
         contextLabel="Authorised Gate Movement"
         statusTone="info"
         statusPill={`${wards.length} Ward${wards.length === 1 ? "" : "s"} · ${scans.length} Scan${scans.length === 1 ? "" : "s"}`}

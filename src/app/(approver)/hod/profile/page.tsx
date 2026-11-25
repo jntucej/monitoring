@@ -9,6 +9,7 @@ export default function ProfilePage() {
       <ContextSituationBar
         roleLabel="Head of Department"
         purpose="Review departmental leadership credentials, role delegations, and administrative settings."
+        why="Keeping your department head profile and signing delegations current avoids authorization delays in campus workflows."
         contextLabel="HOD Profile"
         statusTone="info"
         statusSummary="Manage your departmental administrator profile and account configurations."

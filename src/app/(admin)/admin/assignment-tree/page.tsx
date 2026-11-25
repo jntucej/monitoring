@@ -12,6 +12,7 @@ export default function AdminAssignmentTreePage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor assignment tree for campus operations."
+        why="Routing changes here affect where every leave, correction, and memo request lands for review."
         contextLabel="Assignment Tree"
         statusSummary="Review current assignment tree state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

@@ -137,6 +137,7 @@ function OperatorModeInner() {
             ? `All gates are currently in ${mode} mode. Switching mode requires confirmation.`
             : "Switch terminal operational mode or review emergency perimeter lockdown protocols."
         }
+        why="Changing operating mode alters validator constraints such as enforcing hostel curfew passes or locking barriers during maintenance."
         primaryAction={{ label: "Gate Desk", href: "/operator" }}
         secondaryAction={{ label: "Operator Announcements", href: "/operator/announcements" }}
       />

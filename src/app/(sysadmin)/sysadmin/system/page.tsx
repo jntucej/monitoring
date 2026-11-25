@@ -11,6 +11,7 @@ export default function SystemHubPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor system for campus operations."
+        why="Record the version number here before any deployment so you can reference it in incident reports."
         contextLabel="System"
         statusSummary="Review current system state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

@@ -431,6 +431,7 @@ const shift = useOperatorShiftClock();
           purpose="Live terminal for real-time QR scanning, student roll check, and directional entry/exit validation"
           contextLabel={gateName ? `Gate Desk · ${gateName}` : "Gate Desk"}
           statusSummary={gateMode === "OPEN" && !activeLockdown ? "Kiosk active and ready for barcode, roll entry, or RFID scanning." : "Scanning restricted: check active gate mode or campus lockdown status."}
+          why="Scans automatically validate active permissions and register movements. Switch to manual entry if an optical barcode is unreadable or hardware offline."
           severity={activeLockdown ? "critical" : gateMode === "MAINTENANCE" ? "warn" : "ok"}
           primaryAction={{ label: "Manual Roll Entry", onClick: () => { primeAudioOnGesture(); setManualOpen(true); } }}
           secondaryAction={{ label: "Operator Console", href: "/operator" }}

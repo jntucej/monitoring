@@ -298,6 +298,7 @@ function AccessExceptionsInner() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Adjudicate exam-day access exceptions, candidate disqualifications, and hall discrepancies."
+        why="Resolving exam access exceptions ensures legitimate candidates are not improperly blocked at exam hall gates."
         contextLabel="Access Exceptions"
         statusTone={rows.length > 0 ? "warn" : "ok"}
         statusPill={rows.length > 0 ? `${rows.length} exceptions` : "No exceptions"}

@@ -9,6 +9,7 @@ export default function StudentDirectoryPage() {
       <ContextSituationBar
         roleLabel="Head of Department"
         purpose="Search and inspect department student rosters, enrollments, and academic standing."
+        why="Inspecting student directories helps track semester progress, enrollment counts, and individual academic standings."
         contextLabel="Department Students"
         statusTone="info"
         statusSummary="Browse student records, registration statuses, and year-wise distributions."

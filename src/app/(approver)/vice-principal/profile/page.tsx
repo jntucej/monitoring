@@ -45,6 +45,7 @@ function VicePrincipalProfileInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Manage executive approver profile, contact details, and institutional notifications"
+        why="Keeping executive profile and delegation contacts updated ensures urgent escalations reach you without delay."
         contextLabel="Vice Principal Profile"
         statusSummary="View your administrative profile, role credentials, and institutional delegation settings."
         primaryAction={{ label: "Delegated Responsibilities", href: "/vice-principal/delegated-responsibilities" }}

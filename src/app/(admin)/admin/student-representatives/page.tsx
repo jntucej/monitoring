@@ -66,6 +66,7 @@ export default function RepsPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor student representatives for campus operations."
+        why="Only representatives registered here can use the escalation channel on complaint tickets."
         contextLabel="Student Representatives"
         statusSummary="Review current student representatives state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

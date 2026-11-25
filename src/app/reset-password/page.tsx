@@ -10,7 +10,11 @@ import {
   AlertCircle,
   CheckCircle2,
   KeyRound,
+  ShieldCheck,
+  Info,
 } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { HelpTip } from "@/components/ui/help-tip";
 
 type ResetState = "idle" | "submitting" | "success" | "error";
 
@@ -89,8 +93,23 @@ function ResetPasswordInner() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-bg-base p-4 sm:p-8">
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-bg-base p-4 sm:p-8 space-y-4">
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-6 h-6 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="w-full max-w-md">
+        <ContextSituationBar
+          roleLabel="Account Recovery"
+          purpose="Reset forgotten credentials using a cryptographically signed one-time security token."
+          contextLabel="Password Reset"
+          statusTone={token ? "ok" : "critical"}
+          statusPill={token ? "Token Detected" : "Missing Token"}
+          statusSummary={
+            token
+              ? "Security token verified. Enter your new password to restore access to your account."
+              : "No token was found in the link. Please use the exact link delivered by email or SMS."
+          }
+          primaryAction={{ label: "Back to Sign In", href: "/login" }}
+        />
+      </div>
       <div className="surface-card w-full max-w-md space-y-4 bg-bg-surface/80 p-6">
         <div className="flex items-center gap-2">
           <KeyRound className="h-4 w-4 text-action-success" />
@@ -114,9 +133,12 @@ function ResetPasswordInner() {
         ) : (
           <form onSubmit={submit} className="space-y-4" noValidate>
             <div className="space-y-1">
-              <label htmlFor="new-password" className="text-xs font-medium text-text-muted">
-                New password
-              </label>
+              <div className="flex items-center gap-1.5">
+                <label htmlFor="new-password" className="text-xs font-medium text-text-muted">
+                  New password
+                </label>
+                <HelpTip text="Must be at least 6 characters. Use letters, numbers, and symbols for better security." />
+              </div>
               <div className="relative">
                 <input
                   id="new-password"
@@ -142,9 +164,12 @@ function ResetPasswordInner() {
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="confirm-password" className="text-xs font-medium text-text-muted">
-                Confirm new password
-              </label>
+              <div className="flex items-center gap-1.5">
+                <label htmlFor="confirm-password" className="text-xs font-medium text-text-muted">
+                  Confirm new password
+                </label>
+                <HelpTip text="Re-enter the exact same password to confirm there are no typos." />
+              </div>
               <div className="relative">
                 <input
                   id="confirm-password"

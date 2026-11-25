@@ -267,6 +267,7 @@ function GuardianOverviewInner() {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Monitor linked student campus presence, active passes, and submit requests."
+        why="Guardian access connects parents to live campus safety status, approved outpass history, and instant leave submissions."
         contextLabel="Ward Oversight Hub"
         statusTone={pendingRows.length > 0 ? "warn" : "ok"}
         statusPill={`${wards.length} Ward${wards.length === 1 ? "" : "s"} · ${onCampus} On Campus`}

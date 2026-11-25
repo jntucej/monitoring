@@ -89,6 +89,7 @@ function VpExaminationInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Coordinate examination clearances, hall ticket permissions, and attendance eligibility"
+        why="Coordinating clearances with the Exam Branch ensures only eligible candidates receive hall tickets and entry permits."
         contextLabel="Examination Coordination Hub"
         statusSummary={pendingExam.length > 0 ? `${pendingExam.length} exam permission requests pending, ${slaAtRisk.length} at risk of SLA breach.` : "All examination clearance workflows up to date."}
         severity={slaAtRisk.length > 0 ? "warn" : "ok"}

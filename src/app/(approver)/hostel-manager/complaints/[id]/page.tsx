@@ -8,6 +8,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Hostel Manager"
         purpose="Review block-level student complaints, coordinate facilities fixes, and monitor resolution progress"
+        why="Inspecting specific complaint logs enables targeted dispatch of technicians and clear communication with students."
         contextLabel="Hostel Grievance Detail"
         statusSummary="Inspect resident complaints in your block, review staff activity notes, and ensure operational resolution."
         severity="info"

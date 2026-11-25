@@ -7,7 +7,9 @@ import { useUIStore } from "@/stores/uiStore";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LifeBuoy, Plus, Clock, Send, Loader2 } from "lucide-react";
+import { LifeBuoy, Plus, Clock, Send, Loader2, HelpCircle } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { HelpTip } from "@/components/ui/help-tip";
 
 export default function UserSupportPage() {
   const { user, token } = useAuthStore();
@@ -94,6 +96,24 @@ export default function UserSupportPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <ContextSituationBar
+        roleLabel={user?.role ? user.role.toUpperCase() : "Campus User"}
+        purpose="Report turnstile or scanner issues, track support ticket progress, and contact engineering directly."
+        contextLabel="Help Desk & Support"
+        statusTone={tickets.some((t) => t.status === "open") ? "warn" : "ok"}
+        statusPill={tickets.some((t) => t.status === "open") ? `${tickets.filter((t) => t.status === "open").length} Open Ticket(s)` : "All Resolved"}
+        statusSummary={
+          tickets.some((t) => t.status === "open")
+            ? "You have open support tickets being investigated by the administrative or gate operations team."
+            : "No active support issues. Raise a ticket or direct developer dispatch if you experience gate pass or hardware problems."
+        }
+        primaryAction={{
+          label: showModal ? "Close Form" : "Raise Ticket",
+          onClick: () => setShowModal(!showModal),
+        }}
+        secondaryAction={{ label: "Settings", href: "/settings" }}
+      />
+
       <div className="flex justify-between items-center">
         <div>
           <p className="font-medium text-text-secondary mb-3">Help & Support</p>
@@ -107,23 +127,47 @@ export default function UserSupportPage() {
       {showModal && (
         <Card className="surface-card p-4 bg-bg-elevated dark:bg-bg-elevated/40">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-action-primary" /> New Support Request</h3>
-            <div className="grid-cols-1 md:grid-cols-2 gap-4">
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className="surface-card p-2 text-sm bg-white dark:bg-bg-elevated">
-                <option value="gate_access">Gate Access Issue</option>
-                <option value="id_card">ID Card / Scanner</option>
-                <option value="pass_request">Pass Query</option>
-                <option value="system_issue">System Bug</option>
-              </select>
-              <select value={priority} onChange={(e) => setPriority(e.target.value)} className="surface-card p-2 text-sm bg-white dark:bg-bg-elevated">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-lg flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-action-primary" /> New Support Request</h3>
+              <HelpTip text="Tickets are dispatched directly to gate supervisors and administrative personnel." />
             </div>
-            <input value={subject} onChange={(e) => setSubject(e.target.value)} required className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated" placeholder="Subject" />
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated" placeholder="Explain issue..." />
-            <Button type="submit" size="sm">Submit Ticket</Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <label className="text-xs text-text-muted">Issue Category</label>
+                  <HelpTip text="Select gate access, ID scanning, pass questions, or platform bug." />
+                </div>
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated">
+                  <option value="gate_access">Gate Access Issue</option>
+                  <option value="id_card">ID Card / Scanner</option>
+                  <option value="pass_request">Pass Query</option>
+                  <option value="system_issue">System Bug</option>
+                </select>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <label className="text-xs text-text-muted">Urgency Level</label>
+                  <HelpTip text="High priority triggers faster supervisor triage." />
+                </div>
+                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated">
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-text-muted block mb-1">Subject</label>
+              <input value={subject} onChange={(e) => setSubject(e.target.value)} required className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated" placeholder="Short description of the problem" />
+            </div>
+            <div>
+              <label className="text-xs text-text-muted block mb-1">Details & Context</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} className="surface-card w-full p-2 text-sm bg-white dark:bg-bg-elevated" placeholder="Include gate number, approximate time, and what went wrong..." />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button type="submit" size="sm">Submit Ticket</Button>
+              <p className="text-xs text-text-muted">Once submitted, tickets can be monitored in your ticket history below.</p>
+            </div>
           </form>
         </Card>
       )}
@@ -157,23 +201,33 @@ export default function UserSupportPage() {
       </Card>
 
       <div className="space-y-4">
-        {tickets.map((t) => (
-          <Card key={t.id} className="surface-card p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="surface-card font-bold text-xs bg-bg-elevated dark:bg-bg-elevated px-2 py-0.5">{t.ticket_number}</span>
-                  <h3 className="font-semibold text-base">{t.subject}</h3>
-                  <Badge variant={t.status === "open" ? "entry" : "success"} className="capitalize">{t.status}</Badge>
-                </div>
-                <p className="text-text-muted dark:text-text-secondary mt-1">{t.description}</p>
-                <div className="text-text-muted mt-2 flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5" /> {new Date(t.created_at).toLocaleString()}
+        {tickets.length === 0 ? (
+          <Card className="surface-card p-8 text-center bg-bg-surface">
+            <LifeBuoy className="w-8 h-8 text-text-muted mx-auto mb-2" />
+            <h4 className="text-sm font-semibold text-text-primary">No support tickets</h4>
+            <p className="text-xs text-text-muted mt-1 max-w-sm mx-auto">
+              You haven&apos;t raised any tickets yet. If you run into gate access issues or scanning errors, click &ldquo;Raise Ticket&rdquo; above.
+            </p>
+          </Card>
+        ) : (
+          tickets.map((t) => (
+            <Card key={t.id} className="surface-card p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="surface-card font-bold text-xs bg-bg-elevated dark:bg-bg-elevated px-2 py-0.5">{t.ticket_number}</span>
+                    <h3 className="font-semibold text-base">{t.subject}</h3>
+                    <Badge variant={t.status === "open" ? "entry" : "success"} className="capitalize">{t.status}</Badge>
+                  </div>
+                  <p className="text-text-muted dark:text-text-secondary mt-1">{t.description}</p>
+                  <div className="text-text-muted mt-2 flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5" /> {new Date(t.created_at).toLocaleString()}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );

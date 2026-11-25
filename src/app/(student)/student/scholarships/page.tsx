@@ -15,6 +15,7 @@ export default function ScholarshipsPage() {
           purpose="Track merit scholarships, welfare endowments, grant disbursements, and eligibility criteria"
           contextLabel="Scholarships & Financial Aid"
           statusSummary="Explore eligible scholarship programs, application statuses, and disbursement records."
+          why="Scholarship disbursements automatically apply toward pending semester tuition balances or designated bank accounts."
           primaryAction={{ label: "College Fees", href: "/student/fees" }}
           secondaryActions={[
             { label: "Report Aid Issue", href: "/student/complaints/new" },

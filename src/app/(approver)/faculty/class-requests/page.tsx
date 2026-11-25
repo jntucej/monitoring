@@ -205,6 +205,7 @@ export default function FacultyClassRequestsPage() {
       <ContextSituationBar
         roleLabel={isHod ? "HOD · Class Requests" : "Faculty · Class Requests"}
         purpose="Review student requests, broadcast class notices, and resolve classroom escalations."
+        why="Acting on classroom requests unblocks student academic permissions and addresses urgent leave applications."
         contextLabel="Request Queue"
         statusTone={queue.length > 0 ? "warn" : "ok"}
         statusPill={queue.length > 0 ? `${queue.length} pending` : "Queue clear"}

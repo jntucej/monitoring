@@ -177,6 +177,7 @@ function DeputyWardenDailyOverviewInner() {
       <ContextSituationBar
         roleLabel="Deputy Warden"
         purpose="Monitor daily campus hostel operations, verify gate movement metrics, and maintain shift readiness"
+        why="High-level visibility over in-campus headcounts and pending requests keeps daily warden operations synchronized."
         contextLabel={`Daily Operations Overview · ${onCampusTotal} On Campus`}
         statusSummary={
           pendingTotal > 0

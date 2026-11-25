@@ -94,6 +94,7 @@ export default function AuditPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Forensic audit ledger documenting every consequential administrative and security action"
+        why="Forensic audit logging guarantees regulatory compliance, verifiable accountability, and transparency in administrative actions."
         contextLabel="Institutional Audit Ledger"
         statusSummary="Reconstruct reasons, actors, and timelines for every consequential campus action."
         primaryAction={{ label: "Governance Reports", href: "/principal/governance/reports" }}

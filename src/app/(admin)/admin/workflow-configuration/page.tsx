@@ -87,6 +87,7 @@ function AdminWorkflowConfigurationInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Pass types, pending requests, and approval routing"
+        why="Workflow changes here affect every pending and new request of that type immediately."
         contextLabel="Pass types, pending requests, and approval routing"
         statusSummary="Review current pass types, pending requests, and approval routing state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

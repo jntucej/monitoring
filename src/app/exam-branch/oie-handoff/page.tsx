@@ -81,6 +81,7 @@ function ExamBranchOiehandoffInner() {
       <ContextSituationBar
         roleLabel="Exam Branch"
         purpose="Batch forward verified student clearance bundles to the OIE for sign-off."
+        why="Batching verified student clearance bundles streamlines OIE executive review and eliminates individual ticket delays."
         contextLabel="OIE Handoff"
         statusTone={items.length > 0 ? "warn" : "ok"}
         statusPill={items.length > 0 ? `${items.length} pending` : "Queue clear"}

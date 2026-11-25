@@ -15,6 +15,7 @@ export default function DeputyWardenCurfewOversightPage() {
       <ContextSituationBar
         roleLabel="Deputy Warden"
         purpose="Monitor hostel curfew compliance, overnight gate movement, and late-return requests"
+        why="Monitoring curfew hours catches late entries and unauthorized overnight absences to maintain resident safety."
         contextLabel="Hostel Curfew Monitoring"
         statusSummary="Review live curfew status, check overnight gate scans, or process pending leave requests."
         severity="info"

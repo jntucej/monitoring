@@ -1,6 +1,7 @@
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ScheduledJobsPanel } from "@/components/sysadmin/ScheduledJobsPanel";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /**
  * Scheduled Jobs — thin wrapper. All logic lives in the panel component.
@@ -9,7 +10,17 @@ import { ScheduledJobsPanel } from "@/components/sysadmin/ScheduledJobsPanel";
 export default function ScheduledJobsPage() {
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
-      <ScheduledJobsPanel />
+      <div className="space-y-4">
+        <ContextSituationBar
+          roleLabel="System Admin"
+          purpose="Inspect and manage all scheduled cron jobs: backups, syncs, cleanup, and report generation."
+          contextLabel="Scheduled Jobs"
+          why="Disabling a job here stops it on the next scheduled run — re-enable immediately if a backup job is off."
+          statusSummary="Review the schedule, last-run state, and output for every registered job."
+          primaryAction={{ label: "Cron", href: "/sysadmin/cron" }}
+        />
+        <ScheduledJobsPanel />
+      </div>
     </AuthGuard>
   );
 }

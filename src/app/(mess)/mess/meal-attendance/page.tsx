@@ -140,6 +140,7 @@ function MessMealAttendanceInner() {
             ? `${d.totals.confirmed} meals confirmed served out of ${d.totals.declared} declared present (${d.totals.attendanceRate}% turnout).`
             : "Reconcile expected dining headcounts against confirmed scans across hostel blocks."
         }
+        why="Block-by-block turnout tracking ensures hostel dining allocations match real student headcounts and verifies billing rosters."
         severity="info"
         primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
         secondaryActions={[

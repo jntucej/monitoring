@@ -15,6 +15,7 @@ export default function AdminMessAnalyticsPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Historical meal-day counts — declared vs confirmed vs no-show"
+        why="Export these reports for the mess committee and vendor settlement reviews."
         contextLabel="Historical meal-day counts — declared vs confirmed vs no-show"
         statusSummary="Review current historical meal-day counts — declared vs confirmed vs no-show state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

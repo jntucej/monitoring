@@ -73,6 +73,7 @@ function AdminStudentDetail() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Full record, movement history, flags, and guardian link"
+        why="Edit fields here with care — attendance % and pass eligibility update live for that student."
         contextLabel="Full record, movement history, flags, and guardian link"
         statusSummary="Review current full record, movement history, flags, and guardian link state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

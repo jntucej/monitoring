@@ -94,6 +94,7 @@ function CaretakerWorkersInner() {
       <ContextSituationBar
         roleLabel="Caretaker"
         purpose="Monitor on-duty facility workers, track shift coverage, and audit gate-logged worker activity"
+        why="Auditing shifts verifies active on-ground coverage across electrical, plumbing, and housekeeping roles."
         contextLabel="Facility Staff & Shifts"
         statusTone={n > 0 ? "ok" : "info"}
         statusPill={`${n} active`}

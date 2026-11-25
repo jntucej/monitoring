@@ -94,6 +94,7 @@ function Node({
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Role graph, membership, and on-campus presence"
+        why="Role changes here take effect on the next session refresh — test changes on a scratch account before applying broadly."
         contextLabel="Role graph, membership, and on-campus presence"
         statusSummary="Review current role graph, membership, and on-campus presence state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

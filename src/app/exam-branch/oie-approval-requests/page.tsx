@@ -171,6 +171,7 @@ function OieApprovalRequestsInner() {
       <ContextSituationBar
         roleLabel="Exam Branch"
         purpose="Review exam clearance requests pending OIE decision and track escalation bottlenecks."
+        why="Tracking items submitted to the OIE ensures clearance requests do not stall before hall ticket printing deadlines."
         contextLabel="OIE Approval Queue"
         statusTone={requests.length > 0 ? "warn" : "ok"}
         statusPill={requests.length > 0 ? `${requests.length} awaiting OIE` : "Queue clear"}

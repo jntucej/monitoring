@@ -118,14 +118,7 @@ function StatCard({
   };
   return (
     <div className={cn("surface-card p-4", toneClasses[tone])}>
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Manage and monitor autonomous for campus operations."
-        contextLabel="Autonomous"
-        statusSummary="Review current autonomous state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
+
       <div className="flex items-center gap-3">
         <Icon className="h-4 w-4 opacity-60" />
         <div>
@@ -244,6 +237,15 @@ function AutonomousInner() {
 
   return (
     <div className="space-y-4 p-4">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Autonomous Error-Hunter & Sweeps"
+        purpose="Oversee self-healing error hunter sweeps, automated Docker diagnostics, backup integrity verifications, and system findings."
+        statusSummary={`${findingsActive} active system findings, backup status ${backupOk ? "healthy" : "warning"}, and ${containers?.running ?? 0}/${containers?.total ?? 0} monitored containers active.`}
+        why="Autonomous surveillance discovers dangling locks, silent worker stalls, and container memory leaks before services drop offline."
+        primaryAction={{ label: "Scheduled Jobs", href: "/sysadmin/cron" }}
+        secondaryAction={{ label: "Deployments", href: "/sysadmin/deployments" }}
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold">Autonomous Monitoring</h1>

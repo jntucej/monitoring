@@ -95,6 +95,7 @@ function HostelManagerHousekeepingInner() {
       <ContextSituationBar
         roleLabel="Hostel Manager"
         purpose="Monitor hostel block sanitation, assign housekeeping rosters, and verify completed cleaning rounds"
+        why="Tracking daily sanitation checklists and shift duties ensures hygiene standards across all hostel blocks."
         contextLabel={`Housekeeping Operations · ${n} Item(s)`}
         statusTone={n > 0 ? "warn" : "ok"}
         statusPill={`${n} tasks`}

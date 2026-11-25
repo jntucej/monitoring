@@ -68,6 +68,7 @@ function WorkerWorkOrdersInner() {
             ? `You have ${totalOpen} pending work order${totalOpen === 1 ? "" : "s"} requiring attention.`
             : "All caught up. No pending work orders assigned to you right now."
         }
+        why="Executing work orders promptly resolves facility tickets and keeps hostel and gate amenities operational."
         primaryAction={{ label: "View Shifts", href: "/worker/shifts" }}
         secondaryAction={{ label: "Worker Today", href: "/worker" }}
       />

@@ -41,14 +41,6 @@ function SysadminConsentInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Data consent framework for biometric and gate access data"
-        contextLabel="Data consent framework for biometric and gate access data"
-        statusSummary="Review current data consent framework for biometric and gate access data state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-48 rounded-2xl" />
       </div>
@@ -57,6 +49,15 @@ function SysadminConsentInner() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Biometric Data Consent Governance"
+        purpose="Track granted and revoked student consent for biometric scanning, facial recognition, and movement logging."
+        statusSummary={`${stats.reduce((acc, s) => acc + s.granted, 0)} granted consents across ${stats.length} privacy scopes with ${stats.reduce((acc, s) => acc + s.revoked, 0)} revoked records.`}
+        why="Consent ledgers verify that biometric scanning at campus barriers complies with user privacy preferences and statutory legal limits."
+        primaryAction={{ label: "Compliance Settings", href: "/sysadmin/compliance" }}
+        secondaryAction={{ label: "Audit Logs", href: "/sysadmin/audit" }}
+      />
       <PageHeader
         title="Consent Management"
         subtitle="Data consent framework for biometric and gate access data"

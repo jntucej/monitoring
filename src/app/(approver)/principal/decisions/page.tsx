@@ -88,6 +88,7 @@ export default function DecisionsPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Immutable institutional decision ledger recording all executive determinations with proof of provenance"
+        why="An immutable decision ledger ensures institutional accountability, audit readiness, and verifiable action provenance."
         contextLabel="Executive Decision Ledger"
         statusSummary="Audit all past approvals, rejections, overrides, and delegations with complete timestamps."
         primaryAction={{ label: "Audit Ledger", href: "/principal/governance/audit" }}

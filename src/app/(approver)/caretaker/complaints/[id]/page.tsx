@@ -22,6 +22,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Caretaker"
         purpose="Investigate assigned facility complaints, record physical repairs, and update ticket resolution status"
+        why="Inspecting specific complaint records lets caretakers document physical repairs, attach notes, and mark issues resolved."
         contextLabel="Complaint Inspection & Repair"
         statusSummary="Inspect reported facility defects, log on-site worker actions, and resolve hostel maintenance tickets."
         severity="info"

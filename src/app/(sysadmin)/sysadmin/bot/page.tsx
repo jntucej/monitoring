@@ -279,11 +279,12 @@ export default function SysadminBotPage() {
       <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-6 space-y-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor bot for campus operations."
-        contextLabel="Bot"
-        statusSummary="Review current bot state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Telegram Outpass Bot Gateway"
+        purpose="Monitor Telegram notification bot pairing status, student linkage verification, and outbound gate pass delivery queues."
+        statusSummary={`${summary?.linked ?? 0} students paired with Telegram bot notifications across campus departments.`}
+        why="Instant Telegram push delivery ensures students receive immediate outpass decisions, curfew warnings, and gate validation tokens."
+        primaryAction={{ label: "Announcements Desk", href: "/sysadmin/announcements" }}
+        secondaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
       />
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">

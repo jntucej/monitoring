@@ -11,6 +11,7 @@ export default function Page() {
         purpose="Track the investigation, assignment, and resolution timeline of your grievance ticket"
         contextLabel="Grievance Detail & Resolution"
         statusSummary="View incident notes, investigator actions, and resolution steps for this complaint."
+        why="Follow step-by-step progress as campus staff investigate, communicate updates, and close the issue within stated SLA targets."
         primaryAction={{ label: "All Complaints", href: "/student/complaints" }}
         secondaryAction={{ label: "New Complaint", href: "/student/complaints/new" }}
       />

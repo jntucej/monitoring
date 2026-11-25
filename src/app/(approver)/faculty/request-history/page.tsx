@@ -88,6 +88,7 @@ function FacultyRequestHistoryInner() {
       <ContextSituationBar
         roleLabel="Faculty · History"
         purpose="Audit past student requests, approval outcomes, and resolved clearance decisions."
+        why="Auditing historical decisions provides an immutable log of faculty approvals and rejected permission tickets."
         contextLabel="Request Archive"
         statusTone="info"
         statusPill={`${rows.length} records`}

@@ -208,6 +208,7 @@ function HostelPermissionsInner() {
       <ContextSituationBar
         roleLabel="Hostel Approver"
         purpose="Review hostel outpass and leave requests, monitor gate presence, and enforce curfew adherence"
+        why="Hostel permissions gate physical campus exits and enforce curfew accountability for resident safety."
         contextLabel={`Hostel Permissions & Presence · ${curfew.label}`}
         statusSummary={
           pendingCount > 0

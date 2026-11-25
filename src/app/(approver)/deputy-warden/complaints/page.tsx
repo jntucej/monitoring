@@ -8,6 +8,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Deputy Warden"
         purpose="Review and manage hostel complaint queues, address safety and living conditions, and escalate when necessary"
+        why="Triage resident complaints promptly to preserve hostel safety, sanitation standards, and prompt disciplinary intervention."
         contextLabel="Hostel Complaints Queue"
         statusSummary="Monitor escalated grievances, assign hostel caretaker actions, and resolve resident complaints."
         severity="info"

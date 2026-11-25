@@ -29,6 +29,7 @@ function GateCardInspector({ gate, onInspect }: { gate: Gate; onInspect: (m: Ent
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor gates for campus operations."
+        why="Use this view to cross-check hardware state before dispatching a field maintenance team."
         contextLabel="Gates"
         statusSummary="Review current gates state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

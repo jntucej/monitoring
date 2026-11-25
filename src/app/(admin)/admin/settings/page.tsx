@@ -15,6 +15,7 @@ export default function AdminSettingsPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Configure dynamic system preferences and institutional records"
+        why="Most settings here affect backend workers and gate scanners, not just the web UI."
         contextLabel="Configure dynamic system preferences and institutional records"
         statusSummary="Review current configure dynamic system preferences and institutional records state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

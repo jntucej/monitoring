@@ -163,6 +163,7 @@ function VpPendingApprovalsInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Review and process pending institutional approval requests and gate leave workflows"
+        why="Processing pending requests in order of SLA urgency prevents student leave delays and ensures prompt campus gate clearance."
         contextLabel="Pending Approvals Roster"
         statusSummary={rows.length > 0 ? `${rows.length} requests awaiting your review, including ${rows.filter(slaBreached).length} approaching SLA deadlines.` : "No pending approvals currently awaiting your review."}
         severity={rows.some(slaBreached) ? "warn" : "ok"}

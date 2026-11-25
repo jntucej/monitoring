@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Review institutional approval requests delegated to your desk from vice principals or wardens"
+        why="Delegated items require prompt resolution so lower-tier authorities and students remain unblocked on operational requests."
         contextLabel="Delegated Approvals"
         statusSummary="Monitor workflow requests delegated for executive review and determination."
         primaryAction={{ label: "Pending Approvals", href: "/principal/approvals" }}

@@ -52,14 +52,6 @@ function SysadminEventsInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Upcoming campus events and registration volume"
-        contextLabel="Upcoming campus events and registration volume"
-        statusSummary="Review current upcoming campus events and registration volume state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>
@@ -68,6 +60,15 @@ function SysadminEventsInner() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Campus Events & Registrations"
+        purpose="Review upcoming campus event registrations, venue capacity thresholds, and temporary visitor attendance volumes."
+        statusSummary={`${rows.length} scheduled campus events with ${rows.reduce((acc, r) => acc + (r.registrations || 0), 0)} total attendee registrations recorded.`}
+        why="Large campus gatherings require security gate coordination to permit registered outside attendees and prevent entrance surges."
+        primaryAction={{ label: "Gate Schedule", href: "/sysadmin/gate-schedule" }}
+        secondaryAction={{ label: "Communities", href: "/sysadmin/communities" }}
+      />
       <PageHeader
         title="Campus Events"
         subtitle="Upcoming campus events and registration volume"

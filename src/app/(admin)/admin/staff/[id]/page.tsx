@@ -65,6 +65,7 @@ function AdminStaffDetail() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Duty roster, leave history, and contact info"
+        why="Edit this record to correct department, role, or contact fields; changes sync to their dashboard."
         contextLabel="Duty roster, leave history, and contact info"
         statusSummary="Review current duty roster, leave history, and contact info state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

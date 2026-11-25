@@ -56,6 +56,7 @@ function SubjectClassDrilldownInner() {
               <ContextSituationBar
                 roleLabel="Subject Faculty"
                 purpose="Inspect class roster and track individual student performance for this subject."
+                why="Monitoring subject cohorts ensures individualized attention to attendance risks and assignment completions."
                 contextLabel={subject ? `Subject: ${subject}` : `Class: ${classId}`}
                 statusTone="info"
                 statusSummary={`Viewing student roster for class ${classId}. Select a student to inspect attendance and details.`}

@@ -15,6 +15,7 @@ export default function MarksPage() {
           purpose="View internal marks, semester grade cards, credits earned, and GPA performance"
           contextLabel="Grades & Academic Marks"
           statusSummary="Track your subject-wise continuous evaluation, internal marks, and semester GPA."
+          why="Regularly reviewing internal assessment marks helps identify subjects needing re-evaluation or attendance improvements before finals."
           primaryAction={{ label: "Exams Schedule", href: "/student/exams" }}
           secondaryActions={[
             { label: "Assignments", href: "/student/assignments" },

@@ -205,6 +205,7 @@ function MessOperationalRequestsInner() {
             ? `${openCount} operational request${openCount === 1 ? "" : "s"} open and awaiting caretaker / facilities review.`
             : "No open kitchen operational requests. All supply and equipment tickets resolved."
         }
+        why="Submitting operational requests alerts hostel caretakers and facility managers to expedite equipment repairs and provision refills."
         severity={openCount > 0 ? "warn" : "ok"}
         primaryAction={{ label: "Inventory Stock", href: "/mess/inventory-stock" }}
         secondaryActions={[

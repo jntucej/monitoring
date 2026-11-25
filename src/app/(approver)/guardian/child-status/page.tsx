@@ -282,6 +282,7 @@ function ChildStatusInner() {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Monitor live campus presence, check-in state, and recent gate crossings for linked wards."
+        why="Checking live presence gives families peace of mind by showing the exact gate and timestamp of their ward's last movement."
         contextLabel="Ward Campus Presence"
         statusTone="info"
         statusPill={`${wards.length} Ward${wards.length === 1 ? "" : "s"}`}

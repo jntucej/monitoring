@@ -101,6 +101,7 @@ const api = useApi();
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor navigation for campus operations."
+        why="Broken links here appear in the user's sidebar — fix them before the next release."
         contextLabel="Navigation"
         statusSummary="Review current navigation state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

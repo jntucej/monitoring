@@ -9,6 +9,7 @@ export default function FacultyDirectoryPage() {
       <ContextSituationBar
         roleLabel="Head of Department"
         purpose="Maintain teaching staff profiles, subject allocations, and departmental roles."
+        why="Checking faculty directories ensures correct subject mapping and points of contact for students."
         contextLabel="Faculty Directory"
         statusTone="info"
         statusSummary="View department faculty profiles, workload distributions, and contact information."

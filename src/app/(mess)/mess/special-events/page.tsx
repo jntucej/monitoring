@@ -16,6 +16,7 @@ export default function MessSpecialEventsPage() {
         purpose="Announce special feast items, survey student dining interest, and prepare feast procurement quantities"
         contextLabel="Special Dining Events & Feasts"
         statusSummary="Create and manage holiday dining events, track student token claims, and finalize feast meal counts."
+        why="Planning special feast allocations in advance prevents severe kitchen shortfalls and verifies catering budget allowances."
         severity="info"
         primaryAction={{ label: "Verify Token", href: "/mess/verify-token" }}
         secondaryActions={[

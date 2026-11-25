@@ -68,6 +68,7 @@ function StudentMessTokenInner() {
             ? `Your active meal token is ready. Present the numeric code or QR at the dining service line.`
             : "No active meal token issued for today. Review eligibility status or opt-outs."
         }
+        why="Tokens verify your meal plan allocation for each dining window. Present the token at the scanner counter before meal cutoff times."
         primaryAction={{ label: "Rate Meals", href: "/student/mess/reviews" }}
         secondaryAction={{ label: "Mess Bill", href: "/student/mess-bill" }}
       />

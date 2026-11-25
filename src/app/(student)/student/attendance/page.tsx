@@ -15,6 +15,7 @@ export default function AttendancePage() {
         purpose="Monitor overall attendance rate, safe skips, class schedule, and file attendance disputes"
         contextLabel="Attendance & Safe Skips"
         statusSummary="Track your semester class attendance against requirements, review daily logs, and file period disputes."
+        why="Maintaining at least 75% attendance prevents exam debarment. Use Safe Skips to plan leaves safely or file a dispute if marked absent by mistake."
         primaryAction={{ label: "Attendance Calendar", href: "/student/attendance-calendar" }}
         secondaryAction={{ label: "Gate Scan Log", href: "/student/history" }}
       />

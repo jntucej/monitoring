@@ -66,6 +66,7 @@ function RedisWorkerInner() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor redis worker for campus operations."
+        why="Clearing a stuck job here unblocks every downstream task that was waiting on it."
         contextLabel="Redis Worker"
         statusSummary="Review current redis worker state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

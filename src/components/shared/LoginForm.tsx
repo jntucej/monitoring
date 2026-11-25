@@ -12,6 +12,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 import { getDefaultRouteForRole } from "@/lib/route-helpers";
@@ -193,23 +194,35 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         <div>
           <h1 className="text-2xl font-semibold text-text-primary">Reset password</h1>
           <p className="mt-1 text-sm text-text-muted">
-            We&apos;ll email you a one-time link.
+            Enter the email address registered on your account. We&apos;ll send a one-time link to set a new password.
           </p>
         </div>
         {resetSent ? (
-          <div className="surface-card bg-emerald-500/10 p-3 text-sm text-action-success">
-            If that email exists, a reset link has been sent. Check your inbox.
+          <div className="surface-card bg-emerald-500/10 p-3 text-sm text-action-success space-y-1">
+            <p>If that email exists, a reset link has been sent. Check your inbox and spam folder.</p>
+            <p className="text-xs text-text-muted">
+              No email on file? Contact your department or system administrator for a temporary password.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
-            <input
-              type="email"
-              value={resetEmail}
-              onChange={(e) => setResetEmail(e.target.value)}
-              placeholder="you@college.edu"
-              autoComplete="email"
-              className="surface-card w-full bg-bg-surface px-3 py-2 text-sm text-text-primary"
-            />
+            <div className="space-y-1">
+              <label htmlFor="reset-email" className="text-xs font-medium text-text-muted">
+                Registered email address
+              </label>
+              <input
+                id="reset-email"
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                placeholder="you@college.edu"
+                autoComplete="email"
+                className="surface-card w-full bg-bg-surface px-3 py-2 text-sm text-text-primary"
+              />
+              <p className="text-[11px] text-text-muted">
+                If you haven&apos;t linked an email yet, ask your administrator to reset your password.
+              </p>
+            </div>
             {error && (
               <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger">
                 {error}
@@ -256,9 +269,16 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         className="space-y-4"
       >
         <div className="space-y-1">
-          <label htmlFor="identifier" className="text-xs font-medium text-text-muted">
-            Username / Roll number
-          </label>
+          <div className="flex items-center gap-1.5">
+            <label htmlFor="identifier" className="text-xs font-medium text-text-muted">
+              Username / Roll number
+            </label>
+            <HelpTip
+              label="Username or roll number help"
+              align="left"
+              text="Students: enter your college roll number (e.g. 23JJ1A0599). Faculty, wardens, operators, and staff: enter your assigned username."
+            />
+          </div>
           <div className="relative">
             <input
               id="identifier"
@@ -268,17 +288,28 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               onChange={(e) => setLoginIdentifier(e.target.value)}
               autoComplete="username"
               autoCapitalize="characters"
+              aria-describedby="identifier-hint"
               required
               className="surface-card w-full bg-bg-surface px-3 py-2 pl-10 text-sm text-text-primary"
             />
             <UserCheck className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           </div>
+          <p id="identifier-hint" className="text-[11px] text-text-muted">
+            Students use roll number (e.g. 23JJ1A0599); staff use assigned username.
+          </p>
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="password" className="text-xs font-medium text-text-muted">
-            Password
-          </label>
+          <div className="flex items-center gap-1.5">
+            <label htmlFor="password" className="text-xs font-medium text-text-muted">
+              Password
+            </label>
+            <HelpTip
+              label="Password help"
+              align="left"
+              text="First-time or admin-reset accounts will be prompted to set a new password right after signing in. Repeated failed attempts lock the account for 15 minutes."
+            />
+          </div>
           <div className="relative">
             <input
               id="password"
@@ -311,6 +342,11 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               className="h-3.5 w-3.5 rounded border-border"
             />
             Remember me
+            <HelpTip
+              label="Remember me help"
+              align="left"
+              text="Keeps your session active on this browser. Leave unchecked on shared or gate kiosk devices."
+            />
           </label>
           <button
             type="button"
@@ -321,14 +357,19 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           </button>
         </div>
 
-        <button
-          type="submit"
-          disabled={disabled}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {submitting ? "Signing in…" : "Sign In"}
-          {!submitting && <ArrowRight className="h-4 w-4" />}
-        </button>
+        <div className="space-y-1.5">
+          <button
+            type="submit"
+            disabled={disabled}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {submitting ? "Signing in…" : "Sign In"}
+            {!submitting && <ArrowRight className="h-4 w-4" />}
+          </button>
+          <p className="text-center text-[11px] text-text-muted">
+            Signs you in and opens your role-specific dashboard automatically.
+          </p>
+        </div>
       </form>
 
       {/* New account? */}

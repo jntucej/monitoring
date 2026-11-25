@@ -189,6 +189,7 @@ function ExaminationReportsInner() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Generate hall occupancy summaries, clearance statistics, and exam reports."
+        why="Comprehensive session reports provide the Academic Council and Principal with reliable exam conduct and turnout metrics."
         contextLabel="Examination Reports"
         statusTone="info"
         statusSummary="Export examination audit statistics, clearance volumes, and hall allocations."

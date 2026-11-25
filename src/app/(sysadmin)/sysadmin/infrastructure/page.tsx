@@ -13,6 +13,7 @@ export default function InfrastructurePage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor infrastructure for campus operations."
+        why="Use this view when a service-level alert points to a resource exhaustion or container crash."
         contextLabel="Infrastructure"
         statusSummary="Review current infrastructure state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

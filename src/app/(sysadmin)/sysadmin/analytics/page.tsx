@@ -108,14 +108,6 @@ function SysAdminAnalyticsInner() {
   if (!data && !error) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Traffic, occupancy, and demographic breakdowns"
-        contextLabel="Traffic, occupancy, and demographic breakdowns"
-        statusSummary="Review current traffic, occupancy, and demographic breakdowns state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
@@ -127,6 +119,15 @@ function SysAdminAnalyticsInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Campus Movement Analytics"
+        purpose="Analyze cross-campus pedestrian traffic flows, peak gate utilization, occupancy splits, and demographic movement trends."
+        statusSummary={`${data?.totals?.entries ?? 0} entries and ${data?.totals?.exits ?? 0} exits logged across campus entry and exit turnstiles over the selected window.`}
+        why="Longitudinal traffic and occupancy trends inform gate staffing schedules, security post allocations, and bottleneck mitigation plans."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "Attendance Records", href: "/sysadmin/attendance" }}
+      />
       <PageHeader title="Analytics" subtitle="Traffic, occupancy, and demographic breakdowns" onRefresh={load} />
       {error && <div className="surface-card p-3 text-sm text-action-danger">{error}</div>}
 

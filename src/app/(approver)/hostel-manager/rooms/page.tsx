@@ -31,6 +31,7 @@ export default function HostelManagerRoomsPage() {
       <ContextSituationBar
         roleLabel="Hostel Manager"
         purpose="Monitor room capacity and block occupancy rates, and plan hostel space utilization"
+        why="Tracking vacant beds and density across blocks enables balanced room distribution and maintenance planning."
         contextLabel={`Room Capacity & Occupancy · ${blocks.length} Blocks`}
         statusSummary={
           blocks.length > 0

@@ -14,6 +14,7 @@ export default function AdminMessTodayPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Today's menu, token status, and serving counts"
+        why="Use this view to spot shortages early and rebalance meal distribution before cutoff."
         contextLabel="Today's menu, token status, and serving counts"
         statusSummary="Review current today's menu, token status, and serving counts state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

@@ -14,6 +14,7 @@ export default function AdminSmsQueuePage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Monitor queued, sent, delivered and failed SMS messages."
+        why="Retry or cancel any queued message here before it is dispatched to the SMS gateway."
         contextLabel="Monitor queued, sent, delivered and failed SMS messages."
         statusSummary="Review current monitor queued, sent, delivered and failed sms messages. state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

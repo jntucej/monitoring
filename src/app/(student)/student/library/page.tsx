@@ -15,6 +15,7 @@ export default function LibraryPage() {
           purpose="Check catalog holdings, active book issues, due dates, and outstanding library fines"
           contextLabel="Library & Books"
           statusSummary="Manage your issued volumes, track upcoming return deadlines, and discover library resources."
+          why="Renew or return books before due dates to prevent daily overdue fines and maintain lending privileges."
           primaryAction={{ label: "Assignments", href: "/student/assignments" }}
           secondaryActions={[
             { label: "Report Library Issue", href: "/student/complaints/new" },

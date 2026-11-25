@@ -249,6 +249,7 @@ function ManualEntryInner() {
         purpose="Manual movement registration for students with damaged codes or barcode scanner failures"
         contextLabel="Manual Entry Desk"
         statusSummary="Record entry or exit movements manually when optical or NFC scanners fail to read a physical badge."
+        why="Direct roll submission records transit timestamps even during network degradation or when a student ID barcode is scratched."
         primaryAction={{ label: "Student Lookup", href: "/operator/lookup" }}
         secondaryAction={{ label: "Exceptions Log", href: "/operator/exceptions" }}
       />

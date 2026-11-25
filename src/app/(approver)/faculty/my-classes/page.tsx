@@ -89,6 +89,7 @@ function FacultyMyclassesInner() {
       <ContextSituationBar
         roleLabel="Faculty · Teaching"
         purpose="Confirm class sessions, review active assignments, and coordinate course modules."
+        why="Logging session progress and curriculum milestones keeps students informed and attendance updated."
         contextLabel="Teaching Console"
         statusTone="info"
         statusSummary="Manage live classroom engagement, course assignments, and class status."

@@ -9,6 +9,7 @@ export default function PredictiveAnalyticsPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor analytics predictive for campus operations."
+        why="Tune forecasting thresholds to prepare for high-traffic days and prevent gate congestion."
         contextLabel="Analytics Predictive"
         statusSummary="Review current analytics predictive state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

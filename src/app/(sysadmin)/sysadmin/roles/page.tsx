@@ -457,6 +457,7 @@ export default function RolesManagementPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor roles for campus operations."
+        why="Use this view to audit which capabilities are granted to which roles before any access change."
         contextLabel="Roles"
         statusSummary="Review current roles state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

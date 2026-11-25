@@ -117,14 +117,6 @@ function AdminClassesInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Teaching groups by department, year, and section"
-        contextLabel="Teaching groups by department, year, and section"
-        statusSummary="Review current teaching groups by department, year, and section state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-64 rounded-2xl" />
       </div>
@@ -133,6 +125,15 @@ function AdminClassesInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Classes & Academic Cohorts"
+        purpose="Create teaching sections, manage classroom capacities, and configure academic groups by department, year, and section."
+        statusSummary={`${filtered.filter((c: { isActive?: boolean }) => c.isActive).length} active classes configured across ${depts.length} campus departments.`}
+        why="Structured class rosters link students to class advisors, department faculty, and timetable-based gate pass permissions."
+        primaryAction={{ label: "Faculty Assignments", href: "/sysadmin/faculty-assignments" }}
+        secondaryAction={{ label: "Departments", href: "/sysadmin/departments" }}
+      />
       <PageHeader title="Classes" subtitle="Teaching groups by department, year, and section" onRefresh={load} />
 
       <WidgetBoundary title="Create class">

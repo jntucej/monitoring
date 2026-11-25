@@ -58,14 +58,6 @@ function AdminAlumniInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
-      <ContextSituationBar
-        roleLabel="Campus Admin"
-        purpose="Graduated and checked-out students"
-        contextLabel="Graduated and checked-out students"
-        statusSummary="Review current graduated and checked-out students state and take action below."
-        primaryAction={{ label: "Admin Overview", href: "/admin" }}
-        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
-      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>
@@ -74,6 +66,17 @@ function AdminAlumniInner() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Review and audit de-provisioned student accounts who have graduated or formally completed checkout."
+        contextLabel="Alumni Directory"
+        why="Maintaining accurate records of checked-out students prevents stale badge access and preserves institutional clearance history."
+        statusTone="ok"
+        statusPill={`${rows.length} graduated`}
+        statusSummary={`${rows.length} de-provisioned student account${rows.length === 1 ? "" : "s"} archived in the alumni registry.`}
+        primaryAction={{ label: "Active Students", href: "/admin/students" }}
+        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
+      />
       <PageHeader
         title="Alumni"
         subtitle="Graduated and checked-out students"

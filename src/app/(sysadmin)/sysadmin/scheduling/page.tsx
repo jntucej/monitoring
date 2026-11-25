@@ -11,6 +11,7 @@ export default function SmartSchedulingPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor scheduling for campus operations."
+        why="Scheduling changes here take effect on the next shift boundary for affected staff."
         contextLabel="Scheduling"
         statusSummary="Review current scheduling state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

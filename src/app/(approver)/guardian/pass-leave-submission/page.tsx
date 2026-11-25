@@ -213,6 +213,7 @@ function PassLeaveSubmissionInner() {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Create and submit outing or leave applications for wards into the campus approval pipeline."
+        why="Submitting requests directly guarantees official parent authorization is captured upfront, accelerating approval times."
         contextLabel="Request Submission Portal"
         statusTone="info"
         statusPill={`${wards.length} Ward${wards.length === 1 ? "" : "s"} Available`}

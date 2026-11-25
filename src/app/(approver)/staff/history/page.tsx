@@ -92,6 +92,7 @@ function StaffHistoryInner() {
       <ContextSituationBar
         roleLabel="Campus Staff"
         purpose="Review past campus gate scans, shift check-ins, and leave history."
+        why="Auditing personal timestamp logs ensures recorded entries match working hours and leave records accurately."
         contextLabel="Historical Movement Log"
         statusTone={n > 0 ? "ok" : "info"}
         statusPill={`${n} Records`}

@@ -74,6 +74,7 @@ function AdminNotificationSettingsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor notification settings for campus operations."
+        why="Settings applied here override individual user preferences unless a user re-enables a channel personally."
         contextLabel="Notification Settings"
         statusSummary="Review current notification settings state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

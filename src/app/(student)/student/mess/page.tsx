@@ -43,6 +43,7 @@ export default function StudentMessLanding() {
         purpose="Central dining hub for menus, tokens, meal feedback, special diets, and mess accounts"
         contextLabel="Dining Services Hub"
         statusSummary="Access your daily meal tokens, provide meal feedback, and review running mess charges."
+        why="Scan tokens at the counter during dining hall hours, rate your meals to influence upcoming menus, or file complaints for hygiene issues."
         primaryAction={{ label: "Today's Meal Token", href: "/student/mess/token" }}
         secondaryAction={{ label: "Mess Bill", href: "/student/mess-bill" }}
       />

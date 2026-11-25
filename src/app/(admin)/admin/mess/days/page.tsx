@@ -14,6 +14,7 @@ export default function AdminMessDaysPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Set the date, type, serving window and which menu items are on"
+        why="Day and window changes immediately affect student token generation and gate scan eligibility."
         contextLabel="Set the date, type, serving window and which menu items are on"
         statusSummary="Review current set the date, type, serving window and which menu items are on state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

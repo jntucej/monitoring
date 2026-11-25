@@ -93,6 +93,7 @@ function DeputyWardenHandoverInner() {
       <ContextSituationBar
         roleLabel="Deputy Warden"
         purpose="Review shift logs, maintain continuity across warden shifts, and record operational handover briefings"
+        why="Structured shift logs ensure critical events, pending curfews, and gate flags carry over seamlessly between wardens."
         contextLabel={`Shift Continuity · ${(data?.data?.handovers ?? []).length} Recorded (7d)`}
         statusSummary="Inspect operator and supervisor shift handovers, log critical hostel observations, and ensure operational readiness."
         severity="info"

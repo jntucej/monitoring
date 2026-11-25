@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -26,16 +27,25 @@ export default function WebhooksPage() {
       {loading && !data ? (
         <Skeleton className="h-64 w-full" />
       ) : error && !data ? (
-        <div
-          role="alert"
-          className="surface-card p-4 text-sm"
-          style={{
-            borderColor: "var(--action-danger)",
-            background: "color-mix(in srgb, var(--action-danger) 10%, transparent)",
-            color: "var(--action-danger)",
-          }}
-        >
-          Failed to load Webhooks: {String(error)}
+        <div>
+          <ContextSituationBar
+            roleLabel="System Admin"
+            purpose="Manage the inbound and outbound webhook endpoints and their delivery health."
+            contextLabel="Sysadmin Webhooks"
+            why="A failing webhook here can silently block automated status updates across the portal."
+            statusSummary="Review the current state and take action below."
+          />
+          <div
+            role="alert"
+            className="surface-card p-4 text-sm"
+            style={{
+              borderColor: "var(--action-danger)",
+              background: "color-mix(in srgb, var(--action-danger) 10%, transparent)",
+              color: "var(--action-danger)",
+            }}
+          >
+            Failed to load Webhooks: {String(error)}
+          </div>
         </div>
       ) : data ? (
         <WebhooksContent data={data} onRowClick={setSelected} />

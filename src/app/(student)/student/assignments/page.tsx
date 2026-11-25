@@ -158,6 +158,7 @@ function StudentAssignmentsInner() {
                 ? `You have ${pendingCount} pending assignment${pendingCount === 1 ? "" : "s"} scheduled.`
                 : "No pending submissions. All assignments are submitted or graded."
           }
+          why="Submit assignments before the stated due date to qualify for full internal coursework marks and teacher feedback."
           primaryAction={{ label: "Exams Schedule", href: "/student/exams" }}
           secondaryAction={{ label: "Academic Marks", href: "/student/marks" }}
         />

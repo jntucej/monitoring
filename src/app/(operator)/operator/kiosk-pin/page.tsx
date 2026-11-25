@@ -86,6 +86,7 @@ export default function OperatorKioskPinPage() {
           purpose="Configure device terminal quick-unlock PIN for secure shift lock and re-entry"
           contextLabel="Kiosk Security"
           statusSummary="Set or update your 4-digit terminal quick-authentication PIN for fast kiosk re-activation."
+          why="The kiosk PIN allows fast locking and unlocking of active scan terminals between operator breaks without logging out completely."
           primaryAction={{ label: "Claim Gate", href: "/operator/claim" }}
           secondaryAction={{ label: "Security Profile", href: "/operator/profile" }}
         />

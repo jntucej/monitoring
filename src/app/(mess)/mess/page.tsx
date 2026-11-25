@@ -59,6 +59,7 @@ function MessDashboardInner() {
         purpose="Direct daily dining service operations, verify meal tokens, and reconcile dining hall attendance"
         contextLabel={`Mess Operations Overview · ${mealDate}`}
         statusSummary={`${confirmed} meals confirmed served out of ${declared} declared present (${rate}% attendance rate).`}
+        why="The overview aggregates real-time counter traffic, dietary splits, and serving percentages to keep meal service running smoothly."
         severity="info"
         primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
         secondaryActions={[

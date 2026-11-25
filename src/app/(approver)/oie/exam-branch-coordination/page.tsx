@@ -220,6 +220,7 @@ function ExamBranchCoordinationInner() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Synchronize pending exam clearances between exam branch prep and OIE approval."
+        why="Synchronizing clearance queues with Exam Branch staff prevents candidate delays on examination mornings."
         contextLabel="Branch Coordination"
         statusTone={rows.length > 0 ? "warn" : "ok"}
         statusPill={rows.length > 0 ? `${rows.length} in progress` : "Synced"}

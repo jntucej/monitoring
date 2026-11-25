@@ -22,6 +22,7 @@ export default function StudentMessReviewsPage() {
         purpose="Submit ratings and quality feedback on breakfast, lunch, snacks, and dinner servings"
         contextLabel="Dining Quality & Feedback"
         statusSummary="Help mess managers improve food quality by rating today's dishes and service."
+        why="Student ratings directly determine menu renewals and vendor accountability. Submit feedback within 24 hours of meal service."
         primaryAction={{ label: "Meal Token", href: "/student/mess/token" }}
         secondaryAction={{ label: "Mess Bill", href: "/student/mess-bill" }}
       />

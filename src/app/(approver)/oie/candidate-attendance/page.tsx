@@ -259,6 +259,7 @@ function CandidateAttendanceInner() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Monitor live hall attendance, candidate check-ins, and invigilator rosters."
+        why="Monitoring hall check-ins in real time detects absenteeism patterns and ensures examination session integrity."
         contextLabel="Candidate Attendance"
         statusTone="info"
         statusPill={`${rows.length} candidates`}

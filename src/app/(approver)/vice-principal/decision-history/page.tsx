@@ -106,6 +106,7 @@ function VpDecisionHistoryInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Searchable audit trail of past determinations, sign-offs, and rejected requests"
+        why="Auditing past approvals and rejections maintains accountability and provides a consistent reference for future determinations."
         contextLabel="Executive Decision Ledger"
         statusSummary="Audit approved, rejected, and delegated decisions with full provenance and timestamps."
         primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}

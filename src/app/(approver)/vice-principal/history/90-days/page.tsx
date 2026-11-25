@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Quarterly institutional governance audit and historical request analytics"
+        why="Quarterly archives provide longitudinal evidence for academic council audits, accreditation reviews, and policy refinements."
         contextLabel="Quarterly Decision Archive"
         statusSummary="Access long-term compliance records and approval trails spanning the past 90 days."
         primaryAction={{ label: "Last 30 Days", href: "/vice-principal/history/30-days" }}

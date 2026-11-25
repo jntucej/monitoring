@@ -10,6 +10,7 @@ export default function EscalatedApprovalsPage() {
       <ContextSituationBar
         roleLabel="Head of Department"
         purpose="Address high-priority and escalated approvals forwarded from faculty or security gates."
+        why="Escalated permissions involve boundary breaches or strict deadlines requiring immediate department head intervention."
         contextLabel="Escalated Approvals"
         statusTone="warn"
         statusSummary="Expedite escalated and SLA-breached requests requiring department head intervention."

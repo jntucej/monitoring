@@ -16,6 +16,7 @@ function FacultyPermissionsInner() {
       <ContextSituationBar
         roleLabel="Faculty · Clearances"
         purpose="Review initial-stage exam clearances and student memo requests."
+        why="Processing initial clearances validates departmental eligibility before forwarding to exam or warden authorities."
         contextLabel="Permissions Queue"
         statusTone="info"
         statusSummary="Review initial-stage student clearance requests and memo workflows."

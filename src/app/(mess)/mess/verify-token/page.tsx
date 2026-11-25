@@ -52,6 +52,7 @@ export default function VerifyTokenPage() {
               ? `${events.length} active special event${events.length === 1 ? "" : "s"} scheduled. Select an event to verify student tokens.`
               : "No active special dining events scheduled. Scan standard meal tokens at the Token Scanner."
           }
+          why="Verifying event tokens marks specific banquet meals served and prevents duplicate redemptions by attendees."
           severity="info"
           primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
           secondaryActions={[

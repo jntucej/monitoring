@@ -83,6 +83,7 @@ function AdminSubjectsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Subject catalog across departments (read-only)"
+        why="Renaming a subject here updates every historical report and live dashboard that references it."
         contextLabel="Subject catalog across departments (read-only)"
         statusSummary="Review current subject catalog across departments (read-only) state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

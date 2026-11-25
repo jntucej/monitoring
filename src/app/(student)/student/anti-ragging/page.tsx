@@ -51,6 +51,7 @@ export default function AntiRaggingPage() {
           severity="ok"
           statusPill={`Case #${caseNumber}`}
           statusSummary="Your report has been lodged directly with the Principal's office."
+          why="Anti-ragging filings bypass routine department triage to protect student privacy and ensure immediate executive review."
           primaryAction={{ label: "View Complaints", href: "/student/complaints" }}
           secondaryAction={{ label: "Student Home", href: "/student" }}
         />
@@ -94,6 +95,7 @@ export default function AntiRaggingPage() {
         severity="critical"
         statusPill="Confidential Channel"
         statusSummary="Direct, restricted intake reviewed exclusively by the Principal's office. Anonymous filing supported."
+        why="Incidents are treated with strict confidentiality under UGC and campus safety guidelines to guarantee student protection."
         primaryAction={{ label: "General Complaints", href: "/student/complaints" }}
         secondaryAction={{ label: "Campus Safety Helpline", href: "tel:18001805522" }}
       />

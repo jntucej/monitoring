@@ -23,6 +23,7 @@ export default function JobsPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor jobs for campus operations."
+        why="Cancelling a running job here interrupts it safely; use 'Force rerun' to trigger an immediate retry."
         contextLabel="Jobs"
         statusSummary="Review current jobs state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

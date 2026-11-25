@@ -13,6 +13,7 @@ export default function SysAdminSupportPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Tickets, escalation queue, and SLA tracking"
+        why="Prioritize any overdue tickets here — they are visible to the students and staff who raised them."
         contextLabel="Tickets, escalation queue, and SLA tracking"
         statusSummary="Review current tickets, escalation queue, and sla tracking state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

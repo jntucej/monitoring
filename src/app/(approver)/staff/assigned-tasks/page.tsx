@@ -59,6 +59,7 @@ function StaffAssignedTasksInner() {
       <ContextSituationBar
         roleLabel="Campus Staff"
         purpose="Review and process staff-leave requests and workflow actions assigned to you."
+        why="Processing staff tasks promptly avoids administrative delays and ensures required cover is confirmed."
         contextLabel="Assigned Task Queue"
         statusTone={slice && slice.totalOpen > 0 ? "warn" : "ok"}
         statusPill={slice && slice.totalOpen > 0 ? `${slice.totalOpen} Open` : "Queue Clear"}

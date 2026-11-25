@@ -15,6 +15,7 @@ export default function TeamShiftsPage() {
         purpose="Plan, schedule, and balance security guard coverage across campus posts and gates"
         contextLabel="Shift Scheduling Board"
         statusSummary="Manage guard timetables, post coverage allocations, and resolve vacant perimeter stations."
+        why="Balancing guard rotations across peak hours avoids guard fatigue and guarantees mandatory multi-operator coverage."
         primaryAction={{ label: "Workers Roster", href: "/supervisor/team/workers" }}
         secondaryAction={{ label: "Curfew Roster", href: "/supervisor/team/curfew" }}
       />

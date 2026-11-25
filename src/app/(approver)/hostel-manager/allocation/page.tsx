@@ -11,6 +11,7 @@ export default function HostelManagerAllocationPage() {
       <ContextSituationBar
         roleLabel="Hostel Manager"
         purpose="Monitor block capacity and bed allocation status, and reconcile student resident assignments"
+        why="Reviewing allocation capacity helps verify room assignments and spot discrepancies between enrolled residents and beds."
         contextLabel="Hostel Bed Allocation"
         statusSummary="Bed assignments are managed centrally by Campus Admin. Inspect live block occupancy and resident lists here."
         severity="info"

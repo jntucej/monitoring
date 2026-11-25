@@ -11,6 +11,7 @@ export default function GateLivePage() {
         purpose="Real-time perimeter surveillance, telemetry monitoring, and gate post activity"
         contextLabel="Live Gate Operations"
         statusSummary="Monitor active gate telemetry, guard station occupancy, and live transit events."
+        why="Instant gate telemetry verifies that optical readers, turnstiles, and emergency overrides are online across all portals."
         primaryAction={{ label: "Gate Wall Grid", href: "/supervisor/gates/wall" }}
         secondaryAction={{ label: "Hourly Activity", href: "/supervisor/gates/activity" }}
       />

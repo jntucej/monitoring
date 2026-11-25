@@ -59,6 +59,7 @@ export default function PassLifecyclePage() {
               ? "Pass awaiting approver signature from your assigned faculty or hostel warden."
               : `Current pass status is ${pass.status ?? "unknown"}.`
         }
+        why="Each reviewer stage must sign off before the security turnstile scanner can validate your exit and return QR codes."
         primaryAction={{ label: "All Gate Passes", href: "/student/passes" }}
         secondaryActions={[{ label: "New Request", href: "/student/permissions/new" }]}
       />

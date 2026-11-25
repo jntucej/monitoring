@@ -42,6 +42,7 @@ function SkeletonCard() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Workflow stage definitions, SLAs, and open approval requests"
+        why="Policy changes here propagate to all sessions and can lock out misconfigured roles — test with a test account first."
         contextLabel="Workflow stage definitions, SLAs, and open approval requests"
         statusSummary="Review current workflow stage definitions, slas, and open approval requests state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

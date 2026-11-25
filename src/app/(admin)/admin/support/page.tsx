@@ -16,6 +16,7 @@ export default function AdminSupportPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Tickets, escalation queue, and SLA tracking"
+        why="Every ticket here carries its resolution SLA — prioritize overdue items to avoid escalation."
         contextLabel="Tickets, escalation queue, and SLA tracking"
         statusSummary="Review current tickets, escalation queue, and sla tracking state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

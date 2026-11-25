@@ -8,6 +8,7 @@
 // (sessions / audit / runbooks).
 
 import { useState, useCallback } from "react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -83,7 +84,14 @@ export default function PeoplePage() {
         <Skeleton className="h-64 w-full" />
       ) : (
         <>
-          <div className="section-offscreen">
+                <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="System-level view of every person record across the campus: students, faculty, staff, and guardians."
+        contextLabel="Sysadmin People"
+        why="Use this view to cross-reference identity data before a bulk import or migration."
+        statusSummary="Review the current state and take action below."
+      />
+<div className="section-offscreen">
             <PeopleContent data={data} loading={loading} error={error} onRowClick={openRow} />
           </div>
           <PeopleDrawer row={selectedRow} onClose={() => setSelectedRow(null)} />

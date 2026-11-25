@@ -68,6 +68,7 @@ function OperatorAnnouncementsInner() {
         purpose="Receive urgent security advisories, campus transit notices, and supervisory directives"
         contextLabel="Operational Bulletins"
         statusSummary="Review active administrative circulars, perimeter announcements, and emergency notices."
+        why="Advisories dictate immediate protocol shifts such as temporary lockdowns, heightened visitor scrutiny, or event traffic rules."
         primaryAction={{ label: "Notifications Feed", href: "/operator/notifications" }}
         secondaryAction={{ label: "Gate Desk", href: "/operator" }}
       />

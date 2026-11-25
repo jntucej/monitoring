@@ -82,6 +82,7 @@ const api = useApi();
             ? `Showing ${filtered.length} of ${scans.length} campus turnstile and gate scan events.`
             : "No gate scan records logged yet for your student identity."
         }
+        why="Gate scan stamps prove physical presence on campus and determine curfew compliance as well as pass closure."
         primaryAction={{ label: "Active Gate Passes", href: "/student/passes" }}
         secondaryAction={{ label: "Attendance Calendar", href: "/student/attendance-calendar" }}
       />

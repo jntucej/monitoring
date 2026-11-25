@@ -217,6 +217,7 @@ function AdminPassesInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Outing, day-pass, and home-out pass records"
+        why="Revoke a pass here and it stops working at every gate scanner within seconds."
         contextLabel="Outing, day-pass, and home-out pass records"
         statusSummary="Review current outing, day-pass, and home-out pass records state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

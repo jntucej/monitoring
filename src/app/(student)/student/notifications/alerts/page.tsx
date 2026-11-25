@@ -54,6 +54,7 @@ function Inner() {
             ? `You have ${list.length} active personal or curfew alert${list.length === 1 ? "" : "s"}.`
             : "No urgent alerts pending for your account."
         }
+        why="Alerts include time-sensitive items like pass approvals, warden remarks, and impending curfew window cutoffs."
         primaryAction={{ label: "All Notifications", href: "/student/notifications" }}
         secondaryAction={{ label: "Campus Announcements", href: "/student/notifications/announcements" }}
       />

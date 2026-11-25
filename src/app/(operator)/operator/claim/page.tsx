@@ -85,6 +85,7 @@ export default function OperatorClaimPage() {
           purpose="Claim physical gate assignment for the shift using supervisor-issued authorization tokens"
           contextLabel="Gate Claim Terminal"
           statusSummary="Enter the gate claim PIN or select an unassigned terminal to activate your scanner session."
+          why="Claiming ties your operator identity to the specific physical gate terminal and begins scan logging for the shift."
           primaryAction={{ label: "Set Kiosk PIN", href: "/operator/kiosk-pin" }}
           secondaryAction={{ label: "Operator Home", href: "/operator" }}
         />

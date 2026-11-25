@@ -175,6 +175,7 @@ export default function PrincipalTodayPage() {
         <ContextSituationBar
           roleLabel="Principal"
           purpose="Executive campus leadership console monitoring institutional pulse, decision streaks, and strategic KPIs"
+          why="The executive overview consolidates live campus safety, urgent approval queues, and institutional health metrics in one command center."
           contextLabel="Principal Overview & Leadership Console"
           statusSummary={(d?.emergency?.length ?? 0) > 0 || (d?.counts.overdue ?? 0) > 0 ? `${d?.emergency?.length ?? 0} emergencies and ${d?.counts.overdue ?? 0} overdue items requiring immediate executive command.` : `${pending} approvals in queue, ${sessionDecisions} decisions cleared this session.`}
           severity={(d?.emergency?.length ?? 0) > 0 ? "critical" : (d?.counts.overdue ?? 0) > 0 ? "warn" : "ok"}

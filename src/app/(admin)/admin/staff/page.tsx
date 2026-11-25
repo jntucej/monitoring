@@ -207,6 +207,7 @@ function AdminStaffInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Teaching, support, and worker roster with department breakdown"
+        why="Edit this record to correct department, role, or contact fields; changes sync to their dashboard."
         contextLabel="Teaching, support, and worker roster with department breakdown"
         statusSummary="Review current teaching, support, and worker roster with department breakdown state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

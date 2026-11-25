@@ -108,6 +108,7 @@ export default function AdminStudentsImportPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="CSV provisioning with two-phase validation. The role column is read from the CSV; existing students are skipped, never overwritten."
+        why="Review flagged rows before committing — duplicate roll numbers will block the import."
         contextLabel="CSV provisioning with two-phase validation. The role column is read from the CSV; existing students are skipped, never overwritten."
         statusSummary="Review current csv provisioning with two-phase validation. the role column is read from the csv; existing students are skipped, never overwritten. state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

@@ -252,6 +252,7 @@ function AdminOverviewInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Campus administration"
+        why="Treat this as your first stop each shift — any red or amber item here needs follow-up before campus operations."
         contextLabel="Campus administration"
         statusSummary="Review current campus administration state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

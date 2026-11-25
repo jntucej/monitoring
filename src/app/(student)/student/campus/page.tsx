@@ -20,6 +20,7 @@ export default function CampusPage() {
         purpose="Explore campus social feeds, community groups, club notices, and event highlights"
         contextLabel="Campus Community"
         statusSummary="Stay connected with campus buzz, community activities, and student announcements."
+        why="Engage with campus peer groups, join club initiatives, and discover upcoming collegiate events."
         primaryAction={{ label: "My Events", href: "/student/my-events" }}
         secondaryAction={{ label: "Campus Calendar", href: "/student/calendar" }}
       />

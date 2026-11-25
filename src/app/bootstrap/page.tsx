@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useCallback, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { KeyRound, Lock, User, CheckCircle2, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 type BootstrapState = "idle" | "submitting" | "success" | "error";
 
@@ -124,6 +125,19 @@ function BootstrapPageInner() {
               ? "Follow your personalized activation link to set your password. Your ID is pre-filled and locked."
               : "Enter your university ID and the one-time activation code from your administrator to set your password."}
           </p>
+          <ol className="flex flex-wrap items-center justify-center gap-1.5 pt-1 text-[11px] text-text-muted">
+            <li className="rounded-full bg-bg-surface border border-border px-2.5 py-0.5 font-medium text-text-primary">
+              1. Verify ID &amp; Code
+            </li>
+            <span aria-hidden="true">→</span>
+            <li className="rounded-full bg-bg-surface border border-border px-2.5 py-0.5 font-medium text-text-primary">
+              2. Set Password
+            </li>
+            <span aria-hidden="true">→</span>
+            <li className="rounded-full bg-bg-surface border border-border px-2.5 py-0.5 font-medium text-text-primary">
+              3. Sign In
+            </li>
+          </ol>
         </div>
 
         <div className="surface-card bg-bg-surface p-6 sm:p-8 space-y-5">
@@ -145,9 +159,16 @@ function BootstrapPageInner() {
             {/* Unique ID / Roll */}
             {!idLocked && (
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-text-muted uppercase tracking-wide block" htmlFor="uniqueId">
-                  ID / Roll Number *
-                </label>
+                <div className="flex items-center gap-1.5">
+                  <label className="text-xs font-semibold text-text-muted uppercase tracking-wide block" htmlFor="uniqueId">
+                    ID / Roll Number *
+                  </label>
+                  <HelpTip
+                    label="ID or roll number help"
+                    align="left"
+                    text="Enter the exact roll number or employee ID registered by your administrator. Letters are automatically uppercased."
+                  />
+                </div>
                 <div className="relative">
                   <input
                     id="uniqueId"
@@ -188,9 +209,16 @@ function BootstrapPageInner() {
             {!urlToken && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-text-muted uppercase tracking-wide block" htmlFor="code">
-                    Activation Code *
-                  </label>
+                  <div className="flex items-center gap-1.5">
+                    <label className="text-xs font-semibold text-text-muted uppercase tracking-wide block" htmlFor="code">
+                      Activation Code *
+                    </label>
+                    <HelpTip
+                      label="Activation code help"
+                      align="left"
+                      text="One-time enrollment code issued by your department or campus administrator. If expired or lost, request a new code."
+                    />
+                  </div>
                   {urlCode && (
                     <span className="text-xs text-action-success font-medium">Pre-filled from link</span>
                   )}
@@ -208,6 +236,9 @@ function BootstrapPageInner() {
                   />
                   <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
+                <p className="text-[11px] text-text-muted">
+                  One-time code from your administrator (up to 12 characters).
+                </p>
               </div>
             )}
 
@@ -236,6 +267,9 @@ function BootstrapPageInner() {
                 />
                 <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               </div>
+              <p className="text-[11px] text-text-muted">
+                Must be at least 8 characters. Avoid using your roll number or activation code.
+              </p>
             </div>
 
             {/* Confirm Password */}
@@ -256,25 +290,33 @@ function BootstrapPageInner() {
                 />
                 <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               </div>
+              {confirmPassword.length > 0 && password !== confirmPassword && (
+                <p className="text-[11px] text-action-danger">Passwords do not match yet.</p>
+              )}
             </div>
 
-            <button
-              type="submit"
-              disabled={state === "submitting" || state === "success"}
-              className="surface-card w-full bg-action-success hover:bg-action-success text-white font-bold text-sm transition-all disabled:opacity-50 py-3 flex items-center justify-center gap-2 active:scale-95 mt-2"
-            >
-              {state === "submitting" ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Activating Account…</span>
-                </>
-              ) : (
-                <>
-                  <span>Activate Account</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
+            <div className="space-y-1.5">
+              <button
+                type="submit"
+                disabled={state === "submitting" || state === "success"}
+                className="surface-card w-full bg-action-success hover:bg-action-success text-white font-bold text-sm transition-all disabled:opacity-50 py-3 flex items-center justify-center gap-2 active:scale-95 mt-2"
+              >
+                {state === "submitting" ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Activating Account…</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Activate Account</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+              <p className="text-center text-[11px] text-text-muted">
+                Once activated, you&apos;ll be redirected to sign in with your new password.
+              </p>
+            </div>
           </form>
 
           <div className="surface-card pt-2 text-center">

@@ -154,11 +154,12 @@ const api = useApi();
       <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor devices for campus operations."
-        contextLabel="Devices"
-        statusSummary="Review current devices state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Gate Hardware & Device Verification"
+        purpose="Configure supported biometric authentication modes (fingerprint, facial recognition, QR, barcode) across gate turnstiles."
+        statusSummary={`${Object.values(settings).filter((s: { enabled?: boolean }) => s.enabled).length} authentication modes active across ${Object.keys(settings).length} configured hardware verification modalities.`}
+        why="Device authentication rules enforce institutional multi-factor verification standards at physical barrier turnstiles."
+        primaryAction={{ label: "Gate Schedule", href: "/sysadmin/gate-schedule" }}
+        secondaryAction={{ label: "Docker Services", href: "/sysadmin/docker-services" }}
       />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>

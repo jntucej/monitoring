@@ -117,6 +117,7 @@ function CaretakerMaintenanceInner() {
       <ContextSituationBar
         roleLabel="Caretaker"
         purpose="Review and resolve hostel maintenance requests, track repair SLAs, and verify facility completion"
+        why="Prioritizing open repair tickets helps meet maintenance SLAs and maintain safe living conditions in the hostel block."
         contextLabel={data?.data?.assignedHostel ? `Maintenance Queue · ${data.data.assignedHostel}` : "Maintenance Queue"}
         statusSummary={
           summary

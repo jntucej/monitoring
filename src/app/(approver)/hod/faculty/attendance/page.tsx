@@ -9,6 +9,7 @@ export default function FacultyAttendancePage() {
       <ContextSituationBar
         roleLabel="Head of Department"
         purpose="Track departmental faculty check-ins, campus presence, and lecture attendance."
+        why="Monitoring daily faculty presence ensures lecture schedule coverage and timely leave tracking."
         contextLabel="Faculty Attendance"
         statusTone="info"
         statusSummary="Monitor real-time teacher arrival logs, leaves, and lecture attendance compliance."

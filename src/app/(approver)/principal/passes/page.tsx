@@ -160,6 +160,7 @@ export default function PrincipalPassesPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Direct executive pass generation bypassing lower approver tiers under emergency authority"
+        why="Issuing direct executive passes provides immediate authorized transit during emergency leave or special institutional deputations."
         contextLabel="Authority-Issued Pass Terminal"
         statusSummary="Directly generate verified gate passes for students with administrative sign-off."
         primaryAction={{ label: "Hostel Oversight", href: "/principal/operations/hostel" }}

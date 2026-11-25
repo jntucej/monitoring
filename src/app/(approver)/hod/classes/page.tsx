@@ -9,6 +9,7 @@ export default function ClassesPage() {
       <ContextSituationBar
         roleLabel="Head of Department"
         purpose="Review departmental classes, batch allocations, and class teacher assignments."
+        why="Reviewing class allocations ensures balanced section cohorts and clear mentorship ownership across batches."
         contextLabel="Department Classes"
         statusTone="info"
         statusSummary="Monitor class section capacities, course tracks, and teacher assignments."

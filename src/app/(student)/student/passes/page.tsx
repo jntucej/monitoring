@@ -62,6 +62,7 @@ export default function StudentPassesPage() {
         purpose="View, verify, and present campus entry and exit QR passes"
         contextLabel="Gate Passes vs. Requests"
         statusSummary="Approved requests become active QR gate passes here. Need a new outing or leave? Submit a request first."
+        why="Select any active pass below to inspect its full timeline, proof status, and gate scan history."
         primaryAction={{ label: "New Request", href: "/student/permissions/new" }}
         secondaryAction={{ label: "My Requests", href: "/student/permissions" }}
       />
@@ -69,14 +70,24 @@ export default function StudentPassesPage() {
       {/* PassHub (active + curfew + quota + create + history toggle) */}
       <WidgetBoundary name="pass-hub">
         <Suspense fallback={<PageLoading />}>
-          <PassHub onSelectPass={setSelectedTicket} />
+          <div className="space-y-1.5">
+            <p className="text-[11px] text-text-muted">
+              Active QR passes ready for gate scanning, plus quick pass creation and period usage.
+            </p>
+            <PassHub onSelectPass={setSelectedTicket} />
+          </div>
         </Suspense>
       </WidgetBoundary>
 
       {/* PassHistory (period compare, rate, export) */}
       <WidgetBoundary name="pass-history">
         <Suspense fallback={<PageLoading />}>
-          <PassHistory />
+          <div className="space-y-1.5">
+            <p className="text-[11px] text-text-muted">
+              Historical pass log — filter by period to compare usage and review completed or expired passes.
+            </p>
+            <PassHistory />
+          </div>
         </Suspense>
       </WidgetBoundary>
 
@@ -86,9 +97,14 @@ export default function StudentPassesPage() {
         <Suspense fallback={<PageLoading />}>
           <div id="documents" className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-                My documents
-              </h3>
+              <div>
+                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  My documents
+                </h3>
+                <p className="text-[11px] text-text-muted">
+                  Supporting proof (medical notes, IDs) linked to your passes and their verification status.
+                </p>
+              </div>
               <Link
                 href="/student/permissions"
                 className="inline-flex items-center gap-1.5 rounded-lg bg-bg-elevated px-2.5 py-1 text-[11px] font-medium text-text-secondary hover:text-action-primary transition-colors motion-reduce:transition-none"

@@ -5,7 +5,9 @@ import { useState, useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
 import { NotificationPreferences } from "@/lib/notification-types";
-import { Bell, Smartphone, Mail, AppWindow, Save, CheckCircle2, Clock } from "lucide-react";
+import { Bell, Smartphone, Mail, AppWindow, Save, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { HelpTip } from "@/components/ui/help-tip";
 
 export default function NotificationSettingsPage() {
   const { user } = useAuthStore();
@@ -88,7 +90,22 @@ export default function NotificationSettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <ContextSituationBar
+        roleLabel="Account Owner"
+        purpose="Configure real-time alerts, notification channels, and quiet-hour windows."
+        contextLabel="Alert Preferences"
+        statusTone="ok"
+        statusPill={savedSuccess ? "Saved to Server" : "Synced"}
+        statusSummary="Customize how urgent gate alerts, approvals, and broadcasts reach you across SMS, email, and mobile push."
+        primaryAction={{
+          label: saving ? "Saving..." : savedSuccess ? "Saved!" : "Save Changes",
+          onClick: handleSave,
+          loading: saving,
+        }}
+        secondaryAction={{ label: "Settings Hub", href: "/settings" }}
+      />
+
       <div className="surface-card flex items-center justify-between pb-6">
         <div>
           <p className="text-sm font-medium text-text-secondary mb-3">
@@ -117,7 +134,10 @@ export default function NotificationSettingsPage() {
 
       {/* Channels */}
       <div className="surface-card bg-bg-surface p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-text-primary">Notification Channels</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-text-primary">Notification Channels</h2>
+          <HelpTip text="Toggle where system events are delivered. Emergency broadcasts will always bypass muted channels." />
+        </div>
         <p className="text-xs text-text-muted">Select channels you want to receive alerts through.</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -189,7 +209,10 @@ export default function NotificationSettingsPage() {
 
       {/* Notification Categories */}
       <div className="surface-card bg-bg-surface p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-text-primary">Alert Categories</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-text-primary">Alert Categories</h2>
+          <HelpTip text="Turn individual notification events on or off. Critical security incidents remain active regardless of settings." />
+        </div>
         <p className="text-xs text-text-muted">Enable or disable specific types of alerts.</p>
 
         <div className="space-y-3 pt-2">
@@ -222,6 +245,7 @@ export default function NotificationSettingsPage() {
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-action-primary" />
           <h2 className="text-lg font-semibold text-text-primary">Quiet Hours</h2>
+          <HelpTip text="Notifications generated during quiet hours are queued as low-priority digests instead of loud alerts." />
         </div>
         <p className="text-xs text-text-muted">Suppress non-critical notifications during these hours.</p>
 

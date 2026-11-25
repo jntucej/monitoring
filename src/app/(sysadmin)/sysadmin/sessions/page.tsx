@@ -12,6 +12,7 @@ export default function ActiveSessionsPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor sessions for campus operations."
+        why="Revoke any session here that does not match a known device or user location."
         contextLabel="Sessions"
         statusSummary="Review current sessions state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

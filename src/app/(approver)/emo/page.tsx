@@ -72,6 +72,9 @@ export default function EmoLandingPage() {
       </div>
 
       <ContextSituationBar
+        roleLabel="Electrical Maintenance Officer"
+        purpose="Triage campus electrical breakdowns, assign electrician work orders, and restore lab power"
+        why="Campus electrical disruptions directly impact academic labs, classrooms, and residential safety."
         contextLabel="Electrical Maintenance Queue"
         statusTone={openBacklog > 0 ? "warn" : "ok"}
         statusPill={openBacklog > 0 ? `${openBacklog} open` : "All clear"}

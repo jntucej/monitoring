@@ -243,6 +243,13 @@ function StudentHomeInner() {
                 ? "Track your curfew status, active hostel passes, meal tokens, and campus updates."
                 : "Track your class attendance, today's schedule, gate passes, and campus updates."
         }
+        why={
+          activePass
+            ? "Show your QR pass at the gate scanner when exiting or re-entering campus."
+            : pendingReq
+              ? "Your request is moving through the approval chain. You'll be notified once a QR pass is issued."
+              : "Use the mode tabs below to switch between today's status, academics, hostel/mess, and monthly recap."
+        }
         primaryAction={
           activePass
             ? { label: "Show QR / Passes", href: "/student/passes" }
@@ -288,7 +295,12 @@ function StudentHomeInner() {
           },
         ]}
       />
-      <StudentModeSwitcher mode={mode} onChange={setMode} />
+      <div className="space-y-1">
+        <p className="text-[11px] text-text-muted px-0.5">
+          Choose a view below to focus on today&apos;s gate status, academics, hostel &amp; mess, or monthly growth.
+        </p>
+        <StudentModeSwitcher mode={mode} onChange={setMode} />
+      </div>
       <StudentLivingHub
         snapshot={{
           campusState: "INSIDE",

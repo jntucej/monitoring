@@ -120,6 +120,7 @@ function ExamBranchVerificationInner() {
       <ContextSituationBar
         roleLabel="Exam Branch"
         purpose="Verify candidate credentials against seating plans, exam passes, and presence rolls."
+        why="Verifying student badges against official rosters ensures only duly registered examinees occupy allocated desks."
         contextLabel="Exam Verification"
         statusTone={vpRequests.length > 0 ? "warn" : "ok"}
         statusPill={vpRequests.length > 0 ? `${vpRequests.length} to verify` : "Clear"}

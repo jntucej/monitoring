@@ -14,6 +14,7 @@ export default function SysadminMessDaysPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Set the date, type, serving window and which menu items are on"
+        why="Verify day and window configuration here before the start of each term."
         contextLabel="Set the date, type, serving window and which menu items are on"
         statusSummary="Review current set the date, type, serving window and which menu items are on state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

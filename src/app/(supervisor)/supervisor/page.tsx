@@ -11,6 +11,7 @@ export default function ApprovalsPage() {
         purpose="Primary supervisory command plane for gate operations, security escalations, and guard shifts"
         contextLabel="Supervisory Desk"
         statusSummary="Triage pending frontline gate escalations, review shift handovers, and coordinate guard deployments."
+        why="The supervisory command desk centralizes immediate actionable approvals, guard assignments, and active gate escalations."
         primaryAction={{ label: "Shift Handover", href: "/supervisor/shift/handover" }}
         secondaryAction={{ label: "Active Gates", href: "/supervisor/gates/live" }}
       />

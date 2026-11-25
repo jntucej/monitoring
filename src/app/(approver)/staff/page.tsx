@@ -26,6 +26,7 @@ export default function StaffPage() {
           <ContextSituationBar
             roleLabel="Campus Staff"
             purpose="Daily operational tasks, assigned approvals, and campus roster coordination."
+            why="Staff workspace centralizes active shift rosters, pending approvals, and personal leave filings in one hub."
             contextLabel="Staff Hub"
             statusTone="info"
             statusPill="Active Shift"

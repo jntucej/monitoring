@@ -22,6 +22,7 @@ export default function KnowledgePage() {
         purpose="Search campus knowledge base, FAQs, policies, and submit institutional feedback"
         contextLabel="Knowledge & Feedback"
         statusSummary="Browse campus manuals, policy answers, and submit suggestions to the university feedback desk."
+        why="Access verified administrative regulations regarding hostel curfews, exam rules, and campus facilities anytime."
         primaryAction={{ label: "Campus Feed", href: "/student/campus" }}
         secondaryAction={{ label: "Student Home", href: "/student" }}
       />

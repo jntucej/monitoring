@@ -212,6 +212,7 @@ function ExaminationDayAccessInner() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Verify candidate campus and hall entry authorization for examination sessions."
+        why="Verifying candidate credentials at security turnstiles guarantees authorized hall entry and prevents impersonation."
         contextLabel="Examination Day Access"
         statusTone={rows.length > 0 ? "info" : "ok"}
         statusPill={`${rows.length} records`}

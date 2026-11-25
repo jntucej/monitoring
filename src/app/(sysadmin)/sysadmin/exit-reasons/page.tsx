@@ -100,6 +100,7 @@ export default function ExitReasonsPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor exit reasons for campus operations."
+        why="New reasons added here appear immediately on every operator kiosk and scan terminal."
         contextLabel="Exit Reasons"
         statusSummary="Review current exit reasons state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

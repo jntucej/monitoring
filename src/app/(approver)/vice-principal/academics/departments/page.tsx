@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Monitor academic departments, faculty allocations, and instructional metrics"
+        why="Monitoring departmental instructional delivery and faculty allocations ensures high educational quality across curricula."
         contextLabel="Academic Departments Register"
         statusSummary="Review department performance indicators, HOD staffing status, and student rosters."
         primaryAction={{ label: "Academic Exceptions", href: "/vice-principal/academics/exceptions" }}

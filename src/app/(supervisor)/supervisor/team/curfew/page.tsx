@@ -11,6 +11,7 @@ export default function TeamCurfewPage() {
         purpose="Enforce campus curfew policies, track overnight student transit, and flag late returns"
         contextLabel="Hostel Curfew Oversight"
         statusSummary="Live monitoring of student curfew windows, overdue returns, and security sweep coordination."
+        why="Late return alerts help wardens and supervisors initiate safety checks before curfews close for the night."
         severity="warn"
         primaryAction={{ label: "Workers on Post", href: "/supervisor/team/workers" }}
         secondaryAction={{ label: "Shift Schedule", href: "/supervisor/team/shifts" }}

@@ -106,6 +106,7 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Track stage-by-stage approval progress, verifications, and decisions for ward requests."
+        why="Tracking stages indicates whether a request is waiting for class teacher sign-off, warden review, or is ready for gate departure."
         contextLabel="Request Lifecycle & Approvals"
         statusTone={rows.length > 0 ? "info" : "ok"}
         statusPill={`${rows.length} Request${rows.length === 1 ? "" : "s"}`}

@@ -132,6 +132,7 @@ export default function CoordinatorPage() {
             ? `${relayInbox.length} announcement${relayInbox.length === 1 ? "" : "s"} waiting for your approval to broadcast to the class.`
             : `Active CR for class ${scopeId}. Review relay messages or submit batch concerns.`
         }
+        why="Class Representatives verify and broadcast staff announcements to class groups and represent batch academic grievances."
         primaryAction={{ label: "Class Requests", href: "/student/class-requests" }}
         secondaryAction={{ label: "Student Home", href: "/student" }}
       />

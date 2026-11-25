@@ -150,6 +150,7 @@ const api = useApi();
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor attendance for campus operations."
+        why="Changes here update students' attendance % and the 75% minimum threshold dashboard instantly."
         contextLabel="Attendance"
         statusSummary="Review current attendance state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

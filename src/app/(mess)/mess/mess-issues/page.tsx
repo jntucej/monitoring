@@ -219,6 +219,7 @@ function MessIssuesInner() {
             ? `${issuesRes?.data?.total ?? 0} mess issue event${issuesRes?.data?.total === 1 ? "" : "s"} logged. Review flagged no-shows and token exceptions.`
             : "No mess exception issues or incidents recorded. Logging is operational."
         }
+        why="Documenting dining discrepancies, hygiene feedback, and broken meal tokens provides transparent records for warden reviews."
         severity="info"
         primaryAction={{ label: "Operational Requests", href: "/mess/operational-requests" }}
         secondaryActions={[

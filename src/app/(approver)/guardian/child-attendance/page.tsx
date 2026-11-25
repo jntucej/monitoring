@@ -36,6 +36,7 @@ function ChildAttendanceInner() {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Review weekly gate check-in patterns, curfew compliance, and activity heatmaps for wards."
+        why="Auditing historical check-ins helps ensure wards maintain timely arrivals and meet campus residential curfews."
         contextLabel="Attendance & Gate Activity"
         statusTone="info"
         statusSummary="Monitor 7-day attendance trends, recent gate in/out scans, and period heatmaps."

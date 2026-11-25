@@ -115,6 +115,7 @@ function ExamBranchDiscrepanciesInner() {
       <ContextSituationBar
         roleLabel="Exam Branch"
         purpose="Detect and resolve candidate identity mismatches, hall inconsistencies, and attendance flags."
+        why="Resolving candidate identity and hall allocation flags promptly prevents disruptions and security stops on exam day."
         contextLabel="Exam Discrepancies"
         statusTone={alerts.length > 0 ? "warn" : "ok"}
         statusPill={alerts.length > 0 ? `${alerts.length} flags` : "Zero flags"}

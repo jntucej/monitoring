@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Executive oversight of all campus access gates, perimeter security staffing, and transit flow"
+        why="Centralized gate monitoring prevents unauthorized perimeter access and balances transit flow across campus entry points."
         contextLabel="Campus Gates Command"
         statusSummary="Monitor real-time guard staffing, gate operational states, and entry/exit transit rates."
         primaryAction={{ label: "Security Incidents", href: "/principal/operations/incidents" }}

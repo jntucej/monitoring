@@ -91,6 +91,7 @@ function AdminGateDeviceConfigurationInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Gate roster, schedules, and per-device settings"
+        why="Changes to device pairing and firmware here take effect on the next scanner sync cycle."
         contextLabel="Gate roster, schedules, and per-device settings"
         statusSummary="Review current gate roster, schedules, and per-device settings state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

@@ -71,6 +71,7 @@ function WorkerShiftsInner() {
             ? `Shift started at ${fmtTime(todayShift.check_in)} with ${todayShift.scans ?? 0} scan(s) logged.`
             : "No active shift logged yet today. Check-in records and gate scans will show here."
         }
+        why="Clocking in at your assigned gate marks you present on the supervisor roster and authorizes barcode scanning permissions."
         primaryAction={{ label: "Work Orders", href: "/worker/work-orders" }}
         secondaryAction={{ label: "Worker Today", href: "/worker" }}
       />

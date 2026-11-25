@@ -128,6 +128,7 @@ function ExamBranchPassQueueInner() {
       <ContextSituationBar
         roleLabel="Exam Branch"
         purpose="Review and process student examination passes and clearance workflows."
+        why="Processing student exam pass requests verifies prerequisite compliance and enables hall permit generation."
         contextLabel="Exam Pass Queue"
         statusTone={pendingCount > 0 ? "warn" : "ok"}
         statusPill={pendingCount > 0 ? `${pendingCount} pending` : "Queue clear"}

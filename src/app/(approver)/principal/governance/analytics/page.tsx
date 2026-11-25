@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Long-term governance analytics tracking institutional compliance, approval latencies, and campus trends"
+        why="Monitoring long-term approval trends and compliance rates highlights operational bottlenecks across academic departments."
         contextLabel="Institutional Governance Analytics"
         statusSummary="Monitor longitudinal institutional performance metrics, policy effectiveness, and operational throughput."
         primaryAction={{ label: "Governance Reports", href: "/principal/governance/reports" }}

@@ -25,6 +25,7 @@ function AdminAuditLogsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor audit logs for campus operations."
+        why="These logs feed compliance reviews and are the first place to look when investigating unauthorized changes."
         contextLabel="Audit Logs"
         statusSummary="Review current audit logs state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

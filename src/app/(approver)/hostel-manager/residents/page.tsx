@@ -31,6 +31,7 @@ export default function HostelManagerResidentsPage() {
       <ContextSituationBar
         roleLabel="Hostel Manager"
         purpose="Monitor resident counts across hostel blocks, verify room allocations, and audit occupancy distributions"
+        why="Auditing resident rosters ensures accurate headcounts for emergency drills, mess planning, and room compliance."
         contextLabel={`Hostel Residents · ${blocks.reduce((s, b) => s + b.occupied, 0)} In-Room`}
         statusSummary={
           blocks.length > 0

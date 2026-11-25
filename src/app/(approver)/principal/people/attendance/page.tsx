@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Institutional attendance compliance monitoring, chronic absenteeism review, and debarment oversight"
+        why="Tracking institutional attendance deficits identifies chronic absenteeism early and informs exam debarment decisions."
         contextLabel="Attendance Exceptions Register"
         statusSummary="Review institutional attendance thresholds, student shortage warnings, and condonation appeals."
         severity="warn"

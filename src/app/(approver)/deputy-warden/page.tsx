@@ -20,6 +20,7 @@ function DeputyWardenOutpassInner() {
         <ContextSituationBar
           roleLabel="Deputy Warden"
           purpose="Authorize or escalate hostel outpass requests, enforce curfew policies, and monitor residential exits"
+          why="Deciding on outpass requests ensures approved leaves adhere to curfew limits and verified parental consent."
           contextLabel="Hostel Outpass Decision Queue"
           statusSummary="Approve, reject, or forward hostel outpasses. Review resident destination, time window, and parental consent."
           severity="info"

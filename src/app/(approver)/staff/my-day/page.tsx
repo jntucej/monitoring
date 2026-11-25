@@ -59,6 +59,7 @@ function StaffMydayInner() {
       <ContextSituationBar
         roleLabel="Campus Staff"
         purpose="Monitor daily gate movements, assigned tasks, and duty roster status."
+        why="Tracking your movements and assignments provides proof of physical campus attendance and shift milestones."
         contextLabel="Daily Staff Roster"
         statusTone={summary && summary.openRequestsCount > 0 ? "warn" : "ok"}
         statusPill={summary ? `${summary.movementsToday} scans · ${summary.openRequestsCount} pending` : "Active"}

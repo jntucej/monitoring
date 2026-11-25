@@ -6,6 +6,7 @@ import { Users, AlertCircle, RotateCw, Inbox } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 
 import { FacultyTracking } from "@/components/admin/FacultyTracking";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useAuthStore } from "@/stores/authStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { getAuthHeaders } from "@/lib/utils";
@@ -98,6 +99,22 @@ function FacultyAttendanceInner() {
           {user?.name && <span className="truncate max-w-55">{user.name}</span>}
         </div>
       </div>
+
+      <ContextSituationBar
+        roleLabel="Faculty Attendance Admin"
+        purpose="Track faculty arrivals, gate movement logs, and departmental presence compliance"
+        why="Auditing faculty attendance records ensures timely lecture delivery and complies with institutional regulatory metrics."
+        contextLabel={`Faculty Presence · ${summary.presentToday}/${summary.totalFaculty || records.length} Present`}
+        statusTone={summary.overallAttendanceRate > 0 && summary.overallAttendanceRate < 75 ? "warn" : "ok"}
+        statusPill={`${summary.presentToday} Present`}
+        statusSummary={
+          records.length > 0
+            ? `${summary.presentToday} faculty present today across departments (${summary.overallAttendanceRate}% overall attendance rate).`
+            : "No faculty check-in records logged for today yet."
+        }
+        primaryAction={{ label: "Faculty Directory", href: "/faculty/student-directory" }}
+        secondaryAction={{ label: "My Classes", href: "/faculty/my-classes" }}
+      />
 
       {/* Error banner with retry */}
       {error && (

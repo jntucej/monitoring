@@ -117,14 +117,6 @@ function SysadminCronInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Manage and monitor scheduled jobs for campus operations."
-        contextLabel="Scheduled Jobs"
-        statusSummary="Review current scheduled jobs state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>
@@ -144,6 +136,15 @@ function SysadminCronInner() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Scheduled Jobs & Cron Daemons"
+        purpose="Monitor background scheduled tasks, inspect recent execution runs, and identify failing or stalled cron workers."
+        statusSummary={`${jobs.filter((j) => j.enabled).length} of ${jobs.length} cron jobs active with ${runs.filter((r) => r.status === "failed").length} failed runs in recent history.`}
+        why="Reliable background workers maintain attendance rollups, curfew checks, and automated database sync without manual intervention."
+        primaryAction={{ label: "Autonomous Sweeps", href: "/sysadmin/autonomous" }}
+        secondaryAction={{ label: "Docker Services", href: "/sysadmin/docker-services" }}
+      />
       <PageHeader
         title="Scheduled Jobs"
         subtitle={`${jobs.length} cron jobs · ${runs.length} recent runs`}

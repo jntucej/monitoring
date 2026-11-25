@@ -74,6 +74,7 @@ function EnrollmentCodeModal({ userId, userName, onClose }: { userId: string; us
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor parents for campus operations."
+        why="Use this view to audit parent access and remove stale or unverified links."
         contextLabel="Parents"
         statusSummary="Review current parents state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

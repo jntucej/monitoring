@@ -15,6 +15,7 @@ export default function ExamsPage() {
           purpose="Check exam timetables, hall ticket allocations, seat arrangements, and results"
           contextLabel="Examinations & Assessments"
           statusSummary="Access upcoming examination timetables, assessment schedules, and room allocations."
+          why="Review exam session dates, hall numbers, and required exam guidelines prior to reporting to examination centres."
           primaryAction={{ label: "Academic Marks", href: "/student/marks" }}
           secondaryActions={[
             { label: "Coursework Assignments", href: "/student/assignments" },

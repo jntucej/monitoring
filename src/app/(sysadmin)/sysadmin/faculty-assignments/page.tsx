@@ -144,6 +144,7 @@ function AdminFacultyAssignmentsInner() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Assign faculty to classes and subjects"
+        why="Use this view to audit coverage gaps before the next term begins."
         contextLabel="Assign faculty to classes and subjects"
         statusSummary="Review current assign faculty to classes and subjects state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

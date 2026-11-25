@@ -16,6 +16,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Audit completed clearance decisions and historical examination permit outcomes."
+        why="A historical decision trail ensures transparency and accountability for all granted or denied hall access clearances."
         contextLabel="Queue History"
         statusTone="info"
         statusSummary="Search and review past clearance verdicts, timestamps, and approver logs."

@@ -27,6 +27,7 @@ function StudentProfileSecurityInner() {
         severity="ok"
         statusPill="Protected Account"
         statusSummary="Monitor security posture, active login devices, password changes, and notification preferences."
+        why="Reviewing active sessions and keeping passwords updated protects your gate passes and academic records from unauthorized access."
         primaryAction={{ label: "Active Sessions", href: "/student/profile-security/sessions" }}
         secondaryAction={{ label: "Privacy & Consent", href: "/student/profile/privacy" }}
       />

@@ -9,6 +9,7 @@ export default function GateSchedulePage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor gates schedule for campus operations."
+        why="Schedule changes apply to the next gate shift and can be force-applied immediately if needed."
         contextLabel="Gates Schedule"
         statusSummary="Review current gates schedule state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

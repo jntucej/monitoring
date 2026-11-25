@@ -195,6 +195,7 @@ export default function PrincipalCasesPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Formal disciplinary, academic dishonesty, and institutional inquiry cases"
+        why="Formal case tracking preserves forensic documentation, disciplinary evidence, and procedural integrity for serious campus matters."
         contextLabel="Institutional Case Register"
         statusSummary={rows.length > 0 ? `${rows.length} institutional cases on file; click any case to inspect evidentiary provenance.` : "No active institutional cases on file."}
         primaryAction={{ label: "Emergency Command", href: "/principal/emergency" }}

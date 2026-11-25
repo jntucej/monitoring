@@ -2,6 +2,7 @@
 
 
 import { useEffect, useState } from "react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -160,7 +161,14 @@ export default function GateDetailPage() {
         data-event-mode={gateRules?.mode}
         className="space-y-6"
       >
-        <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-5">
+              <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Inspect a single gate's live status, recent scan log, and device health for that entry point."
+        contextLabel="Admin Gates"
+        why="Use this view to troubleshoot scanner faults or review unusual movement patterns at one gate."
+        statusSummary="Review the current state and take action below."
+      />
+<div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-5">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}

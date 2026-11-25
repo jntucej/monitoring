@@ -81,6 +81,7 @@ function OperatorStatsInner() {
         purpose="Track shift scanning metrics, hourly throughput volumes, and entry versus exit splits"
         contextLabel="Shift Analytics"
         statusSummary="Live scan volume and transit velocity metrics for your active duty window."
+        why="Monitoring hourly throughput helps identify peak transit congestion hours and ensures balanced lane utilization."
         primaryAction={{ label: "View Transactions", href: "/operator/transactions" }}
         secondaryAction={{ label: "Open Gate Desk", href: "/operator" }}
       />

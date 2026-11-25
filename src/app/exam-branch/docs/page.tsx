@@ -99,6 +99,7 @@ function ExamBranchDocsInner() {
       <ContextSituationBar
         roleLabel="Exam Branch"
         purpose="Access exam regulations, circular templates, and operational documentation."
+        why="Standardized circulars, regulations, and seating rubrics ensure uniform examination procedure across all departments."
         contextLabel="Exam Documentation"
         statusTone="info"
         statusSummary="Browse institutional guidelines, seating rubrics, and examination SOPs."

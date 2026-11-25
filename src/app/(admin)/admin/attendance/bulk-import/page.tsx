@@ -114,6 +114,7 @@ export default function AdminAttendanceBulkImportPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Import attendance entries for a date from CSV. Existing roll+date pairs are skipped."
+        why="Errors in the import surface as flagged rows before the data is committed — review them first."
         contextLabel="Import attendance entries for a date from CSV. Existing roll+date pairs are skipped."
         statusSummary="Review current import attendance entries for a date from csv. existing roll+date pairs are skipped. state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

@@ -293,6 +293,7 @@ const api = useApi();
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor staff for campus operations."
+        why="Use this view to audit staff access before a departmental reorganization."
         contextLabel="Staff"
         statusSummary="Review current staff state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

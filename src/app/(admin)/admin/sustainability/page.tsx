@@ -12,6 +12,7 @@ export default function SustainabilityPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Energy, water, and carbon-footprint tracking"
+        why="Metrics here feed the accreditation reports and the sustainability analytics dashboard."
         contextLabel="Energy, water, and carbon-footprint tracking"
         statusSummary="Review current energy, water, and carbon-footprint tracking state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

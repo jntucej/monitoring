@@ -5,6 +5,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import {Check, Loader2, RefreshCw, Save, UtensilsCrossed}  from "lucide-react";
 import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -94,6 +95,21 @@ function MessDefaultInner() {
 
   return (
     <div className="space-y-6">
+      <ContextSituationBar
+        roleLabel="Student"
+        purpose="Configure automated daily mess dietary preference and default meal accompaniments"
+        contextLabel="Default Meal Settings"
+        statusTone={current ? "ok" : "info"}
+        statusPill={current ? (current.primaryItem === "VEG" ? "Default: Veg" : "Default: Non-Veg") : "Not Configured"}
+        statusSummary={
+          current
+            ? `Your meal default is saved as ${current.primaryItem === "VEG" ? "Veg" : "Non-Veg"} with ${current.subItemIds?.length ?? 0} selected side items.`
+            : "No default set yet. Pick your preference to automatically pre-fill the dining window."
+        }
+        why="Setting defaults ensures your meal choice is automatically reserved every day even if you forget to open the daily dining selector."
+        primaryAction={{ label: "Today's Token", href: "/student/mess/token" }}
+        secondaryAction={{ label: "Mess Portal", href: "/student/mess" }}
+      />
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm font-medium text-text-secondary">Workspace</p>
       </div>

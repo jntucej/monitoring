@@ -20,6 +20,7 @@ export default function StudentMyEventsPage() {
         purpose="Manage event RSVPs, scan-in credentials, workshop registrations, and participation records"
         contextLabel="Campus Events & RSVPs"
         statusSummary="Browse campus events, verify attendance check-ins, and manage your booked slots."
+        why="Confirming RSVPs reserves your seat and generates venue check-in verification for co-curricular participation."
         primaryAction={{ label: "Campus Feed", href: "/student/campus" }}
         secondaryAction={{ label: "Full Calendar", href: "/student/calendar" }}
       />

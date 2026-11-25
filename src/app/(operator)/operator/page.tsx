@@ -90,6 +90,7 @@ export default function OperatorPage() {
             purpose="Daily operational hub for assigned entry points, campus transit policies, and shift handover"
             contextLabel="Gate Workspace"
             statusSummary="Check assigned gate duties, active pass queues, or claim an active terminal for your shift."
+            why="Claim an assigned gate to start optical badge scanning, check daily curfew schedules, or hand over ongoing logs to the next operator."
             primaryAction={{ label: "Open Gate Desk", href: "/operator/claim" }}
             secondaryAction={{ label: "Pass Verification", href: "/operator/pass-verification" }}
           />

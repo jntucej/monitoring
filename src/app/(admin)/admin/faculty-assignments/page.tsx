@@ -143,6 +143,7 @@ function AdminFacultyAssignmentsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Assign faculty to classes and subjects"
+        why="Assignment changes immediately affect attendance entry, marks entry, and correction request approvals."
         contextLabel="Assign faculty to classes and subjects"
         statusSummary="Review current assign faculty to classes and subjects state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

@@ -75,6 +75,7 @@ function VpDelegatedResponsibilitiesInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Manage temporary and standing delegations of approval authority to faculty or coordinators"
+        why="Configuring temporary signing authority ensures uninterrupted workflow processing during faculty or coordinator leaves."
         contextLabel="Authority Delegations"
         statusSummary="Configure temporary approval proxies, delegate specific workflows, and audit delegated actions."
         primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}

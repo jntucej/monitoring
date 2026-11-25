@@ -15,6 +15,7 @@ function OperatorNotificationsInner() {
         purpose="Real-time alert dispatch center for high-priority gate incidents, pass alerts, and system pings"
         contextLabel="Operator Notifications"
         statusSummary="Monitor real-time security alerts, curfew breach warnings, and hardware telemetry pings."
+        why="Pings notify you when students trigger invalid pass warnings, when guard coverage shifts, or when supervisors issue alerts."
         primaryAction={{ label: "Announcements", href: "/operator/announcements" }}
         secondaryAction={{ label: "Exceptions Register", href: "/operator/exceptions" }}
       />

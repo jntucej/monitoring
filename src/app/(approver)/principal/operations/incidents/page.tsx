@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Investigate campus-wide security incidents, perimeter breaches, and disciplinary emergencies"
+        why="Prompt incident investigation mitigates campus security vulnerabilities and ensures student disciplinary matters are handled fairly."
         contextLabel="Security Incidents Center"
         statusSummary="Review serious institutional incident reports, coordinate emergency actions, and audit investigations."
         severity="critical"

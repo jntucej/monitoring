@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone, LifeBuoy } from "lucide-react";
+import { ArrowLeft, Mail, Phone, LifeBuoy, ChevronDown } from "lucide-react";
 import { COLLEGE } from "@/lib/college-config";
 import { EmailLink, PhoneLink } from "@/components/shared/ContactLink";
 import {
@@ -79,14 +79,30 @@ export default function HelpPage() {
       </h1>
       <p className="mt-3 text-text-secondary">
         Sign-in help, account recovery, and support contacts for the{" "}
-        {COLLEGE.officialName} campus portal.
+        {COLLEGE.officialName} campus portal. Click any question below to expand the answer.
       </p>
+
+      <div className="mt-4 flex flex-wrap gap-2 text-xs">
+        <Link
+          href="/login"
+          className="rounded-lg bg-action-primary px-3 py-1.5 font-semibold text-white hover:opacity-90"
+        >
+          Go to Sign In
+        </Link>
+        <Link
+          href="/bootstrap"
+          className="rounded-lg border border-border bg-bg-surface px-3 py-1.5 font-medium text-text-primary hover:bg-bg-elevated"
+        >
+          Activate New Account
+        </Link>
+      </div>
 
       <section className="mt-8 divide-y divide-border border-y border-border">
         {FAQS.map((f) => (
-          <details key={f.q} className="py-4">
-            <summary className="cursor-pointer list-none font-semibold">
-              {f.q}
+          <details key={f.q} className="group py-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold">
+              <span>{f.q}</span>
+              <ChevronDown className="h-4 w-4 shrink-0 text-text-muted transition-transform group-open:rotate-180" aria-hidden="true" />
             </summary>
             <p className="mt-2 text-sm text-text-secondary">{f.a}</p>
           </details>
@@ -119,7 +135,7 @@ export default function HelpPage() {
           <Link href="/support" className="text-action-primary underline">
             Support
           </Link>{" "}
-          page to raise a ticket.
+          page to raise a tracked ticket directly with campus IT and administration.
         </p>
       </div>
     </main>

@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-import {User as UserIcon, Loader2, Save}  from "lucide-react";
+import { User as UserIcon, Loader2, Save, Info, AlertCircle } from "lucide-react";
 import { ParticleField } from "@/components/cinematic/ParticleField";
 import { AmbientGlow } from "@/components/cinematic/AmbientGlow";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { HelpTip } from "@/components/ui/help-tip";
 
 interface Profile {
   id: string; name: string; email: string; phone: string | null; role: string;
@@ -91,6 +93,21 @@ export function ProfilePersonalPanel() {
       <ParticleField color="var(--unit-c)" />
       <AmbientGlow color="rgba(139,92,246,0.18)" />
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 space-y-6">
+        <ContextSituationBar
+          roleLabel={roleLabel(profile.role)}
+          purpose="Review your registered campus identity, contact phone number, and institutional scope."
+          contextLabel="Personal Profile"
+          statusTone={profile.status === "ACTIVE" ? "ok" : "warn"}
+          statusPill={`Status: ${profile.status}`}
+          statusSummary={
+            profile.status === "ACTIVE"
+              ? "Your profile is active and synced with campus turnstiles and security gates."
+              : "Account status requires review. Contact administrator if gate scanning fails."
+          }
+          primaryAction={{ label: "Security Hub", href: "/security" }}
+          secondaryAction={{ label: "Settings", href: "/settings" }}
+        />
+
         <div className="surface-card p-6 flex items-center gap-5">
           <div className="w-6 h-6 rounded-card bg-action-success flex items-center justify-center text-white text-2xl font-bold">{initials || <UserIcon className="size-6" />}</div>
           <div className="flex-1 min-w-4">
@@ -104,24 +121,39 @@ export function ProfilePersonalPanel() {
         </div>
 
         <form onSubmit={saveName} className="surface-card p-6 space-y-5">
-          <h2 className="text-lg font-semibold text-text-primary">Personal details</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-text-primary">Personal details</h2>
+            <HelpTip text="Editable details sync immediately. Institutional identifiers and official email require administrative approval." />
+          </div>
           <div>
-            <label className="block text-sm mb-1 text-text-secondary">Full name</label>
+            <div className="flex items-center gap-1.5 mb-1">
+              <label className="block text-sm text-text-secondary">Full name</label>
+              <HelpTip text="Used across live security logs, parent alerts, and printable passes." />
+            </div>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" required minLength={2} maxLength={100} />
             <p className="text-xs text-text-muted mt-1">This is the name shown on gate passes, logs and the campus dashboard.</p>
           </div>
           <div>
-            <label className="block text-sm mb-1 text-text-secondary">Email</label>
+            <div className="flex items-center gap-1.5 mb-1">
+              <label className="block text-sm text-text-secondary">Email</label>
+              <HelpTip text="Official college email address tied to account authentication." />
+            </div>
             <Input value={profile.email} disabled />
             <p className="text-xs text-text-muted mt-1">Email changes require administrator approval.</p>
           </div>
           <div>
-            <label className="block text-sm mb-1 text-text-secondary">Phone</label>
+            <div className="flex items-center gap-1.5 mb-1">
+              <label className="block text-sm text-text-secondary">Phone</label>
+              <HelpTip text="Used for automated gate-entry SMS alerts and emergency security broadcasts." />
+            </div>
             <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 98765 43210" type="tel" />
           </div>
           {profile.uniqueId && (
             <div>
-              <label className="block text-sm mb-1 text-text-secondary">{profile.role === "student" ? "Roll number" : "Employee ID"}</label>
+              <div className="flex items-center gap-1.5 mb-1">
+                <label className="block text-sm text-text-secondary">{profile.role === "student" ? "Roll number" : "Employee ID"}</label>
+                <HelpTip text="Institutional primary key bound to RFID cards and biometric scanners." />
+              </div>
               <Input value={profile.uniqueId} disabled />
             </div>
           )}

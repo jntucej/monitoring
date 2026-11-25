@@ -77,6 +77,7 @@ export default function MessReviewsPage() {
               ? `Reviewing meal satisfaction ratings and recent student comments for ${data.from} → ${data.to}.`
               : "Review student satisfaction distributions and feedback across breakfast, lunch, and dinner."
           }
+          why="Student feedback ratings directly influence recipe adjustments and help resolve hygiene or taste complaints before they escalate."
           severity="info"
           primaryAction={{ label: "Menu Management", href: "/mess/menu-management" }}
           secondaryActions={[

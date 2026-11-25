@@ -10,11 +10,12 @@ export default function AccessHubPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor access for campus operations."
-        contextLabel="Access"
-        statusSummary="Review current access state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Identity & Access Governance"
+        purpose="Central administrative routing hub for role-based access control, privilege escalations, and active session revocations."
+        statusSummary="RBAC policies active across all administrative, operational, and student portals with enforced security boundaries."
+        why="Access governance controls user privileges, prevents privilege creep, and protects institutional data through strict role boundaries."
+        primaryAction={{ label: "Manage Roles", href: "/sysadmin/roles" }}
+        secondaryAction={{ label: "Active Sessions", href: "/sysadmin/sessions" }}
       />
       <div>
         <p className="text-2xl font-bold tracking-tight text-text-primary">Access & Identity Governance</p>

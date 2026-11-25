@@ -14,6 +14,7 @@ export default function SysadminMessTodayPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Today's menu, token status, and serving counts"
+        why="Use this view to cross-check student-facing data before mess operations closes for the day."
         contextLabel="Today's menu, token status, and serving counts"
         statusSummary="Review current today's menu, token status, and serving counts state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

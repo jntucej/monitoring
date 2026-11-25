@@ -205,6 +205,7 @@ function OperatorLookupInner() {
         purpose="Lookup student records, current hosteller or day-scholar campus state, and approved passes"
         contextLabel="Student & Pass Lookup"
         statusSummary="Search any student by roll number or name to verify campus status, active passes, and hostel blocks."
+        why="Use lookup when students do not have their ID cards ready, need curfew status checked, or report missing permission records."
         primaryAction={{ label: "Manual Entry", href: "/operator/manual-entry" }}
         secondaryAction={{ label: "Pass Verification", href: "/operator/pass-verification" }}
       />

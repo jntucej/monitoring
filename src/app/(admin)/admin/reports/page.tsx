@@ -192,6 +192,7 @@ export default function AdminReportsPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor reports for campus operations."
+        why="Exported reports match the data shown on each dashboard as of the report timestamp."
         contextLabel="Reports"
         statusSummary="Review current reports state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

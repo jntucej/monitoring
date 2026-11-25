@@ -168,6 +168,7 @@ export default function HodTodayPage() {
         <ContextSituationBar
           roleLabel="Head of Department"
           purpose="Oversee department academic operations, faculty attendance, and escalation queues."
+          why="HOD oversight ensures departmental curriculum delivery, faculty staffing, and urgent permission escalations stay on track."
           contextLabel="Leadership Console"
           statusTone={pending > 0 ? "warn" : "ok"}
           statusPill={pending > 0 ? `${pending} pending` : "All clear"}

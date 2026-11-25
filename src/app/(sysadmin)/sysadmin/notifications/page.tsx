@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -26,16 +27,25 @@ export default function NotificationsPage() {
       {loading && !data ? (
         <Skeleton className="h-64 w-full" />
       ) : error && !data ? (
-        <div
-          role="alert"
-          className="surface-card p-4 text-sm"
-          style={{
-            borderColor: "var(--action-danger)",
-            background: "color-mix(in srgb, var(--action-danger) 10%, transparent)",
-            color: "var(--action-danger)",
-          }}
-        >
-          Failed to load Notifications: {String(error)}
+        <div>
+          <ContextSituationBar
+            roleLabel="System Admin"
+            purpose="Manage the global notification pipeline: delivery logs, channel health, and queue state."
+            contextLabel="Sysadmin Notifications"
+            why="Stalled notifications here will silently block student and staff alerts until the pipeline is cleared."
+            statusSummary="Review the current state and take action below."
+          />
+          <div
+            role="alert"
+            className="surface-card p-4 text-sm"
+            style={{
+              borderColor: "var(--action-danger)",
+              background: "color-mix(in srgb, var(--action-danger) 10%, transparent)",
+              color: "var(--action-danger)",
+            }}
+          >
+            Failed to load Notifications: {String(error)}
+          </div>
         </div>
       ) : data ? (
         <NotificationsContent data={data} onRowClick={setSelected} />

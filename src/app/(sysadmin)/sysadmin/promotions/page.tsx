@@ -15,6 +15,7 @@
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { PromotionsContent } from "@/components/sysadmin/domains/identity/PromotionsContent";
 import type { PromotionsData } from "@/components/sysadmin/domains/identity/types";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 export default function PromotionsPage() {
   const { data, loading, error } = useDashboardData<PromotionsData>(
@@ -22,5 +23,17 @@ export default function PromotionsPage() {
     { ttlMs: 90_000, pollMs: 30_000 },
   );
 
-  return <PromotionsContent data={data} loading={loading} error={error} />;
+  return (
+    <div className="space-y-4">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        purpose="Manage the promotion and graduation workflow: auto-flagging alumni accounts and archiving records."
+        contextLabel="Promotions & Alumni"
+        why="Accounts promoted here are moved to the alumni view and lose active portal access."
+        statusSummary="Review pending, approved, and rejected promotions across all departments."
+        primaryAction={{ label: "Alumni", href: "/sysadmin/alumni" }}
+      />
+      <PromotionsContent data={data} loading={loading} error={error} />
+    </div>
+  );
 }

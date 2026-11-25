@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Caretaker"
         purpose="Review and manage hostel complaint queues, triage student facility issues, and track resolutions"
+        why="Triage complaints quickly so student living concerns are resolved or assigned to facility workers without delay."
         contextLabel="Caretaker Complaint Queue"
         statusSummary="Triage student facility complaints, assign maintenance personnel, and close resolved issues."
         severity="info"

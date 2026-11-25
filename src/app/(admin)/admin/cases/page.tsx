@@ -164,6 +164,7 @@ export default function AdminCasesPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="The case register behind the institutional decision architecture"
+        why="Case status here is mirrored to OIE, vice-principal, and guardian dashboards in real time."
         contextLabel="The case register behind the institutional decision architecture"
         statusSummary="Review current the case register behind the institutional decision architecture state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

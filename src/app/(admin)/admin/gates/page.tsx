@@ -161,6 +161,7 @@ export default function AdminGatesPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor gates for campus operations."
+        why="Use this view to troubleshoot scanner faults or review unusual movement patterns at one gate."
         contextLabel="Gates"
         statusSummary="Review current gates state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

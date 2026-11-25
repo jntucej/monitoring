@@ -20,6 +20,7 @@ export default function GateWallPage() {
         purpose="Visual command wall providing instantaneous high-level status across all campus access portals"
         contextLabel="Gate Wall Matrix"
         statusSummary="Comprehensive multi-gate operational wall for perimeter security and incident response dispatch."
+        why="Wall view presents side-by-side post readiness, scan rates, and barrier health to enable rapid incident dispatch."
         primaryAction={{ label: "Active Gates", href: "/supervisor/gates/live" }}
         secondaryAction={{ label: "Security Escalations", href: "/supervisor/response/escalations" }}
       />

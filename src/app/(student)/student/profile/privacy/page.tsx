@@ -119,6 +119,7 @@ export default function PrivacyPage() {
         severity="info"
         statusPill={loading ? "Loading…" : `${consents.filter((c) => c.granted).length} scopes active`}
         statusSummary="Exercise control over data processing authorizations, notification channels, and telemetry."
+        why="Optional consents can be granted or revoked at any time. Core service consent is mandatory for student account and campus turnstile access."
         primaryAction={{ label: "Profile & Security", href: "/student/profile-security" }}
         secondaryAction={{ label: "Student Home", href: "/student" }}
       />

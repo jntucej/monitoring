@@ -11,6 +11,7 @@ export default function AnnouncementsPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Publish, schedule, and manage campus-wide notices"
+        why="Every notice you post appears instantly in user inboxes and the campus home screen."
         contextLabel="Publish, schedule, and manage campus-wide notices"
         statusSummary="Review current publish, schedule, and manage campus-wide notices state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

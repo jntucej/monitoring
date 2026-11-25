@@ -91,6 +91,7 @@ function AdminDepartmentsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Department structure and headcount across campus"
+        why="Every class, attendance log, and faculty role resolves to the department record defined here."
         contextLabel="Department structure and headcount across campus"
         statusSummary="Review current department structure and headcount across campus state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

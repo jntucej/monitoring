@@ -71,6 +71,7 @@ function VpAnalyticsInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Executive analytics dashboard tracking approval velocities, SLA adherence, and transit volumes"
+        why="Approval velocity and SLA telemetry reveal departmental bottlenecks before they impact student schedules or campus operations."
         contextLabel="Vice Principal Analytics"
         statusSummary="High-level operational metrics across academic departments, gate operations, and approval chains."
         primaryAction={{ label: "Decision History", href: "/vice-principal/decision-history" }}

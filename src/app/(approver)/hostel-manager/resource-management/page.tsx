@@ -149,6 +149,7 @@ function HostelManagerResourceManagementInner() {
       <ContextSituationBar
         roleLabel="Hostel Manager"
         purpose="Manage hostel facilities, monitor room resources and utility stock, and audit block assets"
+        why="Tracking block assets and supplies prevents shortages in bedding, utilities, and daily hostel hardware."
         contextLabel={`Hostel Resources · ${gates.length} Gates / ${onCampusTotal} Present`}
         statusSummary={`${studentOnCampus} students on campus across active gates. Resource inventories and utilities tracked for all blocks.`}
         severity="info"

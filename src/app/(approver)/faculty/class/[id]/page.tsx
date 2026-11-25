@@ -105,6 +105,7 @@ function ClassRosterInner() {
       <ContextSituationBar
         roleLabel="Faculty · Roster"
         purpose="Review enrolled students, profile summaries, and roll identifiers for this class."
+        why="Inspecting individual class rosters ensures accurate attendance recording and direct student communication."
         contextLabel={details ? `Year ${details.year} · ${details.section}` : "Class Roster"}
         statusTone="info"
         statusPill={`${students.length} students`}

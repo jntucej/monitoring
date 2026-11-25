@@ -94,6 +94,7 @@ function FacultyReportsInner() {
       <ContextSituationBar
         roleLabel="Faculty · Reports"
         purpose="Analyze class feedback, academic reviews, and departmental summaries."
+        why="Evaluating student course feedback informs pedagogical improvements and department review cycles."
         contextLabel="Reports & Feedback"
         statusTone="info"
         statusSummary="Monitor academic evaluations, class sentiment reviews, and teaching reports."

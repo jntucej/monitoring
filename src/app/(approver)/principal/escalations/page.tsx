@@ -103,6 +103,7 @@ export default function EscalationsPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Adjudicate policy-driven escalations requiring executive clearance and justification"
+        why="Executive review addresses multi-tier policy bottlenecks, unusual student leave cases, and cross-department disputes."
         contextLabel="Policy Escalations Register"
         statusSummary={rows.length > 0 ? `${rows.length} policy escalations awaiting executive resolution with root-cause context.` : "Zero pending policy escalations."}
         severity={rows.length > 0 ? "warn" : "ok"}

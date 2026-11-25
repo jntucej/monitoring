@@ -22,6 +22,7 @@ export default function MyTokenPage() {
         severity="ok"
         statusPill="Active Token"
         statusSummary="Show this QR token to counter staff or read your student roll number for verification."
+        why="Event meal tokens grant entry and special catering redemption at the counter during the scheduled event window."
         primaryAction={{ label: "Regular Tokens", href: "/student/mess/token" }}
         secondaryAction={{ label: "Mess Landing", href: "/student/mess" }}
       />

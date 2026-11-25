@@ -37,8 +37,16 @@ function StudentIdInner() {
         primaryAction={{ label: "My Gate Passes", href: "/student/passes" }}
         secondaryAction={{ label: "New Pass Request", href: "/student/permissions/new" }}
       />
-      <div className="max-w-md mx-auto sm:max-w-none">
+      <div className="max-w-md mx-auto sm:max-w-none space-y-3">
         <DigitalIdCard />
+        <div className="surface-card bg-bg-surface p-3.5 text-[11px] text-text-muted space-y-1">
+          <p>
+            <strong className="text-text-secondary">Save QR as PNG:</strong> Downloads a copy for offline use when mobile data is weak at the gate.
+          </p>
+          <p>
+            <strong className="text-text-secondary">Re-issue QR:</strong> Immediately invalidates your previous QR token and generates a new signed code (use if you shared a screenshot).
+          </p>
+        </div>
       </div>
 
     </div>

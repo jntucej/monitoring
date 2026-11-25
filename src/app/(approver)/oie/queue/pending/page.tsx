@@ -18,6 +18,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Review and adjudicate pending candidate exam clearance requests."
+        why="Prompt adjudication of pending clearance requests ensures hall tickets and gate barcodes are active before sessions start."
         contextLabel="Pending Exam Clearances"
         statusTone="info"
         statusSummary="Adjudicate exam-day hall permits and student clearance approvals."

@@ -121,6 +121,7 @@ export default function AttentionPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Institutional attention register highlighting urgent, overdue, and high-impact matters"
+        why="The attention queue prioritizes high-impact institutional incidents, pending disciplinary actions, and emergency alerts."
         contextLabel="Institutional Attention Queue"
         statusSummary={items.length > 0 ? `${items.length} critical items requiring your immediate executive intervention.` : "All institutional attention items cleared."}
         severity={items.some((i) => i.severity === "CRITICAL") ? "critical" : items.length > 0 ? "warn" : "ok"}

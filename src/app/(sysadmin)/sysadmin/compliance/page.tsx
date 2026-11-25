@@ -11,11 +11,12 @@ export default function CompliancePage() {
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor compliance for campus operations."
-        contextLabel="Compliance"
-        statusSummary="Review current compliance state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Regulatory Compliance & Privacy"
+        purpose="Configure institutional privacy parameters, biometric data retention rules, and audit retention policies."
+        statusSummary="Institutional compliance framework active with enforced biometric consent controls and data protection safeguards."
+        why="Strict compliance posture ensures institutional adherence to digital data protection acts and higher education regulatory mandates."
+        primaryAction={{ label: "Data Consent", href: "/sysadmin/consent" }}
+        secondaryAction={{ label: "Audit Logs", href: "/sysadmin/audit" }}
       />
         <ComplianceSettings />
       </div>

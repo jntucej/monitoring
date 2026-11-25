@@ -214,6 +214,7 @@ function DeputyWardenDelegatedApprovalsInner() {
       <ContextSituationBar
         roleLabel="Deputy Warden"
         purpose="Review permission requests within explicit warden delegation scope and escalate out-of-scope requests"
+        why="Acting under delegation allows swift movement approval while safeguarding institutional policies and limits."
         contextLabel={`Delegated Scope · ${delegationActive ? "Active" : "Read-only"}`}
         statusSummary={
           delegationActive

@@ -624,6 +624,7 @@ const api = useApi();
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Manage and monitor students for campus operations."
+        why="Use this view to detect and repair data inconsistencies before the next academic term."
         contextLabel="Students"
         statusSummary="Review current students state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

@@ -79,6 +79,7 @@ function FacultyInner() {
         <ContextSituationBar
           roleLabel="Faculty · Class Teacher"
           purpose="Monitor assigned class permissions, attendance status, and student academic routing."
+          why="Assigning a class section enables you to review student leaves and monitor daily cohort attendance."
           contextLabel="Faculty Workspace"
           statusTone="warn"
           statusPill="Unassigned"
@@ -114,6 +115,7 @@ function FacultyInner() {
       <ContextSituationBar
         roleLabel="Faculty · Class Teacher"
         purpose="Monitor assigned class permissions, attendance status, and student academic routing."
+        why="Class teacher approval is the primary filter for student gate leaves, event passes, and attendance tracking."
         contextLabel={activeClass ? `Year ${activeClass.year} · ${activeClass.section}` : "All Assigned Classes"}
         statusTone="info"
         statusSummary={

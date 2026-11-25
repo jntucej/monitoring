@@ -13,6 +13,7 @@ function PeopleRegister() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Comprehensive directory of students, faculty, and administrative staff across the institution"
+        why="The institutional people register provides immediate access to student profiles, faculty credentials, and transit history records."
         contextLabel="Institutional People Register"
         statusSummary="Search and inspect individual records, academic departments, hostel allocations, and transit histories."
         primaryAction={{ label: "Assignment Tree", href: "/principal/people/assignment-tree" }}

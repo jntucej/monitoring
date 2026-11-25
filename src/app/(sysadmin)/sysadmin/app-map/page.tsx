@@ -126,11 +126,12 @@ function AppMapInner() {
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor application map for campus operations."
-        contextLabel="Application Map"
-        statusSummary="Review current application map state and take action below."
+        contextLabel="Application Route Architecture"
+        purpose="Inspect the live route map, verify RBAC authorization boundaries, and trace client-side API contracts across all views."
+        statusSummary={`${data?.pageCount ?? 0} application routes cataloged across student, approver, operator, and administrative domains.`}
+        why="Auditing route trees and permission scopes ensures no unprotected endpoints or broken navigation pathways exist in production."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        secondaryAction={{ label: "Audit Logs", href: "/sysadmin/audit" }}
       />
       <PageHeader
         title="Application Map"

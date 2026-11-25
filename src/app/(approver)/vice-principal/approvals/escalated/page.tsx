@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="High-priority review for requests escalated by HODs, wardens, or SLA timeouts"
+        why="Intervening on escalated items resolves departmental deadlocks and upholds consistent institutional standards."
         contextLabel="Escalated Approvals Ledger"
         statusSummary="Review urgent approval escalations requiring Vice Principal executive intervention."
         severity="warn"

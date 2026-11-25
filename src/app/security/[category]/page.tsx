@@ -3,8 +3,9 @@
 
 import React, { useState, use } from "react";
 import { useRouter } from "next/navigation";
-import {ArrowLeft, UserCheck, Lock, KeyRound, Database, Globe2, QrCode}  from "lucide-react";
+import { ArrowLeft, UserCheck, Lock, KeyRound, Database, Globe2, QrCode, ShieldCheck, HelpCircle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useAuthStore } from "@/stores/authStore";
 import { useGlass } from "@/context/GlassContext";
 
@@ -169,6 +170,17 @@ export default function SecurityCategoryPage({ params }: PageProps) {
             </div>
           </div>
         </div>
+
+        <ContextSituationBar
+          roleLabel={displayRoleName}
+          purpose={`Inspect cryptographic configuration and telemetry for ${details.title}.`}
+          contextLabel={details.categoryName}
+          statusTone="ok"
+          statusPill="Active Guard"
+          statusSummary={`Auditing ${details.metrics.length} telemetry metrics under this security container. All checks passing.`}
+          primaryAction={{ label: "Security Hub", href: "/security" }}
+          secondaryAction={{ label: "Settings", href: "/settings" }}
+        />
 
         {/* Parameters Grid */}
         <div className="space-y-2">

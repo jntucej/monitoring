@@ -16,6 +16,7 @@ export default function OccupancyPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Live campus presence and the digital twin view"
+        why="Occupancy data here drives curfew exceptions, exam-day access rules, and space planning."
         contextLabel="Live campus presence and the digital twin view"
         statusSummary="Review current live campus presence and the digital twin view state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

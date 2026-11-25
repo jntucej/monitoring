@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Final executive review for high-risk exceptions, emergency passes, and policy escalations"
+        why="Escalated permissions involve boundary exceptions, disciplinary flags, or institutional risks requiring executive sign-off."
         contextLabel="Escalated Approvals Queue"
         statusSummary="Executive adjudication queue for tickets escalated past standard departmental thresholds."
         severity="warn"

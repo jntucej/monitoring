@@ -188,6 +188,7 @@ function ExamBranchRecordsInner() {
       <ContextSituationBar
         roleLabel="Exam Branch"
         purpose="Search and inspect student hall registrations, historical admit cards, and clearance logs."
+        why="Accurate archival of student examination permits protects the institution against enrollment discrepancies and appeals."
         contextLabel="Exam Records"
         statusTone="info"
         statusPill={`${requests.length} records`}

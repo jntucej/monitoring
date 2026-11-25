@@ -175,11 +175,12 @@ export default function SysAdminAccessKeysPage() {
       <div className="space-y-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor access keys for campus operations."
-        contextLabel="Access Keys"
-        statusSummary="Review current access keys state and take action below."
+        contextLabel="Enrollment Keys & Tokens"
+        purpose="Issue, audit, and revoke single-use enrollment credentials and administrative access tokens for student and staff onboarding."
+        statusSummary={`${codes.length} enrollment keys tracked with ${codes.filter((c) => !c.used_at && new Date(c.expires_at) > new Date()).length} currently active and unredeemed.`}
+        why="Enrollment keys permit users to claim official identities and link devices; stale or exposed keys must be revoked immediately."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        secondaryAction={{ label: "Access Governance", href: "/sysadmin/access" }}
       />
         <div className="flex items-center gap-3">
           <div className="size-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">

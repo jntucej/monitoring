@@ -78,6 +78,7 @@ export default function PrincipalDepartmentDetailPage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Inspect specific academic department metrics, faculty composition, and student enrollments"
+        why="Granular department audits reveal faculty workload distributions, student attendance health, and pending permission volumes."
         contextLabel={dept ? `Department Scope · ${dept.name} (${dept.code})` : "Department Scope"}
         statusSummary={dept ? `${deptPerms.length} pending permissions, ${deptFlagged.length} flagged attendance, and ${deptLate.length} late arrivals.` : "Loading department metrics..."}
         primaryAction={{ label: "All Departments", href: "/principal/people/departments" }}

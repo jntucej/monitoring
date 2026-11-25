@@ -69,6 +69,7 @@ function AdminKbInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Ingest policy and SOP documents into the on-campus RAG knowledge base"
+        why="Edits appear immediately in the help center and the AI assistant's answer corpus."
         contextLabel="Ingest policy and SOP documents into the on-campus RAG knowledge base"
         statusSummary="Review current ingest policy and sop documents into the on-campus rag knowledge base state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

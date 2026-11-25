@@ -8,6 +8,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Deputy Warden"
         purpose="Review escalation timeline, assess hostel disciplinary or safety complaints, and take corrective action"
+        why="Inspecting specific grievances ensures evidence, caretaker notes, and student statements are fully weighed before closing."
         contextLabel="Complaint Detail & Escalation"
         statusSummary="Inspect incident chronology, record warden notes, and advance disciplinary or safety complaint resolutions."
         severity="info"

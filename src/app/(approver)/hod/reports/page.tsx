@@ -9,6 +9,7 @@ export default function ReportsPage() {
       <ContextSituationBar
         roleLabel="Head of Department"
         purpose="Generate departmental analytics, academic metrics, and student performance summaries."
+        why="Analyzing attendance trends and pass metrics highlights systemic learning gaps and departmental accreditation indicators."
         contextLabel="Department Analytics"
         statusTone="info"
         statusSummary="Audit attendance rates, course evaluations, and departmental compliance reports."

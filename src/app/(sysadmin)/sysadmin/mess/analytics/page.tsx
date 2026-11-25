@@ -18,6 +18,7 @@ export default function SysadminMessAnalyticsPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Historical meal-day counts — declared vs confirmed vs no-show"
+        why="Use these trends to audit vendor settlement and flag under- or over-provisioning."
         contextLabel="Historical meal-day counts — declared vs confirmed vs no-show"
         statusSummary="Review current historical meal-day counts — declared vs confirmed vs no-show state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

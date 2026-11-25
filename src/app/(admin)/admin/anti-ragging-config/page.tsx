@@ -41,6 +41,7 @@ export default function AntiRaggingConfigPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor anti ragging config for campus operations."
+        why="Configurations here power the /student/anti-ragging reporting flow and OIE decisioning."
         contextLabel="Anti Ragging Config"
         statusSummary="Review current anti ragging config state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

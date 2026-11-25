@@ -293,6 +293,7 @@ function AdminStudentsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Full student roster with department, year, and hostel state"
+        why="Edit fields here with care — attendance % and pass eligibility update live for that student."
         contextLabel="Full student roster with department, year, and hostel state"
         statusSummary="Review current full student roster with department, year, and hostel state state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

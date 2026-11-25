@@ -94,6 +94,7 @@ function StaffRequestsInner() {
       <ContextSituationBar
         roleLabel="Campus Staff"
         purpose="Monitor pending staff leave requests, approvals, and workflow routing."
+        why="Overseeing leave requests maintains departmental operational coverage and tracks pending supervisor endorsements."
         contextLabel="Leave Request Management"
         statusTone={n > 0 ? "warn" : "ok"}
         statusPill={`${n} Pending`}

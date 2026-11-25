@@ -52,6 +52,7 @@ function AdminEventsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Upcoming campus events and registration volume"
+        why="Event pass overrides and curfew exceptions are generated from the data on this page."
         contextLabel="Upcoming campus events and registration volume"
         statusSummary="Review current upcoming campus events and registration volume state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

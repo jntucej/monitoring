@@ -15,6 +15,7 @@ function OperatorPasswordInner() {
         purpose="Update operator account password and authentication credentials"
         contextLabel="Account Security"
         statusSummary="Ensure terminal and account security by regularly maintaining your login credentials."
+        why="Updating passwords regularly protects security clearance levels and ensures gate logs are verifiably attributed."
         primaryAction={{ label: "Operator Profile", href: "/operator/profile" }}
         secondaryAction={{ label: "Kiosk PIN", href: "/operator/kiosk-pin" }}
       />

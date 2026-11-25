@@ -8,6 +8,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Hostel Manager"
         purpose="Manage hostel block complaints, assign housekeeping and maintenance repairs, and track resolution metrics"
+        why="Triaging grievances at the block level ensures swift facility fixes and maintains resident welfare."
         contextLabel="Hostel Complaints Console"
         statusSummary="Monitor and prioritize complaints submitted by residents in your assigned hostel blocks."
         severity="info"

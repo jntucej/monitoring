@@ -49,6 +49,7 @@ function SysadminRetentionInner() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Data-retention and de-provisioning policy definitions"
+        why="Policies applied here govern when historical records are archived or permanently deleted."
         contextLabel="Data-retention and de-provisioning policy definitions"
         statusSummary="Review current data-retention and de-provisioning policy definitions state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

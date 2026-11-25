@@ -66,6 +66,7 @@ const api = useApi();
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor faculty for campus operations."
+        why="Edit fields here to correct academic records; changes are logged and visible to HOD and OIE."
         contextLabel="Faculty"
         statusSummary="Review current faculty state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

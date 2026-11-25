@@ -129,6 +129,7 @@ function ExamBranchReportsInner() {
       <ContextSituationBar
         roleLabel="Exam Branch"
         purpose="Generate examination operational reports, hall occupancy metrics, and attendance analysis."
+        why="Exam branch performance reports inform department heads of clearance throughput, attendance rates, and pass volumes."
         contextLabel="Exam Reports"
         statusTone="info"
         statusSummary="Export pass volumes, clearance response times, and department-level exam analytics."

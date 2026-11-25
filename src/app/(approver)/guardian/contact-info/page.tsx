@@ -110,6 +110,7 @@ function ContactInfoInner() {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Maintain verified guardian contact numbers and account communication settings."
+        why="Verified phone numbers and addresses ensure automated SMS and emergency notifications reach guardians immediately."
         contextLabel="Guardian Profile & Contact"
         statusTone="info"
         statusPill={p?.status ? `Account: ${p.status}` : "Verified"}

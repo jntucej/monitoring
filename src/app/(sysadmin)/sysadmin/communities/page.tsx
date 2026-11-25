@@ -48,14 +48,6 @@ function SysadminCommunitiesInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Campus communities and moderation status"
-        contextLabel="Campus communities and moderation status"
-        statusSummary="Review current campus communities and moderation status state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>
@@ -64,6 +56,15 @@ function SysadminCommunitiesInner() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Campus Communities & Moderation"
+        purpose="Oversee student clubs, special interest groups, moderation controls, and peer community spaces."
+        statusSummary={`${rows.length} campus communities registered with ${rows.filter((r) => r.is_moderated).length} actively under administrative moderation.`}
+        why="Administrative oversight of student group channels ensures compliance with campus communication guidelines and safety codes."
+        primaryAction={{ label: "Campus Events", href: "/sysadmin/events" }}
+        secondaryAction={{ label: "Achievements", href: "/sysadmin/achievements" }}
+      />
       <PageHeader
         title="Communities"
         subtitle="Campus communities and moderation status"

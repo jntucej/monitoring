@@ -27,6 +27,7 @@ function SafetyInner() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Gate lockdown cockpit: secure / elevated / critical states plus the incident timeline"
+        why="Changes here must be reviewed carefully — they control real-world gate and access behavior."
         contextLabel="Gate lockdown cockpit: secure / elevated / critical states plus the incident timeline"
         statusSummary="Review current gate lockdown cockpit: secure / elevated / critical states plus the incident timeline state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

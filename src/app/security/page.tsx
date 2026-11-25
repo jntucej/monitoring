@@ -3,8 +3,9 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, ShieldAlert, ShieldQuestion, ArrowLeft, Lock, KeyRound, Database, Globe2, ServerCog, UserCheck, CheckCircle2, QrCode, Layers, ChevronRight } from "lucide-react";
+import { ShieldCheck, ShieldAlert, ShieldQuestion, ArrowLeft, Lock, KeyRound, Database, Globe2, ServerCog, UserCheck, CheckCircle2, QrCode, Layers, ChevronRight, HelpCircle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useAuthStore } from "@/stores/authStore";
 import { useGlass } from "@/context/GlassContext";
 import type { SecurityMode } from "@/context/GlassContext";
@@ -282,6 +283,21 @@ export default function SecurityPage() {
             )}
           </div>
         </div>
+
+        <ContextSituationBar
+          roleLabel={displayRoleName}
+          purpose="Inspect cryptographic session shields, network telemetry, and role authorization parameters."
+          contextLabel="Security Posture"
+          statusTone={mode === "secure" ? "ok" : mode === "elevated" ? "warn" : "critical"}
+          statusPill={p.label}
+          statusSummary={
+            mode === "secure"
+              ? "All active security layers are healthy. Your cryptographic tokens and role-based permissions are verified."
+              : p.note
+          }
+          primaryAction={{ label: "Change Password", href: "/settings/password" }}
+          secondaryAction={{ label: "Settings", href: "/settings" }}
+        />
 
         {/* Minimal Posture Banner */}
         <div className={`rounded-2xl border p-3.5 transition-all ${p.cls}`}>

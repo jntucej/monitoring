@@ -214,14 +214,6 @@ function AcademicStatusInner() {
   if (loading && !roster) {
     return (
       <div className="space-y-4 p-6">
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Manage and monitor academic status for campus operations."
-        contextLabel="Academic Status"
-        statusSummary="Review current academic status state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
         <Skeleton className="h-6 w-64" />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-48 w-full" />
@@ -244,6 +236,15 @@ function AcademicStatusInner() {
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Academic Status Governance"
+        purpose="Audit, override, and reconcile student academic standing to enforce prerequisite gates and outpass privileges."
+        statusSummary={`${rosterData.totalStudents} students tracked across departments with ${rosterData.totalFlagged} active academic flags requiring oversight.`}
+        why="Student academic status determines gate access privileges, outpass eligibility, and automated examination hall clearances across campus."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "Classes & Batches", href: "/sysadmin/classes" }}
+      />
       {/* Header + stats */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>

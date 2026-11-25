@@ -103,6 +103,7 @@ function ReadOnlyCard({
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage institutional settings. Sysadmin-only sections are read-only here."
+        why="Every change here propagates to gate, hostel, mess, and academic dashboards across the entire campus."
         contextLabel="Manage institutional settings. Sysadmin-only sections are read-only here."
         statusSummary="Review current manage institutional settings. sysadmin-only sections are read-only here. state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

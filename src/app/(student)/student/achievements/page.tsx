@@ -23,6 +23,7 @@ export default function AchievementsPage() {
         purpose="Review your academic milestones, badges, personal goals, and campus contributions"
         contextLabel="Achievements & Milestones"
         statusSummary="Track your personal development progress, milestone badges, and semester contributions."
+        why="Milestones and contribution portfolios document co-curricular excellence for campus awards and placement credentials."
         primaryAction={{ label: "Semester Recap", href: "/student/recap" }}
         secondaryAction={{ label: "Student Home", href: "/student" }}
       />

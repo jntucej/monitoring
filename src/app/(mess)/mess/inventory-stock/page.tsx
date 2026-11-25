@@ -126,6 +126,7 @@ function MessInventoryStockInner() {
             ? `${d.total} items active (${d.primaryCount} primary menu items, ${items.reduce((s, i) => s + i.scheduledDays, 0)} scheduled day allocations).`
             : "Review kitchen stock levels, scheduled item allocations, and supply readiness."
         }
+        why="Auditing ingredient stock levels prevents kitchen runouts during active meal hours and initiates timely restock requests."
         severity="info"
         primaryAction={{ label: "Operational Requests", href: "/mess/operational-requests" }}
         secondaryActions={[

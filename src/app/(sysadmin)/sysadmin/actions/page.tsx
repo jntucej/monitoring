@@ -168,6 +168,15 @@ export default function OperatorActionsPage() {
 
   return (
     <WidgetBoundary>
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Operator Action Approvals"
+        purpose="Adjudicate high-risk automated system triggers and manual operator actions requiring dual-authorization before execution."
+        statusSummary={`${rows.filter((r) => r.status === "pending").length} pending operator action items requiring manual review or execution gate clearance.`}
+        why="Dual authorization prevents unintended mass outpass terminations, unauthorized gate hardware overrides, and sensitive data changes."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "Alerts Desk", href: "/sysadmin/alerts" }}
+      />
       <PageHeader
         title="Automation Actions"
         subtitle="Approval gate for automated & manual operator actions — one-tap approve/reject"
@@ -326,14 +335,7 @@ export default function OperatorActionsPage() {
                       : "transparent",
                 }}
               >
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Approval gate for automated & manual operator actions — one-tap approve/reject"
-        contextLabel="Approval gate for automated & manual operator actions — one-tap approve/reject"
-        statusSummary="Review current approval gate for automated & manual operator actions — one-tap approve/reject state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
+
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">

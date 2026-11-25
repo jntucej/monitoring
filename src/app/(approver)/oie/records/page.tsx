@@ -276,6 +276,7 @@ function OieRecordsInner() {
       <ContextSituationBar
         roleLabel="Officer In-Charge of Examinations"
         purpose="Search and inspect examination hall permits, hall tickets, and verified candidate files."
+        why="Archived examination files and student permits serve as permanent proof of candidate standing and clearance validity."
         contextLabel="Exam Records"
         statusTone="info"
         statusPill={`${oieRows.length} records`}

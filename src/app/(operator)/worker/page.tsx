@@ -21,6 +21,7 @@ export default function WorkerPage() {
             statusTone="info"
             statusPill="Active Shift"
             statusSummary="View today's assigned tasks, track shift check-in times, and review open work orders."
+            why="Check your shift clock-in state, active work orders, and duty zones to ensure campus maintenance jobs are fulfilled."
             primaryAction={{ label: "View Shifts", href: "/worker/shifts" }}
             secondaryAction={{ label: "Work Orders", href: "/worker/work-orders" }}
           />

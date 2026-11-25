@@ -17,6 +17,7 @@ export default function ActivityPage() {
         purpose="Monitor recent campus interactions, timeline events, and task continuity"
         contextLabel="Activity & Timeline"
         statusSummary="Review your chronological activity timeline and resume in-flight campus tasks."
+        why="Activity tracking consolidates your recent pass submissions, disputes, and portal events to resume incomplete actions."
         primaryAction={{ label: "Gate Scan Log", href: "/student/history" }}
         secondaryAction={{ label: "Student Home", href: "/student" }}
       />

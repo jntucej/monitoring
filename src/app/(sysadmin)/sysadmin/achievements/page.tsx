@@ -50,14 +50,6 @@ function SysadminAchievementsInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Manage and monitor achievements for campus operations."
-        contextLabel="Achievements"
-        statusSummary="Review current achievements state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>
@@ -68,6 +60,15 @@ function SysadminAchievementsInner() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
+      <ContextSituationBar
+        roleLabel="System Admin"
+        contextLabel="Campus Achievement System"
+        purpose="Configure gamified campus milestones, monitor student milestone completions, and manage badge tier allocations."
+        statusSummary={`${earned.length} unlocked achievements and ${unearned.length} available tier badges configured in the campus engagement registry.`}
+        why="Student achievements incentivize campus participation, verified attendance milestones, and positive student community engagement."
+        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
+        secondaryAction={{ label: "Communities", href: "/sysadmin/communities" }}
+      />
       <PageHeader
         title="Achievements"
         subtitle={`${earned.length} earned · ${unearned.length} available`}

@@ -33,6 +33,7 @@ function StatusDot({ status, label, detail }: { status: ComponentStatus; label: 
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor health for campus operations."
+        why="Use this page first when any other admin surface starts returning errors or slow responses."
         contextLabel="Health"
         statusSummary="Review current health state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

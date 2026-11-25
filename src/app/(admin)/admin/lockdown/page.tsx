@@ -86,6 +86,7 @@ function AdminLockdownInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Broadcast or lift a campus-wide gate lockdown"
+        why="Broadcasting a lockdown freezes all gate passes instantly — use only for genuine emergencies."
         contextLabel="Broadcast or lift a campus-wide gate lockdown"
         statusSummary="Review current broadcast or lift a campus-wide gate lockdown state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

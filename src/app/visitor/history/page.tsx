@@ -12,8 +12,9 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import { Loader2, History, AlertTriangle, ArrowRight, Search } from "lucide-react";
+import { Loader2, History, AlertTriangle, ArrowRight, Search, HelpCircle } from "lucide-react";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { HelpTip } from "@/components/ui/help-tip";
 import type { VisitorsMineResponse, VisitorLogRow } from "../types";
 
 function fmtRange(l: VisitorLogRow): string {
@@ -113,6 +114,7 @@ function VisitorHistoryInner() {
             <div className="flex items-center gap-2 min-w-0">
               <History className="w-4 h-4 text-action-info shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Completed visits</span>
+              <HelpTip text="Historical visitor records are archived and kept for campus audit and compliance." />
             </div>
             <span className="text-xs text-text-muted shrink-0">{history.length} visit(s)</span>
           </div>

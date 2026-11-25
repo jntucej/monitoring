@@ -26,6 +26,7 @@ function NotificationsInner() {
       <ContextSituationBar
         roleLabel="Student Guardian / Parent"
         purpose="Monitor critical alerts, pass approval milestones, and emergency campus bulletins."
+        why="Guardian alerts keep parents immediately informed of unauthorized late returns, curfew warnings, or leave approvals."
         contextLabel="Guardian Alert Center"
         statusTone="info"
         statusSummary="Stay notified of gate scan events, pass decision updates, and institutional broadcasts for your wards."

@@ -100,6 +100,7 @@ function AdminSessionsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Monitor live JWT and refresh-token sessions and revoke stale or suspicious access."
+        why="Revoking a session here signs that device out immediately and logs the action to the audit trail."
         contextLabel="Active Sessions"
         statusTone={staleCount > 0 ? "warn" : "ok"}
         statusPill={staleCount > 0 ? `${staleCount} stale (>24h)` : `${rows.length} active`}

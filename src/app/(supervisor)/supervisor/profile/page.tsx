@@ -11,6 +11,7 @@ export default function ProfilePage() {
         purpose="Manage supervisor credentials, contact information, and duty preferences"
         contextLabel="Supervisor Profile"
         statusSummary="Review your supervisor account details, assigned guard zones, and security authority credentials."
+        why="Supervisor contact details are published to gate operators for instant dispatch and emergency communication."
         primaryAction={{ label: "Guard Shifts", href: "/supervisor/team/shifts" }}
         secondaryAction={{ label: "Supervisory Desk", href: "/supervisor" }}
       />

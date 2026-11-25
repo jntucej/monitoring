@@ -82,6 +82,7 @@ return (
           <ContextSituationBar
             roleLabel="Officer In-Charge of Examinations"
             purpose="Evaluate examination clearances, manage day-access permits, and resolve hall exceptions."
+            why="The OIE console provides central command over hall access permits, invigilator clearances, and emergency exam exceptions."
             contextLabel="Exam Cell Overview"
             statusTone={pendingCount > 0 ? "warn" : "ok"}
             statusPill={pendingCount > 0 ? `${pendingCount} pending` : "Clear"}

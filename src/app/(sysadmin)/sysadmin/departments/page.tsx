@@ -99,11 +99,12 @@ const api = useApi();
       <div className="space-y-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor departments for campus operations."
-        contextLabel="Departments"
-        statusSummary="Review current departments state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Department Governance & HODs"
+        purpose="Register academic departments, assign Head of Department (HOD) accounts, and review student-faculty ratios."
+        statusSummary={`${departments.length} academic departments registered with ${departments.reduce((acc, d) => acc + d.totalStudents, 0)} enrolled students.`}
+        why="HOD assignments establish the academic approval hierarchy for student outpass requests and examination attendance clearances."
+        primaryAction={{ label: "Classes & Sections", href: "/sysadmin/classes" }}
+        secondaryAction={{ label: "Faculty Assignments", href: "/sysadmin/faculty-assignments" }}
       />
         <div className="flex items-center justify-between">
           <div>

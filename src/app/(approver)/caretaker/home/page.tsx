@@ -32,6 +32,7 @@ export default function CaretakerPage() {
           <ContextSituationBar
             roleLabel="Caretaker"
             purpose="Maintain hostel facility operations, monitor physical infrastructure tasks, and oversee on-ground workers"
+            why="Tracking active maintenance requests and facility workers ensures prompt repairs and healthy hostel operations."
             contextLabel="Facilities & Maintenance Overview"
             statusSummary="Monitor real-time hostel maintenance boards, track urgent repairs, and coordinate facility tasks."
             severity="info"

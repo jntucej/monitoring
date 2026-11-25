@@ -61,6 +61,7 @@ const api = useApi();
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor workers for campus operations."
+        why="Changing a worker's PIN here takes effect on their kiosk device within seconds."
         contextLabel="Workers"
         statusSummary="Review current workers state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

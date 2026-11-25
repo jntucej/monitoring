@@ -135,6 +135,7 @@ function PassVerificationInner() {
         purpose="Verify student and visitor gate passes, approval signatures, and validity windows"
         contextLabel="Pass Verification Desk"
         statusSummary="Inspect QR digital passes, check active validity windows, and verify approver cryptographic signatures."
+        why="Validating pass authenticity ensures students and visitors only cross perimeter points within their authorized time slots and designated gates."
         primaryAction={{ label: "Search Pass", href: "/operator/lookup" }}
         secondaryAction={{ label: "Daily Transactions", href: "/operator/transactions" }}
       />

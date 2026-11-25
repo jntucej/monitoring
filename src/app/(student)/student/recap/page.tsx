@@ -47,6 +47,7 @@ ${r.completedGoals}/${r.totalGoals} goals completed`;
         severity="ok"
         statusPill={r.periodLabel}
         statusSummary={`${r.eventsRegistered} events attended, ${r.earnedAchievements.length} achievements earned, and ${r.completedGoals}/${r.totalGoals} goals finished.`}
+        why="Your recap synthesizes co-curricular involvement, community milestones, and participation stats for your personal student portfolio."
         primaryAction={{ label: "Achievements", href: "/student/achievements" }}
         secondaryAction={{ label: "Student Home", href: "/student" }}
       />

@@ -67,6 +67,7 @@ function StaffRequestStatusInner() {
       <ContextSituationBar
         roleLabel="Campus Staff"
         purpose="Track personal leave request progress, stage approvals, and decisions."
+        why="Checking ticket lifecycle details clarifies whether your leave is with HR, department head, or fully approved."
         contextLabel="Request Lifecycle"
         statusTone={((data as DataResponse | null)?.total ?? 0) > 0 ? "info" : "ok"}
         statusPill={`${(data as DataResponse | null)?.total ?? 0} Requests`}

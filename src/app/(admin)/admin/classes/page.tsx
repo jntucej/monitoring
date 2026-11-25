@@ -168,6 +168,7 @@ function AdminClassesInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Teaching groups by department, year, and section"
+        why="Renaming or retiring a class affects historical reports and live dashboards that reference it."
         contextLabel="Teaching groups by department, year, and section"
         statusSummary="Review current teaching groups by department, year, and section state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

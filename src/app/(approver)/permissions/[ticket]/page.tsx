@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PermissionDetailPanel } from "@/components/approver/PermissionDetailPanel";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
@@ -25,6 +26,15 @@ function PermissionTicketInner() {
 
   return (
     <div className="p-4 sm:p-6 md:p-4 max-w-5xl mx-auto space-y-4 sm:space-y-6 min-w-0">
+      <ContextSituationBar
+        roleLabel="Approval Authority"
+        purpose="Review individual ticket details, audit permission approval chains, and take resolution actions"
+        why="Inspecting specific ticket records allows approvers to audit stage approvals, SLA deadlines, and student notes before acting."
+        contextLabel={`Ticket Audit · ${ticket}`}
+        statusTone="info"
+        statusSummary={`Reviewing detailed approval pipeline and metadata for ticket ${ticket}.`}
+        primaryAction={{ label: "Back to Queue", onClick: () => router.back() }}
+      />
       <PermissionDetailPanel
         ticket={ticket}
         isStandalonePage

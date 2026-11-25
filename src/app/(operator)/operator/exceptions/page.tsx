@@ -170,6 +170,7 @@ function ExceptionsInner() {
         purpose="Review denied scans, invalid pass alerts, curfew overrides, and gate transit discrepancies"
         contextLabel="Exceptions Register"
         statusSummary="Investigate gate scan rejections, expired pass attempts, and perimeter security anomalies."
+        why="Reviewing failed or blocked scan attempts prevents repeat gate bottlenecks and flags unauthorized perimeter movements."
         severity="warn"
         primaryAction={{ label: "Manual Entry", href: "/operator/manual-entry" }}
         secondaryAction={{ label: "Transit Log", href: "/operator/transactions" }}

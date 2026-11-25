@@ -35,6 +35,7 @@ return (
           <ContextSituationBar
             roleLabel="Deputy Warden"
             purpose="Supervise hostel safety, process escalated outpass permissions, and ensure residential discipline"
+            why="Unified hostel command keeps residential gate movements, curfew compliance, and open incidents in clear view."
             contextLabel="Hostel Delegation & Discipline Dashboard"
             statusSummary="Review active hostel permissions on the Kanban board, audit delegation status, and inspect alerts."
             severity="info"

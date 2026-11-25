@@ -14,6 +14,7 @@ export default function HostelManagerMaintenancePage() {
       <ContextSituationBar
         roleLabel="Hostel Manager"
         purpose="Oversee block maintenance workflows, coordinate technician work orders, and verify repair completion"
+        why="Monitoring active repair orders ensures electrical, civil, and plumbing issues are resolved within SLA standards."
         contextLabel="Hostel Maintenance Console"
         statusSummary="Track and prioritize electrical, civil, and plumbing repair work orders across your hostel blocks."
         severity="info"

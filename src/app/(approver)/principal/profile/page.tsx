@@ -11,6 +11,7 @@ export default function PrincipalProfilePage() {
       <ContextSituationBar
         roleLabel="Principal"
         purpose="Executive account details, statutory credentials, and institutional delegation parameters"
+        why="Maintaining executive credentials and security settings safeguards institutional authority and digital signing keys."
         contextLabel="Principal Office Profile"
         statusSummary="Manage executive contact information, cryptographic signing keys, and administrative settings."
         primaryAction={{ label: "Delegations Desk", href: "/principal/governance/delegations" }}

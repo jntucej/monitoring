@@ -14,6 +14,7 @@ export default function AdminSmsComposePage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Compose and queue bulk SMS to campus segments or individual recipients."
+        why="Messages broadcast from here are charged to the institutional SMS gateway and logged per recipient."
         contextLabel="Compose and queue bulk SMS to campus segments or individual recipients."
         statusSummary="Review current compose and queue bulk sms to campus segments or individual recipients. state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

@@ -145,6 +145,7 @@ function OperatorTransactionsInner() {
         purpose="Review chronological transit history, direction stamps, and operator-verified logs"
         contextLabel="Transit Transactions"
         statusSummary="Audit chronological entry and exit scans processed during the current operational shift."
+        why="Transactions provide verifiable chronological audit records to resolve disputed entry/exit times and verify student movement compliance."
         primaryAction={{ label: "My Shift Stats", href: "/operator/stats" }}
         secondaryAction={{ label: "Pass Verification", href: "/operator/pass-verification" }}
       />

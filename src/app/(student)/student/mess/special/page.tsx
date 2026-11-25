@@ -22,6 +22,7 @@ export default function StudentMessSpecialPage() {
         purpose="Select festive menus, weekend specials, and dietary preferences for mess preparation"
         contextLabel="Special Menus & Diet Preferences"
         statusSummary="Pre-order upcoming event dishes and customize dietary requirements for upcoming meals."
+        why="Selecting preferences in advance ensures kitchen staff prepare adequate portions and reduces campus food wastage."
         primaryAction={{ label: "Meal Token", href: "/student/mess/token" }}
         secondaryAction={{ label: "Mess Reviews", href: "/student/mess/reviews" }}
       />

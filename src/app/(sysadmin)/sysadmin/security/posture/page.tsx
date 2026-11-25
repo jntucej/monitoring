@@ -69,6 +69,7 @@ export default function SecurityPosturePage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Every defence from Batches A–I, in one view. Red = act now."
+        why="Remediate any warning items here before the next scheduled security audit."
         contextLabel="Every defence from Batches A–I, in one view. Red = act now."
         statusSummary="Review current every defence from batches a–i, in one view. red = act now. state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

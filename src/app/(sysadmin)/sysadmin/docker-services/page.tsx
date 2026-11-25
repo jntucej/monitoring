@@ -60,11 +60,12 @@ function DockerServicesInner() {
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor docker services for campus operations."
-        contextLabel="Docker Services"
-        statusSummary="Review current docker services state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Docker Fleet & Container Health"
+        purpose="Monitor Docker container liveness, CPU and memory usage, crash restarts, and app-level service health."
+        statusSummary={`${d?.containers?.filter((c) => c.running).length ?? 0} of ${d?.containers?.length ?? 0} Docker containers currently running with liveness checks passing.`}
+        why="Container infrastructure supports campus API backends, Redis workers, and real-time socket gateways; restarts indicate unhandled crashes."
+        primaryAction={{ label: "Application Health", href: "/sysadmin/application-health" }}
+        secondaryAction={{ label: "Database Health", href: "/sysadmin/database-health" }}
       />
       <div>
         <p className="text-2xl font-bold text-text-primary flex items-center gap-2">

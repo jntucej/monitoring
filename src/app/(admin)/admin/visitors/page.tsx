@@ -106,6 +106,7 @@ function AdminVisitorsInner() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Live check-in / check-out board and visit records"
+        why="Rejecting a visitor here stops their QR pass from working at every gate immediately."
         contextLabel="Live check-in / check-out board and visit records"
         statusSummary="Review current live check-in / check-out board and visit records state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

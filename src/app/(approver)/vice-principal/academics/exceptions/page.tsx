@@ -9,6 +9,7 @@ export default function Page() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Institutional academic exception audit, curriculum deviation tracking, and attendance shortfalls"
+        why="Tracking academic exceptions identifies students needing curriculum remediation, course waivers, or attendance intervention."
         contextLabel="Academic Exceptions Queue"
         statusSummary="Investigate course prerequisite waivers, timetable conflicts, and academic standing exceptions."
         severity="warn"

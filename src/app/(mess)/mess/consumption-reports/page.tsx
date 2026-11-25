@@ -143,6 +143,7 @@ function MessConsumptionReportsInner() {
             ? `${d.totals?.served ?? 0} total meals served (${d.avgPerDay ?? 0} avg/day) across the monitored window.`
             : "Review meal serving distributions, scan methods, and dining trends across active mess days."
         }
+        why="Multi-day consumption analysis forecasts meal preparation batches accurately and mitigates raw food waste."
         severity="info"
         primaryAction={{ label: "Token Scanner", href: "/mess/scan" }}
         secondaryActions={[

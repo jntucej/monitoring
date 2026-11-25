@@ -132,6 +132,7 @@ function SysadminGateScheduleInner() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Access rules and the gate holiday calendar"
+        why="Use this to audit whether gate hours match institutional policy before each term."
         contextLabel="Access rules and the gate holiday calendar"
         statusSummary="Review current access rules and the gate holiday calendar state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

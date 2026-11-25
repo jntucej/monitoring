@@ -89,6 +89,7 @@ function FacultyCorrectionRequestsInner() {
       <ContextSituationBar
         roleLabel="Faculty · Corrections"
         purpose="Inspect student attendance correction memos and forward validated edits."
+        why="Reviewing disputed attendance logs prevents incorrect absences from counting against the 75% threshold."
         contextLabel="Correction Queue"
         statusTone={rows.length > 0 ? "warn" : "ok"}
         statusPill={rows.length > 0 ? `${rows.length} pending` : "All clear"}

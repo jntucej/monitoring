@@ -59,6 +59,7 @@ function StaffDutiesInner() {
       <ContextSituationBar
         roleLabel="Campus Staff"
         purpose="Monitor active duty rosters and colleagues currently on shift across campus."
+        why="Viewing peer shift rosters ensures handover readiness and verifies departmental desk coverage."
         contextLabel="Shift & Duty Schedule"
         statusTone={slice && slice.totalOnShift > 0 ? "ok" : "info"}
         statusPill={`${slice?.totalOnShift ?? 0} On Shift`}

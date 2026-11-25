@@ -23,6 +23,7 @@ function Inner() {
       <ContextSituationBar
         roleLabel="Hostel Manager"
         purpose="Review and process permission requests routed to your hostel block, and manage residential workflows"
+        why="Managing block permissions ensures student movements adhere to allocated hostel policies and curfew regulations."
         contextLabel="Resident Ticket Inbox"
         statusSummary="Process permission requests and leave applications routed to your assigned hostel blocks."
         severity="info"

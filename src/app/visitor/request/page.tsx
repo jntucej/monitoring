@@ -10,8 +10,9 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import { Loader2, FileText, AlertTriangle, ArrowRight } from "lucide-react";
+import { Loader2, FileText, AlertTriangle, ArrowRight, HelpCircle } from "lucide-react";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { HelpTip } from "@/components/ui/help-tip";
 import type { VisitorsMineResponse } from "../types";
 
 function VisitorRequestInner() {
@@ -103,6 +104,7 @@ function VisitorRequestInner() {
             <div className="flex items-center gap-2 min-w-0">
               <FileText className="w-4 h-4 text-action-info shrink-0" />
               <span className="text-sm font-semibold text-white truncate">What you requested to visit</span>
+              <HelpTip text="Once the host approves your request, your status transitions to ACTIVE for gate clearance." />
             </div>
           </div>
           {busy ? (
@@ -113,26 +115,41 @@ function VisitorRequestInner() {
             <div className="p-4 min-w-0 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">State</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-text-muted uppercase tracking-wide">State</p>
+                    <HelpTip text="Active = Approved & current; Completed = Pass concluded." />
+                  </div>
                   <p className={`mt-1 text-base font-bold ${stateTone}`}>{stateLabel}</p>
                 </div>
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Host</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-text-muted uppercase tracking-wide">Host</p>
+                    <HelpTip text="The faculty, staff, or department official you are visiting." />
+                  </div>
                   <p className="mt-1 text-base text-text-primary">{req?.hostName ?? "—"}</p>
                 </div>
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Purpose</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-text-muted uppercase tracking-wide">Purpose</p>
+                    <HelpTip text="Stated reason for entering campus premises." />
+                  </div>
                   <p className="mt-1 text-base text-text-primary">{req?.purpose ?? "—"}</p>
                 </div>
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Requested</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-text-muted uppercase tracking-wide">Requested</p>
+                    <HelpTip text="Timestamp when your request was registered." />
+                  </div>
                   <p className="mt-1 text-base font-semibold text-action-warning">{fmt(req?.requestedAt)}</p>
                 </div>
               </div>
               {req?.state === "NONE" && (
-                <p className="text-xs text-text-muted">
-                  No visit request is on record yet. Ask your host to issue a visitor pass at the gate.
-                </p>
+                <div className="surface-card bg-bg-surface p-4 text-center space-y-2 border border-border">
+                  <p className="text-sm font-medium text-text-secondary">No active visit request found</p>
+                  <p className="text-xs text-text-muted">
+                    No visit request is on record yet. Ask your host or department sponsor to issue an entry pass at the gate.
+                  </p>
+                </div>
               )}
             </div>
           )}

@@ -3,6 +3,7 @@ import { POLL_INTERVALS } from "@/config/app-constants";
 
 import React, { useState, useCallback } from "react";
 import { ClipboardList, Plus, Inbox, AlertCircle, Search } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -215,31 +216,50 @@ export default function StudentPermissionsPage() {
         />
 
         {error && (
-          <div className="surface-card p-4 bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] text-action-danger text-xs md:text-sm flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
+          <div className="surface-card p-4 bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] text-action-danger text-xs md:text-sm flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error} — Check your connection and try again.</span>
+            </div>
+            <button
+              type="button"
+              onClick={fetchTickets}
+              className="shrink-0 rounded-lg border border-current px-2.5 py-1 text-xs font-semibold hover:opacity-80"
+            >
+              Retry
+            </button>
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 pb-1">
-          {FILTERS.map((f) => {
-            const count =
-              f === "ALL" ? tickets.length : tickets.filter((t) => t.status === f).length;
-            return (
-              <button
-                key={f}
-                type="button"
-                onClick={() => setFilter(f)}
-                className={`min-h-11 inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-                  filter === f
-                    ? "bg-action-primary text-white shadow"
-                    : "bg-bg-surface border border-border text-text-muted hover:text-text-primary"
-                }`}
-              >
-                {f} ({count})
-              </button>
-            );
-          })}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+            <span>Filter by status</span>
+            <HelpTip
+              label="Permission status meanings"
+              align="left"
+              text="PENDING: awaiting review at the shown Stage. APPROVED: QR gate pass is active in Active Passes. REJECTED: declined (you can Reapply). COMPLETED: pass used or closed."
+            />
+          </div>
+          <div className="flex flex-wrap gap-2 pb-1">
+            {FILTERS.map((f) => {
+              const count =
+                f === "ALL" ? tickets.length : tickets.filter((t) => t.status === f).length;
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFilter(f)}
+                  className={`min-h-11 inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                    filter === f
+                      ? "bg-action-primary text-white shadow"
+                      : "bg-bg-surface border border-border text-text-muted hover:text-text-primary"
+                  }`}
+                >
+                  {f} ({count})
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {loading && tickets.length === 0 ? (
@@ -253,8 +273,28 @@ export default function StudentPermissionsPage() {
             <Inbox className="size-6 text-text-muted mx-auto" />
             <p className="text-sm font-semibold text-text-primary">No permission requests found</p>
             <p className="text-xs text-text-muted">
-              {filter === "ALL" ? "You haven't submitted any permission requests yet." : `No ${filter.toLowerCase()} requests.`}
+              {filter === "ALL"
+                ? "You haven't submitted any permission requests yet. Create one when you need outing, leave, or late-entry approval."
+                : `No ${filter.toLowerCase()} requests right now.`}
             </p>
+            <div className="pt-1 flex justify-center gap-2">
+              {filter !== "ALL" ? (
+                <button
+                  type="button"
+                  onClick={() => setFilter("ALL")}
+                  className="rounded-lg border border-border bg-bg-surface px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-elevated"
+                >
+                  Show all requests
+                </button>
+              ) : (
+                <Link
+                  href="/student/permissions/new"
+                  className="rounded-lg bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                >
+                  New Permission Request
+                </Link>
+              )}
+            </div>
           </div>
         ) : (
           <div className="space-y-3">

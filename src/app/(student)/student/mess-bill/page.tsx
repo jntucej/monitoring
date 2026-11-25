@@ -113,6 +113,7 @@ export default function MessBillPage() {
             ? `${data.totalServed ?? 0} meals served this month at ₹${data.mealRate ?? 0}/meal. Opt out before ${data.cutoffTime ?? "cutoff"} to avoid billing.`
             : "Reviewing your monthly dining consumption, rates, and opt-out cutoffs."
         }
+        why="Opting out before the daily cutoff credits your mess balance and prevents the mess team from billing unconsumed meals."
         primaryAction={{ label: "Meal Token", href: "/student/mess/token" }}
         secondaryAction={{ label: "Mess Landing", href: "/student/mess" }}
       />

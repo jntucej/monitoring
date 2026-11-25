@@ -8,6 +8,7 @@ export default function UserAnalyticsPage() {
       <ContextSituationBar
         roleLabel="Admin"
         purpose="Analyze user demographics, role distribution, and identity trends across campus."
+        why="Detect dormant accounts, surface popular modules, and target onboarding for low engagement."
         contextLabel="User Demographics & Activity"
         statusPill="Live Directory"
         statusTone="info"

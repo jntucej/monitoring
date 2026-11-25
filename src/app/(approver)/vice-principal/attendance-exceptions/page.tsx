@@ -81,6 +81,7 @@ function VpAttendanceExceptionsInner() {
       <ContextSituationBar
         roleLabel="Vice Principal"
         purpose="Review severe student attendance deficits, shortage warnings, and condonation appeals"
+        why="Evaluating attendance shortages safeguards student exam eligibility and enforces institutional attendance thresholds."
         contextLabel="Attendance Exceptions Ledger"
         statusSummary="Monitor students with critical attendance shortages and assess eligibility for exam condonation."
         severity="warn"

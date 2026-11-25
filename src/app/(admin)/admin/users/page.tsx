@@ -121,6 +121,7 @@ export default function AdminUsersPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor users for campus operations."
+        why="Suspend a user here and their session is invalidated on the next heartbeat check."
         contextLabel="Users"
         statusSummary="Review current users state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

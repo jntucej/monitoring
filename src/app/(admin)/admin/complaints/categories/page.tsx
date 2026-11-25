@@ -46,6 +46,7 @@ export default function CategoriesPage() {
       <ContextSituationBar
         roleLabel="Campus Admin"
         purpose="Manage and monitor complaints categories for campus operations."
+        why="Category changes immediately alter where student complaints are dispatched and how fast they must resolve."
         contextLabel="Complaints Categories"
         statusSummary="Review current complaints categories state and take action below."
         primaryAction={{ label: "Admin Overview", href: "/admin" }}

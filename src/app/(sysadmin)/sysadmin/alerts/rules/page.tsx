@@ -109,11 +109,12 @@ export default function AlertRulesPage() {
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Manage and monitor alerts rules for campus operations."
-        contextLabel="Alerts Rules"
-        statusSummary="Review current alerts rules state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        contextLabel="Alert Rules Management"
+        purpose="Configure automated threshold monitors, breach duration triggers, and notification routing channels across campus telemetry."
+        statusSummary={`${rules.filter((r) => r.enabled).length} active alert rules monitoring campus systems and dispatching to configured on-call channels.`}
+        why="Well-tuned thresholds ensure critical service degradations and security anomalies alert the on-call team without notification fatigue."
+        primaryAction={{ label: "Live Alerts Feed", href: "/sysadmin/alerts" }}
+        secondaryAction={{ label: "Autonomous Sweeps", href: "/sysadmin/autonomous" }}
       />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

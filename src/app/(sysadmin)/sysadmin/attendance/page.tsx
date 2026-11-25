@@ -100,11 +100,12 @@ export default function SysAdminAttendancePage() {
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <ContextSituationBar
         roleLabel="System Admin"
-        purpose="Daily student attendance records"
-        contextLabel="Daily student attendance records"
-        statusSummary="Review current daily student attendance records state and take action below."
+        contextLabel="Student Daily Attendance"
+        purpose="Audit campus-wide daily student check-ins, resolve time-in/time-out discrepancies, and verify presence rosters."
+        statusSummary={`${rows.length} total student attendance records loaded for date ${date} with ${rows.filter((r) => r.status === "present").length} verified present.`}
+        why="Accurate attendance logs substantiate curfew adherence, satisfy university compliance mandates, and feed outpass decision workflows."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
+        secondaryAction={{ label: "Analytics", href: "/sysadmin/analytics" }}
       />
         <PageHeader title="Attendance" subtitle="Daily student attendance records" />
         <div className="flex items-center justify-between flex-wrap gap-2">

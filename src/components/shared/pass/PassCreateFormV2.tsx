@@ -215,31 +215,40 @@ export function PassCreateFormV2({
       {effectiveConfig && (
         <form onSubmit={submit} className="space-y-3">
           {/* Time range */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs font-medium text-text-muted flex items-center gap-1 mb-1">
-                <Clock className="h-3 w-3" /> From
-              </label>
-              <input
-                type="datetime-local"
-                value={from}
-                onChange={(e) => handleFromChange(e.target.value)}
-                className="surface-card w-full bg-bg-base px-3 py-2 text-xs text-text-primary focus:outline-none"
-                required
-              />
+          <div className="space-y-1">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs font-medium text-text-muted flex items-center gap-1 mb-1">
+                  <Clock className="h-3 w-3" /> From *
+                </label>
+                <input
+                  type="datetime-local"
+                  value={from}
+                  onChange={(e) => handleFromChange(e.target.value)}
+                  className="surface-card w-full bg-bg-base px-3 py-2 text-xs text-text-primary focus:outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-text-muted flex items-center gap-1 mb-1">
+                  <Clock className="h-3 w-3" /> To *
+                </label>
+                <input
+                  type="datetime-local"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  className="surface-card w-full bg-bg-base px-3 py-2 text-xs text-text-primary focus:outline-none"
+                  required
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-xs font-medium text-text-muted flex items-center gap-1 mb-1">
-                <Clock className="h-3 w-3" /> To
-              </label>
-              <input
-                type="datetime-local"
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
-                className="surface-card w-full bg-bg-base px-3 py-2 text-xs text-text-primary focus:outline-none"
-                required
-              />
-            </div>
+            <p className="text-[11px] text-text-muted">
+              Picking a start time auto-fills the end time; adjust within the allowed{" "}
+              {effectiveConfig.durationUnit === "days"
+                ? `${effectiveConfig.minDuration}–${effectiveConfig.maxDuration} day`
+                : `${effectiveConfig.minDuration}–${effectiveConfig.maxDuration} hour`}{" "}
+              window.
+            </p>
           </div>
 
           {/* Duration preview */}
@@ -315,17 +324,28 @@ export function PassCreateFormV2({
 
           {/* Reason */}
           <div>
-            <label className="text-xs font-medium text-text-muted block mb-1">Reason (optional)</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium text-text-muted">Reason (optional)</label>
+              <span className="text-[10px] text-text-muted tabular-nums">{reason.length}/500</span>
+            </div>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value.slice(0, 500))}
               rows={2}
+              placeholder="Briefly explain why you need this pass (helps approvers decide faster)"
               className="surface-card w-full bg-bg-base px-3 py-2 text-xs text-text-primary focus:outline-none resize-none"
             />
           </div>
 
           {/* Approval chain preview */}
-          <ApprovalChainPreview config={effectiveConfig} />
+          <div className="space-y-1">
+            <ApprovalChainPreview config={effectiveConfig} />
+            <p className="text-[11px] text-text-muted">
+              {effectiveConfig.requiresApproval
+                ? "Your request moves through these stages in order. Once approved, your QR gate pass activates."
+                : "This pass type is self-issued and activates immediately upon submission."}
+            </p>
+          </div>
 
           {/* Validation errors */}
           {!validation.valid && validation.errors.length > 0 && (
@@ -366,6 +386,13 @@ export function PassCreateFormV2({
             Submit {effectiveConfig.requiresApproval ? "for approval" : "pass"}
           </button>
           )}
+          <p className="text-center text-[11px] text-text-muted">
+            {!from || !to
+              ? "Select both From and To times to enable submission."
+              : effectiveConfig.requiresApproval
+                ? "Submits your request and notifies the first approver in the chain."
+                : "Issues your active gate pass immediately."}
+          </p>
         </form>
       )}
     </div>

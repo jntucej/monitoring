@@ -14,6 +14,7 @@ export default function SysadminMessItemsPage() {
       <ContextSituationBar
         roleLabel="System Admin"
         purpose="Items students can select as their primary or sub-item"
+        why="Use this view to audit item costs and consumption before menu revisions."
         contextLabel="Items students can select as their primary or sub-item"
         statusSummary="Review current items students can select as their primary or sub-item state and take action below."
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}

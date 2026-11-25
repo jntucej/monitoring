@@ -84,6 +84,7 @@ function OperatorProfileInner() {
         purpose="Review assigned gate duty details, operator badge credentials, and station preferences"
         contextLabel="Operator Profile"
         statusSummary="Check your personal profile, active station assignments, and shift contact information."
+        why="Keeping duty contact info current ensures supervisor dispatches and urgent perimeter broadcasts reach you during shifts."
         primaryAction={{ label: "Change Password", href: "/operator/password" }}
         secondaryAction={{ label: "Kiosk PIN", href: "/operator/kiosk-pin" }}
       />

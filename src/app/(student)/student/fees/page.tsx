@@ -15,6 +15,7 @@ export default function FeesPage() {
           purpose="Review tuition fees, hostel dues, scholarship adjustments, and payment receipts"
           contextLabel="Fees & Financial Dues"
           statusSummary="Track fee payment installments, outstanding college balances, and transaction receipts."
+          why="Clearing semester dues before deadlines ensures uninterrupted exam hall ticket issuance and registration."
           primaryAction={{ label: "Scholarships", href: "/student/scholarships" }}
           secondaryActions={[
             { label: "Mess Bill", href: "/student/mess-bill" },

@@ -11,6 +11,7 @@ export default function ShiftHandoverPage() {
         purpose="Facilitate seamless operational briefing, outstanding issue transfer, and shift sign-off"
         contextLabel="Shift Handover Console"
         statusSummary="Document unresolved security items, ongoing gate maintenance, and brief incoming shift leadership."
+        why="Structured handovers prevent security gaps between shift transitions and transfer pending investigations to incoming officers."
         primaryAction={{ label: "Live Shift Desk", href: "/supervisor/shift/live" }}
         secondaryAction={{ label: "Shift History", href: "/supervisor/shift/history" }}
       />

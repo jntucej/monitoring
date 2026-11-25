@@ -18,6 +18,7 @@ function DeputyWardenLeaveInner() {
         <ContextSituationBar
           roleLabel="Deputy Warden"
           purpose="Review and adjudicate extended hostel leave applications, verify parent consent, and record leave approvals"
+          why="Multi-day leaves require verified parental endorsement and warden sign-off before students depart hostel premises."
           contextLabel="Hostel Leave Requests Review"
           statusSummary="Process resident leave and vacation requests awaiting hostel level-2 review and forward decisions."
           severity="info"
