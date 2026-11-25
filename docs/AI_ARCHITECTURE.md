@@ -101,9 +101,12 @@ Per-worker behavior:
   `permission-engine`. The new route is wired in
   `src/app/api/ai/documents/route.ts`: it reuses `withAuthorization`,
   `assertCsrf`, and the `requireEnabled("ai_models_enabled")` kill-switch,
-  base64-decodes the PDF, and calls `runDocumentPipeline`. The `@model-runtime`
-  webpack alias (in `next.config.mjs` + `tsconfig.json` `paths`) points at the
-  local `model-runtime/` source so the route imports it directly.
+  base64-decodes the PDF, and calls `runDocumentPipeline`. The route imports
+  the local `model-runtime/` source via a **relative import**
+  (`../../../../../model-runtime`) — not a bundler alias. `tsconfig.json`
+  still carries an `@model-runtime` `paths` entry for editor/type-checking,
+  but the build (Next 16 Turbopack) resolves the route's relative import
+  directly, so no webpack/turbopack alias config is required.
 - **Config:** new env vars are read in `model-runtime/config.ts` (see §7).
 - **Kill-switch:** reuses the existing `automation_controls` table — a new row
   `ai_models_enabled` so a sysadmin can stop the AI layer with one SQL update, no

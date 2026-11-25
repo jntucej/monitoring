@@ -157,3 +157,23 @@ The **Gate Monitor** technology stack is engineered for low-latency responsivene
   (HOD two-person rule for SUSPENDED/DEBARRED/LATERAL_JOIN).
 - Design: `docs/teaching-capability-architecture.md`; kernel contract:
   `docs/CONTRACT.md` §"Teaching Capability Addendum".
+
+## AI model layer (added 2026-11-25)
+- **3 local workers** behind one `ModelManager` — see `docs/AI_ARCHITECTURE.md`
+  + `docs/AI_MODEL_COMPATIBILITY.md` for selection, lifecycle, and measured
+  benchmark results.
+  - **M1** conversation / tool routing — `qwen3:1.7b` (Ollama, host daemon).
+  - **M2** OCR — Tesseract 5 (deployed) / PaddleOCR (auto-selected when
+    importable), per-burst Python sidecar (`python3 -m model_runtime.ocr`).
+  - **M3** document intelligence — `qwen2.5:3b` (Ollama).
+- **Credential isolation** — the LLM never sees customer tokens/keys; a
+  deterministic permission engine (RBAC → scope → tenant → credential lookup)
+  authorizes each tool request and injects the secret only inside tool
+  execution. Raw model output is Zod-validated before use.
+- **Entry point** — `POST /api/ai/documents` (base64 PDF → M2 OCR if scanned
+  → M3 extraction). Gated by `withAuthorization` + CSRF + the
+  `ai_models_enabled` kill-switch.
+- **No new infra** — no vector DB, no embeddings service, no reranker, no
+  planner, no extra LLM. Ollama runs as a host daemon; M2 is a short-lived
+  process. M2 and M3 are serialized so they never hold RAM simultaneously
+  (peak resident AI memory ≤ ~2.1 GB on this 15 GiB host).

@@ -18,37 +18,51 @@ sudo systemctl stop gate-stack.service
 ```bash
 cd /opt/monitoring/compose
 
-# View running container health
-docker compose --env-file /opt/monitoring/env/production.env ps
+# The compose project reads /opt/monitoring/compose/.env (kept in sync with
+# /opt/monitoring/env/production.env — both carry the same AUTH_JWT_SECRET /
+# POSTGRES_PASSWORD, so JWT signing matches between the web container and any
+# external one-time-link verifier). The systemd service uses the
+# production.env path; manual work from the compose dir can omit --env-file
+# because .env is picked up automatically.
+docker compose ps
+docker compose logs -f
+docker compose logs -f web
+docker compose logs -f worker
 
-# Tail all logs
-docker compose --env-file /opt/monitoring/env/production.env logs -f
-
-# Tail specific container logs
-docker compose --env-file /opt/monitoring/env/production.env logs -f web
-docker compose --env-file /opt/monitoring/env/production.env logs -f worker
+# Deploy after a source change (rebuild + recreate the web container):
+docker build -t monitoring-web:latest -f Dockerfile --target runner .
+docker compose up -d --force-recreate web
 ```
+
+> **Note:** `docker compose up -d web` errors if it would also start
+> `cloudflared` while `TUNNEL_TOKEN` is unset — recreate only `web` with
+> `--force-recreate web` (the placeholder TUNNEL_TOKEN is fine).
 
 ## 2. Backup & Restore Operations
 
 ### Manual On-Demand Backup
 ```bash
-/opt/monitoring/scripts/backup-postgres.sh
-```
+# Full + logical backup (the script the cron job actually runs):
+bash /opt/monitoring/scripts/master-backup.sh
 
-### Automated Backup Verification
-```bash
+# Verify the most recent backup restores cleanly:
 /opt/monitoring/scripts/verify-backup.sh
 ```
 
-### Crontab Schedule for Root (`crontab -e`)
+### Automated Backup (live schedule)
+The production backup is driven by `/etc/cron.d/gate-backup`, **not** a
+root `crontab`:
 ```cron
-# Nightly PostgreSQL backup at 05:00 UTC
-0 5 * * * /opt/monitoring/scripts/backup-postgres.sh >> /opt/monitoring/logs/backup.log 2>&1
-
-# Weekly restore verification test at 06:00 UTC on Sundays
-0 6 * * 0 /opt/monitoring/scripts/verify-backup.sh >> /opt/monitoring/logs/verify-backup.log 2>&1
+# /etc/cron.d/gate-backup
+0 */6 * * *  root  bash /root/monitoring/scripts/master-backup.sh >> /root/monitoring/backups/cron.log 2>&1
 ```
+Cadence is every 6 hours (matches `master-backup.sh`'s own 6h comment).
+Backups land in `/opt/monitoring/backups/` (a.k.a.
+`/root/monitoring/backups/` — same tree).
+
+> Legacy `backup-postgres.sh` + nightly `verify-backup.sh` cron entries
+> predate `master-backup.sh` and are no longer the live path — do not
+> re-add a 05:00 nightly cron for them.
 
 ## 3. Troubleshooting & Recovery
 
