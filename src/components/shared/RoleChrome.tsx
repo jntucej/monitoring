@@ -31,7 +31,7 @@ import { AdminStatusBar, type AdminCounts } from "@/components/approver/AdminSta
 import { PrincipalStatusBar, type PrincipalCounts } from "@/components/approver/PrincipalStatusBar";
 import { VpStatusBar, type VpCounts } from "@/components/approver/VpStatusBar";
 import { SysadminStatusBar, type SysadminCounts } from "@/components/approver/SysadminStatusBar";
-import { Loader2, Clock, RefreshCw } from "lucide-react";
+
 
 interface RoleChromeProps {
   /** The manifest role (e.g. "oie", "staff", "guardian"). */
@@ -42,14 +42,6 @@ interface RoleChromeProps {
   className?: string;
 }
 
-function fmt(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  } catch {
-    return "—";
-  }
-}
 
 function renderBar(chrome: ReturnType<typeof useRoleConsoleChrome>): React.ReactNode {
   const { kind, counts, lastScan, refreshing } = chrome;
@@ -149,21 +141,7 @@ export function RoleChrome({ role, variant = "footer", className }: RoleChromePr
     <div className={cn("sticky bottom-0 z-30 border-t bg-bg-surface/95 backdrop-blur-md", className)}>
       {chrome.kind !== "generic" ? (
         <div className="px-4">{renderBar(chrome)}</div>
-      ) : (
-        // Minimal footer for roles without a dedicated status bar: just the
-        // freshness clock + command trigger, so the console still reads as a
-        // live system.
-        <div className="flex items-center justify-between px-4 py-2 text-xs text-text-muted">
-          <span className="inline-flex items-center gap-1.5">
-            <span className={`size-2 rounded-full ${chrome.refreshing ? "bg-action-info animate-pulse" : "bg-action-primary"}`} />
-            <span>Live console</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5 font-mono tabular-nums">
-            <Clock className="size-3.5" />
-            {chrome.lastScan ? fmt(chrome.lastScan) : "loading…"}
-          </span>
-        </div>
-      )}
+      ) : null}
       <button
         type="button"
         onClick={() => chrome.setCommandBarOpen(true)}

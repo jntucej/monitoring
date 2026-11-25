@@ -22,7 +22,6 @@ import {
   type StudentDashboardMode,
 } from "@/components/student/home/StudentDashboardModes";
 import { WifiOff, RotateCw } from "lucide-react";
-import { Greeting } from "@/components/Greeting";
 import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
 import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
@@ -214,7 +213,10 @@ function StudentHomeInner() {
 
   const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
-      <Greeting />
+      {/* Single structured greeting card: time-of-day salutation + name +
+          role badge + contextual subline + optional special-occasion wish.
+          (Was two overlapping greetings — <Greeting/> and
+          <CustomRoleGreeting/> — deduped to the richer card.) */}
       <CustomRoleGreeting name={user?.name} role={user?.role ?? "student"} />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
