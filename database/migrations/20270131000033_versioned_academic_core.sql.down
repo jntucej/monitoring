@@ -1,0 +1,14 @@
+-- 20270131000033_versioned_academic_core.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.schedule_exceptions;
+ALTER TABLE public.gate_devices
+  DROP COLUMN IF EXISTS retired_at,
+  DROP COLUMN IF EXISTS replaced_by;
+ALTER TABLE public.movement_logs DROP COLUMN IF EXISTS academic_snapshot;
+DROP TABLE IF EXISTS public.student_academic_history;
+DROP TABLE IF EXISTS public.academic_regulations;
+DROP TABLE IF EXISTS public.entry_modes;
+DROP TABLE IF EXISTS public.academic_branches;
+DROP TABLE IF EXISTS public.academic_programs;
+DROP TABLE IF EXISTS public.academic_years;
+COMMIT;
