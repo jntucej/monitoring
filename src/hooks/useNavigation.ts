@@ -350,6 +350,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/worker/shifts", label: "Shifts" },
             { href: "/worker/work-orders", label: "Work orders" },
             { href: "/worker/history", label: "History" },
+            { href: "/worker/profile", label: "Profile" },
           ],
         },
       ];

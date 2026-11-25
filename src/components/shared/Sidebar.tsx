@@ -63,7 +63,7 @@ const getPriorityItems = (role: Role, items: NavItem[]): NavItem[] => {
     guardian: ['/guardian', '/guardian/child-requests', '/guardian/child-attendance', '/guardian/child-status'],
     faculty: ['/faculty', '/faculty/my-classes', '/admin/alerts', '/faculty/permissions'],
     staff: ['/staff', '/staff/my-day', '/admin/alerts', '/staff/my-profile'],
-    worker: ['/worker', '/worker/shifts', '/admin/alerts', '/worker/history'],
+    worker: ['/worker', '/worker/shifts', '/worker/work-orders', '/worker/history', '/worker/profile'],
     visitor: ['/visitor', '/visitor/approval-status', '/visitor/history', '/visitor/request'],
     mess_incharge: ['/mess', '/mess/scan'],
   };
