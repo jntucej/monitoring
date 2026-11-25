@@ -167,3 +167,86 @@ Per-worker behavior:
 - **Ollama host service:** M1/M3 require the host Ollama daemon; if it is down the
   AI layer fails closed (503), matching the existing `auto_llm_enabled` behavior.
 ```
+
+## 9. Circulars pipeline (`/api/circulars/ocr-classify`)
+
+The circulars feature is a second consumer of the M2 → M3 pipeline, wired
+through `createAiRuntime().runDocumentPipeline()` in `src/lib/circulars/pipeline.ts`.
+
+### Request / response shape
+
+```
+POST /api/circulars/ocr-classify
+Roles: faculty, hod, hostel_manager, vice_principal, principal, admin, sysadmin
+
+Body: {
+  base64?: string          — scanned or digital PDF (triggers M2+M3)
+  raw_text?: string        — pre-extracted text (skips AI, deterministic only)
+  title?: string           — title override
+  attachment_url?: string  — stored URL for the attachment
+}
+
+Response (200):
+{
+  fields: {
+    title, circular_no, issued_by, effective_date, deadline,
+    summary, action_required
+  },
+  targets: {
+    roles, personas, departments, hostel_blocks,
+    confidence, rationale[], estimated_headcount
+  },
+  ai_extraction: DocumentExtraction | null,   // M3 output when base64 was sent
+  raw_ocr_text: string,
+  attachment_url: string | null
+}
+```
+
+### Two-stage extraction strategy
+
+**Stage 1 — deterministic (always runs):**
+`extractCircularFields(rawText)` uses regex patterns to pull `circular_no`,
+`issued_by`, `effective_date`, `deadline`, and `action_required` from the
+text. No AI call. This is the fallback when the PDF is digital and has a
+usable text layer, or when M2/M3 fail.
+
+**Stage 2 — AI (only when `base64` is supplied):**
+`runDocumentPipeline({ pdf, schemaFields: ["circular_no","issued_by",
+"effective_date","deadline","target_audience","summary"],
+metadata: { kind: "circular" } })` runs M2 (OCR if scanned) → M3
+(document intelligence). The result is `DocumentExtraction`; its
+`document_number`, `issuer`, and `valid_until` are merged into the
+deterministic fields **only when the regex missed them** (no overwrite).
+
+### Target classification (Stage 2, deterministic)
+
+`classifyCircularTargets(rawText)` runs a keyword/regex pass over the same
+text. No LLM. Output:
+
+- `roles` — from keyword matching (student, faculty, hod, guardian, staff,
+  worker); defaults to `[student, faculty]` campus-wide when no keyword hits.
+- `personas` — `hosteller` / `day_scholar`.
+- `departments` — matched against the 7-dept allowlist (CSE, IT, ECE, EEE,
+  MECH, CIVIL, AIML).
+- `hostel_blocks` — regex for `Block X` / `Boys N` / `Girls N` patterns.
+- `confidence` — `0.9` when ≥2 rationale items fired, `0.75` otherwise.
+- `estimated_headcount` — resolved via `resolveTargetUserIds()` against
+  `public.users` + `public.student_details` (RLS-aware query).
+
+### Publishing (Stage 4, separate endpoint)
+
+`publishApprovedCircular(circularId, actorId, actorRole)` — called by the
+approval endpoint, not by `ocr-classify` — inserts into
+`public.campus_feed_items` (kind=`circular`, scope=`global`, priority
+`urgent` when `action_required`), fans out receipts to every target user,
+writes an audit row, and publishes a `circular.published` notification
+on the in-app channel.
+
+### Lifecycle notes
+
+- The circulars route uses the same `createAiRuntime()` singleton as
+  `/api/ai/documents` — M1/M2/M3 state machine, idle-stop timers, and
+  serialized-doc guard all apply.
+- `raw_text` (no `base64`) → deterministic only, no AI call, no Ollama
+  dependency. This makes the circulars UI usable even when the AI layer
+  is killed or Ollama is down.

@@ -13,14 +13,28 @@ export interface AnnouncementsResponse {
   success: boolean;
   data: Array<{
     id: string;
+    kind: string;          // "announcement" | "circular" | "event" | "alert" | "emergency"
     title: string;
     message: string;
+    body: string;         // campus_feed source uses body, legacy uses message
     priority: string;
     audience: string;
     created_at: string;
     expires_at: string | null;
+    source: "announcements" | "campus_feed";
   }>;
 }
+
+/** Category keys shown as filter tabs in the student announcements UI. */
+export const KIND_LABELS: Record<string, string> = {
+  all: "All",
+  announcement: "Announcements",
+  circular: "Circulars",
+  event: "Events",
+  alert: "Alerts",
+  emergency: "Emergencies",
+};
+
 
 export function fmtDateTime(iso: string | null | undefined): string {
   if (!iso) return "—";

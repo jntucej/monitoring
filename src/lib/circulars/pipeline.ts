@@ -240,15 +240,28 @@ export async function publishApprovedCircular(
     ? [{ type: "pdf", url: circ.attachment_url, title: circ.title }]
     : [];
 
+  // Derive target_scope from classified targets: if a specific dept or hostel
+  // block was identified, use it; otherwise fall back to 'global'.
+  const targets = circ.classified_targets;
+  let targetScope = "global";
+  if (targets.hostel_blocks?.length === 1) {
+    targetScope = `hostel:${targets.hostel_blocks[0]}`;
+  } else if (targets.departments?.length === 1) {
+    targetScope = `dept:${targets.departments[0]}`;
+  }
+  // Multiple depts or multiple hostel blocks → keep global and rely on
+  // the receipt fan-out (per-user) for delivery.
+
   const { rows: feedRows } = await query<{ id: string }>(
     `INSERT INTO public.campus_feed_items
        (kind, title, body_md, attachments, target_scope, priority, posted_by, posted_by_role, expires_at, status)
-     VALUES ('circular', $1, $2, $3::jsonb, 'global', $4, $5::uuid, $6, $7::timestamptz, 'active')
+     VALUES ('circular', $1, $2, $3::jsonb, $4, $5, $6::uuid, $7, $8::timestamptz, 'active')
      RETURNING id`,
     [
       circ.title,
       circ.summary || circ.raw_ocr_text?.slice(0, 1000) || circ.title,
       JSON.stringify(attachments),
+      targetScope,
       circ.action_required ? "urgent" : "normal",
       circ.requested_by,
       circ.requested_by_role,
