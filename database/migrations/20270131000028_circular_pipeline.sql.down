@@ -1,0 +1,5 @@
+-- 20270131000028_circular_pipeline.sql.down
+BEGIN;
+ALTER TABLE public.campus_feed_receipts DROP COLUMN IF EXISTS noted_at;
+DROP TABLE IF EXISTS public.circular_requests;
+COMMIT;
