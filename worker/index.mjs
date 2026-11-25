@@ -98,6 +98,7 @@ import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
 import hardDeleteExpired from './jobs/hard_delete_expired.js';
 import sloSnapshot from './jobs/slo_snapshot.js';
 import { startOperatorActionListener, runOperatorActionMaintenance } from './jobs/operator_actions.js';
+import { opsAgentServer } from './ops-agent.mjs';
 import { runMessSecretRotate } from './jobs/mess_secret_rotate.js';
 import { runMessConversionTrack } from './jobs/mess_conversion_track.js';
 import { runSosLease } from './jobs/sos_lease.js';
@@ -252,3 +253,9 @@ for (const job of jobs) {
 console.log(
   `[worker] scheduled jobs: ${jobs.map((j) => `${j.name} (${j.ms / 60000}m)`).join(', ')}`
 );
+
+// Start the restricted operations agent (binds to 127.0.0.1:3002).
+// It is started here so that a crash in the main worker loop does not
+// take down the ops agent, and so the health check on 3002 covers it.
+console.log('[worker] ops-agent started on 127.0.0.1:3002');
+

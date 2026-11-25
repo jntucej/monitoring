@@ -215,6 +215,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "SysAdmin Console",
           items: [
+            { href: "/sysadmin/admin-center", label: "Admin Center", icon: "LayoutGrid", badge: "NEW" },
             { href: "/sysadmin/application-health", label: "Health", icon: "Activity", badge: "LIVE" },
             { href: "/sysadmin/docker-services", label: "Services", icon: "Server" },
             { href: "/sysadmin/deployments", label: "Deployments", icon: "Rocket" },

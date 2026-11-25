@@ -319,6 +319,7 @@ services:
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
       - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for worker}
+      - OPS_AGENT_SECRET=${OPS_AGENT_SECRET:?OPS_AGENT_SECRET must be set in .env}
       # DR §7: write the last-known-good status snapshot to a named volume
       # shared with Caddy's /status static page. The Caddy container mounts
       # this volume read-only at /usr/share/status; the worker writes to
