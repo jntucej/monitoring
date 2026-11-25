@@ -1,0 +1,4 @@
+-- 20270131000034_institutional_deadlines.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.institutional_deadlines;
+COMMIT;

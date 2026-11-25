@@ -241,6 +241,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/admin/alerts", label: "Alerts", icon: "Bell", badge: "ACTIVE" },
             { href: "/admin/announcements", label: "Announcements", icon: "Megaphone" },
             { href: "/admin/circulars", label: "Circulars (OCR)", icon: "FileText" },
+            { href: "/admin/academic", label: "Academic Catalogs", icon: "GraduationCap" },
+            { href: "/admin/ops", label: "Ops & Compliance", icon: "ShieldCheck" },
             { href: "/admin/audit-logs", label: "Audit", icon: "ScrollText" },
             { href: "/admin/health", label: "Backup", icon: "Activity" },
             { href: "/admin/reports", label: "Reports", icon: "FileSpreadsheet" },

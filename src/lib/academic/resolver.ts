@@ -137,3 +137,18 @@ export async function resolveEffectiveSchedule(
   }
   return { source: "default" as const, override_mode: "normal", open_time: "06:00", close_time: "22:00", reason: null };
 }
+
+let branchCache: { at: number; map: Record<string, string> } | null = null;
+
+export async function getActiveBranchMap(): Promise<Record<string, string>> {
+  if (branchCache && Date.now() - branchCache.at < 60_000) {
+    return branchCache.map;
+  }
+  const { rows } = await query<{ code: string; short_name: string }>(
+    `SELECT code, short_name FROM public.academic_branches WHERE is_active = true`,
+  );
+  const map: Record<string, string> = {};
+  for (const r of rows) map[r.code] = r.short_name;
+  branchCache = { at: Date.now(), map };
+  return map;
+}

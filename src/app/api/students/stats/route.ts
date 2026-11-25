@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getActiveBranchMap } from "@/lib/academic/resolver";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -102,12 +103,14 @@ async function handleGet(req: NextRequest) {
 
         const details = (detailsRes.data as unknown as StudentDetailsRow[]) || [];
     const detailsMap = new Map(details.map((sd): [string, StudentDetailsRow] => [sd.user_id, sd]));
+    const dbBranchMap = await getActiveBranchMap().catch(() => ({}));
     const deptCodeMap: Record<string, string> = {
       "02": "EEE",
       "03": "MECH",
       "04": "ECE",
       "05": "CSE",
       "12": "IT",
+      ...dbBranchMap,
     };
 
     // Join and apply filters in memory

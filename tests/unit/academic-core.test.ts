@@ -9,6 +9,7 @@ import {
   resolveStudentAcademicState,
   recordAcademicTransition,
   resolveEffectiveSchedule,
+  getActiveBranchMap,
 } from "@/lib/academic/resolver";
 
 describe("Versioned Academic Core & Schedule Exceptions", () => {
@@ -79,5 +80,16 @@ describe("Versioned Academic Core & Schedule Exceptions", () => {
     const sched = await resolveEffectiveSchedule("campus", "all", "2026-11-26");
     expect(sched.source).toBe("exception");
     expect(sched.open_time).toBe("07:00");
+  });
+
+  it("loads active branches from academic_branches registry", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        { code: "05", short_name: "CSE" },
+        { code: "66", short_name: "CSM" },
+      ],
+    });
+    const map = await getActiveBranchMap();
+    expect(map["66"]).toBe("CSM");
   });
 });
