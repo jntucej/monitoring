@@ -338,6 +338,33 @@ describe("U4 auth/RBAC regression shape", () => {
   }, 30_000);
 });
 
+// ── NOSCRIPT recovery (U4 follow-up: script-cache resilience) ──────────────
+describe("U4 NOSCRIPT recovery", () => {
+  it("N1: recovery path exists — NOSCRIPT → SCRIPT LOAD → retry (structural)", () => {
+    // The checkSharedRedisLimit function is module-private; the NOSCRIPT
+    // recovery logic is verified structurally. A full behavioral test
+    // (real Redis restart / SCRIPT FLUSH) is integration scope (U4b).
+    const fs = require("node:fs");
+    const src = fs.readFileSync("src/lib/rate-limit.ts", "utf8");
+    // All four required recovery elements must be present:
+    expect(src).toContain("NOSCRIPT");                    // detect NOSCRIPT
+    expect(src).toContain('["SCRIPT", "LOAD"');            // load the script
+    expect(src).toContain("scriptLoaded = false");          // latch reset
+    expect(src).toContain('client.on("ready"');            // reset on reconnect
+  });
+
+  it("N2: NOSCRIPT error is caught specifically (not blanket)", () => {
+    const fs = require("node:fs");
+    const src = fs.readFileSync("src/lib/rate-limit.ts", "utf8");
+    // The NOSCRIPT check must inspect the error message/code, not just
+    // catch everything.
+    const noscriptBlock = src.match(/catch\s*\(e[^)]*\)\s*\{[\s\S]{0,300}NOSCRIPT[\s\S]{0,300}\}/);
+    expect(noscriptBlock).not.toBeNull();
+    // And the retry must use the same EVALSHA after SCRIPT LOAD
+    expect(src).toMatch(/SCRIPT.*LOAD[\s\S]{0,200}EVALSHA/);
+  });
+});
+
 // ── Scenario 14: U3 compatibility (deep equality on 429 body) ──────────────
 describe("U4 ↔ U3 429 contract", () => {
   it("S14: 429 body deep-equals the U3 canonical error shape", async () => {

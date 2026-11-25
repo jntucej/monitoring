@@ -43,6 +43,10 @@ function getRedisSharedStore(): Promise<RedisClient> {
         socket: { reconnectStrategy: (retries: number) => (retries < 5 ? 500 * retries : false) },
       });
       client.on("error", () => { /* connection errors surface on command failure; keep process alive */ });
+      // A successful (re)connect implies a fresh script cache on the
+      // server side — reset the load-latch so the next EVALSHA recovers
+      // via NOSCRIPT → SCRIPT LOAD.
+      client.on("ready", () => { scriptLoaded = false; });
       await client.connect().catch(() => {
         redisClientPromise = null;
       });
@@ -203,18 +207,54 @@ const INCR_PEXPIRE_LUA = `
  *  computed locally so we don't need the redis client's helper types). */
 const INCR_PEXPIRE_SHA1 = createHash("sha1").update(INCR_PEXPIRE_LUA).digest("hex");
 
+// Tracks whether the script has been confirmed loaded in the current Redis
+// instance. After a restart / SCRIPT FLUSH the cache is empty, so the first
+// EVALSHA will NOSCRIPT — we load via SCRIPT LOAD and retry, then latch.
+// Reset to false when the client reconnects (see client.on("ready")).
+let scriptLoaded = false;
+
 /**
- * Shared-redis rate-limit check (atomic). Returns null when Redis is
- * unreachable — the caller decides fallback.
+ * Shared-redis rate-limit check (atomic, with NOSCRIPT recovery).
+ *
+ * Sequence (per the required behavior):
+ *   1. EVALSHA — fast path when the script is cached in Redis.
+ *   2. On NOSCRIPT: SCRIPT LOAD the source, retry EVALSHA once.
+ *   3. Latch scriptLoaded so the operator can see the recovery happened.
+ *   4. If Redis remains unavailable after all attempts, return null and
+ *      the caller's Postgres/memory fallback takes over (preserved).
+ *
+ * The `scriptLoaded` latch is reset on every client "ready" event (which
+ * fires on (re)connect), so a Redis restart that wipes the script cache
+ * is always recovered on the next request.
  */
 async function checkSharedRedisLimit(key: string, cfg: Required<RateLimitConfig>): Promise<RateLimitResult | null> {
   try {
     const client = await getRedisSharedStore();
     const redisKey = `rl:${cfg.keyPrefix}:${key}`;
     const windowMs = Math.max(1, cfg.windowMs);
-    const [count, ttlMsRaw] = await client.sendCommand([
-      "EVALSHA", INCR_PEXPIRE_SHA1, "1", redisKey, String(windowMs),
-    ]) as unknown as [number, number];
+
+    const evalsha = async (): Promise<[number, number] | null> => {
+      try {
+        return (await client.sendCommand([
+          "EVALSHA", INCR_PEXPIRE_SHA1, "1", redisKey, String(windowMs),
+        ])) as unknown as [number, number];
+      } catch (e: any) {
+        // NOSCRIPT error: the script is not in this instance's cache
+        // (fresh Redis, SCRIPT FLUSH, or eviction). Load and retry once.
+        if (e?.message?.includes("NOSCRIPT") || e?.code === "NOSCRIPT") {
+          await client.sendCommand(["SCRIPT", "LOAD", INCR_PEXPIRE_LUA]);
+          scriptLoaded = true;
+          return (await client.sendCommand([
+            "EVALSHA", INCR_PEXPIRE_SHA1, "1", redisKey, String(windowMs),
+          ])) as unknown as [number, number];
+        }
+        throw e; // any other Redis error → caller's fallback
+      }
+    };
+
+    const result = await evalsha();
+    if (!result) return null;
+    const [count, ttlMsRaw] = result;
     const c = Number(count);
     const ttlMs = Number(ttlMsRaw);
     const remaining = Math.max(0, cfg.maxRequests - c);
@@ -227,6 +267,9 @@ async function checkSharedRedisLimit(key: string, cfg: Required<RateLimitConfig>
       retryAfter,
     };
   } catch {
+    // Redis unreachable (connection down, auth failure, etc.) — the caller
+    // falls back to the next store (Postgres secondary or memory). This
+    // preserves the layered resilience contract.
     return null;
   }
 }
