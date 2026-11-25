@@ -1,0 +1,8 @@
+-- 20270131000032_faculty_and_hostel_ops.sql.down
+BEGIN;
+ALTER TABLE public.visitor_logs DROP COLUMN IF EXISTS photo_url;
+DROP TABLE IF EXISTS public.housekeeping_scores;
+DROP TABLE IF EXISTS public.mess_rule_violations;
+DROP TABLE IF EXISTS public.hostel_room_allotments;
+DROP TABLE IF EXISTS public.study_materials;
+COMMIT;

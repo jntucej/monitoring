@@ -6,8 +6,9 @@ import { ShiftPublisher } from "@/components/security/ShiftPublisher";
 import { LiveMap } from "@/components/security/LiveMap";
 import { GateLogsPanel } from "@/components/security/GateLogsPanel";
 import { GuardStatsPanel } from "@/components/security/GuardStatsPanel";
+import { OpsCompliancePanel } from "@/components/security/OpsCompliancePanel";
 
-type TabKey = "live" | "gates" | "shifts" | "places" | "stats";
+type TabKey = "live" | "gates" | "shifts" | "places" | "stats" | "ops";
 
 export default function SupervisorSecurityPage() {
   const [tab, setTab] = useState<TabKey>("live");
@@ -24,6 +25,7 @@ export default function SupervisorSecurityPage() {
               ["shifts", "Shifts & Handover"],
               ["places", "Places (Geo)"],
               ["stats", "Guard Stats"],
+              ["ops", "Ops & Protocols"],
             ] as const
           ).map(([k, label]) => (
             <button
@@ -47,6 +49,7 @@ export default function SupervisorSecurityPage() {
       {tab === "shifts" && <ShiftPublisher />}
       {tab === "places" && <PlacesEditor />}
       {tab === "stats" && <GuardStatsPanel />}
+      {tab === "ops" && <OpsCompliancePanel />}
     </div>
   );
 }

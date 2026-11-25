@@ -1,0 +1,11 @@
+-- 20270131000031_admin_supervisor_ops.sql.down
+BEGIN;
+DROP TABLE IF EXISTS public.emergency_protocols;
+DROP TABLE IF EXISTS public.access_requests;
+ALTER TABLE public.visitor_watchlist DROP COLUMN IF EXISTS photo_url;
+ALTER TABLE public.visitor_pre_registrations
+  DROP COLUMN IF EXISTS status,
+  DROP COLUMN IF EXISTS host_user_id,
+  DROP COLUMN IF EXISTS category_code;
+DELETE FROM public.ref_categories WHERE domain = 'visitor_category';
+COMMIT;
