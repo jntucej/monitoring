@@ -43,9 +43,14 @@ function sha256File(filePath) {
 function isDue(cronExpr, lastRunAt, now = new Date()) {
   if (!lastRunAt) return true;
   const hours = (now - new Date(lastRunAt)) / 3600000;
-  const m = cronExpr.match(/\*\s*\/\s*(\d+)/) || cronExpr.match(/\*\/(\d+)/);
-  const stepHours = m ? Number(m[1]) : 24;
-  return hours >= stepHours;
+  // Step syntax: "*\/3" → every 3h; "0 *\/3" → every 3h
+  const m = cronExpr.match(/\*\s*\/\s*(\d+)/);
+  if (m) return hours >= Number(m[1]);
+  // Standard 5-field cron: M H D MoW → daily fires at the specified hour
+  const parts = cronExpr.trim().split(/\s+/);
+  if (parts.length >= 5 && (parts[2] === "*" || parts[4] === "*")) return hours >= 24;
+  // Fallback
+  return hours >= 24;
 }
 
 function safeExec(args, timeoutMs = 300_000, env = process.env) {

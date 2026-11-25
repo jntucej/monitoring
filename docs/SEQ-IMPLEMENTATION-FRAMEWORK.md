@@ -136,5 +136,6 @@ Proposed order = dependency order. **Each unit: implement → verify → stop �
 
 | Unit | Status | Commit | Notes |
 |---|---|---|---|
-| U1 — Migrations 37–39 | **deployed** | 65365c4f | 2026-11-25. Scratch rollback test passed (37→38→39 forward, 39→38→37 down, idempotency re-apply, 303 originals intact). Production: 306 migrations, 14 new tables, WD seed updated with UUID. Pre-deploy backup: /opt/monitoring/backups/daily/pre-u1-migrate.dump. |
-| U2 — Seed backup_policies | pending | — | Next: seed daily-postgres policy row + force one cycle run |
+| U1 — Migrations 37–39 | **deployed** | c13679b7 | 2026-11-25. Scratch rollback test passed. Production: 306 migrations, 14 new tables, WD seed updated. Pre-deploy backup: pre-u1-migrate.dump. |
+| U2 — Seed backup_policies + first cycle | **deployed** | (pending commit) | 2026-11-25. Seeded `daily-postgres` policy (0 3 * * *, 30d retention). One manual cycle: pg_dump -Fc → /opt/monitoring/backups/daily/gate-db-u2.sql.gz (1.2 MB, sha256 ad68571b…). Records: 1 execution (completed), 1 artifact (verified), 1 recovery_point (latest_good=true). pg_restore --list OK, 2969 TOC entries. |
+| U3 — API error normalization | pending | — | Next: shared error-middleware + route wrapper |
