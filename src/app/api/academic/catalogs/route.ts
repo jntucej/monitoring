@@ -2,7 +2,9 @@ import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { assertCsrf } from "@/lib/csrf";
 import { query } from "@/lib/postgres";
+import { addAudit } from "@/lib/db";
 import { ok, fail } from "@/server/http/response";
+import type { AuthContext } from "@/lib/authContext";
 
 async function handleGet() {
   const [years, programs, branches, entryModes, regulations] = await Promise.all([
@@ -65,5 +67,37 @@ export const GET = withAuthorization(handleGet, {
   requiredRole: ["student", "faculty", "hod", "dean", "oie", "vice_principal", "principal", "admin", "sysadmin"],
 });
 export const POST = withAuthorization(handlePost, {
+  requiredRole: ["admin", "sysadmin", "principal", "oie"],
+});
+
+async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
+  const csrfErr = assertCsrf(req);
+  if (csrfErr) return csrfErr;
+
+  const b = await req.json().catch(() => null);
+  const kind = String(b?.kind ?? "").trim();
+  const code = String(b?.code ?? "").trim();
+  if (!code) return fail("INVALID_INPUT", "code is required", 400);
+
+  if (kind === "branch_deactivate") {
+    const { rows: deps } = await query<{ cnt: number }>(
+      `SELECT COUNT(*)::int AS cnt FROM public.student_academic_history WHERE branch_code = $1 AND effective_to IS NULL`,
+      [code],
+    );
+    if ((deps[0]?.cnt ?? 0) > 0 && !b?.force_archive) {
+      return fail("HAS_DEPENDENCIES", `Branch ${code} has ${deps[0].cnt} active student records; archive instead of deleting`, 409);
+    }
+    const { rows } = await query(
+      `UPDATE public.academic_branches SET is_active = false, effective_to = CURRENT_DATE WHERE code = $1 RETURNING *`,
+      [code],
+    );
+    await addAudit({ action: "ACADEMIC_BRANCH_DEACTIVATED", userId: auth.userId, role: auth.role, details: { code } });
+    return ok(rows[0]);
+  }
+
+  return fail("INVALID_KIND", "Unsupported patch kind", 400);
+}
+
+export const PATCH = withAuthorization(handlePatch, {
   requiredRole: ["admin", "sysadmin", "principal", "oie"],
 });

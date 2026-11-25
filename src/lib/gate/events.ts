@@ -19,6 +19,7 @@
  *     applies `serializeGateEvent` unless isSuperAdmin).
  */
 import { query } from "@/lib/postgres";
+import { resolveStudentAcademicState } from "@/lib/academic/resolver";
 import { errMsg } from "@/lib/err-msg";
 import {
   getBlueprint,
@@ -182,14 +183,17 @@ async function recomputeOccupancy(
 
 const writeMovementLog: Dispatcher = async (input, payload, derived, outcome, occurredAt) => {
   const p = payload as Record<string, any>;
+  const academicSnapshot = input.subjectId
+    ? await resolveStudentAcademicState(input.subjectId, occurredAt).catch(() => null)
+    : null;
   const { rows } = await query(
     `INSERT INTO public.movement_logs
        (user_id, direction, reason, gate_id, operator_id, is_manual,
         event_type, device_id, shift_id, verification_method, purpose_code,
         outcome, photo_url, geo, subject_ref,
-        watchlist_hit, curfew_violation, duplicate_scan, payload)
+        watchlist_hit, curfew_violation, duplicate_scan, payload, academic_snapshot)
      VALUES
-       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+       ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
      RETURNING id`,
     [
       input.subjectId ?? null,
@@ -211,6 +215,7 @@ const writeMovementLog: Dispatcher = async (input, payload, derived, outcome, oc
       derived.curfew_violation ?? false,
       derived.duplicate_scan ?? false,
       JSON.stringify({ ...p, _derived: derived }),
+      academicSnapshot ? JSON.stringify(academicSnapshot) : null,
     ]
   );
   return { id: rows[0].id, recordTarget: "movement_logs" };
