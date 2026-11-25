@@ -113,6 +113,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/principal/people/departments", label: "People", icon: "Users" },
             { href: "/principal/operations/gates", label: "Operations", icon: "DoorOpen" },
             { href: "/principal/examinations", label: "Exams", icon: "FileText" },
+            { href: "/principal/circulars", label: "Circulars", icon: "FileText" },
             { href: "/principal/governance/audit", label: "Governance", icon: "Scale" },
           ],
         },
@@ -128,6 +129,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/vice-principal", label: "Approvals", icon: "CheckSquare" },
             { href: "/vice-principal/academics/departments", label: "Academics", icon: "GraduationCap" },
             { href: "/vice-principal/examinations", label: "Examinations", icon: "FileText" },
+            { href: "/principal/circulars", label: "Circulars", icon: "FileText" },
             { href: "/vice-principal/history/30-days", label: "History", icon: "History" },
             { href: "/vice-principal/profile", label: "Profile", icon: "UserCog" },
           ],
@@ -238,6 +240,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/admin/alerts", label: "Alerts", icon: "Bell", badge: "ACTIVE" },
             { href: "/admin/announcements", label: "Announcements", icon: "Megaphone" },
+            { href: "/admin/circulars", label: "Circulars (OCR)", icon: "FileText" },
             { href: "/admin/audit-logs", label: "Audit", icon: "ScrollText" },
             { href: "/admin/health", label: "Backup", icon: "Activity" },
             { href: "/admin/reports", label: "Reports", icon: "FileSpreadsheet" },
