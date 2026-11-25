@@ -50,7 +50,7 @@ const GET = withAuthorization(
               mount_point, filesystem, filesystem_uuid, filesystem_driver,
               total_bytes, available_bytes, last_seen_at, is_primary_backup,
               eligible_for_backup, read_writable, health_status, last_backup_at,
-              last_validate_at, is_mounted, mount_path
+              last_validated_at, last_validation_result, is_mounted, mount_path
          FROM public.storage_devices
         ORDER BY is_primary_backup DESC, registered_at DESC`
     );

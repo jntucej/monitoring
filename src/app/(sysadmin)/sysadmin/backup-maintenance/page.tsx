@@ -99,6 +99,30 @@ type Classification = {
   notes: string | null;
 };
 
+type RecoveryPoint = {
+  id: string;
+  snapshot_id: string;
+  repository_path: string;
+  is_protected: boolean;
+  is_latest_good: boolean;
+  protected_reason: string | null;
+  created_at: string;
+  tag: string | null;
+  time: string | null;
+};
+
+type RestoreTest = {
+  id: string;
+  test_type: string;
+  status: string;
+  started_at: string | null;
+  completed_at: string | null;
+  result: string | null;
+  error: string | null;
+  duration_ms: number | null;
+  created_at: string;
+};
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 function fmtBytes(n: number | null | undefined): string {
@@ -139,6 +163,8 @@ export default function BackupMaintenancePage() {
   const [maintPols, setMaintPols] = useState<MaintPolicy[]>([]);
   const [usbDevices, setUsbDevices] = useState<DiscoveredUSB[]>([]);
   const [classifications, setClassifications] = useState<Classification[]>([]);
+  const [recoveryPoints, setRecoveryPoints] = useState<RecoveryPoint[]>([]);
+  const [restoreTests, setRestoreTests] = useState<RestoreTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionMsg, setActionMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -158,11 +184,12 @@ export default function BackupMaintenancePage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [devRes, repoRes, centerRes, usbRes] = await Promise.all([
+      const [devRes, repoRes, centerRes, usbRes, recRes] = await Promise.all([
         api("/api/sysadmin/storage-devices"),
         api("/api/sysadmin/backup-repo"),
         api("/api/sysadmin/backup-maintenance-center"),
         api("/api/sysadmin/usb-discovery"),
+        api("/api/sysadmin/recovery"),
       ]);
       if (devRes.ok) setDevices((await devRes.json()).devices ?? []);
       if (repoRes.ok) {
@@ -173,7 +200,12 @@ export default function BackupMaintenancePage() {
       if (centerRes.ok) setMaintPols((await centerRes.json()).maintenance_policies ?? []);
       if (usbRes.ok) {
         const usb = await usbRes.json();
-        setUsbDevices(usb.discovered ?? []);
+        setUsbDevices(usb.hardware?.discovered ?? usb.discovered ?? []);
+      }
+      if (recRes.ok) {
+        const rec = await recRes.json();
+        setRecoveryPoints(rec.recovery_points ?? []);
+        setRestoreTests(rec.restore_tests ?? []);
       }
     } catch { /* ignore */ }
     setLoading(false);
@@ -583,6 +615,114 @@ export default function BackupMaintenancePage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Recovery Center */}
+      <section>
+        <h2 className="mb-2 text-sm font-semibold text-foreground">
+          Recovery Center
+        </h2>
+
+        {/* Recovery points */}
+        {recoveryPoints.length > 0 && (
+          <div className="mb-4">
+            <h3 className="mb-1 text-xs font-semibold text-foreground">
+              Protected Recovery Points ({recoveryPoints.length})
+            </h3>
+            <div className="divide-y divide-border">
+              {recoveryPoints.map((rp) => (
+                <div key={rp.id} className="flex flex-wrap items-center gap-3 py-2">
+                  <span className="font-mono text-xs text-foreground">{rp.snapshot_id}</span>
+                  {rp.tag && <span className="text-xs text-foreground">{rp.tag}</span>}
+                  {rp.is_protected && (
+                    <span className="bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                      PROTECTED
+                    </span>
+                  )}
+                  {rp.is_latest_good && (
+                    <span className="text-xs text-action-success">latest-good</span>
+                  )}
+                  <span className="ml-auto text-xs text-foreground">
+                    {rp.time ? new Date(rp.time).toLocaleString() : rp.created_at ? new Date(rp.created_at).toLocaleString() : ""}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Restore test history */}
+        {restoreTests.length > 0 && (
+          <div className="mb-4">
+            <h3 className="mb-1 text-xs font-semibold text-foreground">
+              Restore Test History ({restoreTests.length})
+            </h3>
+            <div className="divide-y divide-border">
+              {restoreTests.slice(0, 10).map((t) => (
+                <div key={t.id} className="flex flex-wrap items-center gap-3 py-2 text-xs">
+                  <span className={`font-bold ${
+                    t.status === "passed" ? "text-action-success" :
+                    t.status === "failed" ? "text-action-danger" :
+                    t.status === "running" ? "text-action-warning" : "text-foreground"
+                  }`}>
+                    {t.status.toUpperCase()}
+                  </span>
+                  <span className="text-foreground">{t.test_type}</span>
+                  <span className="text-foreground">{t.started_at ? new Date(t.started_at).toLocaleString() : ""}</span>
+                  {t.duration_ms != null && (
+                    <span className="text-foreground">{(t.duration_ms / 1000).toFixed(1)}s</span>
+                  )}
+                  {t.error && <span className="truncate text-action-danger max-w-64">{t.error.slice(0, 80)}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Restore actions */}
+        {snapshots.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              disabled={busy}
+              onClick={() => void post("/api/sysadmin/recovery", {
+                action: "execute_restore",
+                snapshot_id: snapshots[0]?.snapshot_id,
+                target: "staging",
+              })}
+              className="bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+            >
+              Restore Latest to Staging
+            </button>
+            <button
+              disabled={busy}
+              onClick={() => {
+                const snap = snapshots[0];
+                if (!snap) return;
+                if (confirm("PRODUCTION RESTORE: This will overwrite the live database. Are you sure?")) {
+                  void post("/api/sysadmin/recovery", {
+                    action: "execute_restore",
+                    snapshot_id: snap.snapshot_id,
+                    target: "production",
+                    confirm_production: true,
+                  });
+                }
+              }}
+              className="border border-action-danger/30 px-3 py-1.5 text-xs text-action-danger hover:bg-action-danger/10 disabled:opacity-50"
+            >
+              Restore to Production
+            </button>
+            <button
+              disabled={busy}
+              onClick={() => void post("/api/sysadmin/recovery", {
+                action: "preview_restore",
+                snapshot_id: snapshots[0]?.snapshot_id,
+              })}
+              className="bg-muted px-3 py-1.5 text-xs text-foreground hover:bg-accent disabled:opacity-50"
+            >
+              Preview Latest
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Maintenance Policies */}

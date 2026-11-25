@@ -30,6 +30,7 @@ import os from "node:os";
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { getWorkerDbPool } from "./db.js";
 
 const AGENT_PORT = Number(process.env.OPS_AGENT_PORT || 3002);
@@ -234,9 +235,30 @@ async function opGetContainerLogs({ container, lines = 100 } = {}) {
 
 /**
  * host_diagnostics
- * Body: {} → { hostname, uptime_s, load_avg, mem_total_mb, mem_used_mb, mem_used_pct, cpu_count }
+ * Body: { type?: "usb-discover" } →
+ *   default: { hostname, uptime_s, load_avg, cpu_count, mem_total_mb, mem_used_mb, mem_used_pct }
+ *   usb-discover: { usb_devices: [...] } (from /opt/monitoring/scripts/usb-discover.sh)
  */
-async function opHostDiagnostics() {
+async function opHostDiagnostics(body, ctx) {
+  // USB discovery sub-operation
+  if (body?.type === "usb-discover") {
+    const script = "/opt/monitoring/scripts/usb-discover.sh";
+    if (!fs.existsSync(script)) {
+      return { usb_devices: [], error: "usb-discover.sh not found on host" };
+    }
+    try {
+      const out = execFileSync(script, [], {
+        timeout: 30_000,
+        stdio: "pipe",
+        maxBuffer: 1024 * 1024,
+      }).toString();
+      const devices = JSON.parse(out);
+      return { usb_devices: devices };
+    } catch (err) {
+      return { usb_devices: [], error: String(err.message).slice(0, 200) };
+    }
+  }
+
   const total = os.totalmem();
   const free = os.freemem();
   return {

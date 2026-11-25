@@ -307,8 +307,10 @@ describe("retention-safety", () => {
       "worker/jobs/backup_maintenance.js",
       "utf8"
     );
-    // The retention handler only deletes if a newer backup exists
-    expect(content).toContain("newer.length > 0");
+    // The retention handler sorts by mtime and never deletes index 0 (newest)
+    expect(content).toContain("sort((a, b) => b.mtime - a.mtime)");
+    expect(content).toContain("i = 1; i <");
+    expect(content).toContain("gate-db-");
   });
 
   it("never deletes the only backup copy", async () => {
@@ -317,10 +319,11 @@ describe("retention-safety", () => {
       "worker/jobs/backup_maintenance.js",
       "utf8"
     );
-    // The guard: only delete if `newer` count > 0
-    expect(content).toContain("newer.length > 0");
+    // The guard: loop starts at i=1 (skips the newest)
+    expect(content).toContain("for (let i = 1; i <");
     // And it filters for the same backup prefix (gate-db-*.sql.gz)
     expect(content).toContain("gate-db-");
+    expect(content).toContain(".sql.gz");
   });
 });
 

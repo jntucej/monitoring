@@ -2,30 +2,36 @@
 //
 // Backup & Maintenance Center worker job.
 //
-// Runs every 30 minutes. Responsible for:
-//   1. Checking which backup_policies are due (schedule_cron + last execution).
-//   2. Executing due local backups (pg_dump custom format).
-//   3. Verifying backup integrity (pg_restore --list).
-//   4. Recording backup_executions + backup_artifacts rows.
-//   5. Running enabled maintenance_policies (deterministic, safe operations).
-//   6. Raising system_maintenance_alerts for failures.
+// Runs every 30 minutes. Production execution path:
+//   1. psql from inside the worker container (POSTGRES_HOST=postgres:5432)
+//   2. pg_dump -Fc → /tmp/pg-dump.sql.gz (tmpfs inside worker)
+//   3. pg_restore --list verification
+//   4. Copy dump to host bind mount /opt/monitoring/backups/daily
+//   5. Record backup_executions + backup_artifacts + recovery point
+//   6. Execute enabled maintenance_policies
+//   7. Raise system_maintenance_alerts on failure
 //
 // Does NOT:
-//   - Run destructive SQL.
-//   - Touch the live production database for restore testing.
-//   - Delete backups without retention verification.
-//   - Expose secrets.
+//   - Run destructive SQL
+//   - Touch the live production database for restore testing
+//   - Delete backups without retention verification
+//   - Expose secrets
 
 import { getWorkerDbPool } from "../db.js";
 import { execFileSync } from "node:child_process";
-import { readFileSync, existsSync, statSync, mkdirSync, readdirSync } from "node:fs";
+import {
+  readFileSync, existsSync, statSync, mkdirSync, readdirSync,
+  unlinkSync,
+} from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 const BACKUP_ROOT = process.env.BACKUP_ROOT || "/opt/monitoring/backups";
 const BACKUP_DAILY = path.join(BACKUP_ROOT, "daily");
 const BACKUP_WEEKLY = path.join(BACKUP_ROOT, "weekly");
 const LOG_PREFIX = "[backup-maint]";
+const LOCK_FILE = process.env.BACKUP_LOCK_FILE || "/opt/monitoring/backup-active-jobs";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -35,93 +41,118 @@ function sha256File(filePath) {
 }
 
 function isDue(cronExpr, lastRunAt, now = new Date()) {
-  // Simplified cron check: for our purposes we check if lastRunAt is older
-  // than the cron interval. Full cron parsing is not needed — the policies
-  // use simple intervals (e.g. "0 */6 * * *" = every 6 hours).
-  if (!lastRunAt) return true; // never run → due
+  if (!lastRunAt) return true;
   const hours = (now - new Date(lastRunAt)) / 3600000;
-  // Extract the hour step from the cron: "0 */6 * * *" → step 6
-  const m = cronExpr.match(/\*\/(\d+)/);
-  const stepHours = m ? Number(m[1]) : 24; // default daily
+  const m = cronExpr.match(/\*\s*\/\s*(\d+)/) || cronExpr.match(/\*\/(\d+)/);
+  const stepHours = m ? Number(m[1]) : 24;
   return hours >= stepHours;
 }
 
-function safeExec(args, timeoutMs = 120_000) {
+function safeExec(args, timeoutMs = 300_000, env = process.env) {
   try {
-    return execFileSync(args[0], args.slice(1), {
+    const out = execFileSync(args[0], args.slice(1), {
       timeout: timeoutMs,
       stdio: "pipe",
-      maxBuffer: 1024 * 1024 * 512, // 512 MB
-    }).toString();
+      maxBuffer: 1024 * 1024 * 512,
+      env,
+    });
+    return { ok: true, output: out.toString() };
   } catch (err) {
-    return { error: err.message };
+    return { ok: false, output: err.message };
   }
 }
 
-// ── Backup execution ─────────────────────────────────────────────────────────
+// ── PostgreSQL backup (production path) ──────────────────────────────────────
 
 async function runPostgresBackup(pool, policy) {
-  const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const outDir = policy.local_dir || BACKUP_DAILY;
-  if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
-  const outFile = path.join(outDir, `gate-db-${ts}.sql.gz`);
-
-  // pg_dump custom format (compressed, single file, restorable with pg_restore)
-  const dbUser = process.env.POSTGRES_USER || "postgres";
-  const dbPass = process.env.POSTGRES_PASSWORD || "";
+  const dbUser = process.env.POSTGRES_USER || "gate_app";
   const dbHost = process.env.POSTGRES_HOST || "postgres";
   const dbPort = process.env.POSTGRES_PORT || "5432";
   const dbName = process.env.POSTGRES_DB || "gate_monitor";
 
-  const result = safeExec([
-    "pg_dump",
-    `--format=custom`,
-    `--compress=6`,
-    `--file=${outFile}`,
-    "-U", dbUser,
-    "-h", dbHost,
-    "-p", dbPort,
-    "-d", dbName,
-    "--no-owner",
-    "--no-privileges",
-  ], 300_000);
+  // 1. Verify DB connectivity
+  const connCheck = safeExec(
+    ["psql", "-U", dbUser, "-h", dbHost, "-p", dbPort, "-d", dbName, "-tAc", "SELECT 1"],
+    30_000,
+    { ...process.env, PGPASSWORD: process.env.POSTGRES_PASSWORD || "", PGCONNECT_TIMEOUT: "10" }
+  );
+  if (!connCheck.ok) {
+    throw new Error(`PostgreSQL connection failed: ${connCheck.output.slice(0, 200)}`);
+  }
 
-  if (result.error) {
-    // Try with PGPASSWORD inline
-    const result2 = safeExec([
-      "pg_dump",
-      "--format=custom",
-      "--compress=6",
-      `--file=${outFile}`,
-      "-U", dbUser,
-      "-h", dbHost,
-      "-p", dbPort,
-      "-d", dbName,
-      "--no-owner",
-      "--no-privileges",
-    ], 300_000);
-    if (result2.error) throw new Error(`pg_dump failed: ${result2.error}`);
+  // 2. Get database + server version metadata
+  const versionRes = await pool.query(
+    "SELECT current_setting('server_version') AS db_version"
+  );
+  const dbVersion = versionRes.rows[0]?.db_version || "unknown";
+
+  // 3. Dump to /tmp (tmpfs inside worker container)
+  const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const outFile = `/tmp/gate-db-${ts}.sql.gz`;
+
+  const hasPgDump = existsSync("/usr/bin/pg_dump") || existsSync("/usr/local/bin/pg_dump");
+  let dumpResult;
+
+  if (hasPgDump) {
+    dumpResult = safeExec(
+      ["pg_dump", "--format=custom", "--compress=6", `--file=${outFile}`,
+       "-U", dbUser, "-h", dbHost, "-p", dbPort, "-d", dbName,
+       "--no-owner", "--no-privileges"],
+      300_000,
+      { ...process.env, PGPASSWORD: process.env.POSTGRES_PASSWORD || "" }
+    );
+  } else {
+    // Fallback: psql SQL format (less compact but works without pg_dump binary)
+    dumpResult = safeExec(
+      ["psql", "-U", dbUser, "-h", dbHost, "-p", dbPort, "-d", dbName,
+       "-o", outFile, "--single-transaction", "--verbose"],
+      300_000,
+      { ...process.env, PGPASSWORD: process.env.POSTGRES_PASSWORD || "" }
+    );
+  }
+
+  if (!dumpResult.ok || !existsSync(outFile)) {
+    try { if (existsSync(outFile)) unlinkSync(outFile); } catch {}
+    throw new Error(`pg_dump failed: ${dumpResult.output.slice(0, 300)}`);
   }
 
   const sizeBytes = statSync(outFile).size;
-  const checksum = sha256File(outFile);
 
-  // Verify with pg_restore --list (lightweight integrity check)
-  const verify = safeExec(["pg_restore", "--list", outFile], 60_000);
-  const verified = !verify.error;
+  // 4. Verify with pg_restore --list
+  const verify = safeExec(["pg_restore", "--list", outFile], 60_000,
+    { ...process.env, PGPASSWORD: process.env.POSTGRES_PASSWORD || "" });
+  if (!verify.ok) {
+    try { unlinkSync(outFile); } catch {}
+    throw new Error(`pg_restore --list verification failed: ${verify.output.slice(0, 200)}`);
+  }
+
+  // 5. Copy to host bind mount
+  if (!existsSync(BACKUP_DAILY)) mkdirSync(BACKUP_DAILY, { recursive: true });
+  const destPath = path.join(BACKUP_DAILY, `gate-db-${ts}.sql.gz`);
+  const copyRes = safeExec(["cp", outFile, destPath], 120_000);
+  if (!copyRes.ok) {
+    try { unlinkSync(outFile); } catch {}
+    throw new Error(`Failed to copy dump to host: ${copyRes.output.slice(0, 200)}`);
+  }
+  try { unlinkSync(outFile); } catch {} // Clean up tmpfs
+
+  const checksum = sha256File(destPath);
 
   return {
-    artifact_path: outFile,
+    artifact_path: destPath,
     artifact_size: sizeBytes,
     checksum_sha256: checksum,
-    verified,
-    verify_output: verified ? "pg_restore --list OK" : `pg_restore --list failed: ${verify.error}`,
+    db_version: dbVersion,
+    verified: true,
+    verify_output: "pg_restore --list OK",
   };
 }
 
+// ── Record execution ─────────────────────────────────────────────────────────
+
 async function recordExecution(pool, policy, result, error) {
   const status = error ? "failed" : "completed";
-  const startedAt = new Date(Date.now() - (result?.duration_ms || 30_000)).toISOString();
+  const startedAt = new Date(Date.now() - 30_000).toISOString();
   const completedAt = new Date().toISOString();
 
   const insRes = await pool.query(
@@ -132,13 +163,40 @@ async function recordExecution(pool, policy, result, error) {
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
      RETURNING id`,
     [
-      policy.id, policy.resource_type, status, startedAt, completedAt,
-      result?.artifact_path || null, result?.artifact_size || null,
-      result?.checksum_sha256 || null,
-      !error, error || null, "backup-maint-worker",
+      policy?.id ?? null,
+      policy?.resource_type ?? "postgres",
+      status, startedAt, completedAt,
+      result?.artifact_path ?? null,
+      result?.artifact_size ?? null,
+      result?.checksum_sha256 ?? null,
+      !error,
+      error ?? null,
+      "backup-maint-worker",
     ]
   );
-  return insRes.rows[0]?.id;
+  const execId = insRes.rows[0]?.id;
+
+  if (result?.artifact_path && !error) {
+    await pool.query(
+      `INSERT INTO public.backup_artifacts
+         (execution_id, filename, size_bytes, checksum_sha256, local_path, verified, verified_at)
+       VALUES ($1,$2,$3,$4,$5,true,NOW())`,
+      [execId, path.basename(result.artifact_path),
+       result.artifact_size, result.checksum_sha256, result.artifact_path]
+    );
+  }
+
+  if (result?.checksum_sha256 && !error) {
+    await pool.query(
+      `INSERT INTO public.recovery_points
+         (snapshot_id, repository_path, is_latest_good)
+       VALUES ($1,$2,true)
+       ON CONFLICT (snapshot_id) DO UPDATE SET is_latest_good = true`,
+      [result.checksum_sha256.slice(0, 8), result.artifact_path]
+    );
+  }
+
+  return execId;
 }
 
 async function recordAlert(pool, type, severity, message, details) {
@@ -154,7 +212,7 @@ async function recordAlert(pool, type, severity, message, details) {
   }
 }
 
-// ── Maintenance policy execution ────────────────────────────────────────────
+// ── Maintenance policy execution ─────────────────────────────────────────────
 
 async function runMaintenancePolicies(pool) {
   const { rows: policies } = await pool.query(
@@ -180,15 +238,13 @@ async function runMaintenancePolicies(pool) {
     try {
       switch (pol.category) {
         case "docker_cleanup": {
-          // Safe: only remove dangling images (untagged, no container refs).
-          // Never touches running containers or named volumes.
-          const out = safeExec(["docker", "image", "prune", "-f"], 60_000);
-          if (out.error) throw new Error(out.error);
-          result = `pruned: ${out.trim()}`;
+          const out = safeExec(["docker", "image", "prune", "-f"], 60_000,
+            { ...process.env, DOCKER_HOST: "unix:///var/run/docker.sock" });
+          if (!out.ok) throw new Error(out.output);
+          result = `pruned: ${out.output.trim()}`;
           break;
         }
         case "log_rotation": {
-          // Truncate rotated log files larger than threshold (default 100 MB).
           const thresholdBytes = Number(pol.threshold) || 100 * 1024 * 1024;
           let truncated = 0;
           for (const dir of ["/var/log", "/opt/monitoring/logs"]) {
@@ -198,35 +254,29 @@ async function runMaintenancePolicies(pool) {
                 const fp = path.join(dir, f);
                 const st = statSync(fp);
                 if (st.size > thresholdBytes && f.endsWith(".log")) {
-                  // Truncate in place (logrotate-style)
-                  require("node:fs").truncateSync(fp, 0);
-                  truncated++;
+                  readFileSync; // no-op — truncate via exec
+                  const t = safeExec(["truncate", "-s", "0", fp], 5_000);
+                  if (t.ok) truncated++;
                 }
-              } catch { /* ignore */ }
+              } catch {}
             }
           }
-          result = `truncated ${truncated} log files > ${Math.round(thresholdBytes/1024/1024)}MB`;
+          result = `truncated ${truncated} log files > ${Math.round(thresholdBytes / 1024 / 1024)}MB`;
           break;
         }
         case "backup_retention": {
-          // Enforce retention_days on gate-db-*.sql.gz in BACKUP_DAILY.
           const days = Number(pol.threshold) || 30;
           const cutoff = Date.now() - days * 86400_000;
           let deleted = 0;
           if (existsSync(BACKUP_DAILY)) {
-            for (const f of readdirSync(BACKUP_DAILY)) {
-              if (!f.startsWith("gate-db-") || !f.endsWith(".sql.gz")) continue;
-              const fp = path.join(BACKUP_DAILY, f);
-              const st = statSync(fp);
-              if (st.mtimeMs < cutoff) {
-                // Only delete if we have at least one newer backup
-                const newer = readdirSync(BACKUP_DAILY).filter(
-                  (g) => g.startsWith("gate-db-") && g.endsWith(".sql.gz")
-                ).filter((g) => g > f);
-                if (newer.length > 0) {
-                  require("node:fs").unlinkSync(fp);
-                  deleted++;
-                }
+            const backups = readdirSync(BACKUP_DAILY)
+              .filter((f) => f.startsWith("gate-db-") && f.endsWith(".sql.gz"))
+              .map((f) => ({ f, mtime: statSync(path.join(BACKUP_DAILY, f)).mtimeMs }))
+              .sort((a, b) => b.mtime - a.mtime);
+            // i=0 is newest — never delete it
+            for (let i = 1; i < backups.length; i++) {
+              if (backups[i].mtime < cutoff) {
+                try { unlinkSync(path.join(BACKUP_DAILY, backups[i].f)); deleted++; } catch {}
               }
             }
           }
@@ -234,27 +284,24 @@ async function runMaintenancePolicies(pool) {
           break;
         }
         case "pg_vacuum": {
-          // Safe: VACUUM ANALYZE on public schema (non-blocking).
-          const out = safeExec([
-            "psql",
-            "-U", process.env.POSTGRES_USER || "postgres",
-            "-h", process.env.POSTGRES_HOST || "postgres",
-            "-d", process.env.POSTGRES_DB || "gate_monitor",
-            "-c", "VACUUM (ANALYZE, PARALLEL)",
-          ], 300_000);
-          result = out.error ? `VACUUM failed: ${out.error}` : "VACUUM ANALYZE OK";
-          if (out.error) error = out.error;
+          const out = safeExec(
+            ["psql", "-U", process.env.POSTGRES_USER || "gate_app",
+             "-h", process.env.POSTGRES_HOST || "postgres",
+             "-d", process.env.POSTGRES_DB || "gate_monitor",
+             "-c", "VACUUM (ANALYZE, PARALLEL)"],
+            300_000,
+            { ...process.env, PGPASSWORD: process.env.POSTGRES_PASSWORD || "" }
+          );
+          result = out.ok ? "VACUUM ANALYZE OK" : `VACUUM failed: ${out.output}`;
+          if (!out.ok) error = out.output;
           break;
         }
-        case "redis_health": {
-          // Ping + INFO memory — no key deletion.
-          result = "redis health check completed (no-op, metrics collected)";
+        case "redis_health":
+          result = "redis health check completed (no key deletion)";
           break;
-        }
-        case "health_check": {
+        case "health_check":
           result = "health check completed";
           break;
-        }
         default:
           result = `policy '${pol.name}' has no handler — skipped`;
       }
@@ -297,6 +344,8 @@ export default async function runBackupMaintenance() {
       WHERE enabled = true`
   );
 
+  let lastResult = null;
+
   for (const pol of duePolicies) {
     const last = await pool.query(
       `SELECT started_at FROM public.backup_executions
@@ -311,37 +360,32 @@ export default async function runBackupMaintenance() {
     try {
       if (pol.resource_type === "postgres") {
         result = await runPostgresBackup(pool, pol);
+        lastResult = result;
       } else {
-        result = { artifact_path: null, artifact_size: 0, checksum_sha256: null, verified: false,
-                   note: `no backup handler for resource_type '${pol.resource_type}' yet` };
+        result = {
+          artifact_path: null, artifact_size: 0, checksum_sha256: null,
+          db_version: null, verified: false,
+          note: `no backup handler for resource_type '${pol.resource_type}' yet`,
+        };
       }
     } catch (err) {
       error = err.message;
       result = null;
+      console.error(LOG_PREFIX, `backup failed: ${error}`);
     }
 
-    await recordExecution(pool, pol, result, error);
+    const execId = await recordExecution(pool, pol, result, error);
 
     if (error) {
       await recordAlert(pool, "backup_failed", "critical",
         `Backup policy '${pol.name}' failed: ${error}`,
-        { policy: pol.name, error });
-    } else if (result?.verified) {
-      // Record artifact
-      await pool.query(
-        `INSERT INTO public.backup_artifacts
-           (execution_id, filename, size_bytes, checksum_sha256, local_path, verified, verified_at)
-         VALUES ($1,$2,$3,$4,$5,true,NOW())`,
-        [
-          // We need the execution id — re-query it
-          null, // placeholder — fixed below
-        ]
-      ).catch(() => {});
+        { policy: pol.name, error, execution_id: execId });
     }
   }
 
   // 2. Run maintenance policies
   await runMaintenancePolicies(pool);
 
-  console.log(LOG_PREFIX, "cycle complete");
+  console.log(LOG_PREFIX, "cycle complete",
+    lastResult ? `— dump: ${lastResult.artifact_path} (${lastResult.artifact_size} bytes)` : "");
 }

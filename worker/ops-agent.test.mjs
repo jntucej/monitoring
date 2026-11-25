@@ -34,6 +34,8 @@ describe("ops-agent allowlist", () => {
     assert.equal(ALLOWED_OPS.has("rm_rf"), false);
     assert.equal(ALLOWED_OPS.has("exec_shell"), false);
     assert.equal(ALLOWED_OPS.has("retry_failed_notifications"), true);
+    // host_diagnostics now supports a usb-discover sub-type
+    assert.equal(ALLOWED_OPS.has("host_diagnostics"), true);
   });
 
   it("rejects arbitrary SQL in params", () => {
