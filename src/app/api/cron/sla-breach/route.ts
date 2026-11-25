@@ -59,9 +59,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Internal error";
+    console.error("[cron/sla-breach] failed:", err);
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Internal error" } },
       { status: 500 },
     );
   }

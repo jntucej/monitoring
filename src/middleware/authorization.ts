@@ -67,9 +67,13 @@ async function handleAuthError(err: unknown): Promise<NextResponse> {
       { status },
     );
   }
-  const msg = err instanceof Error ? err.message : "Internal error";
+  // U3: the 500 fallback must not leak the raw error message (SQL text,
+  // internal paths). Log it server-side, send a generic body.
+  if (err instanceof Error && err.message) {
+    console.error(`[auth-middleware] unhandled auth-layer error: ${err.message}`);
+  }
   return NextResponse.json(
-    { success: false, error: { code: "INTERNAL_ERROR", message: msg } },
+    { success: false, error: { code: "INTERNAL_ERROR", message: "Internal error" } },
     { status: 500 }
   );
 }

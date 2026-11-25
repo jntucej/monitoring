@@ -198,7 +198,7 @@ export async function POST(req: NextRequest) {
         success: false,
         error: {
           code: "INTERNAL_ERROR",
-          message: err instanceof Error ? err.message : "Internal error",
+          message: "Internal error",
         },
       },
       { status: 500 }

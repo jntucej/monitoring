@@ -81,10 +81,9 @@ async function handleGet(_req: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Failed to load presence matrix";
-    console.error("Error fetching presence matrix:", error);
+    console.error("[occupancy/presence-matrix] failed:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: msg } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Internal error" } },
       { status: 500 }
     );
   }

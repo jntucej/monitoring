@@ -658,8 +658,8 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }): Pr
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    const { body, status } = err("DB_ERROR", message, 500);
+    console.error("[attention/queue] failed:", error);
+    const { body, status } = err("INTERNAL_ERROR", "Internal error", 500);
     return NextResponse.json(body, { status });
   }
 }

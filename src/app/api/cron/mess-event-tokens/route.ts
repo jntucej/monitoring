@@ -83,8 +83,9 @@ export async function POST(req: NextRequest) {
       ranAt: new Date().toISOString(),
     });
   } catch (err) {
+    console.error("[cron/mess-event-tokens] failed:", err);
     return NextResponse.json(
-      { success: false, error: { message: err instanceof Error ? err.message : "cron failed" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Internal error" } },
       { status: 500 },
     );
   }

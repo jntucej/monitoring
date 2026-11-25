@@ -116,10 +116,9 @@ async function handleGet(
       },
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to load bot session";
-    console.error("GET /api/bot/session/current failed:", error);
+    console.error("[bot/session/current] failed:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Internal error" } },
       { status: 500 },
     );
   }
