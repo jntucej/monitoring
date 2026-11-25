@@ -28,5 +28,5 @@ async function handleGet() {
 }
 
 export const GET = withAuthorization(handleGet, {
-  requiredRole: ["supervisor", "admin", "sysadmin"],
+  requiredRole: ["supervisor", "principal", "hod", "dean", "admin", "sysadmin"],
 });

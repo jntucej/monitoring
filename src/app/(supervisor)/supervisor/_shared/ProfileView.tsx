@@ -20,11 +20,11 @@ interface ProfileData {
 }
 
 export function ProfileView() {
-  const { data, loading } = useApiResource<{ success: boolean; data: ProfileData }>("/api/profile", {
+  const { data, loading, error, refresh } = useApiResource<{ success?: boolean; data?: ProfileData } & Partial<ProfileData>>("/api/profile", {
     ttlMs: 60_000,
   });
 
-  const profile = data?.data;
+  const profile: ProfileData | undefined = data?.data ?? (data?.id ? (data as ProfileData) : undefined);
 
   return (
     <div className="space-y-4">
@@ -47,6 +47,13 @@ export function ProfileView() {
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} className="h-12 w-full rounded-xl" />
           ))}
+        </div>
+      ) : error && !profile ? (
+        <div className="surface-card bg-bg-surface p-4 flex items-center justify-between text-xs text-destructive">
+          <span>Failed to load profile: {error}</span>
+          <button type="button" onClick={() => void refresh()} className="underline font-semibold">
+            Retry
+          </button>
         </div>
       ) : profile ? (
         <div className="surface-card bg-bg-surface p-5 space-y-4">

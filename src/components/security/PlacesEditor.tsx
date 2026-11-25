@@ -15,12 +15,22 @@ interface PlaceRow {
 
 export function PlacesEditor() {
   const [places, setPlaces] = useState<PlaceRow[]>([]);
+  const [filter, setFilter] = useState("");
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [kind, setKind] = useState("open_area");
   const [lat, setLat] = useState("17.9784");
   const [lng, setLng] = useState("79.5942");
   const [radiusM, setRadiusM] = useState("30");
+
+  function useMyGps() {
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        setLat(pos.coords.latitude.toFixed(6));
+        setLng(pos.coords.longitude.toFixed(6));
+      });
+    }
+  }
 
   const load = useCallback(() => {
     fetch("/api/security/locations")
@@ -95,13 +105,32 @@ export function PlacesEditor() {
           placeholder="lat,lng"
           className="border border-border bg-background px-2 py-1.5 text-sm text-foreground"
         />
+        <button type="button" onClick={useMyGps} className="border border-border px-2 py-1.5 text-xs text-foreground">
+          Use GPS
+        </button>
         <button type="submit" className="bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
           Add Place
         </button>
       </form>
 
+      <input
+        type="text"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        placeholder="Type to filter places by code, name, or kind..."
+        className="w-full border-b border-border py-1.5 text-sm text-foreground"
+      />
+
       <div className="divide-y divide-border">
-        {places.map((p) => (
+        {places
+          .filter(
+            (p) =>
+              !filter.trim() ||
+              p.code.toLowerCase().includes(filter.toLowerCase()) ||
+              p.name.toLowerCase().includes(filter.toLowerCase()) ||
+              p.kind.toLowerCase().includes(filter.toLowerCase()),
+          )
+          .map((p) => (
           <div key={p.id} className="flex items-center justify-between py-2 text-sm text-foreground">
             <span>
               <strong>{p.code}</strong> — {p.name} ({p.kind})
