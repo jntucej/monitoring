@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Sun, CloudSun, Moon, Coffee } from "lucide-react";
-import { useAuthStore } from "@/stores/authStore";
 import { StreakBadge } from "./StreakBadge";
 
 function timeOfDay(): { icon: typeof Sun; greeting: string } {
@@ -22,7 +21,6 @@ export function MorningBrief({
   cleared: number;
   target: number;
 }) {
-  const user = useAuthStore((s) => s.user);
   const t = timeOfDay();
   const Icon = t.icon;
 
@@ -44,8 +42,8 @@ export function MorningBrief({
             <Icon className="size-5 text-action-primary" aria-hidden />
           </div>
           <div>
-            <p className="text-sm font-medium text-text-primary">
-              {t.greeting}, {user?.name?.split(" ")[0] ?? "Principal"}
+            <p className="text-xs font-medium text-text-primary">
+              Daily brief
             </p>
             <p className="text-xs text-text-muted">
               {new Date().toLocaleDateString("en-IN", {

@@ -215,8 +215,10 @@ function StudentHomeInner() {
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
       {/* Single structured greeting card: time-of-day salutation + name +
           role badge + contextual subline + optional special-occasion wish.
-          (Was two overlapping greetings — <Greeting/> and
-          <CustomRoleGreeting/> — deduped to the richer card.) */}
+          (Previously the page rendered two overlapping greeting blocks — the
+          two-line Greeting strip and this card — which was deduped down to
+          the single richer card. The old two-line Greeting component was
+          removed entirely once every panel migrated to this one.) */}
       <CustomRoleGreeting name={user?.name} role={user?.role ?? "student"} />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
