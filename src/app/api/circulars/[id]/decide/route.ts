@@ -16,8 +16,51 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const b = await req.json().catch(() => null);
   const action = String(b?.action ?? "").toLowerCase();
 
-  if (!["forward_principal", "approve", "reject"].includes(action)) {
-    return fail("INVALID_ACTION", "action must be forward_principal, approve, or reject", 400);
+  if (!["forward_principal", "request_revision", "withdraw", "approve", "reject"].includes(action)) {
+    return fail("INVALID_ACTION", "action must be forward_principal, request_revision, withdraw, approve, or reject", 400);
+  }
+
+  if (action === "request_revision") {
+    const remarks = String(b?.reason ?? b?.remarks ?? "Please revise and resubmit").trim();
+    const { rows } = await query(
+      `UPDATE public.circular_requests
+          SET status = 'revision_requested', revision_remarks = $2, updated_at = NOW()
+        WHERE id = $1::uuid AND status IN ('pending_vp', 'pending_principal')
+        RETURNING id, status, revision_remarks`,
+      [circularId, remarks],
+    );
+    if (!rows[0]) return fail("NOT_FOUND", "Pending circular not found", 404);
+    await addAudit({
+      action: "CIRCULAR_REVISION_REQUESTED",
+      userId: auth.userId,
+      role: auth.role,
+      details: { circularId, remarks },
+    });
+    return ok(rows[0]);
+  }
+
+  if (action === "withdraw") {
+    const reason = String(b?.reason ?? "Withdrawn by authority").trim();
+    const { rows } = await query<{ id: string; feed_item_id: string | null }>(
+      `UPDATE public.circular_requests
+          SET status = 'withdrawn', withdrawn_at = NOW(), withdrawn_reason = $2, updated_at = NOW()
+        WHERE id = $1::uuid
+        RETURNING id, feed_item_id`,
+      [circularId, reason],
+    );
+    if (!rows[0]) return fail("NOT_FOUND", "Circular not found", 404);
+    if (rows[0].feed_item_id) {
+      await query(`UPDATE public.campus_feed_items SET status = 'archived' WHERE id = $1::uuid`, [
+        rows[0].feed_item_id,
+      ]);
+    }
+    await addAudit({
+      action: "CIRCULAR_WITHDRAWN",
+      userId: auth.userId,
+      role: auth.role,
+      details: { circularId, reason },
+    });
+    return ok({ id: circularId, status: "withdrawn" });
   }
 
   if (action === "forward_principal") {

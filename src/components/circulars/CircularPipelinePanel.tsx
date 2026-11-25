@@ -136,13 +136,17 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
     load();
   }
 
-  async function decide(id: string, action: "approve" | "reject") {
+  async function decide(id: string, action: "approve" | "reject" | "request_revision" | "withdraw") {
     await fetch(`/api/circulars/${id}/decide`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action }),
     });
     load();
+  }
+
+  async function sendReminder(id: string) {
+    await fetch(`/api/circulars/${id}/remind`, { method: "POST" });
   }
 
   function toggleItem(list: string[], setList: (v: string[]) => void, val: string) {
@@ -261,7 +265,7 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
                   </div>
                 </div>
                 {canApprove && (c.status === "pending_principal" || c.status === "pending_vp") && (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => decide(c.id, "approve")}
@@ -271,11 +275,46 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
                     </button>
                     <button
                       type="button"
+                      onClick={() => decide(c.id, "request_revision")}
+                      className="px-2 py-1 text-xs text-foreground underline"
+                    >
+                      Return for Revision
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => decide(c.id, "reject")}
-                      className="border border-border px-3 py-1 text-xs text-destructive"
+                      className="px-2 py-1 text-xs text-destructive underline"
                     >
                       Reject
                     </button>
+                  </div>
+                )}
+                {c.status === "published" && (
+                  <div className="flex flex-wrap gap-2">
+                    {c.share_token && (
+                      <a
+                        href={`/circulars/share/${c.share_token}`}
+                        className="px-2 py-1 text-xs text-foreground underline"
+                      >
+                        Share Card
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => sendReminder(c.id)}
+                      className="px-2 py-1 text-xs text-primary underline"
+                    >
+                      Remind Un-noted
+                    </button>
+                    {canApprove && (
+                      <button
+                        type="button"
+                        onClick={() => decide(c.id, "withdraw")}
+                        className="px-2 py-1 text-xs text-destructive underline"
+                      >
+                        Withdraw
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

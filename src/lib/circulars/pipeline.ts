@@ -29,7 +29,10 @@ export interface ClassifiedTargets {
   roles: string[];
   personas: string[];
   departments: string[];
+  years: number[];
   hostel_blocks: string[];
+  duty_groups: string[];
+  roll_prefixes: string[];
   confidence: number;
   rationale: string[];
   estimated_headcount: number;
@@ -43,6 +46,10 @@ export interface ExtractedCircularFields {
   deadline: string | null;
   summary: string;
   action_required: boolean;
+  has_stamp_or_sig: boolean;
+  requires_attachment: boolean;
+  faculty_relay_required: boolean;
+  staff_duty_required: boolean;
 }
 
 function parseIsoDate(raw: string | undefined): string | null {
@@ -82,6 +89,10 @@ export function extractCircularFields(
   const actionRequired = /\b(mandatory|required|must\s+submit|compulsory|action\s+required|acknowledge)\b/i.test(
     rawText,
   );
+  const hasStampOrSig = /\b(sd\/-|principal|registrar|seal|signed|approved\s+by)\b/i.test(rawText);
+  const requiresAttachment = /\b(attached|enclosure|annexure|form\s+attached|proforma)\b/i.test(rawText);
+  const facultyRelayRequired = /\b(class|section|lab|mentee|attendance|internal|exam|faculty)\b/i.test(rawText);
+  const staffDutyRequired = /\b(lab\s+prep|office|library|register|issue\s+form|shift|staff|maintenance)\b/i.test(rawText);
 
   const summary = lines.slice(0, 4).join(" ").slice(0, 320);
 
@@ -93,6 +104,10 @@ export function extractCircularFields(
     deadline: parseIsoDate(deadMatch?.[1]),
     summary,
     action_required: actionRequired,
+    has_stamp_or_sig: hasStampOrSig,
+    requires_attachment: requiresAttachment,
+    faculty_relay_required: facultyRelayRequired,
+    staff_duty_required: staffDutyRequired,
   };
 }
 
@@ -161,11 +176,27 @@ export async function classifyCircularTargets(
     hostelBlocks.add(b.trim());
   }
 
+  const years = new Set<number>();
+  if (/\b(1st\s*year|i\s*year|sem\s*[12])\b/i.test(rawText)) years.add(1);
+  if (/\b(2nd\s*year|ii\s*year|sem\s*[34])\b/i.test(rawText)) years.add(2);
+  if (/\b(3rd\s*year|iii\s*year|sem\s*[56])\b/i.test(rawText)) years.add(3);
+  if (/\b(4th\s*year|iv\s*year|sem\s*[78])\b/i.test(rawText)) years.add(4);
+  if (years.size > 0) rationale.push(`Detected years: ${[...years].join(", ")}`);
+
+  const dutyGroups = new Set<string>();
+  if (/\blab\b/i.test(rawText)) dutyGroups.add("lab_prep");
+  if (/\blibrary\b/i.test(rawText)) dutyGroups.add("library");
+  if (/\boffice|form|register\b/i.test(rawText)) dutyGroups.add("office_desk");
+  if (/\bhostel|mess|block\b/i.test(rawText)) dutyGroups.add("hostel_ops");
+
   const targets: ClassifiedTargets = {
     roles: [...roles],
     personas: [...personas],
     departments: [...departments],
+    years: [...years],
     hostel_blocks: [...hostelBlocks],
+    duty_groups: [...dutyGroups],
+    roll_prefixes: [],
     confidence: rationale.length >= 2 ? 0.9 : 0.75,
     rationale,
     estimated_headcount: 0,
@@ -180,12 +211,16 @@ export async function resolveTargetUserIds(targets: {
   roles?: string[];
   personas?: string[];
   departments?: string[];
+  years?: number[];
   hostel_blocks?: string[];
+  roll_prefixes?: string[];
 }): Promise<string[]> {
   const roles = targets.roles?.length ? targets.roles : ["student"];
   const personas = targets.personas ?? [];
   const departments = targets.departments ?? [];
+  const years = targets.years ?? [];
   const blocks = targets.hostel_blocks ?? [];
+  const rollPrefixes = targets.roll_prefixes ?? [];
 
   const { rows } = await query<{ id: string }>(
     `SELECT DISTINCT u.id
@@ -195,7 +230,11 @@ export async function resolveTargetUserIds(targets: {
         AND u.role = ANY($1::text[])
         AND ($2::int = 0 OR u.role <> 'student' OR sd.student_type = ANY($3::text[]))
         AND ($4::int = 0 OR u.role <> 'student' OR UPPER(COALESCE(sd.department, '')) = ANY($5::text[]))
-        AND ($6::int = 0 OR u.role <> 'student' OR COALESCE(sd.hostel_block, u.hostel_block, '') = ANY($7::text[]))`,
+        AND ($6::int = 0 OR u.role <> 'student' OR COALESCE(sd.hostel_block, u.hostel_block, '') = ANY($7::text[]))
+        AND ($8::int = 0 OR u.role <> 'student' OR sd.year = ANY($9::int[]))
+        AND ($10::int = 0 OR u.role <> 'student' OR EXISTS (
+          SELECT 1 FROM unnest($11::text[]) p WHERE u.unique_id ILIKE p || '%'
+        ))`,
     [
       roles,
       personas.length,
@@ -204,6 +243,10 @@ export async function resolveTargetUserIds(targets: {
       departments.map((d) => d.toUpperCase()),
       blocks.length,
       blocks,
+      years.length,
+      years,
+      rollPrefixes.length,
+      rollPrefixes,
     ],
   );
   return rows.map((r) => r.id);

@@ -20,13 +20,18 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const feedId = cRows[0]?.feed_item_id;
   if (!feedId) return fail("NOT_FOUND", "Published circular not found", 404);
 
+  const b = await req.json().catch(() => ({}));
+  const remark = b?.remark ? String(b.remark).trim() : null;
+  const sharedBy = b?.shared_by ? String(b.shared_by).trim() : null;
+
   await query(
-    `INSERT INTO public.campus_feed_receipts (feed_id, user_id, seen_at, noted_at)
-     VALUES ($1::uuid, $2::uuid, NOW(), NOW())
+    `INSERT INTO public.campus_feed_receipts (feed_id, user_id, seen_at, noted_at, noted_remark, shared_by)
+     VALUES ($1::uuid, $2::uuid, NOW(), NOW(), $3, $4::uuid)
      ON CONFLICT (feed_id, user_id) DO UPDATE
        SET seen_at = COALESCE(public.campus_feed_receipts.seen_at, NOW()),
-           noted_at = COALESCE(public.campus_feed_receipts.noted_at, NOW())`,
-    [feedId, auth.userId],
+           noted_at = COALESCE(public.campus_feed_receipts.noted_at, NOW()),
+           noted_remark = COALESCE(EXCLUDED.noted_remark, public.campus_feed_receipts.noted_remark)`,
+    [feedId, auth.userId, remark, sharedBy],
   );
 
   await addAudit({

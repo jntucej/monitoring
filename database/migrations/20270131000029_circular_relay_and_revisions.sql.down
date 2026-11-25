@@ -1,0 +1,16 @@
+-- 20270131000029_circular_relay_and_revisions.sql.down
+BEGIN;
+ALTER TABLE public.campus_feed_receipts
+  DROP COLUMN IF EXISTS shared_by,
+  DROP COLUMN IF EXISTS noted_remark;
+DROP TABLE IF EXISTS public.circular_relays;
+ALTER TABLE public.circular_requests
+  DROP COLUMN IF EXISTS staff_duty_required,
+  DROP COLUMN IF EXISTS faculty_relay_required,
+  DROP COLUMN IF EXISTS requires_attachment,
+  DROP COLUMN IF EXISTS has_stamp_or_sig,
+  DROP COLUMN IF EXISTS withdrawn_reason,
+  DROP COLUMN IF EXISTS withdrawn_at,
+  DROP COLUMN IF EXISTS supersedes_id,
+  DROP COLUMN IF EXISTS revision_remarks;
+COMMIT;

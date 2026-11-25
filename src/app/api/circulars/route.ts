@@ -44,8 +44,10 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     `INSERT INTO public.circular_requests
        (title, circular_no, issued_by, effective_date, deadline, summary,
         raw_ocr_text, attachment_url, classified_targets, edited_fields,
-        action_required, status, requested_by, requested_by_role)
-     VALUES ($1, $2, $3, $4::date, $5::date, $6, $7, $8, $9::jsonb, $10::jsonb, $11, $12, $13::uuid, $14)
+        action_required, has_stamp_or_sig, requires_attachment,
+        faculty_relay_required, staff_duty_required, supersedes_id,
+        status, requested_by, requested_by_role)
+     VALUES ($1, $2, $3, $4::date, $5::date, $6, $7, $8, $9::jsonb, $10::jsonb, $11, $12, $13, $14, $15, $16::uuid, $17, $18::uuid, $19)
      RETURNING id, status`,
     [
       title,
@@ -59,6 +61,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       JSON.stringify(enrichedTargets),
       JSON.stringify(b?.edited_fields ?? {}),
       Boolean(b?.action_required),
+      Boolean(b?.has_stamp_or_sig),
+      Boolean(b?.requires_attachment),
+      Boolean(b?.faculty_relay_required),
+      Boolean(b?.staff_duty_required),
+      b?.supersedes_id || null,
       initialStatus,
       auth.userId,
       auth.role,
@@ -88,8 +95,8 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withAuthorization(handleGet, {
-  requiredRole: ["faculty", "hod", "hostel_manager", "vice_principal", "principal", "admin", "sysadmin"],
+  requiredRole: ["faculty", "hod", "staff", "hostel_manager", "vice_principal", "principal", "admin", "sysadmin"],
 });
 export const POST = withAuthorization(handlePost, {
-  requiredRole: ["faculty", "hod", "hostel_manager", "vice_principal", "principal", "admin", "sysadmin"],
+  requiredRole: ["faculty", "hod", "staff", "hostel_manager", "vice_principal", "principal", "admin", "sysadmin"],
 });
