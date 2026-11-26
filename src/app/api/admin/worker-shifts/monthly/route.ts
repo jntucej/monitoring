@@ -47,8 +47,8 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const contractor = sp.get("contractor");
   const { from, to, label } = periodRange(period);
 
-  // Per-worker roll-up
-  const workerWhere = contractor ? "AND w.contractor = $3" : "";
+  // Per-worker roll-up (derived from worker_attendance_logs IN/OUT pairs per day)
+  const workerWhere = contractor ? "AND COALESCE(w.block_id, 'Unassigned') = $3" : "";
   const workerParams: unknown[] = [from, to];
   if (contractor) workerParams.push(contractor);
 
@@ -61,36 +61,65 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     late_count: string;
     shift_count: string;
   }>(
-    `SELECT w.id::text AS worker_id,
-            w.name AS worker_name,
-            COALESCE(w.contractor, 'Unassigned') AS contractor,
-            COALESCE(SUM(w.hours_logged), 0)::text AS total_hours,
-            COALESCE(SUM(CASE WHEN w.hours_logged > 8 THEN w.hours_logged - 8 ELSE 0 END), 0)::text AS overtime_hours,
-            COALESCE(SUM(CASE WHEN w.is_late = TRUE THEN 1 ELSE 0 END), 0)::text AS late_count,
+    `WITH daily_shifts AS (
+       SELECT w.worker_id,
+              COALESCE(w.block_id, 'Unassigned') AS contractor,
+              (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date AS shift_date,
+              MIN(w.logged_at) FILTER (WHERE w.direction = 'IN') AS time_in,
+              MAX(w.logged_at) FILTER (WHERE w.direction = 'OUT') AS time_out
+         FROM public.worker_attendance_logs w
+        WHERE (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date >= $1::date
+          AND (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date <= $2::date
+          ${workerWhere}
+        GROUP BY w.worker_id, COALESCE(w.block_id, 'Unassigned'), (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date
+     ),
+     shift_hours AS (
+       SELECT ds.worker_id,
+              u.name AS worker_name,
+              ds.contractor,
+              GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(ds.time_out, ds.time_in) - ds.time_in)) / 3600) AS hours_logged,
+              ((ds.time_in AT TIME ZONE 'Asia/Kolkata')::time > TIME '09:15:00') AS is_late
+         FROM daily_shifts ds
+         JOIN public.users u ON u.id = ds.worker_id
+     )
+     SELECT worker_id::text AS worker_id,
+            worker_name,
+            contractor,
+            COALESCE(SUM(hours_logged), 0)::text AS total_hours,
+            COALESCE(SUM(CASE WHEN hours_logged > 8 THEN hours_logged - 8 ELSE 0 END), 0)::text AS overtime_hours,
+            COALESCE(SUM(CASE WHEN is_late THEN 1 ELSE 0 END), 0)::text AS late_count,
             COUNT(*)::text AS shift_count
-       FROM worker_shifts w
-      WHERE w.date >= $1::date AND w.date <= $2::date
-      ${workerWhere}
-      GROUP BY w.id, w.name, w.contractor
+       FROM shift_hours
+      GROUP BY worker_id, worker_name, contractor
       ORDER BY total_hours DESC`,
     workerParams
   );
 
-  // Contractor-level roll-up
+  // Contractor/block-level roll-up
   const contrR = await query<{
     contractor: string;
     workers: string;
     total_hours: string;
     late_count: string;
   }>(
-    `SELECT COALESCE(w.contractor, 'Unassigned') AS contractor,
-            COUNT(DISTINCT w.id)::text AS workers,
-            COALESCE(SUM(w.hours_logged), 0)::text AS total_hours,
-            COALESCE(SUM(CASE WHEN w.is_late = TRUE THEN 1 ELSE 0 END), 0)::text AS late_count
-       FROM worker_shifts w
-      WHERE w.date >= $1::date AND w.date <= $2::date
-      ${contractor ? "AND w.contractor = $3" : ""}
-      GROUP BY COALESCE(w.contractor, 'Unassigned')
+    `WITH daily_shifts AS (
+       SELECT w.worker_id,
+              COALESCE(w.block_id, 'Unassigned') AS contractor,
+              (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date AS shift_date,
+              MIN(w.logged_at) FILTER (WHERE w.direction = 'IN') AS time_in,
+              MAX(w.logged_at) FILTER (WHERE w.direction = 'OUT') AS time_out
+         FROM public.worker_attendance_logs w
+        WHERE (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date >= $1::date
+          AND (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date <= $2::date
+          ${contractor ? "AND COALESCE(w.block_id, 'Unassigned') = $3" : ""}
+        GROUP BY w.worker_id, COALESCE(w.block_id, 'Unassigned'), (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date
+     )
+     SELECT contractor,
+            COUNT(DISTINCT worker_id)::text AS workers,
+            COALESCE(SUM(GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(time_out, time_in) - time_in)) / 3600)), 0)::text AS total_hours,
+            COALESCE(SUM(CASE WHEN (time_in AT TIME ZONE 'Asia/Kolkata')::time > TIME '09:15:00' THEN 1 ELSE 0 END), 0)::text AS late_count
+       FROM daily_shifts
+      GROUP BY contractor
       ORDER BY total_hours DESC`,
     contractor ? [from, to, contractor] : [from, to]
   );
@@ -103,12 +132,21 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const lmTo = lmEnd.toISOString().slice(0, 10);
 
   const lmR = await query<{ total_hours: string; late_count: string; shift_count: string }>(
-    `SELECT COALESCE(SUM(w.hours_logged), 0)::text AS total_hours,
-            COALESCE(SUM(CASE WHEN w.is_late = TRUE THEN 1 ELSE 0 END), 0)::text AS late_count,
+    `WITH daily_shifts AS (
+       SELECT w.worker_id,
+              (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date AS shift_date,
+              MIN(w.logged_at) FILTER (WHERE w.direction = 'IN') AS time_in,
+              MAX(w.logged_at) FILTER (WHERE w.direction = 'OUT') AS time_out
+         FROM public.worker_attendance_logs w
+        WHERE (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date >= $1::date
+          AND (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date <= $2::date
+          ${contractor ? "AND COALESCE(w.block_id, 'Unassigned') = $3" : ""}
+        GROUP BY w.worker_id, (w.logged_at AT TIME ZONE 'Asia/Kolkata')::date
+     )
+     SELECT COALESCE(SUM(GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(time_out, time_in) - time_in)) / 3600)), 0)::text AS total_hours,
+            COALESCE(SUM(CASE WHEN (time_in AT TIME ZONE 'Asia/Kolkata')::time > TIME '09:15:00' THEN 1 ELSE 0 END), 0)::text AS late_count,
             COUNT(*)::text AS shift_count
-       FROM worker_shifts w
-      WHERE w.date >= $1::date AND w.date <= $2::date
-      ${contractor ? "AND w.contractor = $3" : ""}`,
+       FROM daily_shifts`,
     contractor ? [lmFrom, lmTo, contractor] : [lmFrom, lmTo]
   );
 
