@@ -1,14 +1,14 @@
 # Docs Index — Gate Monitor
 
-> **Updated: 2026-11-25** — This index catalogs every `.md` under `docs/`
-> (161 files) and separates **live reference** docs (kept in sync with the
+> **Updated: 2026-11-26** — This index catalogs every `.md` under `docs/`
+> and separates **live reference** docs (kept in sync with the
 > deployed code) from **historical** audit / fix / plan reports (point-in-time
 > records left as-is). If a doc you're reading feels stale, check this index
 > first: most "stale" docs are dated reports that were *superseded*, not
 > *wrong*.
 >
 > **Read these first** (canonical): `CONTRACT.md`, `TECH_STACK.md`,
-> `SERVER_ARCHITECTURE.md`, `RUNBOOK.md`, `AI_ARCHITECTURE.md`.
+> `SERVER_ARCHITECTURE.md`, `RUNBOOK.md`, `AI_ARCHITECTURE.md`, `SEQ-IMPLEMENTATION-FRAMEWORK.md`.
 
 ---
 
@@ -36,6 +36,13 @@ truth; update them when architecture changes.
 | `AUTONOMOUS_OPERATIONS.md` | The 13 autonomous cron jobs + kill-switch controls. |
 | `teaching-capability-architecture.md` | Capability-keyed teaching/academic access (binding, not role). |
 | `student-personas-passes.md` | Student personas and pass-type matrix. |
+| `SEQ-IMPLEMENTATION-FRAMEWORK.md` | Security/observability/backup hardening units U1–U10 + U8.1 + UI/API audit ledger (all deployed). |
+| `ui-architecture.md` | UI navigation, shell model, KPI drill-downs, and security/a11y patterns (467 pages, 675 components). |
+| `ui-interaction-inventory.md` | Interactive element & KPI drill-down inventory across role dashboards. |
+| `resource-relationship-map.md` | Cross-entity resource & drill-down relationship map. |
+| `ui-page-coverage-matrix.md` | 100% page-by-page live Playwright browser verification matrix (466/466 VERIFIED). |
+| `u10-s3-offsite-setup.md` | S3 offsite backup configuration & `HeadObjectCommand` verification guide (disabled by default). |
+| `pre-deployment-readiness-audit.md` | Pre/post-deployment readiness & rollback record (`:pre-u7-u10-deploy` + `pre-u7-u10-deploy.dump`). |
 
 ### Roles (live)
 `docs/roles/` — one file per role (`_overview.md` is the map). **Note:** the

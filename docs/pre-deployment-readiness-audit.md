@@ -2,9 +2,9 @@
 
 **Date:** 2026-11-26  
 **Repository:** `/opt/monitoring/compose` (`git@github.com:jntucej/monitoring.git`, branch `main`)  
-**Candidate HEAD:** `7c288c21` (`feat: U10 — S3 offsite backup upload path (disabled by default) + ledger`)  
-**Live Production Images:** `gate_web` (`sha256:0b4d9642...`, created `2026-11-25T15:59:17Z`), `gate_worker` (`sha256:cc1638a5...`, created `2026-11-25T15:59:17Z`) — **predate U2–U10**  
-**Overall Readiness Status:** **READY WITH CONDITIONS** (no production deployment performed)
+**Candidate HEAD (at audit):** `7c288c21` → **Deployed HEAD:** `d2341ae7` / `25de904b`  
+**Live Production Images (post-deploy):** `gate_web` (`sha256:48391624...`), `gate_worker` (`sha256:0bc151e7...`) — rollback tags `:pre-u7-u10-deploy` (`sha256:0b4d9642...` / `sha256:cc1638a5...`) + `/opt/monitoring/backups/daily/pre-u7-u10-deploy.dump` (42M, 2982 TOC entries)  
+**Overall Readiness Status:** **DEPLOYED & VERIFIED** (U8.1 streamed body-size enforcement + `HeadObjectCommand` + UI/API fixes deployed; 466/466 routes browser-verified)
 
 ---
 

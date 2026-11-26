@@ -46,10 +46,17 @@ INTERNET / CAMPUS CLIENTS (Port 80 / 443)
 | Service | Container Name | Image | Function | Internal Port |
 |---|---|---|---|---|
 | **Caddy** | `gate_caddy` | `caddy:2-alpine` | TLS termination, reverse proxy, SSE buffering disable | 80, 443 (Host) |
-| **Web** | `gate_web` | `monitoring-web:latest` | Next.js 16 standalone SSR and API engine | 3000 |
-| **Worker** | `gate_worker` | `monitoring-worker:latest` | Scheduled cron jobs (backfill, pass cleanup, log rotation) | N/A |
-| **Postgres** | `gate_postgres` | `supabase/postgres:17.6.1.136` | Primary transactional relational database | 5432 (Internal) |
-| **Redis** | `gate_redis` | `redis:7-alpine` | In-memory cache, token bucket rate limiting | 6379 (Internal) |
+| **Web** | `gate_web` | `monitoring-web:latest` | Next.js 16 standalone SSR and API engine (467 pages, 798 API routes) | 3000 |
+| **Worker** | `gate_worker` | `monitoring-worker:latest` | Scheduled cron jobs (backfill, pass cleanup, `backup-maintenance` 30m, S3 offsite) | N/A |
+| **Postgres** | `gate_postgres` | `supabase/postgres:17.6.1.136` | Primary transactional relational database (`gate_monitor`) | 5432 (Internal) |
+| **Redis** | `gate_redis` | `redis:7-alpine` | In-memory cache, Lua EVALSHA distributed rate limiting | 6379 (Internal) |
+| **LLM Proxy** | `gate_llm_proxy` | `node:20-alpine` | Cloud AI proxy (OmniRoute) for M1/M2/M3 model runtime | Internal |
+| **Prometheus** | `gate_prometheus` | `prom/prometheus:v3.1.0` | App & container metrics scraping | 9090 (Internal) |
+| **Alertmanager** | `gate_alertmanager` | `prom/alertmanager:v0.28.1` | Alert routing & Telegram webhook dispatch | 9093 (Internal) |
+| **cAdvisor** | `gate_cadvisor` | `gcr.io/cadvisor/cadvisor:v0.51.0` | Container CPU/memory/network metrics | 8080 (Internal) |
+| **DDNS** | `cloudflare-ddns` | `favonia/cloudflare-ddns:latest` | Dynamic DNS updater for Cloudflare | N/A |
+
+> **Host Observability Stack (`/opt/server-monitoring`):** `mon_grafana` (`11.5.1`), `mon_loki` (`3.4.1`), `mon_alloy` (`v1.7.1`), `mon_prometheus` (`v3.1.0`), `mon_postgres_exporter` (`v0.17.1` with `--disable-settings-metrics`), `mon_node_exporter` (`v1.8.2`), `mon_cadvisor` (`v0.51.0`).
 
 ## 4. Host Directory Layout (`/opt/monitoring`)
 

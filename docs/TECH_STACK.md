@@ -52,9 +52,11 @@ The **Gate Monitor** technology stack is engineered for low-latency responsivene
 
 | Category | Technology | Version | Purpose & Architectural Rationale |
 | :--- | :--- | :--- | :--- |
-| **Framework** | Next.js | `16.3.1` | Next-gen full-stack framework with React Server Components, App Router, and Edge middleware capabilities. |
-| **UI Library** | React | `19.2.8` | Modern concurrent rendering UI engine powering dynamic operator dashboards and interactive views. |
+| **Framework** | Next.js | `^16.4.6` | Next-gen full-stack framework with React Server Components, App Router, and Edge middleware capabilities. |
+| **UI Library** | React | `^19.3.1` | Modern concurrent rendering UI engine powering dynamic operator dashboards and interactive views. |
 | **Language** | TypeScript | `^5.0.0` | Strict static typing across front-end models, API routes, database schemas, and shared interfaces. |
+| **Validation** | Zod | `^4.6.7` | Shared request body validation (`src/lib/validate-body.ts`, `src/lib/schemas/`). |
+| **Offsite Backup** | `@aws-sdk/client-s3` | `^3.1160.0` | S3 offsite backup upload + `HeadObjectCommand` verification (`worker/lib/s3-offsite.js`, disabled by default). |
 
 ### 2.2 Frontend & UI Libraries
 
