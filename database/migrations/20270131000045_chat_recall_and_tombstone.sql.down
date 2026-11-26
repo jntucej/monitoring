@@ -1,0 +1,10 @@
+-- Rollback for 20270131000045_chat_recall_and_tombstone.sql
+BEGIN;
+
+ALTER TABLE public.chat_messages
+  DROP COLUMN IF EXISTS superseded_by_id,
+  DROP COLUMN IF EXISTS recall_reason,
+  DROP COLUMN IF EXISTS recalled_by,
+  DROP COLUMN IF EXISTS recalled_at;
+
+COMMIT;

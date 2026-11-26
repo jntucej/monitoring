@@ -45,7 +45,38 @@ export const ToolAuthorizations: Record<string, ToolAuthorization> = {
   get_documents: { tool: "get_documents", requiredCapabilities: ["documents.read"], provider: "document_store" },
   search_documents: { tool: "search_documents", requiredCapabilities: ["documents.read"], provider: "document_store" },
   send_sms: { tool: "send_sms", requiredCapabilities: ["sms.send"], provider: "sms_gateway" },
+  get_pending_items: { tool: "get_pending_items", requiredCapabilities: ["agent.read"] },
+  get_unnoted_circulars: { tool: "get_unnoted_circulars", requiredCapabilities: ["agent.read"] },
+  explain_workflow_status: { tool: "explain_workflow_status", requiredCapabilities: ["agent.read"] },
+  draft_action: { tool: "draft_action", requiredCapabilities: ["agent.propose"] },
 };
+
+const AGENT_READ_ROLES = new Set([
+  "student", "faculty", "staff", "hod", "deputy_warden", "hostel_manager",
+  "oie", "exam_branch", "exam_superintendent", "vice_principal", "principal",
+  "admin", "sysadmin", "operator", "supervisor", "caretaker", "emo",
+  "mess_incharge", "dean", "chief_warden", "controller_examinations",
+  "addl_controller_academic", "addl_controller_results", "addl_controller_automation",
+  "guardian", "parent",
+]);
+
+const AGENT_DRAFT_ROLES = new Set([
+  "faculty", "staff", "hod", "deputy_warden", "hostel_manager",
+  "oie", "exam_branch", "exam_superintendent", "vice_principal", "principal",
+  "admin", "sysadmin", "operator", "supervisor", "dean", "chief_warden",
+  "controller_examinations",
+]);
+
+export function canInvokeAgentTool(
+  role: string,
+  toolName: "get_pending_items" | "get_unnoted_circulars" | "explain_workflow_status" | "draft_action",
+  _scope?: string,
+): boolean {
+  if (toolName === "draft_action") {
+    return AGENT_DRAFT_ROLES.has(role);
+  }
+  return AGENT_READ_ROLES.has(role);
+}
 
 export interface DenyReason {
   code: "NO_SUCH_TOOL" | "MISSING_CAPABILITY" | "TENANT_MISMATCH" | "NO_CREDENTIAL" | "SCOPED_OUT";

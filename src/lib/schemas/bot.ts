@@ -12,6 +12,10 @@ export const BotChatSchema = z.object({
   conversationId: z.string().max(64).optional(),
   lang: z.enum(["en", "te"]).optional(),
   sourceLang: z.enum(["en", "te", "auto"]).optional(),
+  groupId: z.string().max(64).optional(),
+  activeConsoleRole: z.string().max(64).optional(),
+  entityContext: z.record(z.string(), z.unknown()).optional(),
+  tool: z.enum(["get_pending_items", "get_unnoted_circulars", "explain_workflow_status", "draft_action"]).optional(),
 }).passthrough();
 
 export type BotChatInput = z.infer<typeof BotChatSchema>;

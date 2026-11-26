@@ -1,0 +1,9 @@
+-- Rollback for 20270131000044_chat_moderation_and_mute.sql
+BEGIN;
+
+ALTER TABLE public.chat_messages
+  DROP COLUMN IF EXISTS redaction_reason,
+  DROP COLUMN IF EXISTS deleted_by,
+  DROP COLUMN IF EXISTS deleted_at;
+
+COMMIT;

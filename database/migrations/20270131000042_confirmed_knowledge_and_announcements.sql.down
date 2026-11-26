@@ -1,0 +1,10 @@
+-- Rollback for 20270131000042_confirmed_knowledge_and_announcements.sql
+BEGIN;
+
+ALTER TABLE public.class_doubt_escalations
+  DROP COLUMN IF EXISTS subject_code,
+  DROP COLUMN IF EXISTS also_applies_to;
+
+DROP TABLE IF EXISTS public.confirmed_knowledge;
+
+COMMIT;

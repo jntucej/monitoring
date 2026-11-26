@@ -1,0 +1,11 @@
+-- Rollback for 20270131000041_class_authority_bridge.sql
+BEGIN;
+
+DROP TABLE IF EXISTS public.class_doubt_escalations;
+DROP INDEX IF EXISTS idx_chat_groups_single_class;
+
+ALTER TABLE public.chat_groups
+  DROP COLUMN IF EXISTS is_single_class_room,
+  DROP COLUMN IF EXISTS class_id;
+
+COMMIT;

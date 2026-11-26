@@ -1,0 +1,6 @@
+-- Rollback for 20270131000043_agent_traces.sql
+BEGIN;
+
+DROP TABLE IF EXISTS public.agent_traces;
+
+COMMIT;
