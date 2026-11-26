@@ -9,7 +9,7 @@ She taps the row → `PermissionDetailPanel` opens. It shows Priya's name, roll,
 - `withAuthorization` injects `x-user-role = 'caretaker'`.
 - The engine checks `canApproveAtStage('caretaker', 'hostel', 'caretaker') === true`. **Also checks `hostel_scope`:** Seetha's scope is `girls`, Priya's request scope is `girls` → ✓.
 - Engine calls `applyPermissionAction(ticket, "approve", actor, comment)`.
-- `current_stage` becomes `'deputy_warden'`. `stage_history` ga- `current_stage` becomes `'deputy_warden'`. `sN_A- `current_stage` becomes `'deon` - `current_stage` becomes `'deputy_warden'`. `stage_history` ga- `current_stage` becomes `'deputy_warden'`. `sN_A- `current_stage` becomes `'deon` - `current_stage` becomes `'deputy_warden'`. `stage_histoden ta- `current_stage` becomes `'deputy_warden'`. `stage_history` ga- `current_stage` becomes `'deputy_warden'`. `sN_A- `current_stage` becomes `'deon` - `current_stage` becomes `'deputy_warden'`. `stage_history` ga- `current_stage` becomes `'deputy_iya- `current_stage` bl ex- `current_stage` becomes `'deputy_warden'`. `stage_history` ga- `curreneck** section. The system verifies if devices are enabled. Since they are OFF by default, Caretaker taps "Mark Hostel Check Complete (device disabled)".
+- `current_stage` becomes `'deputy_warden'`. `stage_history` records the caretaker approval and advances to the hostel check section. The system verifies if biometric devices are enabled. Since they are OFF by default, Caretaker taps "Mark Hostel Check Complete (device disabled)".
 - `biometric_hostel_at = NOW()`. Priya's phone shows: **Hostel ✓ Verified**.
 
 ### Act 6 — The Gate

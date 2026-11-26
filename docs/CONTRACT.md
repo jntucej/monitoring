@@ -18,7 +18,7 @@ Lives in exactly one file, imported by every shell:
 
 | File | Why it can't fork |
 |---|---|
-| `lib/permission-model.ts` → `canAct()` | If Warden allows an action Principal blocks, you've shipped a security bug |
+| `lib/permission-model.ts` → `canAct()` | If Deputy Warden allows an action Principal (warden) blocks, you've shipped a security bug |
 | `lib/escalation-ladder.ts` → `LADDER`, `nextActor()` | Two ladders = a ticket bounces forever between disagreeing consoles |
 | `lib/conduct.ts` → `FlagLevel`, `deriveFlag()`, `COC_POLICIES` | A user flagged on one screen must be flagged on all |
 | `lib/pass-types.ts` → `PassTypeConfig` + seed | The *data* is shared; each shell decides *how* to render it |

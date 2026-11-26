@@ -13,7 +13,7 @@ image) replaces hosted Supabase; teaching/academic capability layer added
 
 ## 1. Executive Summary & Stack Strategy
 
-The **Gate Monitor** technology stack is engineered for low-latency responsiveness, high concurrency, strict type safety, and seamless mobile responsiveness. By combining **Next.js 16 (App Router)** with **Supabase (PostgreSQL with Realtime)** and **Tailwind CSS 4**, the platform achieves sub-300ms verification speeds and offline-first capabilities for gate guards.
+The **Gate Monitor** technology stack is engineered for low-latency responsiveness, high concurrency, strict type safety, and seamless mobile responsiveness. By combining **Next.js 16 (App Router)** with **self-hosted PostgreSQL 17 (`supabase/postgres:17.6.1.136`)**, **Redis 7**, **Caddy 2**, and **Tailwind CSS 4**, the platform achieves sub-300ms verification speeds and offline-first capabilities for gate guards.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -27,20 +27,21 @@ The **Gate Monitor** technology stack is engineered for low-latency responsivene
                                   ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │                      BACKEND & API LAYER                         │
-│  - Next.js API Routes (Serverless & Edge Runtimes)               │
-│  - TypeScript 5 (End-to-End Type Safety)                         │
+│  - Next.js API Routes (withApiChain + withAuthorization)         │
+│  - TypeScript 5 & Zod 4 (End-to-End Type & Body Validation)      │
 │  - @simplewebauthn (FIDO2 / WebAuthn Biometrics)                │
 │  - Jose & BcryptJS (JWT & Password Cryptography)                │
-│  - Rate-Limiter-Flexible (DDoS & Brute Force Guard)             │
+│  - Redis Lua EVALSHA Rate Limiting + Postgres Fallback           │
 └─────────────────────────────────┬────────────────────────────────┘
                                   │
                                   ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │                  DATABASE & INFRASTRUCTURE LAYER                 │
-│  - Supabase PostgreSQL (Managed Relational Database & RLS)      │
-│  - Supabase Realtime (WebSocket Streaming Engine)                │
-│  - Vercel Edge Network (Edge Middleware & CDN Global Host)       │
-│  - Playwright Framework (E2E Test Automation)                    │
+│  - Self-Hosted PostgreSQL 17 (supabase/postgres:17.6.1.136, RLS) │
+│  - Redis 7 (Cache & Distributed Rate Limiting)                   │
+│  - Caddy 2 (Reverse Proxy, Auto-TLS, SSE Streaming)              │
+│  - Node.js Worker (Cron, Backup Maintenance, Optional S3 Offsite)│
+│  - Playwright & Vitest (E2E & Unit Test Automation)              │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
