@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from '@/lib/dbClient';
 import { withAuthorization } from '@/middleware/authorization';
 import { withRateLimit } from '@/lib/rate-limit';
@@ -92,9 +93,11 @@ async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet as any, { requiredRole: ['student', 'parent', 'admin', 'sysadmin', 'faculty', 'principal'] }),
-  { keyPrefix: 'config_pass_types_get', maxRequests: 100 }
-);
+export const GET = withApiChain(handleGet as any, {
+  route: "/api/config/pass-types",
+  auth: "user",
+  requiredRole: ['student', 'parent', 'admin', 'sysadmin', 'faculty', 'principal'],
+  rateLimit: { keyPrefix: 'config_pass_types_get', maxRequests: 100 },
+});
 
 export const PATCH = withAdminMutation(handlePatch, { rateLimit: { windowMs: 60_000, maxRequests: 20 } });

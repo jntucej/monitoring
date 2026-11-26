@@ -16,6 +16,7 @@
 // locked marks with a correction_reason (see /api/faculty/marks/correct).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -113,10 +114,12 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ inserted, classId: body.classId, examType });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["faculty", "hod", "admin", "sysadmin"] }),
-  { keyPrefix: "faculty-marks-get", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/faculty/marks",
+  auth: "user",
+  requiredRole: ["faculty", "hod", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "faculty-marks-get", maxRequests: 30, windowMs: 60_000 },
+});
 
 export const POST = withRateLimit(
   withMutationGuard(implPost, { requiredRole: ["faculty"] }),

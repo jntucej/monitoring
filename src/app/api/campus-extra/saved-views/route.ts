@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -146,10 +147,11 @@ async function handleDelete(
 const readLimit: RateLimitConfig = { ...RATE_LIMITS.read, keyPrefix: "saved_views" };
 const writeLimit: RateLimitConfig = { ...RATE_LIMITS.mutation, keyPrefix: "saved_views" };
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet),
-  readLimit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/campus-extra/saved-views",
+  auth: "user",
+  rateLimit: readLimit,
+});
 export const POST = withMutationGuard(handlePost, {rateLimit: writeLimit});
 
 export const DELETE = withMutationGuard(handleDelete, {rateLimit: writeLimit});

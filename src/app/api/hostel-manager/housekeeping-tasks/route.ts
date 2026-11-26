@@ -4,6 +4,7 @@
 // hostel scope (boys / girls / both), fail-closed when the scope is unknown.
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit, type RateLimitConfig } from "@/lib/rate-limit";
@@ -98,7 +99,9 @@ async function handleGet(
 
 const readLimit: RateLimitConfig = { ...RATE_LIMITS.read, keyPrefix: "hostel_manager_hk" };
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: [...ROLES] }),
-  readLimit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/hostel-manager/housekeeping-tasks",
+  auth: "user",
+  requiredRole: [...ROLES],
+  rateLimit: readLimit,
+});

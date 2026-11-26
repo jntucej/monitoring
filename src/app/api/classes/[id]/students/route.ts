@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -63,8 +64,7 @@ function getSegment(req: NextRequest, fromEnd: number): string {
 // the filter. Scope: HOD owns the department; a faculty caller may read the
 // roster only as class teacher OR as an active assignment holder; admin/sys
 // admin bypass.
-export const GET = withRateLimit(
-  withAuthorization(async (req: NextRequest, { auth }) => {
+export const GET = withApiChain(async (req: NextRequest, { auth }) => {
     try {
       const classId = getSegment(req, 1); // .../classes/<id>/students → <id>
       if (!classId) return fail("BAD_REQUEST", "Missing class id", 400);
@@ -132,6 +132,9 @@ export const GET = withRateLimit(
     } catch {
       return fail("INTERNAL_ERROR", "Internal server error", 500);
     }
-  }, { requiredRole: ["hod", "faculty", "admin", "sysadmin"] }),
-  { keyPrefix: "class_students", maxRequests: 30, windowMs: 60_000 }
-);
+  }, {
+  route: "/api/classes/[id]/students",
+  auth: "user",
+  requiredRole: ["hod", "faculty", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "class_students", maxRequests: 30, windowMs: 60_000 },
+});

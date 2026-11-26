@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
@@ -54,7 +55,9 @@ async function handleGet(req: NextRequest) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
-  { keyPrefix: "operator_last_scan", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/operator/last-scan",
+  auth: "user",
+  requiredRole: ["operator", "supervisor", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "operator_last_scan", maxRequests: 60 },
+});

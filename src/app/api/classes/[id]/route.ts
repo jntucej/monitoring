@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -12,8 +13,7 @@ import type { ClassRow, UpdateClassInput } from "@/contracts/classes";
 // Load the class by id (404 if absent). HOD: 403 unless the class's
 // department matches their own. Faculty: 403 unless they are the class
 // teacher OR hold an active assignment to this class. Admin/sysadmin bypass.
-export const GET = withRateLimit(
-  withAuthorization(async (req: NextRequest, { auth }) => {
+export const GET = withApiChain(async (req: NextRequest, { auth }) => {
     try {
       const classId = getClassId(req);
       if (!classId) return fail("MISSING_PARAM", "Class id required", 400);
@@ -64,9 +64,12 @@ export const GET = withRateLimit(
     } catch {
       return fail("INTERNAL_ERROR", "Internal server error", 500);
     }
-  }, { requiredRole: ["hod", "faculty", "admin", "sysadmin"] }),
-  { keyPrefix: "class_id", maxRequests: 30, windowMs: 60_000 }
-);
+  }, {
+  route: "/api/classes/[id]",
+  auth: "user",
+  requiredRole: ["hod", "faculty", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "class_id", maxRequests: 30, windowMs: 60_000 },
+});
 
 function getClassId(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);

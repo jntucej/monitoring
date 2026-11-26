@@ -3,6 +3,7 @@
 // auto-blocked by the gate verify path (see /api/gate/verify-*).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -62,10 +63,12 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ added: body.userId });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["supervisor", "admin", "sysadmin"] }),
-  { keyPrefix: "watchlist-get", maxRequests: 20, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/supervisor/visitors/watchlist",
+  auth: "user",
+  requiredRole: ["supervisor", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "watchlist-get", maxRequests: 20, windowMs: 60_000 },
+});
 
 export const POST = withRateLimit(
   withMutationGuard(implPost, { requiredRole: ["supervisor", "admin", "sysadmin"] }),

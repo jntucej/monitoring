@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { err } from "@/lib/api-response";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getAllGatesLive, withTransaction, addAudit } from "@/lib/db";
@@ -111,10 +112,12 @@ async function handleDelete(req: NextRequest, ctx: { auth?: AuthContext }) {
   return NextResponse.json({ success: true, data: { gateId, deactivated: true } });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "supervisor", "principal"] }),
-  { keyPrefix: "gate_get", maxRequests: 50 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/gates",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "operator", "supervisor", "principal"],
+  rateLimit: { keyPrefix: "gate_get", maxRequests: 50 },
+});
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "gate_post", maxRequests: 10 }});
 

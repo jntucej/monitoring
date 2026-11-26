@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -32,8 +33,7 @@ function toSubject(r: SubjectDbRow): Subject {
 // Return all active subjects, optionally filtered by `?department=<code>`.
 // Ordered by sort_order. The subjects table has no RLS, so reads are safe
 // for any authenticated caller in the allowed roles.
-export const GET = withRateLimit(
-  withAuthorization(async (req: NextRequest, _ctx) => {
+export const GET = withApiChain(async (req: NextRequest, _ctx) => {
     try {
       const department = req.nextUrl.searchParams.get("department")?.trim();
 
@@ -54,6 +54,9 @@ export const GET = withRateLimit(
     } catch {
       return fail("INTERNAL_ERROR", "Internal server error", 500);
     }
-  }, { requiredRole: ["faculty", "hod", "admin", "student", "sysadmin"] }),
-  { keyPrefix: "subjects", maxRequests: 30, windowMs: 60_000 }
-);
+  }, {
+  route: "/api/config/subjects",
+  auth: "user",
+  requiredRole: ["faculty", "hod", "admin", "student", "sysadmin"],
+  rateLimit: { keyPrefix: "subjects", maxRequests: 30, windowMs: 60_000 },
+});

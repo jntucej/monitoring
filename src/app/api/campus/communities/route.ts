@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -238,9 +239,11 @@ const READ_ROLES: readonly Role[] = [
   "mess_incharge",
 ];
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: [...READ_ROLES] }),
-  { ...RATE_LIMITS.read, keyPrefix: "communities" }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/campus/communities",
+  auth: "user",
+  requiredRole: [...READ_ROLES],
+  rateLimit: { ...RATE_LIMITS.read, keyPrefix: "communities" },
+});
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { ...RATE_LIMITS.mutation, keyPrefix: "communities" }});

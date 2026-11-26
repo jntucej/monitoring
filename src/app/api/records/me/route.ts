@@ -6,6 +6,7 @@
 // Read-only. Each sub-query degrades gracefully (missing table → null).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization, type AuthContext } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
@@ -115,7 +116,9 @@ async function implGet(req: NextRequest, ctx: { auth: AuthContext }) {
   return Response.json({ success: true, records });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["student", "guardian", "parent", "admin", "sysadmin"] }),
-  { keyPrefix: "records-me", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/records/me",
+  auth: "user",
+  requiredRole: ["student", "guardian", "parent", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "records-me", maxRequests: 30, windowMs: 60_000 },
+});

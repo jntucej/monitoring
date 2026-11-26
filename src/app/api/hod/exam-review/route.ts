@@ -3,6 +3,7 @@
 // (STEP 3.3). Scoped to the HOD's department.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -68,10 +69,12 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ proposalId: body.proposalId, decision: decision === "APPROVE" ? "APPROVED" : "REJECTED" });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["hod", "controller_examinations", "admin", "sysadmin"] }),
-  { keyPrefix: "hod-exam-review-get", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/hod/exam-review",
+  auth: "user",
+  requiredRole: ["hod", "controller_examinations", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "hod-exam-review-get", maxRequests: 30, windowMs: 60_000 },
+});
 
 export const POST = withRateLimit(
   withMutationGuard(implPost, { requiredRole: ["hod", "controller_examinations", "admin", "sysadmin"] }),

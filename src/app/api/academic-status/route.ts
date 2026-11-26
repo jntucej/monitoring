@@ -288,10 +288,12 @@ async function implGetPending(req: NextRequest, ctx: { auth: AuthContext }) {
   })) });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["hod", "admin", "sysadmin"] }),
-  { keyPrefix: "academic-status-get", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/academic-status",
+  auth: "user",
+  requiredRole: ["hod", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "academic-status-get", maxRequests: 30, windowMs: 60_000 },
+});
 
 export const POST = withApiChain(implPost, {
   route: "/api/academic-status",

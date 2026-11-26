@@ -162,9 +162,11 @@ export const POST = withApiChain(handlePost, {
   rateLimit: { keyPrefix: "manual_entry", maxRequests: 20, windowMs: 60_000 },
 });
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: TIER.OPERATOR }),
-  { keyPrefix: "manual_entry_list", maxRequests: 60, windowMs: 60_000 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/operator/manual-entry",
+  auth: "user",
+  requiredRole: TIER.OPERATOR,
+  rateLimit: { keyPrefix: "manual_entry_list", maxRequests: 60, windowMs: 60_000 },
+});
 
 export const dynamic = "force-dynamic";

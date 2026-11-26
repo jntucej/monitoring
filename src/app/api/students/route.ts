@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { findAllStudents, searchStudents, getParentChildren, query } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
@@ -156,9 +157,9 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "parent", "guardian", "principal", "vice_principal", "supervisor", "hod", "faculty"],
-  }),
-  { keyPrefix: "students_list", maxRequests: 100 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/students",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "parent", "guardian", "principal", "vice_principal", "supervisor", "hod", "faculty"],
+  rateLimit: { keyPrefix: "students_list", maxRequests: 100 },
+});

@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -53,8 +54,7 @@ function getDeptParam(req: NextRequest): string {
 // Resolve the department (UUID or code, 404 if unknown), then list its
 // active classes. HOD callers may only read their own department;
 // admin/sysadmin bypass.
-export const GET = withRateLimit(
-  withAuthorization(async (req: NextRequest, { auth }) => {
+export const GET = withApiChain(async (req: NextRequest, { auth }) => {
     try {
       const dept = getDeptParam(req);
       if (!dept) return fail("BAD_REQUEST", "Department identifier missing", 400);
@@ -95,6 +95,9 @@ export const GET = withRateLimit(
     } catch {
       return fail("INTERNAL_ERROR", "Internal server error", 500);
     }
-  }, { requiredRole: ["hod", "admin", "sysadmin"] }),
-  { keyPrefix: "dept_classes", maxRequests: 30, windowMs: 60_000 }
-);
+  }, {
+  route: "/api/departments/[dept]/classes",
+  auth: "user",
+  requiredRole: ["hod", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "dept_classes", maxRequests: 30, windowMs: 60_000 },
+});

@@ -12,6 +12,7 @@
  */
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -117,7 +118,8 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, {}),
-  { keyPrefix: "approver-decision-history", maxRequests: 30, windowMs: 60_000 }
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/approver/decision-history",
+  auth: "user",
+  rateLimit: { keyPrefix: "approver-decision-history", maxRequests: 30, windowMs: 60_000 },
+});

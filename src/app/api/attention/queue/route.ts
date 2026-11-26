@@ -12,6 +12,7 @@
 // No caller-supplied scope is ever trusted — the role comes from auth.role.
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit, type RateLimitConfig } from "@/lib/rate-limit";
@@ -666,7 +667,9 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }): Pr
 
 const readLimit: RateLimitConfig = { ...RATE_LIMITS.read, keyPrefix: "attention_queue" };
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ALL_ROLES }),
-  readLimit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/attention/queue",
+  auth: "user",
+  requiredRole: ALL_ROLES,
+  rateLimit: readLimit,
+});

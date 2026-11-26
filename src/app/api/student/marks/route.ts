@@ -3,6 +3,7 @@
 // Drafts/submitted/locked marks stay invisible to the student.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok } from "@/server/http/response";
@@ -34,7 +35,9 @@ async function implGet(_req: NextRequest, ctx: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["student", "parent", "guardian", "hod", "admin", "sysadmin"] }),
-  { keyPrefix: "student-marks", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/student/marks",
+  auth: "user",
+  requiredRole: ["student", "parent", "guardian", "hod", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "student-marks", maxRequests: 30, windowMs: 60_000 },
+});

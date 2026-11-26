@@ -18,6 +18,7 @@
 //   ?source=  request | event | notification | audit
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getLinkedPersons } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -238,7 +239,9 @@ async function handleGet(
 
 const readLimit: RateLimitConfig = { ...RATE_LIMITS.read, keyPrefix: "attention_timeline" };
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: [...ALL_ROLES] }),
-  readLimit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/attention/timeline",
+  auth: "user",
+  requiredRole: [...ALL_ROLES],
+  rateLimit: readLimit,
+});

@@ -8,6 +8,7 @@
 // scoped to the calling user.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization, type AuthContext } from "@/middleware/authorization";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -81,10 +82,12 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return Response.json({ success: true, dispute: inserted[0] });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["student", "guardian", "parent", "admin", "sysadmin"] }),
-  { keyPrefix: "disputes-get", maxRequests: 60, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/disputes",
+  auth: "user",
+  requiredRole: ["student", "guardian", "parent", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "disputes-get", maxRequests: 60, windowMs: 60_000 },
+});
 
 export const POST = withMutationGuard(implPost, {
   requiredRole: ["student", "guardian", "parent"],

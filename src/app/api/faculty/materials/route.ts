@@ -3,6 +3,7 @@
 // for their classes; students list for their classes.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -70,10 +71,12 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ posted: true });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["faculty", "student", "parent", "guardian", "hod", "admin", "sysadmin"] }),
-  { keyPrefix: "faculty-materials-get", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/faculty/materials",
+  auth: "user",
+  requiredRole: ["faculty", "student", "parent", "guardian", "hod", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "faculty-materials-get", maxRequests: 30, windowMs: 60_000 },
+});
 
 export const POST = withRateLimit(
   withMutationGuard(implPost, { requiredRole: ["faculty"] }),

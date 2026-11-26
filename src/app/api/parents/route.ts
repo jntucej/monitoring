@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { randomInt } from "node:crypto";
 import {
   listParents,
@@ -191,9 +192,11 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "parents_list", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/parents",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "parents_list", maxRequests: 60 },
+});
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "parents_create", maxRequests: 30 }});

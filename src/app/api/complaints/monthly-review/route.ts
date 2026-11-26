@@ -9,6 +9,7 @@
  */
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -129,7 +130,9 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["admin", "sysadmin", "principal"] }),
-  { keyPrefix: "complaints-monthly-review", maxRequests: 20, windowMs: 60_000 }
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/complaints/monthly-review",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "principal"],
+  rateLimit: { keyPrefix: "complaints-monthly-review", maxRequests: 20, windowMs: 60_000 },
+});

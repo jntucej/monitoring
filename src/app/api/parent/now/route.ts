@@ -4,6 +4,7 @@
 // This is the Family bot's first block (attendance is the anchor).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -105,7 +106,9 @@ async function implGet(_req: NextRequest, ctx: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["parent", "guardian", "admin", "sysadmin"] }),
-  { keyPrefix: "parent-now", maxRequests: 20, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/parent/now",
+  auth: "user",
+  requiredRole: ["parent", "guardian", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "parent-now", maxRequests: 20, windowMs: 60_000 },
+});

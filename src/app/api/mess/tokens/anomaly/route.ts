@@ -3,6 +3,7 @@
 // rolling 15-minute window → flag before service begins (STEP 3.5).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok } from "@/server/http/response";
@@ -31,7 +32,9 @@ async function implGet(req: NextRequest, _ctx: { auth: AuthContext }) {
                 : "OK" });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["mess_incharge", "admin", "sysadmin"] }),
-  { keyPrefix: "mess-tokens-anomaly", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/mess/tokens/anomaly",
+  auth: "user",
+  requiredRole: ["mess_incharge", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "mess-tokens-anomaly", maxRequests: 30, windowMs: 60_000 },
+});

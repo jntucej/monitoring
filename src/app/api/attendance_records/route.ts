@@ -1,4 +1,5 @@
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -73,11 +74,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ created, skipped, failed });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "operator", "faculty", "principal", "supervisor"],
-  }),
-  { keyPrefix: "att_records", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/attendance_records",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "operator", "faculty", "principal", "supervisor"],
+  rateLimit: { keyPrefix: "att_records", maxRequests: 60 },
+});
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"],});

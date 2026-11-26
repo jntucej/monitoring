@@ -3,6 +3,7 @@
 // Auth: admin, sysadmin, or the user themselves.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -52,7 +53,9 @@ async function implGet(req: NextRequest, ctx: { auth: AuthContext }) {
   })));
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["student", "guardian", "parent", "admin", "sysadmin", "principal", "deputy_warden", "hostel_manager"] }),
-  { keyPrefix: "conduct-events", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/conduct/events",
+  auth: "user",
+  requiredRole: ["student", "guardian", "parent", "admin", "sysadmin", "principal", "deputy_warden", "hostel_manager"],
+  rateLimit: { keyPrefix: "conduct-events", maxRequests: 30, windowMs: 60_000 },
+});

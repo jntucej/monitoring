@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
@@ -64,7 +65,9 @@ async function handleGet(req: NextRequest) {
 
 const limit = { keyPrefix: "principal_digest", maxRequests: 30 };
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["principal", "vice_principal", "admin", "sysadmin"] }),
-  limit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/principal/digest",
+  auth: "user",
+  requiredRole: ["principal", "vice_principal", "admin", "sysadmin"],
+  rateLimit: limit,
+});

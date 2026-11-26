@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query, addAudit } from "@/lib/db";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -85,9 +86,11 @@ async function handlePut(req: any, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(async (req, ctx) => handleGet(req, ctx), { requiredRole: ["student"] }),
-  { keyPrefix: "mess_default_get" }
-);
+export const GET = withApiChain(async (req, ctx) => handleGet(req, ctx), {
+  route: "/api/mess/default",
+  auth: "user",
+  requiredRole: ["student"],
+  rateLimit: { keyPrefix: "mess_default_get" },
+});
 
 export const PUT = withMutationGuard(async (req, ctx) => handlePut(req, ctx), {requiredRole: ["student"], rateLimit: { keyPrefix: "mess_default_put", maxRequests: 20 }});

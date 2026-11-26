@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -12,8 +13,7 @@ import type { FacultyAssignment, AssignInput } from "@/contracts/classes";
 //   - admin/sysadmin → all assignments
 //   - HOD           → assignments whose class belongs to the caller's department
 //   - faculty       → only their own (self) active + historical assignments
-export const GET = withRateLimit(
-  withAuthorization(async (req: NextRequest, { auth }) => {
+export const GET = withApiChain(async (req: NextRequest, { auth }) => {
     try {
       const isAdmin = auth.role === "admin" || auth.role === "sysadmin";
       const isHod = auth.role === "hod";
@@ -50,9 +50,12 @@ export const GET = withRateLimit(
     } catch {
       return fail("INTERNAL_ERROR", "Internal server error", 500);
     }
-  }, { requiredRole: ["hod", "faculty", "admin", "sysadmin"] }),
-  { keyPrefix: "faculty_assignments", maxRequests: 30, windowMs: 60_000 }
-);
+  }, {
+  route: "/api/faculty-assignments",
+  auth: "user",
+  requiredRole: ["hod", "faculty", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "faculty_assignments", maxRequests: 30, windowMs: 60_000 },
+});
 
 function rowToFacultyAssignment(row: any): FacultyAssignment {
   return {

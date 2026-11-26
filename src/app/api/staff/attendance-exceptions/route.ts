@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient, supabase } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -130,9 +131,10 @@ async function handleGet(_req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, {
-    requiredRole: [
+export const GET = withApiChain(handleGet, {
+  route: "/api/staff/attendance-exceptions",
+  auth: "user",
+  requiredRole: [
       "admin",
       "sysadmin",
       "hod",
@@ -142,6 +144,5 @@ export const GET = withRateLimit(
       "vice_principal",
       "supervisor",
     ],
-  }),
-  { keyPrefix: "staff_att_exceptions", maxRequests: 30 }
-);
+  rateLimit: { keyPrefix: "staff_att_exceptions", maxRequests: 30 },
+});

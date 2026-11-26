@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { err } from "@/lib/api-response";
 import { getSupabaseServiceClient as getDbClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
@@ -38,7 +39,9 @@ async function handleGet(req: NextRequest, _context: { auth: any }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "hod", "faculty", "staff"] }),
-  { keyPrefix: "faculty_list", maxRequests: 30 },
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/faculty",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "hod", "faculty", "staff"],
+  rateLimit: { keyPrefix: "faculty_list", maxRequests: 30 },
+});

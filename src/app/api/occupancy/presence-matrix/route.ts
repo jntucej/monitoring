@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -89,7 +90,9 @@ async function handleGet(_req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "supervisor", "principal", "vice_principal", "caretaker", "deputy_warden", "hostel_manager", "exam_branch", "oie", "exam_superintendent", "faculty", "staff", "worker", "visitor"] }),
-  { keyPrefix: "presence_matrix", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/occupancy/presence-matrix",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "operator", "supervisor", "principal", "vice_principal", "caretaker", "deputy_warden", "hostel_manager", "exam_branch", "oie", "exam_superintendent", "faculty", "staff", "worker", "visitor"],
+  rateLimit: { keyPrefix: "presence_matrix", maxRequests: 60 },
+});

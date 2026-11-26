@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -194,9 +195,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["principal", "admin", "sysadmin"] }),
-  { keyPrefix: "principal_delegations_get", maxRequests: 30 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/principal/delegations",
+  auth: "user",
+  requiredRole: ["principal", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "principal_delegations_get", maxRequests: 30 },
+});
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["principal", "admin", "sysadmin"], rateLimit: { keyPrefix: "principal_delegations_post", maxRequests: 10 }});

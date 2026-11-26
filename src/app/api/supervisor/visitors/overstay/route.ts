@@ -4,6 +4,7 @@
 // queue (STEP 3.4). Nightly reconciliation job also writes to this view.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -41,7 +42,9 @@ async function implGet(req: NextRequest, ctx: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["supervisor", "admin", "sysadmin"] }),
-  { keyPrefix: "visitors-overstay", maxRequests: 20, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/supervisor/visitors/overstay",
+  auth: "user",
+  requiredRole: ["supervisor", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "visitors-overstay", maxRequests: 20, windowMs: 60_000 },
+});

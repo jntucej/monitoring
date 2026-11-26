@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getNotifications } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -44,7 +45,8 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet),
-  { keyPrefix: 'notifications_list', maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/notifications",
+  auth: "user",
+  rateLimit: { keyPrefix: 'notifications_list', maxRequests: 60 },
+});

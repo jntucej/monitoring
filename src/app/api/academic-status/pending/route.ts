@@ -15,6 +15,7 @@
 //     recorded from the pending write's audit trail.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -129,10 +130,12 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ userId: body.userId.trim(), rejected: pendingStatus });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: APPROVER_ROLES }),
-  { keyPrefix: "academic-status-pending-get", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/academic-status/pending",
+  auth: "user",
+  requiredRole: APPROVER_ROLES,
+  rateLimit: { keyPrefix: "academic-status-pending-get", maxRequests: 30, windowMs: 60_000 },
+});
 
 export const POST = withRateLimit(
   withMutationGuard(implPost, { requiredRole: APPROVER_ROLES }),

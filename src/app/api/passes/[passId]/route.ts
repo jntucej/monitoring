@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { findPass, approvePass, rejectPass } from "@/lib/db";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -149,9 +150,11 @@ async function handlePut(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "parent", "student", "principal", "principal"] }),
-  { keyPrefix: "passes_get", maxRequests: 100 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/passes/[passId]",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "parent", "student", "principal", "principal"],
+  rateLimit: { keyPrefix: "passes_get", maxRequests: 100 },
+});
 
 export const PUT = withMutationGuard(handlePut, {requiredRole: ["admin", "sysadmin", "principal"], rateLimit: { keyPrefix: "passes_update", maxRequests: 20 }});

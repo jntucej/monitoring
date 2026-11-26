@@ -6,6 +6,7 @@
 // nothing is permanent.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -61,7 +62,9 @@ async function implGet(req: NextRequest, ctx: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["admin", "sysadmin", "principal", "dean"] }),
-  { keyPrefix: "delegation-graph", maxRequests: 20, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/delegations/graph",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "principal", "dean"],
+  rateLimit: { keyPrefix: "delegation-graph", maxRequests: 20, windowMs: 60_000 },
+});

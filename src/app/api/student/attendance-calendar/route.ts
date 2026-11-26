@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -122,9 +123,11 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["student", "parent", "guardian"] }),
-  { keyPrefix: "student_attendance_calendar", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/student/attendance-calendar",
+  auth: "user",
+  requiredRole: ["student", "parent", "guardian"],
+  rateLimit: { keyPrefix: "student_attendance_calendar", maxRequests: 60 },
+});
 
 export const dynamic = "force-dynamic";

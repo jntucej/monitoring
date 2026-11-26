@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query, addAudit } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -109,10 +110,12 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(async (req, ctx) => handleGet(req, ctx), { requiredRole: TIER.MESS_INCHARGE }),
-  { keyPrefix: "mess_days_get" }
-);
+export const GET = withApiChain(async (req, ctx) => handleGet(req, ctx), {
+  route: "/api/mess/days",
+  auth: "user",
+  requiredRole: TIER.MESS_INCHARGE,
+  rateLimit: { keyPrefix: "mess_days_get" },
+});
 
 export const POST = withMutationGuard(handlePost, {
   rateLimit: { windowMs: 60_000, maxRequests: 20 },

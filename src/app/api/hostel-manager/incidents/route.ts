@@ -4,6 +4,7 @@
 // incident → chief_warden → HOD flag → dean/principal approval).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -101,10 +102,12 @@ async function implEscalate(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ incidentId: body.incidentId, escalatedTo: acad ?? null });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["hostel_manager", "deputy_warden", "chief_warden", "principal", "admin", "sysadmin"] }),
-  { keyPrefix: "hostel-incidents-get", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/hostel-manager/incidents",
+  auth: "user",
+  requiredRole: ["hostel_manager", "deputy_warden", "chief_warden", "principal", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "hostel-incidents-get", maxRequests: 30, windowMs: 60_000 },
+});
 
 export const POST = withRateLimit(
   withMutationGuard(implPost, { requiredRole: ["deputy_warden", "hostel_manager", "chief_warden", "admin", "sysadmin"] }),

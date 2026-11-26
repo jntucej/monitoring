@@ -1,4 +1,5 @@
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getAllGatesLive } from "@/lib/db";
@@ -190,7 +191,9 @@ async function handleGet(_req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "gate_devices", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/gate/devices",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "gate_devices", maxRequests: 60 },
+});

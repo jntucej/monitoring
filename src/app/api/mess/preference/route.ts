@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query, addAudit } from "@/lib/db";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -205,9 +206,11 @@ async function handlePost(req: Parameters<ReturnType<typeof withRateLimit>>[0], 
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(async (req, ctx) => handleGet(req, ctx), { requiredRole: ["student", "admin", "sysadmin"] }),
-  { keyPrefix: "mess_preference_get" }
-);
+export const GET = withApiChain(async (req, ctx) => handleGet(req, ctx), {
+  route: "/api/mess/preference",
+  auth: "user",
+  requiredRole: ["student", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "mess_preference_get" },
+});
 
 export const POST = withMutationGuard(async (req, ctx) => handlePost(req, ctx), {requiredRole: ["student", "admin", "sysadmin"], rateLimit: { keyPrefix: "mess_preference_post", maxRequests: 20 }});

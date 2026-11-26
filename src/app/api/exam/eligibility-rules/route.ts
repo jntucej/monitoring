@@ -5,6 +5,7 @@
 // precomputes the signed manifest from these rules 24h before each exam.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -61,10 +62,12 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ rules: { minAttendancePct: minPct, requireFeesPaid: body.requireFeesPaid ?? true, requireAcademicActive: body.requireAcademicActive ?? true } });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["controller_examinations", "oie", "exam_branch", "admin", "sysadmin"] }),
-  { keyPrefix: "exam-elig-get", maxRequests: 20, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/exam/eligibility-rules",
+  auth: "user",
+  requiredRole: ["controller_examinations", "oie", "exam_branch", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "exam-elig-get", maxRequests: 20, windowMs: 60_000 },
+});
 
 export const POST = withRateLimit(
   withMutationGuard(implPost, { requiredRole: ["controller_examinations", "admin", "sysadmin"] }),

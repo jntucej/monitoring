@@ -3,6 +3,7 @@
 // complaints (STEP 3.2). Faculty-only.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok } from "@/server/http/response";
@@ -45,7 +46,9 @@ async function implGet(_req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ mentorId: auth.userId, mentees });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["faculty", "hod", "admin", "sysadmin"] }),
-  { keyPrefix: "faculty-mentees", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/faculty/mentees",
+  auth: "user",
+  requiredRole: ["faculty", "hod", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "faculty-mentees", maxRequests: 30, windowMs: 60_000 },
+});

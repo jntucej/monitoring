@@ -402,10 +402,12 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["sysadmin"] }),
-  { keyPrefix: "telegram_sync_get", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/bot/telegram-sync",
+  auth: "user",
+  requiredRole: ["sysadmin"],
+  rateLimit: { keyPrefix: "telegram_sync_get", maxRequests: 60 },
+});
 
 export const POST = withApiChain(handlePost, {
   route: "/api/bot/telegram-sync",

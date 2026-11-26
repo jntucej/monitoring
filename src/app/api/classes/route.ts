@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -42,8 +43,7 @@ function toClassRow(r: ClassesDbRow): ClassRow {
 // READ — src/app/api/classes/route.ts
 // Contract: src/contracts/classes.ts  (hod|admin scope)
 // HOD callers see only their own department's classes; admin/sysadmin see all.
-export const GET = withRateLimit(
-  withAuthorization(async (_req: NextRequest, { auth }) => {
+export const GET = withApiChain(async (_req: NextRequest, { auth }) => {
     try {
       const isAdmin = auth.role === "admin" || auth.role === "sysadmin";
 
@@ -76,9 +76,12 @@ export const GET = withRateLimit(
     } catch {
       return fail("INTERNAL_ERROR", "Internal server error", 500);
     }
-  }, { requiredRole: ["hod", "admin", "sysadmin"] }),
-  { keyPrefix: "classes", maxRequests: 30, windowMs: 60_000 }
-);
+  }, {
+  route: "/api/classes",
+  auth: "user",
+  requiredRole: ["hod", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "classes", maxRequests: 30, windowMs: 60_000 },
+});
 
 // WRITE — POST src/app/api/classes/route.ts
 // Contract: src/contracts/classes.ts  (hod|admin scope, input: CreateClassInput)

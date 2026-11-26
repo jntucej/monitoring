@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
@@ -82,7 +83,9 @@ async function handleGet() {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet as never, { requiredRole: ["admin", "sysadmin", "principal", "vice_principal"] }),
-  { keyPrefix: "dashboard_hostel", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet as never, {
+  route: "/api/dashboard/hostel",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "principal", "vice_principal"],
+  rateLimit: { keyPrefix: "dashboard_hostel", maxRequests: 60 },
+});

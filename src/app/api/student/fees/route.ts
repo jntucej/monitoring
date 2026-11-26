@@ -4,6 +4,7 @@
 // via the guardian mapping.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok } from "@/server/http/response";
@@ -34,7 +35,9 @@ async function implGet(_req: NextRequest, ctx: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["student", "parent", "guardian", "admin", "sysadmin"] }),
-  { keyPrefix: "student-fees", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/student/fees",
+  auth: "user",
+  requiredRole: ["student", "parent", "guardian", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "student-fees", maxRequests: 30, windowMs: 60_000 },
+});

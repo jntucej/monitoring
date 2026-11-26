@@ -4,6 +4,7 @@
 // pass loop. Auth: the pass owner or their parent/guardian/admin.
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization, type AuthContext } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
@@ -73,9 +74,9 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, {
-    requiredRole: ["student", "guardian", "parent", "admin", "sysadmin"],
-  }),
-  { keyPrefix: "passes-status", maxRequests: 60, windowMs: 60_000 },
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/passes/[passId]/status",
+  auth: "user",
+  requiredRole: ["student", "guardian", "parent", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "passes-status", maxRequests: 60, windowMs: 60_000 },
+});

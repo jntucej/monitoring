@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { createVisitor, checkInVisitor, checkOutVisitor } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -114,10 +115,12 @@ async function handlePut(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin", "visitor"] }),
-  { keyPrefix: "visitors_get", maxRequests: 100 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/visitors",
+  auth: "user",
+  requiredRole: ["operator", "admin", "sysadmin", "visitor"],
+  rateLimit: { keyPrefix: "visitors_get", maxRequests: 100 },
+});
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["operator", "admin", "sysadmin"], rateLimit: { keyPrefix: "visitors_post", maxRequests: 30 }});
 

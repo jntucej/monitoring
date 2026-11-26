@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -72,7 +73,9 @@ async function handleGet(req: NextRequest, { auth: _auth }: { auth: AuthContext 
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(async (req, ctx) => handleGet(req, ctx), { requiredRole: TIER.MESS_INCHARGE }),
-  { keyPrefix: "mess_token_get", maxRequests: 200 }
-);
+export const GET = withApiChain(async (req, ctx) => handleGet(req, ctx), {
+  route: "/api/mess/token/[code]",
+  auth: "user",
+  requiredRole: TIER.MESS_INCHARGE,
+  rateLimit: { keyPrefix: "mess_token_get", maxRequests: 200 },
+});

@@ -10,6 +10,7 @@
 //        if issuance velocity or ledger mismatch exceeds threshold.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -90,10 +91,12 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ ...result, serviceBlocked });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["mess_incharge", "admin", "sysadmin"] }),
-  { keyPrefix: "mess-reconcile-get", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/mess/reconcile",
+  auth: "user",
+  requiredRole: ["mess_incharge", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "mess-reconcile-get", maxRequests: 30, windowMs: 60_000 },
+});
 
 export const POST = withRateLimit(
   withMutationGuard(implPost, { requiredRole: ["mess_incharge", "chief_warden", "admin", "sysadmin"] }),

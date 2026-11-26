@@ -5,6 +5,7 @@
 // admin-gated /api/parents listing for the parent's own view.
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getLinkedPersons } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -151,7 +152,9 @@ async function handleGet(
 
 const readLimit: RateLimitConfig = { ...RATE_LIMITS.read, keyPrefix: "parents_me" };
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: [...ROLES] }),
-  readLimit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/parents/me",
+  auth: "user",
+  requiredRole: [...ROLES],
+  rateLimit: readLimit,
+});

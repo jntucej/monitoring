@@ -13,6 +13,7 @@
 //   flow in /api/supervisor/gate-exceptions).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -73,7 +74,9 @@ async function implGet(req: NextRequest, _ctx: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
-  { keyPrefix: "gate-verify-leave-chain", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/gate/verify-leave-chain",
+  auth: "user",
+  requiredRole: ["operator", "supervisor", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "gate-verify-leave-chain", maxRequests: 30, windowMs: 60_000 },
+});

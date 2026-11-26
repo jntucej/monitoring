@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -143,12 +144,12 @@ async function handlePatch(req: NextRequest, { auth: _auth }: { auth: AuthContex
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, {
-    requiredRole: ["oie", "exam_superintendent", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"],
-  }),
-  { keyPrefix: "exam_access_exceptions", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/exam/access-exceptions",
+  auth: "user",
+  requiredRole: ["oie", "exam_superintendent", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"],
+  rateLimit: { keyPrefix: "exam_access_exceptions", maxRequests: 60 },
+});
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["exam_superintendent", "oie", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"], rateLimit: { keyPrefix: "exam_access_exceptions_post", maxRequests: 20 }});
 

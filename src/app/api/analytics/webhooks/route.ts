@@ -1,4 +1,5 @@
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -19,7 +20,9 @@ async function handleGet() {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "webhooks_analytics", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/analytics/webhooks",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "webhooks_analytics", maxRequests: 60 },
+});

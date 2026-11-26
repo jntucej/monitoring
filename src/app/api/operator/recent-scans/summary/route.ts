@@ -10,6 +10,7 @@
  */
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -134,7 +135,9 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: TIER.OPERATOR }),
-  { keyPrefix: "operator-recent-scans-summary", maxRequests: 30, windowMs: 60_000 }
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/operator/recent-scans/summary",
+  auth: "user",
+  requiredRole: TIER.OPERATOR,
+  rateLimit: { keyPrefix: "operator-recent-scans-summary", maxRequests: 30, windowMs: 60_000 },
+});

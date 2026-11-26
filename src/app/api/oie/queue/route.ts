@@ -15,6 +15,7 @@
 // This route never mutates. All writes go through /api/permissions/[ticket].
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit, type RateLimitConfig } from "@/lib/rate-limit";
@@ -165,7 +166,9 @@ async function handleGet(
 
 const readLimit: RateLimitConfig = { ...RATE_LIMITS.read, keyPrefix: "oie_queue" };
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: [...VIEW_ROLES] }),
-  readLimit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/oie/queue",
+  auth: "user",
+  requiredRole: [...VIEW_ROLES],
+  rateLimit: readLimit,
+});

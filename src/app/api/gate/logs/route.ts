@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getAllLogs } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -46,8 +47,10 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator'] }),
-  { keyPrefix: 'gate_logs_list', maxRequests: 100 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/gate/logs",
+  auth: "user",
+  requiredRole: ['admin', 'sysadmin', 'operator'],
+  rateLimit: { keyPrefix: 'gate_logs_list', maxRequests: 100 },
+});
 

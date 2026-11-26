@@ -6,6 +6,7 @@
 // Additive: doesn't change ticket state; pure read.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -88,7 +89,9 @@ async function implGet(_req: NextRequest, ctx: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["admin", "principal", "deputy_warden", "hostel_manager", "caretaker", "faculty", "hod", "vice_principal", "exam_branch", "sysadmin", "oie", "mess_incharge"] }),
-  { keyPrefix: "perm-can-act", maxRequests: 60, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/permissions/[ticket]/can-act",
+  auth: "user",
+  requiredRole: ["admin", "principal", "deputy_warden", "hostel_manager", "caretaker", "faculty", "hod", "vice_principal", "exam_branch", "sysadmin", "oie", "mess_incharge"],
+  rateLimit: { keyPrefix: "perm-can-act", maxRequests: 60, windowMs: 60_000 },
+});

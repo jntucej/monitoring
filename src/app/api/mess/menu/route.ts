@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 
 import { query } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -80,9 +81,9 @@ async function handleGet(req: any, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(async (req, ctx) => handleGet(req, ctx), {
-    requiredRole: ["student", "admin", "sysadmin", "mess_incharge"],
-  }),
-  { keyPrefix: "mess_menu_get" }
-);
+export const GET = withApiChain(async (req, ctx) => handleGet(req, ctx), {
+  route: "/api/mess/menu",
+  auth: "user",
+  requiredRole: ["student", "admin", "sysadmin", "mess_incharge"],
+  rateLimit: { keyPrefix: "mess_menu_get" },
+});

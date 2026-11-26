@@ -5,6 +5,7 @@
  */
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -53,7 +54,9 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }) {
   );
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: TIER.OPERATOR }),
-  { keyPrefix: "operator-scan-edits", maxRequests: 30, windowMs: 60_000 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/operator/scans/[id]/edits",
+  auth: "user",
+  requiredRole: TIER.OPERATOR,
+  rateLimit: { keyPrefix: "operator-scan-edits", maxRequests: 30, windowMs: 60_000 },
+});

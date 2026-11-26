@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getStaffRegister, type RegisterKey } from "@/lib/staff-register";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -34,10 +35,10 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "hod", "operator", "supervisor"],
-  }),
-  { keyPrefix: "staff_register", maxRequests: 60 },
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/staff/register",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "hod", "operator", "supervisor"],
+  rateLimit: { keyPrefix: "staff_register", maxRequests: 60 },
+});
 

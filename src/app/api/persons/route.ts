@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 
 import { findAllPersons, searchPersons, findPersonByUniqueId, findPersonsByType, getLinkedPersons, mPerson, withTransaction } from "@/lib/db";
@@ -331,10 +332,12 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin", "parent", "guardian", "faculty", "staff"] }),
-  { keyPrefix: "persons_get", maxRequests: 100 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/persons",
+  auth: "user",
+  requiredRole: ["operator", "admin", "sysadmin", "parent", "guardian", "faculty", "staff"],
+  rateLimit: { keyPrefix: "persons_get", maxRequests: 100 },
+});
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "persons_post", maxRequests: 30 }});
 

@@ -1,4 +1,5 @@
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -127,9 +128,11 @@ async function handlePatchInner(req: NextRequest) {
 const handleGet = log.wrap("/api/system/config:GET", handleGetInner);
 const handlePatch = log.wrap("/api/system/config:PATCH", handlePatchInner);
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "sys_config_get", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/system/config",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "sys_config_get", maxRequests: 60 },
+});
 
 export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "sys_config_patch", maxRequests: 20 }});

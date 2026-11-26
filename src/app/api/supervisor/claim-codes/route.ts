@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -214,8 +215,10 @@ async function handleDelete(req: NextRequest, ctx: { auth: AuthContext }): Promi
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["supervisor", "sysadmin"], rateLimit: limit});
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["supervisor", "sysadmin"] }),
-  limit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/supervisor/claim-codes",
+  auth: "user",
+  requiredRole: ["supervisor", "sysadmin"],
+  rateLimit: limit,
+});
 export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["supervisor", "sysadmin"], rateLimit: limit});

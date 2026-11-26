@@ -4,6 +4,7 @@
 // server-side aggregation over users + employee_details, grouped by the
 // role hierarchy, department and staff category, plus status counts.
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -136,7 +137,9 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "hod", "faculty", "staff"] }),
-  { keyPrefix: "staff_stats", maxRequests: 120 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/staff/stats",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "hod", "faculty", "staff"],
+  rateLimit: { keyPrefix: "staff_stats", maxRequests: 120 },
+});
