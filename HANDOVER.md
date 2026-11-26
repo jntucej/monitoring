@@ -8,20 +8,20 @@
 
 ## 1. What this system does
 
-Gate Monitor is a self-hosted, five-container monitoring stack for a
-residential campus (UC EJC). It watches:
+Gate Monitor is a self-hosted containerized monitoring stack for a
+residential campus (JNTUH CEJ). It watches:
 
 - **Gate access** — scan events at physical gates (student/operator movements)
-- **Infrastructure** — 4 container health (Postgres, Redis, Web, Worker),
+- **Infrastructure** — container health (Postgres, Redis, Web, Worker, Caddy, LLM Proxy, Prometheus, Alertmanager, cAdvisor),
   disk, DB pool, queue depth, SSE stream count
 - **Application** — API error rates, p95 latency, announcement/mess/complaint
-  write paths, RBAC enforcement
-- **Autonomous self-heal** — restarts containers, prunes backups, raises pool
+  write paths, RBAC enforcement, U3–U8.1 security chain (`withApiChain`, Zod `validateBody`, Redis Lua rate limiting, streamed 413 limits)
+- **Autonomous self-heal** — restarts containers, prunes backups (`backup-maintenance` 30m + optional S3 offsite), raises pool
   size, and escalates irreversible actions to a human approval gate
 
-The five containers: `gate_postgres`, `gate_redis`, `gate_web` (Next.js),
+Core containers: `gate_postgres` (`supabase/postgres:17.6.1.136`), `gate_redis` (`redis:7-alpine`), `gate_web` (Next.js 16, 467 pages / 798 API routes),
 `gate_worker` (job scheduler + autonomous SRE loop), `gate_caddy` (reverse
-proxy + the static `/status` page that survives even when `gate_web` is down).
+proxy + static `/status` page), `gate_llm_proxy` (OmniRoute cloud AI proxy), `gate_prometheus`, `gate_alertmanager`, `gate_cadvisor`, and `cloudflare-ddns` (plus `/opt/server-monitoring` Grafana/Loki/Alloy stack).
 
 ```
 caddy:80 ──► web:3000 (Next.js, all routes + /api/health)

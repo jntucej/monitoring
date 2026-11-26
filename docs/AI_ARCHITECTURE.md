@@ -4,6 +4,8 @@ This document describes the **intended** architecture implemented by
 `model-runtime/`. It is the contract the benchmark and tests verify. See
 `docs/AI_MODEL_COMPATIBILITY.md` for the hardware-grounded model selection.
 
+> **Production Runtime Note (2026-11-26):** In live production, `gate_llm_proxy` (`node:20-alpine`) routes AI inference to the cloud OmniRoute endpoint (`http://localhost:20128/v1` / `omniroute.ucej.in`) rather than running a local Ollama container.
+
 ## 1. Roles (the three workers)
 
 | Worker | Model | Purpose | Lifecycle |

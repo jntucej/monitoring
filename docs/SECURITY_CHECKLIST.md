@@ -40,6 +40,13 @@ A mandatory checklist for incoming PRs and architecture reviews to ensure Gate M
 - [ ] **RLS drift:** Is the nightly `pg_policies` diff (`/api/sysadmin/rls/drift`) checked, and do new tables that `gate_app` can read have RLS enabled with no `USING (true)` policies?
 - [ ] **Bot surface:** Do OPERATOR/APPROVER-tier mutations via the Telegram bot require step-up (device-bound) confirmation, and are anomalous-velocity sessions auto-suspended (`/api/sysadmin/bot/anomaly`)?
 
+## 7. Hardening Chain Controls (U3–U8.1, deployed 2026-11-26)
+- [x] **Middleware order (`withApiChain`):** Authenticated routes run `withAuthorization` before `withRateLimit` (user-scoped buckets); 0 inverted `withRateLimit(withAuthorization)` sites across 798 API route files.
+- [x] **Error normalization (U3):** `src/lib/api-error-handler.ts` maps pg SQLSTATEs and never leaks raw SQL/stack/secrets in 500 responses.
+- [x] **Rate limiting (U4):** Atomic Redis Lua `INCR+PEXPIRE` via `EVALSHA` with `NOSCRIPT` recovery and `src/lib/rate-limit-policies.ts`.
+- [x] **Body validation & size limits (U5/U8/U8.1):** `validateBody` (Zod) + Edge `Content-Length` fast-reject + `setupBodyCaching` streamed byte limits (`1 MB` JSON / `25 MB` multipart → `413 PAYLOAD_TOO_LARGE`).
+- [x] **Structured logging & correlation (U6/U8):** Single `http.request` JSON line per request, `sanitizeEdgeRequestId`, internal `x-auth-*`/`x-u6-*` headers stripped before response.
+
 *Cross-references: `docs/ROLE_OPERATIONS.md` (the full route→role map),
 `docs/IMPLEMENTATION_BLUEPRINT.md` (build status), `docs/AUTONOMOUS_OPERATIONS.md` (threat model + control loops).*
 
