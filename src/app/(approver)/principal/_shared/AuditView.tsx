@@ -33,7 +33,7 @@ interface AuditResponse {
 }
 
 export function AuditView() {
-  const { data, loading } = useApiResource<AuditResponse>("/api/principal/audit", {
+  const { data, loading, error } = useApiResource<AuditResponse>("/api/principal/audit", {
     ttlMs: 30_000,
   });
 
@@ -44,18 +44,6 @@ export function AuditView() {
     closeInspection,
   } = useEntityInspector();
   const openInspector = (log: AuditLog) => ourInspect(buildAuditInspection(log));
-
-  const role = useRoleContext();
-  const gate: RoleGate = {
-    isPrincipal: role.isPrincipal,
-    isFaculty: role.isFaculty,
-    role: role.role ?? null,
-  };
-  const [mainInspection, setMainInspection] = useState<
-    ReturnType<typeof buildAuditEventInspection> | null
-  >(null);
-  const inspectMain = (log: AuditLog) =>
-    setMainInspection(buildAuditEventInspection(log, gate));
 
   return (
     <div className="space-y-4">
@@ -86,8 +74,16 @@ export function AuditView() {
           value={logs.length}
           onClick={logs.length > 0 ? () => openInspector(logs[0]) : undefined}
         />
-        <KpiCard label="Audit Logging" value="Active" tone="ok" />
-        <KpiCard label="Integrity" value="Verified" tone="ok" />
+        <KpiCard
+          label="Audit Logging"
+          value={error ? "Degraded" : loading && !data ? "Checking..." : "Active"}
+          tone={error ? "warn" : "ok"}
+        />
+        <KpiCard
+          label="Integrity"
+          value={error ? "Unverified" : loading && !data ? "Checking..." : logs.length > 0 ? "Verified" : "Empty"}
+          tone={error ? "warn" : "ok"}
+        />
       </div>
 
       {loading && logs.length === 0 ? (
@@ -95,56 +91,24 @@ export function AuditView() {
       ) : logs.length === 0 ? (
         <EmptyState title="No audit entries" description="No audit log events found." />
       ) : (
-        <>
-          <ul className="space-y-2 md:hidden">
-            {logs.map((log) => (
-              <li key={log.id}>
-                <button
-                  type="button"
-                  onClick={() => openInspector(log)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") openInspector(log);
-                  }}
-                  aria-label={`Inspect audit event: ${log.action}`}
-                  className="surface-card block w-full bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">
-                      <SmartTextRef text={log.action} currentPath="/principal/governance/audit" />
-                    </p>
-                    <span className="text-xs text-text-muted">
-                      {new Date(log.timestamp).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-text-secondary">
-                    {log.user_name ?? "System"} ({log.user_role ?? "sys"})
-                  </p>
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:block">
-            <DataTable<AuditLog>
-              onRowClick={openInspector}
-              columns={[
-                { header: "Action", accessor: (r) => <SmartTextRef text={r.action} currentPath="/principal/governance/audit" /> },
-                { header: "Actor", accessor: (r) => r.user_name ?? "System" },
-                { header: "Role", accessor: (r) => r.user_role ?? "—" },
-                {
-                  header: "Timestamp",
-                  accessor: (r) => new Date(r.timestamp).toLocaleString(),
-                },
-              ]}
-              data={logs}
-              keyExtractor={(r) => r.id}
-            />
-          </div>
-        </>
+        <DataTable<AuditLog>
+          onRowClick={openInspector}
+          mobileLayout="cards"
+          columns={[
+            { header: "Action", accessor: (r) => <SmartTextRef text={r.action} currentPath="/principal/governance/audit" /> },
+            { header: "Actor", accessor: (r) => r.user_name ?? "System" },
+            { header: "Role", accessor: (r) => r.user_role ?? "—" },
+            {
+              header: "Timestamp",
+              accessor: (r) => new Date(r.timestamp).toLocaleString(),
+            },
+          ]}
+          data={logs}
+          keyExtractor={(r) => r.id}
+        />
       )}
 
       <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
-      <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );
 }

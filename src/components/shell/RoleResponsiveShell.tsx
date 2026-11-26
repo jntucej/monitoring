@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Menu, X } from "lucide-react";
 import { RoleSidebar } from "./RoleSidebar";
 import { RoleNotificationBell } from "./RoleNotificationBell";
-import { RoleChrome } from "@/components/shared/RoleChrome";
+import { RoleSearchBar } from "@/components/shared/RoleSearchBar";
 import type { RoleManifest } from "./types";
 
 const AgentConsoleDrawer = dynamic(
@@ -68,10 +68,11 @@ export function RoleResponsiveShell({
 
       {/* Single-mounted main content */}
       <div className="relative flex-1 overflow-y-auto overflow-x-hidden">
+        <RoleSearchBar role={manifest.role} />
         <main
           id="main-content"
           tabIndex={-1}
-          className="mx-auto w-full max-w-7xl px-4 py-4 pb-[max(4rem,env(safe-area-inset-bottom))] lg:px-6 lg:py-6 lg:pb-24"
+          className="mx-auto w-full max-w-7xl px-4 py-4 pb-[env(safe-area-inset-bottom)] lg:px-6 lg:py-6"
         >
           {children}
         </main>
@@ -79,12 +80,6 @@ export function RoleResponsiveShell({
             dual-mounted, doubling polling + badge state). */}
         <RoleNotificationBell className="fixed right-6 top-6 z-20 lg:right-6 lg:top-6" />
         <AgentConsoleDrawer role={manifest.role} />
-        <div className="hidden lg:block">
-          <RoleChrome role={manifest.role} variant="footer" />
-        </div>
-        <div className="lg:hidden">
-          <RoleChrome role={manifest.role} variant="mobile" />
-        </div>
       </div>
 
       {/* Mobile navigation drawer */}

@@ -24,6 +24,7 @@ export function VPSidebar({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const focusStreak = useVPRetention((s) => s.focusStreak);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   // Hydrate persisted expansion state
@@ -110,7 +111,7 @@ export function VPSidebar({
           <Flame className="size-3.5 text-action-warning" />
           <span className="text-text-muted">Focus streak</span>
           <span className="ml-auto font-semibold tabular-nums text-text-primary">
-            {useVPRetention.getState().focusStreak}d
+            {focusStreak}d
           </span>
         </div>
 

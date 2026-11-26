@@ -43,6 +43,11 @@ export function DelegationsView() {
   const { data, loading } = useApiResource<DelegationsResponse>("/api/principal/delegations", {
     ttlMs: 30_000,
   });
+  const { data: dashData } = useApiResource<{
+    data?: { pendingCount?: number; delegatedCount?: number };
+  }>("/api/principal/dashboard", { ttlMs: 30_000 });
+  const pendingCount = dashData?.data?.pendingCount ?? 0;
+  const delegatedCount = dashData?.data?.delegatedCount ?? 0;
 
   const role = useRoleContext();
   const gate: RoleGate = {
@@ -67,10 +72,6 @@ export function DelegationsView() {
     if (filter === "inactive") return !isActive(d);
     return true;
   });
-  const {
-    inspection: ourInspection,
-    closeInspection,
-  } = useEntityInspector();
   const openInspector = (d: Delegation) => inspectMain(d);
 
   return (
@@ -131,86 +132,56 @@ export function DelegationsView() {
         <PrincipalEmptyReconciler
           title="No matching delegations"
           breakdown={[
-            { label: "Delegated Approvals", count: 0, href: "/principal/approvals/delegated" },
-            { label: "Pending Queue", count: 0, href: "/principal/approvals/pending" },
+            { label: "Delegated Approvals", count: delegatedCount, href: "/principal/approvals/delegated" },
+            { label: "Pending Queue", count: pendingCount, href: "/principal/approvals/pending" },
           ]}
         />
       ) : (
-        <>
-          <ul className="space-y-2 md:hidden">
-            {visibleDelegations.map((d) => (
-              <li key={d.id}>
+        <DataTable<Delegation>
+          mobileLayout="cards"
+          onRowClick={openInspector}
+          columns={[
+            {
+              header: "Delegate Role",
+              accessor: (r) => r.delegate_role?.replace(/_/g, " ") ?? "—",
+            },
+            {
+              header: "Scope",
+              accessor: (r) => r.scope ?? "All Workflows",
+            },
+            {
+              header: "Starts",
+              accessor: (r) => (r.starts_at ? new Date(r.starts_at).toLocaleDateString() : "—"),
+            },
+            {
+              header: "Status",
+              accessor: (r) => (
+                <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                  {r.status ?? "ACTIVE"}
+                </span>
+              ),
+            },
+            {
+              header: "Overview",
+              accessor: (r) => (
                 <button
                   type="button"
-                  onClick={() => openInspector(d)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") openInspector(d);
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openInspector(r);
                   }}
-                  aria-label={`Inspect delegation: ${d.delegate_role ?? "delegation"}`}
-                  className="surface-card block w-full bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                  className="text-xs font-semibold text-action-primary hover:underline"
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{d.delegate_role?.replace(/_/g, " ")}</p>
-                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
-                      {d.status ?? "ACTIVE"}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-text-secondary">
-                    Scope: <SmartTextRef text={d.scope ?? "Full"} currentPath="/principal/governance/delegations" />
-                  </p>
+                  Open &rarr;
                 </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:block">
-            <DataTable<Delegation>
-              onRowClick={openInspector}
-              columns={[
-                {
-                  header: "Delegate Role",
-                  accessor: (r) => r.delegate_role?.replace(/_/g, " ") ?? "—",
-                },
-                {
-                  header: "Scope",
-                  accessor: (r) => r.scope ?? "All Workflows",
-                },
-                {
-                  header: "Starts",
-                  accessor: (r) => (r.starts_at ? new Date(r.starts_at).toLocaleDateString() : "—"),
-                },
-                {
-                  header: "Status",
-                  accessor: (r) => (
-                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
-                      {r.status ?? "ACTIVE"}
-                    </span>
-                  ),
-                },
-                {
-                  header: "Overview",
-                  accessor: (r) => (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openInspector(r);
-                      }}
-                      className="text-xs font-semibold text-action-primary hover:underline"
-                    >
-                      Open &rarr;
-                    </button>
-                  ),
-                },
-              ]}
-              data={visibleDelegations}
-              keyExtractor={(r) => r.id}
-            />
-          </div>
-        </>
+              ),
+            },
+          ]}
+          data={visibleDelegations}
+          keyExtractor={(r) => r.id}
+        />
       )}
 
-      <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
       <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );

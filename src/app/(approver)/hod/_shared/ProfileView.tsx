@@ -15,6 +15,8 @@ interface ProfileData {
   phone?: string;
   role: string;
   status?: string;
+  mfaEnabled?: boolean;
+  mfa_enabled?: boolean;
   photoUrl?: string;
   department?: string;
 }
@@ -25,6 +27,9 @@ export function ProfileView() {
   });
 
   const profile = data?.data;
+  const statusLabel = profile?.status ? profile.status.replace(/_/g, " ") : loading ? "Loading..." : "Active";
+  const roleLabel = profile?.role ? profile.role.replace(/_/g, " ").toUpperCase() : "HOD";
+  const mfaActive = Boolean(profile?.mfaEnabled ?? profile?.mfa_enabled);
 
   return (
     <div className="space-y-4">
@@ -37,9 +42,9 @@ export function ProfileView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <KpiCard label="Account Status" value="Active" tone="ok" />
-        <KpiCard label="Authority Tier" value="Head of Department" tone="ok" />
-        <KpiCard label="Security" value="MFA Enabled" tone="ok" />
+        <KpiCard label="Account Status" value={statusLabel} tone={profile?.status === "SUSPENDED" ? "warn" : "ok"} />
+        <KpiCard label="Authority Tier" value={roleLabel} tone="ok" />
+        <KpiCard label="Security" value={mfaActive ? "MFA Enabled" : "Standard"} tone={mfaActive ? "ok" : "neutral"} />
       </div>
 
       {loading && !profile ? (
@@ -55,10 +60,10 @@ export function ProfileView() {
               <img
                 src={profile.photoUrl}
                 alt={profile.name}
-                className="size-6 rounded-full object-cover"
+                className="size-14 rounded-full object-cover"
               />
             ) : (
-              <div className="size-6 rounded-full bg-bg-elevated flex items-center justify-center">
+              <div className="size-14 rounded-full bg-bg-elevated flex items-center justify-center">
                 <User className="w-6 h-6 text-text-muted" />
               </div>
             )}

@@ -150,7 +150,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
       <WidgetBoundary title="Account">
         <SectionCard title="Account" description="Signed in to the admin console" icon={Shield} showHeader={false}>
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-            <div className="size-6 sm:w-6 sm:h-6 rounded-2xl bg-action-primary/15 flex items-center justify-center text-xl sm:text-2xl font-black text-action-primary ring-2 ring-action-primary/25 overflow-hidden shrink-0">
+            <div className="size-14 rounded-2xl bg-action-primary/15 flex items-center justify-center text-xl sm:text-2xl font-black text-action-primary ring-2 ring-action-primary/25 overflow-hidden shrink-0">
               {photoUrl ? <img src={photoUrl} alt="" width={80} height={80} className="w-full h-full object-cover" /> : initials}
             </div>
             <div className="flex-1 min-w-0">
@@ -260,7 +260,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
                     const active = accent === id;
                     return (
                       <button key={id} type="button" onClick={() => pickAccent(id)} aria-pressed={active} aria-label={`Use ${a.label} accent`} title={a.label}
-                        className={cn("size-6 rounded-2xl flex items-center justify-center transition-all active:scale-95", a.swatch,
+                        className={cn("size-12 rounded-2xl flex items-center justify-center transition-all active:scale-95", a.swatch,
                           active ? "ring-2 ring-offset-2 ring-offset-[var(--bg-surface)] ring-white/70 scale-105" : "opacity-70 hover:opacity-100")}>
                         {active && <Check className="w-4 h-4 text-white" />}
                       </button>

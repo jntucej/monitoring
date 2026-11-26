@@ -78,10 +78,6 @@ export function ExamsView() {
     if (filter === "resolved") return isResolved(e);
     return true;
   });
-  const {
-    inspection: ourInspection,
-    closeInspection,
-  } = useEntityInspector();
   const openInspector = (e: ExamException) => inspectMain(e);
 
   return (
@@ -145,83 +141,53 @@ export function ExamsView() {
       ) : visibleExceptions.length === 0 ? (
         <EmptyState title="No exam exceptions" description="No hall clearance or exam exceptions match this filter." />
       ) : (
-        <>
-          <ul className="space-y-2 md:hidden">
-            {visibleExceptions.map((e, idx) => (
-              <li key={e.id ?? idx}>
+        <DataTable<ExamException>
+          mobileLayout="cards"
+          onRowClick={openInspector}
+          columns={[
+            {
+              header: "Candidate",
+              accessor: (r) => r.student_name ?? r.candidate ?? r.student?.name ?? "Candidate",
+            },
+            {
+              header: "Roll / Hall",
+              accessor: (r) => r.ticket_number ?? (r.roll ? `${r.roll}${r.hall ? ` · ${r.hall}` : ""}` : r.hall ?? "—"),
+            },
+            {
+              header: "Reason",
+              accessor: (r) => (
+                <SmartTextRef text={r.reason ?? r.description ?? "Exam hall clearance"} currentPath="/principal/examinations" />
+              ),
+            },
+            {
+              header: "Status",
+              accessor: (r) => (
+                <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                  {r.status ?? (isResolved(r) ? "RESOLVED" : "PENDING")}
+                </span>
+              ),
+            },
+            {
+              header: "Overview",
+              accessor: (r) => (
                 <button
                   type="button"
-                  onClick={() => openInspector(e)}
-                  onKeyDown={(ev) => {
-                    if (ev.key === "Enter" || ev.key === " ") openInspector(e);
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    openInspector(r);
                   }}
-                  aria-label={`Inspect exam exception: ${e.student_name ?? e.candidate ?? e.student?.name ?? "student"}`}
-                  className="surface-card block w-full bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                  className="text-xs font-semibold text-action-primary hover:underline"
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{e.student_name ?? e.candidate ?? e.student?.name ?? "Student"}</p>
-                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
-                      {e.status ?? (isResolved(e) ? "RESOLVED" : "PENDING")}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-text-secondary">
-                    <SmartTextRef text={e.reason ?? e.description ?? "Exam hall clearance"} currentPath="/principal/examinations" />
-                  </p>
+                  Open &rarr;
                 </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:block">
-            <DataTable<ExamException>
-              onRowClick={openInspector}
-              columns={[
-                {
-                  header: "Candidate",
-                  accessor: (r) => r.student_name ?? r.candidate ?? r.student?.name ?? "Candidate",
-                },
-                {
-                  header: "Roll / Hall",
-                  accessor: (r) => r.ticket_number ?? (r.roll ? `${r.roll}${r.hall ? ` · ${r.hall}` : ""}` : r.hall ?? "—"),
-                },
-                {
-                  header: "Reason",
-                  accessor: (r) => (
-                    <SmartTextRef text={r.reason ?? r.description ?? "Exam hall clearance"} currentPath="/principal/examinations" />
-                  ),
-                },
-                {
-                  header: "Status",
-                  accessor: (r) => (
-                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
-                      {r.status ?? (isResolved(r) ? "RESOLVED" : "PENDING")}
-                    </span>
-                  ),
-                },
-                {
-                  header: "Overview",
-                  accessor: (r) => (
-                    <button
-                      type="button"
-                      onClick={(ev) => {
-                        ev.stopPropagation();
-                        openInspector(r);
-                      }}
-                      className="text-xs font-semibold text-action-primary hover:underline"
-                    >
-                      Open &rarr;
-                    </button>
-                  ),
-                },
-              ]}
-              data={visibleExceptions}
-              keyExtractor={(r) => r.id ?? r.ticket_number ?? "exam-row"}
-            />
-          </div>
-        </>
+              ),
+            },
+          ]}
+          data={visibleExceptions}
+          keyExtractor={(r) => r.id ?? r.ticket_number ?? "exam-row"}
+        />
       )}
 
-      <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
       <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );

@@ -24,6 +24,7 @@ export function PrincipalSidebar({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const authorityStreak = usePrincipalRetention((s) => s.authorityStreak);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   // Hydrate persisted expansion state
@@ -110,7 +111,7 @@ export function PrincipalSidebar({
           <Flame className="size-3.5 text-action-warning" />
           <span className="text-text-muted">Authority streak</span>
           <span className="ml-auto font-semibold tabular-nums text-text-primary">
-            {usePrincipalRetention.getState().authorityStreak}d
+            {authorityStreak}d
           </span>
         </div>
 

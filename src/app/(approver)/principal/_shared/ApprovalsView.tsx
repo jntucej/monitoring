@@ -2,7 +2,9 @@
 
 import { useEffect, useState, Suspense, lazy } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useApiResource } from "@/hooks/useApiResource";
+import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
@@ -56,11 +58,9 @@ export function ApprovalsView({
 
   // ?ticket= deep link (retention widgets / notification emails open a specific
   // ticket's inspector on the matching view).
-  const [ticketParam] = useState(() =>
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("ticket")
-      : null
-  );
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const ticketParam = searchParams.get("ticket");
   const openTicket = (rows: PermissionItem[]) => {
     if (ticketParam) {
       const hit = rows.find((r) => r.ticket_number === ticketParam);
@@ -102,6 +102,7 @@ export function ApprovalsView({
   const { data, loading, refresh } = useApiResource<PermissionsResponse>(url, {
     ttlMs: 15_000,
   });
+  usePolling(refresh, { intervalMs: 15_000 });
   const addToast = useUIStore((s) => s.addToast);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [rejectNote, setRejectNote] = useState("");
@@ -342,7 +343,7 @@ export function ApprovalsView({
               key: "status",
               label: "Slice",
               value: status,
-              onRemove: () => {},
+              onRemove: () => router.push("/principal/approvals"),
             },
           ]}
           shownCount={rows.length}

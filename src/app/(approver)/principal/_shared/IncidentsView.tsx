@@ -4,6 +4,8 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useRoleContext } from "@/hooks/useRoleContext";
+import { getAuthHeaders } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { DataTable } from "@/components/ui/DataTable";
@@ -11,21 +13,10 @@ import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
 import {
-  useEntityInspector,
-  EntityInspectorPanel,
-} from "@/components/shared/useEntityInspector";
-import {
-  buildIncidentInspection,
-  type AlertRecord as OurAlertRecord,
-  type RelatedRecord,
-  type IncidentActions,
-} from "@/lib/principal/incidentInspection";
-import {
   buildIncidentInspection as buildMainIncidentInspection,
   type IncidentRecord,
   type RoleGate,
 } from "./entityInspectionModels";
-import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 import { SmartTextRef } from "@/components/nav/SmartTextRef";
 
 export interface AlertItem {
@@ -53,12 +44,34 @@ export function IncidentsView() {
     ttlMs: 15_000,
   });
 
-  const {
-    inspection: ourInspection,
-    inspect: ourInspect,
-    closeInspection,
-  } = useEntityInspector();
-  const [, setActing] = useState(false);
+  const [actingId, setActingId] = useState<string | null>(null);
+  const addToast = useUIStore((s) => s.success);
+  const errorToast = useUIStore((s) => s.error);
+
+  const resolveAlert = useCallback(
+    async (alertId: string) => {
+      if (actingId) return;
+      setActingId(alertId);
+      try {
+        const res = await fetch(`/api/alerts/${encodeURIComponent(alertId)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        });
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          throw new Error(j?.error?.message ?? `HTTP ${res.status}`);
+        }
+        addToast("Alert resolved");
+        setMainInspection(null);
+        await refresh();
+      } catch (err: unknown) {
+        errorToast(err instanceof Error ? err.message : "Failed to resolve alert");
+      } finally {
+        setActingId(null);
+      }
+    },
+    [actingId, addToast, errorToast, refresh],
+  );
 
   const role = useRoleContext();
   const gate: RoleGate = {
@@ -69,7 +82,6 @@ export function IncidentsView() {
   const [mainInspection, setMainInspection] = useState<
     ReturnType<typeof buildMainIncidentInspection> | null
   >(null);
-  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
 
   const inspectMain = (a: AlertItem) => {
     setMainInspection(
@@ -85,21 +97,6 @@ export function IncidentsView() {
         gate
       )
     );
-    setPivot({
-      kind: "gate",
-      id: a.gate_id ?? a.gateId ?? a.id,
-      title: a.title ?? a.message ?? "Alert",
-      subtitle: `${a.severity ?? "alert"} · ${a.status ?? "OPEN"}${a.gate_name ? " · " + a.gate_name : ""}`,
-      fullRoute: (a.gate_id ?? a.gateId) ? `/admin/gates/${a.gate_id ?? a.gateId}` : `/admin/alerts`,
-      relatedLinks: [
-        { label: "Gate Activity", href: "/principal/operations/gates" },
-        { label: "Incidents", href: "/principal/operations/incidents" },
-        { label: "Hostel", href: "/principal/operations/hostel" },
-        { label: "People", href: "/principal/people" },
-        { label: "Escalations", href: "/principal/escalations" },
-        { label: "Cases", href: "/principal/cases" },
-      ],
-    });
   };
 
   const [filter, setFilter] = useState<"all" | "high" | "open" | "resolved">("all");
@@ -123,58 +120,12 @@ export function IncidentsView() {
    * is marked unavailable (never a fabricated link).
    */
   const openInspector = useCallback(
-    async (alert: AlertItem) => {
-      const gId = alert.gateId ?? alert.gate_id;
-      const related: RelatedRecord[] = [];
-      if (gId) {
-        related.push({
-          kind: "gate",
-          id: gId,
-          label: "Gate",
-          subtitle: gId,
-        });
-      }
-      if (alert.studentRoll) {
-        related.push({
-          kind: "student",
-          id: alert.studentRoll,
-          label: "Student",
-          subtitle: alert.studentRoll,
-        });
-      }
-      // Honest actions: acknowledge/resolve exist for unresolved alerts.
-      const actions: IncidentActions = {
-        acknowledge: {
-          available: !alert.resolved,
-          reason: alert.resolved ? "already resolved" : undefined,
-        },
-        resolve: {
-          available: !alert.resolved,
-          reason: alert.resolved ? "already resolved" : undefined,
-        },
-      };
-      ourInspect(
-        buildIncidentInspection({
-          alert: {
-            ...alert,
-            gateId: gId,
-          } as OurAlertRecord,
-          related,
-          actions,
-          detailHref: gId ? `/principal/operations/gates/${gId}` : undefined,
-          detailLabel: gId ? "Open gate page" : undefined,
-        })
-      );
+    (alert: AlertItem) => {
+      inspectMain(alert);
     },
-    [ourInspect]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [gate.isPrincipal, gate.isFaculty, gate.role]
   );
-
-  // Re-sync after an action so the register reflects the new state.
-  const onActionComplete = useCallback(() => {
-    setActing(false);
-    closeInspection();
-    refresh();
-  }, [closeInspection, refresh]);
 
   return (
     <div className="space-y-4">
@@ -231,107 +182,82 @@ export function IncidentsView() {
       ) : visibleAlerts.length === 0 ? (
         <EmptyState title="No matching alerts" description="No campus alerts match the selected filter." />
       ) : (
-        <>
-          <ul className="space-y-2 md:hidden">
-            {visibleAlerts.map((a) => (
-              <li key={a.id}>
-                <button
-                  type="button"
-                  onClick={() => openInspector(a)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") openInspector(a);
-                  }}
-                  aria-label={`Inspect alert: ${a.title ?? a.message ?? "alert"}`}
-                  className="surface-card w-full min-h-11 bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <p className="text-sm font-medium">
-                      <SmartTextRef text={a.title ?? a.message ?? "Alert"} currentPath="/principal/operations/incidents" />
-                    </p>
-                    <span className="surface-card bg-action-danger/10 px-2 py-0.5 text-xs text-action-danger">
-                      {a.severity ?? "alert"}
-                    </span>
-                  </div>
-                  {a.message && a.title ? (
-                    <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
-                      <SmartTextRef text={a.message} currentPath="/principal/operations/incidents" />
-                    </p>
-                  ) : null}
-                  {a.gate_name || a.gate_id || a.gateId ? (
-                    <p className="mt-1 text-xs font-mono text-text-muted">
-                      {a.gate_name ?? a.gate_id ?? a.gateId}
-                    </p>
-                  ) : null}
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:block">
-            <DataTable<AlertItem>
-              onRowClick={(a) => openInspector(a)}
-              columns={[
-                {
-                  header: "Title",
-                  accessor: (r) => <SmartTextRef text={r.title ?? r.message ?? "Alert"} currentPath="/principal/operations/incidents" />,
-                },
-                {
-                  header: "Severity",
-                  accessor: (r) => (
-                    <span className="surface-card bg-action-danger/10 px-2 py-0.5 text-xs text-action-danger">
-                      {r.severity ?? "normal"}
-                    </span>
-                  ),
-                },
-                {
-                  header: "Gate",
-                  accessor: (r) => {
-                    const gId = r.gate_id ?? r.gateId;
-                    const label = r.gate_name ?? gId;
-                    return gId ? (
-                      <Link
-                        href={`/principal/operations/gates/${gId}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="font-mono text-xs text-action-primary hover:underline"
-                      >
-                        {label}
-                      </Link>
-                    ) : (
-                      "—"
-                    );
-                  },
-                },
-                {
-                  header: "Status",
-                  accessor: (r) => r.status ?? (isResolved(r) ? "RESOLVED" : "OPEN"),
-                },
-                {
-                  header: "Overview",
-                  accessor: (r) => (
+        <DataTable<AlertItem>
+          mobileLayout="cards"
+          onRowClick={(a) => openInspector(a)}
+          columns={[
+            {
+              header: "Title",
+              accessor: (r) => <SmartTextRef text={r.title ?? r.message ?? "Alert"} currentPath="/principal/operations/incidents" />,
+            },
+            {
+              header: "Severity",
+              accessor: (r) => (
+                <span className="surface-card bg-action-danger/10 px-2 py-0.5 text-xs text-action-danger">
+                  {r.severity ?? "normal"}
+                </span>
+              ),
+            },
+            {
+              header: "Gate",
+              accessor: (r) => {
+                const gId = r.gate_id ?? r.gateId;
+                const label = r.gate_name ?? gId;
+                return gId ? (
+                  <Link
+                    href={`/principal/operations/gates/${gId}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-mono text-xs text-action-primary hover:underline"
+                  >
+                    {label}
+                  </Link>
+                ) : (
+                  "—"
+                );
+              },
+            },
+            {
+              header: "Status",
+              accessor: (r) => r.status ?? (isResolved(r) ? "RESOLVED" : "OPEN"),
+            },
+            {
+              header: "Overview",
+              accessor: (r) => (
+                <div className="flex items-center gap-3">
+                  {!isResolved(r) && (
                     <button
                       type="button"
+                      disabled={actingId === r.id}
                       onClick={(e) => {
                         e.stopPropagation();
-                        openInspector(r);
+                        resolveAlert(r.id);
                       }}
-                      className="text-xs font-semibold text-action-primary hover:underline"
+                      className="text-xs font-semibold text-action-success hover:underline disabled:opacity-50"
                     >
-                      Open &rarr;
+                      {actingId === r.id ? "Resolving..." : "Resolve"}
                     </button>
-                  ),
-                },
-              ]}
-              data={visibleAlerts}
-              keyExtractor={(r) => r.id}
-            />
-          </div>
-        </>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openInspector(r);
+                    }}
+                    className="text-xs font-semibold text-action-primary hover:underline"
+                  >
+                    Open &rarr;
+                  </button>
+                </div>
+              ),
+            },
+          ]}
+          data={visibleAlerts}
+          keyExtractor={(r) => r.id}
+        />
       )}
 
       {/* The incident inspector drawer (overview → context → actions). */}
-      <EntityInspectorPanel inspection={ourInspection} onClose={onActionComplete} />
-      <EntityInspector inspection={mainInspection} onClose={() => { setMainInspection(null); setPivot(null); }} />
-      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
+      <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );
 }

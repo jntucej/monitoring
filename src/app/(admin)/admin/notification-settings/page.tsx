@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 
-import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import {

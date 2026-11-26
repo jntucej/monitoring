@@ -20,7 +20,7 @@ import {
 import { StatCard } from "@/components/admin/StatCard";
 import { useApi } from "@/hooks/useApi";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 import { useAuthStore } from "@/stores/authStore";

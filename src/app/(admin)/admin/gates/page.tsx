@@ -8,7 +8,7 @@ import Link from "next/link";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { gateInspection } from "@/components/shared/inspectionModels";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";

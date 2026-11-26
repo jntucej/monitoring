@@ -38,11 +38,6 @@ export function HostelView() {
   const { data, loading } = useApiResource<HostelBlocksResponse>("/api/hostel/blocks", {
     ttlMs: 30_000,
   });
-  const {
-    inspection: ourInspection,
-    inspect: ourInspect,
-    closeInspection,
-  } = useEntityInspector();
 
   const role = useRoleContext();
   const gate: RoleGate = {
@@ -198,7 +193,6 @@ export function HostelView() {
         </div>
       )}
 
-      <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
       <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );

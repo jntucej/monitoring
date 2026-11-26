@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
@@ -29,6 +30,7 @@ interface WeekDigestResponse {
 }
 
 export function ReportsView() {
+  const router = useRouter();
   const { data, loading } = useApiResource<WeekDigestResponse>("/api/principal/week-digest", {
     ttlMs: 60_000,
   });
@@ -138,13 +140,7 @@ export function ReportsView() {
 
           <div className="hidden md:block">
             <DataTable<{ workflow_type: string; count: number }>
-              onRowClick={(r) => {
-                // Row → register: the workflow type is a drilldown into the
-                // pending approvals filtered to that category, and also opens
-                // the in-page inspector (main's entity deep-link path).
-                inspect(r);
-                window.location.href = wfHref(r.workflow_type);
-              }}
+              onRowClick={(r) => inspect(r)}
               columns={[
                 {
                   header: "Workflow Category",
@@ -153,6 +149,21 @@ export function ReportsView() {
                 {
                   header: "Volume This Week",
                   accessor: (r) => r.count,
+                },
+                {
+                  header: "Queue",
+                  accessor: (r) => (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(wfHref(r.workflow_type));
+                      }}
+                      className="text-xs font-semibold text-action-primary hover:underline"
+                    >
+                      View Queue &rarr;
+                    </button>
+                  ),
                 },
               ]}
               data={breakdown}

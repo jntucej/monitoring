@@ -1,57 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { Clock, ArrowRight } from "lucide-react";
-import { SlaBadge } from "@/components/approver/SlaBadge";
+import { UpcomingPreviewBase, type UpcomingItem } from "@/components/shared/retention/UpcomingPreviewBase";
 
-export interface UpcomingItem {
-  ticket: string;
-  subject: string;
-  slaDeadline: string;
-  workflowType: string;
-}
+export type { UpcomingItem };
 
 export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
-  if (items.length === 0) {
-    return (
-      <section className="surface-card bg-bg-surface p-4 sm:p-5">
-        <header className="mb-2 flex items-center gap-2">
-          <Clock className="size-4 text-text-muted" />
-          <h2 className="text-sm font-semibold text-text-primary">Due soon</h2>
-        </header>
-        <p className="text-xs text-text-muted">
-          Nothing due in the next 24 hours.
-        </p>
-      </section>
-    );
-  }
-
-  return (
-    <section className="surface-card bg-bg-surface p-4 sm:p-5">
-      <header className="mb-3 flex items-center gap-2">
-        <Clock className="size-4 text-action-warning" />
-        <h2 className="text-sm font-semibold text-text-primary">
-          Due in next 24h
-        </h2>
-      </header>
-
-      <ul className="space-y-2">
-        {items.map((item) => (
-          <li key={item.ticket}>
-            <Link
-              href={`/supervisor/response/escalations?ticket=${encodeURIComponent(item.ticket)}`}
-              className="surface-card flex min-h-11 items-center gap-2 p-2 text-xs transition hover:bg-bg-elevated"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-text-primary">{item.subject}</p>
-                <p className="text-xs text-text-muted">{item.ticket}</p>
-              </div>
-              <SlaBadge slaDeadline={item.slaDeadline} status="PENDING" />
-              <ArrowRight className="size-3 shrink-0 text-text-muted" />
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
+  return <UpcomingPreviewBase items={items} ticketHrefPrefix="/supervisor/response/escalations?ticket=" />;
 }

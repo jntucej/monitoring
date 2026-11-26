@@ -12,7 +12,7 @@
 
 import { useApiResource } from "@/hooks/useApiResource";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { TrendingDown } from "lucide-react";
 
 interface Resp {

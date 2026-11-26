@@ -174,7 +174,7 @@ export function FocusMode({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex size-4 min-h-11 min-w-11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
               aria-label="Exit focus mode"
             >
               <X className="size-4" />
