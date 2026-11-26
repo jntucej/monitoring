@@ -10,6 +10,7 @@
  */
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -145,7 +146,9 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin-worker-monthly", maxRequests: 20, windowMs: 60_000 }
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/admin/worker-shifts/monthly",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "admin-worker-monthly", maxRequests: 20, windowMs: 60_000 },
+});

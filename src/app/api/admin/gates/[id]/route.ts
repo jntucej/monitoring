@@ -143,10 +143,12 @@ async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promis
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["sysadmin"] }),
-  adminLimit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/gates/[id]",
+  auth: "user",
+  requiredRole: ["sysadmin"],
+  rateLimit: adminLimit,
+});
 
 export const PATCH = withApiChain(handlePatch, {
   route: "/api/admin/gates/[id]",

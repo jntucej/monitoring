@@ -19,6 +19,7 @@
 // admin-scoped: requiredRole ['sysadmin', 'admin'].
 
 import { type NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -64,9 +65,7 @@ async function safeQuery<T extends QueryResultRow>(
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> => {
       void req;
       void ctx;
 
@@ -127,8 +126,9 @@ export const GET = withRateLimit(
         roleDistribution,
         multiRoleUsers,
       });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { keyPrefix: "admin_access_overview", windowMs: 60_000, maxRequests: 60 }
-);
+    }, {
+  route: "/api/admin/access/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { keyPrefix: "admin_access_overview", windowMs: 60_000, maxRequests: 60 },
+});

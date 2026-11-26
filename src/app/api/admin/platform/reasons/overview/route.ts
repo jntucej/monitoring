@@ -1,4 +1,5 @@
 import { type NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -16,9 +17,7 @@ interface CustomReasonRow {
   updated_at: string;
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
       let items: CustomReasonRow[] = [];
 
       try {
@@ -41,8 +40,9 @@ export const GET = withRateLimit(
       }
 
       return ok({ items });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { windowMs: 60000, maxRequests: 60 }
-);
+    }, {
+  route: "/api/admin/platform/reasons/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { windowMs: 60000, maxRequests: 60 },
+});

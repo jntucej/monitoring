@@ -5,6 +5,7 @@
 // any change and the CI gate blocks deploys on unexpected drift.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok } from "@/server/http/response";
@@ -62,7 +63,9 @@ async function implGet(_req: NextRequest, _ctx: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["sysadmin"] }),
-  { keyPrefix: "rls-drift", maxRequests: 5, windowMs: 300_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/sysadmin/rls/drift",
+  auth: "user",
+  requiredRole: ["sysadmin"],
+  rateLimit: { keyPrefix: "rls-drift", maxRequests: 5, windowMs: 300_000 },
+});

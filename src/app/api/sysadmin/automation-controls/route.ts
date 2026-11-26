@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -53,7 +54,9 @@ async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }): Promis
   return ok({ controls: controls.rows, ladder: ladder.rows });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["sysadmin"] }),
-  { keyPrefix: "sysadmin_automation_controls", maxRequests: 120 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/sysadmin/automation-controls",
+  auth: "user",
+  requiredRole: ["sysadmin"],
+  rateLimit: { keyPrefix: "sysadmin_automation_controls", maxRequests: 120 },
+});

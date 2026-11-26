@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -80,7 +81,9 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }): Promise
   return ok({ actions: rows, filter: statusIn ?? "all" });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] }),
-  { keyPrefix: "sysadmin_actions", maxRequests: 120 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/sysadmin/actions",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { keyPrefix: "sysadmin_actions", maxRequests: 120 },
+});

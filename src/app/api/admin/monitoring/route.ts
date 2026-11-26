@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { promQuery, promQueryRange } from "@/lib/monitoring";
@@ -46,7 +47,9 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["sysadmin"] }),
-  { keyPrefix: "mon_proxy", maxRequests: 120 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/monitoring",
+  auth: "user",
+  requiredRole: ["sysadmin"],
+  rateLimit: { keyPrefix: "mon_proxy", maxRequests: 120 },
+});

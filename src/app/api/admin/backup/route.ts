@@ -141,10 +141,12 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin_backup_get", maxRequests: 30 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/backup",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "admin_backup_get", maxRequests: 30 },
+});
 
 export const POST = withApiChain(handlePost, {
   route: "/api/admin/backup",

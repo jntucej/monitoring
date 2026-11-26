@@ -27,6 +27,7 @@
 // admin-scoped: requiredRole ['sysadmin','admin'].
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -63,9 +64,7 @@ function commitMs(commit: string | null): number | null {
   return Number.isFinite(t) ? (t as number) : null;
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> => {
       void req;
       void ctx;
 
@@ -142,8 +141,9 @@ export const GET = withRateLimit(
           leadTimeAvgMin: Math.round(lead_time_h * 60),
         },
       });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { windowMs: 60_000, maxRequests: 60 }
-);
+    }, {
+  route: "/api/admin/deployments/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { windowMs: 60_000, maxRequests: 60 },
+});

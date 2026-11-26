@@ -14,6 +14,7 @@
 // admin-scoped: requiredRole ['sysadmin','admin'].
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -26,9 +27,7 @@ function num(rows: Array<Record<string, unknown>>): number {
   return typeof v === "number" ? v : 0;
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
       const [
         roleStateRows,
         totalsRows,
@@ -133,8 +132,9 @@ export const GET = withRateLimit(
       };
 
       return ok(payload);
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { windowMs: 60_000, maxRequests: 120 }
-);
+    }, {
+  route: "/api/admin/identity/people/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { windowMs: 60_000, maxRequests: 120 },
+});

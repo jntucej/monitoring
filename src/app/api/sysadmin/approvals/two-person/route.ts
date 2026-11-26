@@ -10,6 +10,7 @@
 //        checker must NOT be the maker (DB re-checks on write).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -80,10 +81,12 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ approvalId: body.approvalId, status: newStatus });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(implGet, { requiredRole: ["sysadmin", "admin"] }),
-  { keyPrefix: "two-person-get", maxRequests: 30, windowMs: 60_000 },
-);
+export const GET = withApiChain(implGet, {
+  route: "/api/sysadmin/approvals/two-person",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { keyPrefix: "two-person-get", maxRequests: 30, windowMs: 60_000 },
+});
 
 export const POST = withRateLimit(
   withMutationGuard(implPost, { requiredRole: ["sysadmin", "admin"] }),

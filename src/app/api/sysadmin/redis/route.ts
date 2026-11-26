@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import os from "os";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -129,7 +130,9 @@ async function handleGet(_req: NextRequest) {
   return NextResponse.json({ success: true, data: out });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] }),
-  { keyPrefix: "sysadmin_redis", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/sysadmin/redis",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { keyPrefix: "sysadmin_redis", maxRequests: 60 },
+});

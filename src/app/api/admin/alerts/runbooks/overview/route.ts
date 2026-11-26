@@ -3,6 +3,7 @@
 // Runbooks audit log history: recent runbook executions from audit_logs.
 
 import { type NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -43,9 +44,7 @@ async function safeQuery<T extends QueryResultRow>(
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> => {
       void req;
       void ctx;
 
@@ -70,8 +69,9 @@ export const GET = withRateLimit(
       return ok({
         items: rows,
       });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { keyPrefix: "admin_alerts_runbooks_overview", windowMs: 60_000, maxRequests: 120 }
-);
+    }, {
+  route: "/api/admin/alerts/runbooks/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { keyPrefix: "admin_alerts_runbooks_overview", windowMs: 60_000, maxRequests: 120 },
+});

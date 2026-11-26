@@ -1,4 +1,5 @@
 import { type NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { ok, fail } from "@/server/http/response";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -101,7 +102,9 @@ async function handler(_req: NextRequest, _ctx: { auth: AuthContext }): Promise<
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handler, { requiredRole: ["sysadmin", "admin"] }),
-  { windowMs: 60000, maxRequests: 60 }
-);
+export const GET = withApiChain(handler, {
+  route: "/api/admin/reference/hostel-tickets/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { windowMs: 60000, maxRequests: 60 },
+});

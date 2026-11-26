@@ -43,10 +43,12 @@ async function handleGet(
   return ok({ rows: (data ?? []) as AnnouncementRow[], count: data?.length ?? 0 });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin_announcements", ...RATE_LIMITS.read },
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/announcements",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "admin_announcements", ...RATE_LIMITS.read },
+});
 
 async function handlePost(
   _req: NextRequest,

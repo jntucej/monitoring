@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { checkSystemHealth } from "@/lib/health";
 import { promQuery } from "@/lib/monitoring";
 import { withAuthorization } from "@/middleware/authorization";
@@ -72,7 +73,9 @@ async function handleGet(_req: NextRequest) {
   return NextResponse.json({ success: true, data: result });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] }),
-  { keyPrefix: "sysadmin_services", maxRequests: 120 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/sysadmin/services",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { keyPrefix: "sysadmin_services", maxRequests: 120 },
+});

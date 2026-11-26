@@ -1,4 +1,5 @@
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -80,9 +81,11 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator"] }),
-  { keyPrefix: "ticket_comments_get", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/support/tickets/[id]/comments",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "operator"],
+  rateLimit: { keyPrefix: "ticket_comments_get", maxRequests: 60 },
+});
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "operator"], rateLimit: { keyPrefix: "ticket_comments_post", maxRequests: 30 }});

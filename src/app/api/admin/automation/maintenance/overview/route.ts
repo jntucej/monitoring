@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -9,9 +10,7 @@ interface SystemSettingRow {
   value: unknown;
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
       let windows: unknown[] = [];
       let available = false;
 
@@ -52,8 +51,9 @@ export const GET = withRateLimit(
         windows,
         available,
       });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { windowMs: 60_000, maxRequests: 60 }
-);
+    }, {
+  route: "/api/admin/automation/maintenance/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { windowMs: 60_000, maxRequests: 60 },
+});

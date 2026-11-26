@@ -1,4 +1,5 @@
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -302,10 +303,12 @@ async function handlePatch(req: NextRequest, ctx: { auth: { userId: string; role
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin_user_get", maxRequests: 300, windowMs: 60_000 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/users/[id]",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "admin_user_get", maxRequests: 300, windowMs: 60_000 },
+});
 export const PATCH = withAdminMutation(handlePatch, {
   rateLimit: { keyPrefix: "admin_user_patch", maxRequests: 120, windowMs: 60_000 },
 });

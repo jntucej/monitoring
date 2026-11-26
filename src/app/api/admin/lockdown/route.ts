@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getActiveLockdown, createLockdown, liftLockdown } from "@/lib/db";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -61,9 +62,11 @@ const adminOnly = { requiredRole: ["admin", "sysadmin", "principal", "supervisor
 const rl = { keyPrefix: "lockdown", maxRequests: 20 };
 
 // Operators can also poll GET to check active state
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "principal", "supervisor"] }),
-  { keyPrefix: "lockdown_get", maxRequests: 120 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/lockdown",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "operator", "principal", "supervisor"],
+  rateLimit: { keyPrefix: "lockdown_get", maxRequests: 120 },
+});
 export const POST   = withMutationGuard(handlePost, { ...adminOnly, rateLimit: rl });
 export const DELETE = withMutationGuard(handleDelete, { ...adminOnly, rateLimit: rl });

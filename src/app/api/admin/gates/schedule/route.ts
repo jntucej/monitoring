@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -247,10 +248,12 @@ async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promis
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  readLimit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/gates/schedule",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: readLimit,
+});
 
 export const POST = withAdminMutation(handlePost, { rateLimit: readLimit });
 

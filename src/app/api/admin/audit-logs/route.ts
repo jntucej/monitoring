@@ -15,6 +15,7 @@
 // Response: { items, total, page, pageSize }
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -182,7 +183,9 @@ async function handleGet(
   });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin_audit_logs", maxRequests: 300 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/audit-logs",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "admin_audit_logs", maxRequests: 300 },
+});

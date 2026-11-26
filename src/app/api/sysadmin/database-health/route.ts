@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { checkSystemHealth } from "@/lib/health";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
@@ -68,7 +69,9 @@ async function handleGet(_req: NextRequest) {
   return NextResponse.json({ success: true, data: out });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] }),
-  { keyPrefix: "sysadmin_db_health", maxRequests: 60 }
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/sysadmin/database-health",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { keyPrefix: "sysadmin_db_health", maxRequests: 60 },
+});

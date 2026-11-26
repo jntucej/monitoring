@@ -8,6 +8,7 @@
 // Conforms to HealthData from @/components/sysadmin/domains/monitoring/types.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -30,9 +31,7 @@ interface SystemSettingRow {
   updated_at: string;
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
       // ── app: 24-hour per-hour error rate from api_metrics ─────────
       let errorRate24h: number[] = Array(24).fill(0);
       try {
@@ -203,8 +202,9 @@ export const GET = withRateLimit(
         system_settings: systemSettings,
         items,
       });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { windowMs: 60_000, maxRequests: 60 }
-);
+    }, {
+  route: "/api/admin/monitoring/health/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { windowMs: 60_000, maxRequests: 60 },
+});

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -109,9 +110,11 @@ async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promis
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["sysadmin"] }),
-  adminLimit
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/kiosk",
+  auth: "user",
+  requiredRole: ["sysadmin"],
+  rateLimit: adminLimit,
+});
 
 export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin"], rateLimit: adminLimit});

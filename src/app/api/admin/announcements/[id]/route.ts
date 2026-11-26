@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -23,10 +24,12 @@ async function handleGet(
   return ok(res.rows[0]);
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin_announcements", ...RATE_LIMITS.read },
-);
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/announcements/[id]",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "admin_announcements", ...RATE_LIMITS.read },
+});
 
 async function handlePatch(
   req: NextRequest,

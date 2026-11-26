@@ -16,6 +16,7 @@
 // admin/sysadmin only. Read-only.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -37,9 +38,7 @@ const JOB_INTERVAL_MS: Record<string, number> = {
 };
 const DEFAULT_STALE_MS = 2 * 60 * 60 * 1000;
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
       void _req;
       void _ctx;
 
@@ -99,8 +98,9 @@ export const GET = withRateLimit(
         stale_count: staleCount,
         error_count: errorCount,
       });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { keyPrefix: "sysadmin_worker_jobs", maxRequests: 60 }
-);
+    }, {
+  route: "/api/sysadmin/worker-jobs",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { keyPrefix: "sysadmin_worker_jobs", maxRequests: 60 },
+});

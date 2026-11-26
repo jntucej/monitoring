@@ -7,6 +7,7 @@
 // Columns: id, action, user_id, user_name, user_role, details, ip_address, user_agent, timestamp, gate_id
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -70,9 +71,7 @@ interface AuditLogRow {
   gate_id: string | null;
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
       const [kpiRes, dailyActionsRes, recentLogsRes] = await Promise.all([
         query<AuditKpisRow>(
           `
@@ -127,8 +126,9 @@ export const GET = withRateLimit(
         high_risk_actions_defined: HIGH_RISK_ACTIONS,
         items: recentLogs,
       });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { windowMs: 60_000, maxRequests: 60 }
-);
+    }, {
+  route: "/api/admin/governance/audit/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { windowMs: 60_000, maxRequests: 60 },
+});

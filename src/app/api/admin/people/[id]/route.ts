@@ -12,6 +12,7 @@
 // missing table/column degrades to a safe default instead of 500-ing.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -29,9 +30,7 @@ function firstRow<T>(rows: T[]): T | null {
   return rows[0] ?? null;
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
       const userId = idFromPath(req);
       if (!userId) {
         return fail("INVALID_USER_ID", "User ID is required", 400);
@@ -164,8 +163,9 @@ export const GET = withRateLimit(
       };
 
       return ok(payload);
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { windowMs: 60_000, maxRequests: 60 }
-);
+    }, {
+  route: "/api/admin/people/[id]",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { windowMs: 60_000, maxRequests: 60 },
+});

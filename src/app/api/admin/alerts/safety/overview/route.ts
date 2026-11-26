@@ -3,6 +3,7 @@
 // Gate posture + high/critical unresolved incident overview.
 
 import { type NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -49,9 +50,7 @@ async function safeQuery<T extends QueryResultRow>(
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(
-    async (req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> => {
       void req;
       void ctx;
 
@@ -111,8 +110,9 @@ export const GET = withRateLimit(
         incidents,
         open_incidents: incidents.length,
       });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { keyPrefix: "admin_alerts_safety_overview", windowMs: 60_000, maxRequests: 120 }
-);
+    }, {
+  route: "/api/admin/alerts/safety/overview",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { keyPrefix: "admin_alerts_safety_overview", windowMs: 60_000, maxRequests: 120 },
+});
