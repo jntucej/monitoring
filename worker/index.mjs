@@ -75,10 +75,12 @@ async function postCronEndpoint(path) {
     console.error(`[worker] CRON_SECRET missing — refusing to call ${path}`);
     throw new Error("CRON_SECRET not set");
   }
+  const requestId = crypto.randomUUID();
   const res = await fetch(`${baseUrl}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-request-id": requestId,
       Authorization: `Bearer ${secret}`,
     },
   });

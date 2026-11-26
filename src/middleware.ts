@@ -83,8 +83,15 @@ function homeAuthRedirect(req: NextRequest): NextResponse | null {
   return NextResponse.redirect(url);
 }
 
+const SAFE_REQUEST_ID_RE = /^[a-zA-Z0-9_-]{8,64}$/;
+
+function sanitizeEdgeRequestId(raw: string | null): string {
+  if (raw && SAFE_REQUEST_ID_RE.test(raw)) return raw;
+  return crypto.randomUUID();
+}
+
 export async function proxy(req: NextRequest) {
-  const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
+  const requestId = sanitizeEdgeRequestId(req.headers.get('x-request-id'));
   const { pathname } = req.nextUrl;
 
   // L2: Per-request CSP nonce. Generated in the edge middleware so Next.js
@@ -217,6 +224,38 @@ export async function proxy(req: NextRequest) {
     res.headers.set('x-request-id', requestId);
     res.headers.set('Content-Security-Policy', csp);
     return res;
+  }
+
+  // U8: Global payload-size fast-reject (413 PAYLOAD_TOO_LARGE) on /api/* mutations
+  // when Content-Length exceeds the configured cap. Streamed/chunked bodies are
+  // still bounded by U5 validateBody().
+  const method = req.method.toUpperCase();
+  if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+    const clHeader = req.headers.get('content-length');
+    if (clHeader !== null) {
+      const contentLength = Number(clHeader);
+      const isUpload =
+        pathname.includes('/upload') ||
+        (req.headers.get('content-type') ?? '').toLowerCase().includes('multipart/form-data');
+      const maxBytes = isUpload
+        ? Number(process.env.MAX_UPLOAD_BODY_BYTES) || 26_214_400
+        : Number(process.env.MAX_API_BODY_BYTES) || 1_048_576;
+      if (Number.isFinite(contentLength) && contentLength > maxBytes) {
+        const res = NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'PAYLOAD_TOO_LARGE',
+              message: 'Request body too large.',
+            },
+          },
+          { status: 413 }
+        );
+        res.headers.set('x-request-id', requestId);
+        res.headers.set('Content-Security-Policy', csp);
+        return res;
+      }
+    }
   }
 
   // NOTE: per-request rate limiting is owned by the individual /api routes

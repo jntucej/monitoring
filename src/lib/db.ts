@@ -1901,6 +1901,7 @@ export async function addAudit(entry: {
   role?: Role;
   details: string | Record<string, any>;
   gateId?: string;
+  requestId?: string;
 }) {
   const id = `audit-${Date.now()}-${randomBytes(4).toString("hex")}`;
   const timestamp = new Date().toISOString();
@@ -1910,6 +1911,9 @@ export async function addAudit(entry: {
     detailObject = { message: entry.details };
   } else if (typeof entry.details !== 'object' || entry.details === null) {
       detailObject = { value: entry.details };
+  }
+  if (entry.requestId && typeof detailObject === 'object' && detailObject !== null && !detailObject.request_id) {
+    detailObject = { ...detailObject, request_id: entry.requestId };
   }
 
   const { getSupabaseServiceClient } = await import('./dbClient');

@@ -277,12 +277,19 @@ export async function logAuditEvent(
   details: unknown,
   ipAddress: string | null = null,
   userRole: string | null = null,
-  userName: string | null = null
+  userName: string | null = null,
+  requestId: string | null = null
 ) {
+  const enrichedDetails =
+    requestId && typeof details === "object" && details !== null && !Array.isArray(details)
+      ? { ...(details as Record<string, unknown>), request_id: requestId }
+      : requestId
+        ? { value: details, request_id: requestId }
+        : details;
   await query(
     `INSERT INTO audit_logs (id, action, user_id, user_name, user_role, details, ip_address)
      VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-    [randomUUID(), eventType, userId, userName, userRole, JSON.stringify(details), ipAddress]
+    [randomUUID(), eventType, userId, userName, userRole, JSON.stringify(enrichedDetails), ipAddress]
   );
 }
 
