@@ -214,38 +214,46 @@ function DeputyWardenDailyOverviewInner() {
       {/* KPI row */}
       <WidgetBoundary title="Daily Overview">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-          <StatCard
-            icon={UserCheck}
-            label="On Campus"
-            value={onCampusTotal}
-            sub="People inside all active gates (live presence matrix)"
-            accent="text-action-success"
-            loading={presenceLoading && !presence}
-          />
-          <StatCard
-            icon={Inbox}
-            label="Pending at Warden Stage"
-            value={pendingTotal}
-            sub="Hostel / outpass requests awaiting principal review"
-            accent="text-action-warning"
-            loading={outpassLoading && !outpassQueue}
-          />
-          <StatCard
-            icon={AlertTriangle}
-            label="SLA Breached"
-            value={slaBreached}
-            sub="Warden-stage requests past their 48h deadline"
-            accent="text-action-danger"
-            loading={outpassLoading && !outpassQueue}
-          />
-          <StatCard
-            icon={DoorOpen}
-            label="Reporting Gates"
-            value={gates.length}
-            sub="Gates currently feeding the presence matrix"
-            accent="text-white"
-            loading={presenceLoading && !presence}
-          />
+          <Link href="/deputy-warden/gate-movement" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+            <StatCard
+              icon={UserCheck}
+              label="On Campus"
+              value={onCampusTotal}
+              sub="People inside all active gates (live presence matrix)"
+              accent="text-action-success"
+              loading={presenceLoading && !presence}
+            />
+          </Link>
+          <Link href="/deputy-warden/leave-requests" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+            <StatCard
+              icon={Inbox}
+              label="Pending at Warden Stage"
+              value={pendingTotal}
+              sub="Hostel / outpass requests awaiting principal review"
+              accent="text-action-warning"
+              loading={outpassLoading && !outpassQueue}
+            />
+          </Link>
+          <Link href="/deputy-warden/delegated-approvals" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+            <StatCard
+              icon={AlertTriangle}
+              label="SLA Breached"
+              value={slaBreached}
+              sub="Warden-stage requests past their 48h deadline"
+              accent="text-action-danger"
+              loading={outpassLoading && !outpassQueue}
+            />
+          </Link>
+          <Link href="/deputy-warden/gate-movement" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+            <StatCard
+              icon={DoorOpen}
+              label="Reporting Gates"
+              value={gates.length}
+              sub="Gates currently feeding the presence matrix"
+              accent="text-white"
+              loading={presenceLoading && !presence}
+            />
+          </Link>
         </div>
       </WidgetBoundary>
 

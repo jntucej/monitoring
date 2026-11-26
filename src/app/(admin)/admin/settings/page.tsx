@@ -38,16 +38,31 @@ export default function AdminSettingsPage() {
             <PreviewAsPanel />
           </WidgetBoundary>
 
-          <WidgetBoundary title="More Config">
-            <div className="surface-card p-6 col-span-1 lg:col-span-2">
-              <h3 className="font-semibold flex items-center gap-2 mb-4 text-emerald-400">
+          <WidgetBoundary title="Configuration Directory">
+            <div className="surface-card p-6 col-span-1 lg:col-span-2 space-y-4">
+              <h3 className="font-semibold flex items-center gap-2 text-emerald-400">
                 <Settings className="w-5 h-5" />
-                More dynamic config forms coming soon…
+                Institutional &amp; System Configuration
               </h3>
-              <p className="text-sm text-muted">
-                As part of settings modernization, exit reasons, roles, and UI
-                configurations will map here.
-              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[
+                  { label: "Institutional Config", href: "/admin/institutional-configuration", desc: "Campus rules, timings & policies" },
+                  { label: "Permission Policies", href: "/admin/permission-policies", desc: "Pass & leave approval rules" },
+                  { label: "Workflow Config", href: "/admin/workflow-configuration", desc: "Escalation & routing stages" },
+                  { label: "Roles & Access", href: "/admin/roles", desc: "Role definitions & permissions" },
+                  { label: "Gate Devices", href: "/admin/gate-device-configuration", desc: "RFID readers & gate hardware" },
+                  { label: "Notifications", href: "/admin/notification-settings", desc: "Alert channels & templates" },
+                ].map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className="block rounded-lg border border-border bg-bg-elevated p-3 hover:border-border-strong transition-colors"
+                  >
+                    <div className="text-sm font-medium text-text-primary">{item.label}</div>
+                    <div className="text-xs text-text-muted mt-0.5">{item.desc}</div>
+                  </a>
+                ))}
+              </div>
             </div>
           </WidgetBoundary>
         </div>

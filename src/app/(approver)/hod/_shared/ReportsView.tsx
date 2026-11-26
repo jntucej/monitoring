@@ -48,10 +48,10 @@ export function ReportsView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard label="On Campus Today" value={stats?.onCampusToday} tone="ok" />
-        <KpiCard label="Entries Today" value={stats?.todayEntries} tone="info" />
-        <KpiCard label="Exits Today" value={stats?.todayExits} tone="warn" />
-        <KpiCard label="Active Students" value={stats?.active} tone="neutral" />
+        <KpiCard label="On Campus Today" value={stats?.onCampusToday} tone="ok" drilldown={{ label: "View students", href: "/hod/students" }} />
+        <KpiCard label="Entries Today" value={stats?.todayEntries} tone="info" drilldown={{ label: "View students", href: "/hod/students" }} />
+        <KpiCard label="Exits Today" value={stats?.todayExits} tone="warn" drilldown={{ label: "View students", href: "/hod/students" }} />
+        <KpiCard label="Active Students" value={stats?.active} tone="neutral" drilldown={{ label: "Student directory", href: "/hod/students" }} />
       </div>
 
       {loading && !stats ? (

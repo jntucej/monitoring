@@ -318,7 +318,7 @@ function ToggleRow({
       >
         <span
           className={`absolute top-0.5 h-3.5 w-3.5 rounded-full transition-[left] motion-reduce:transition-none ${
-            on ? "left-[18px] bg-action-success" : "left-0.5 bgtext-muted"
+            on ? "left-[18px] bg-action-success" : "left-0.5 bg-text-muted"
           }`}
         />
       </button>

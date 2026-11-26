@@ -163,7 +163,7 @@ function AdminPassesInner() {
                     <ChevronRight className="size-3.5" /> Student profile
                   </InspectorButton>
                   <InspectorButton
-                    href="/admin/institutional/cases"
+                    href="/admin/cases"
                     variant="ghost"
                   >
                     <ChevronRight className="size-3.5" /> Linked cases

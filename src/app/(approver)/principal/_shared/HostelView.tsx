@@ -101,12 +101,13 @@ export function HostelView() {
           value={blocks.length}
           onClick={blocks.length > 0 ? () => openInspector(blocks[0]) : undefined}
         />
-        <KpiCard label="Capacity" value={totalCapacity} />
-        <KpiCard label="Occupied" value={totalOccupied} />
+        <KpiCard label="Capacity" value={totalCapacity} onClick={blocks.length > 0 ? () => openInspector(blocks[0]) : undefined} />
+        <KpiCard label="Occupied" value={totalOccupied} onClick={blocks.length > 0 ? () => openInspector(blocks[0]) : undefined} />
         <KpiCard
           label="Occupancy Rate"
           value={totalCapacity > 0 ? `${Math.round((totalOccupied / totalCapacity) * 100)}%` : "—"}
           tone="ok"
+          drilldown={{ label: "Attendance", href: "/principal/people/attendance" }}
         />
       </div>
 

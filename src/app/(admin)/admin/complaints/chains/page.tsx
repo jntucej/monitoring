@@ -96,7 +96,7 @@ export default function ChainsPage() {
       title: "Actions",
       content: (
         <div className="flex flex-wrap gap-2">
-          <InspectorButton href="/admin/complaints" variant="ghost">All complaints</InspectorButton>
+          <InspectorButton href="/admin/cases" variant="ghost">All cases</InspectorButton>
           <InspectorButton href="/admin/complaints/categories" variant="ghost">Category settings</InspectorButton>
         </div>
       ),
@@ -111,7 +111,7 @@ export default function ChainsPage() {
         </span>
       ),
       sections,
-      detailHref: "/admin/complaints",
+      detailHref: "/admin/cases",
       detailLabel: "Complaints console",
     };
   };

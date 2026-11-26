@@ -118,7 +118,7 @@ export function BetweenClasses({
               className={`size-1.5 shrink-0 rounded-full ${
                 s.marked
                   ? "bg-action-primary"
-                  : "bgtext-muted"
+                  : "bg-text-muted"
               }`}
             />
             <span className="tabular-nums text-text-muted">{s.startsAt}</span>

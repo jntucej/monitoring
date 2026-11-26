@@ -283,38 +283,46 @@ function GuardianOverviewInner() {
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={Users}
-          label="Wards Supervised"
-          value={wards.length}
-          sub="Students linked to your account"
-          accent="text-white"
-          loading={personsLoading && wards.length === 0}
-        />
-        <StatCard
-          icon={ShieldCheck}
-          label="On Campus"
-          value={onCampus}
-          sub={`${offCampus} ward(s) off campus`}
-          accent="text-action-info"
-          loading={personsLoading && wards.length === 0}
-        />
-        <StatCard
-          icon={Inbox}
-          label="Pending Requests"
-          value={pendingRows.length || pending?.total || 0}
-          sub="Ward pass/leave requests awaiting the approval chain"
-          accent="text-action-warning"
-          loading={pendingLoading && pendingRows.length === 0}
-        />
-        <StatCard
-          icon={Ticket}
-          label="Active Passes"
-          value={activePasses.length}
-          sub={`${pendingPasses.length} still pending`}
-          accent="text-action-success"
-          loading={passesLoading && passList.length === 0}
-        />
+        <Link href="/guardian/child" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+          <StatCard
+            icon={Users}
+            label="Wards Supervised"
+            value={wards.length}
+            sub="Students linked to your account"
+            accent="text-white"
+            loading={personsLoading && wards.length === 0}
+          />
+        </Link>
+        <Link href="/guardian/child-status" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+          <StatCard
+            icon={ShieldCheck}
+            label="On Campus"
+            value={onCampus}
+            sub={`${offCampus} ward(s) off campus`}
+            accent="text-action-info"
+            loading={personsLoading && wards.length === 0}
+          />
+        </Link>
+        <Link href="/guardian/child-requests" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+          <StatCard
+            icon={Inbox}
+            label="Pending Requests"
+            value={pendingRows.length || pending?.total || 0}
+            sub="Ward pass/leave requests awaiting the approval chain"
+            accent="text-action-warning"
+            loading={pendingLoading && pendingRows.length === 0}
+          />
+        </Link>
+        <Link href="/guardian/passes" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+          <StatCard
+            icon={Ticket}
+            label="Active Passes"
+            value={activePasses.length}
+            sub={`${pendingPasses.length} still pending`}
+            accent="text-action-success"
+            loading={passesLoading && passList.length === 0}
+          />
+        </Link>
       </div>
 
       {/* Ward cards — click to inspect */}

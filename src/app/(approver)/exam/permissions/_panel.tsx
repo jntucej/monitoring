@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 
@@ -126,38 +127,46 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={Inbox}
-          label="OIE Pending"
-          value={oieTotal}
-          sub="Exam clearances awaiting OIE review"
-          accent="text-action-success"
-          loading={oieLoading && !oieData}
-        />
-        <StatCard
-          icon={UserCheck}
-          label="VP Pending"
-          value={vpTotal}
-          sub="Requests escalated to Vice Principal"
-          accent="text-action-info"
-          loading={vpLoading && !vpData}
-        />
-        <StatCard
-          icon={AlertTriangle}
-          label="SLA Breached"
-          value={oieSlaBreached}
-          sub="OIE queue past their 48h SLA deadline"
-          accent="text-action-warning"
-          loading={oieLoading && !oieData}
-        />
-        <StatCard
-          icon={ShieldCheck}
-          label="Total Open"
-          value={oieTotal + vpTotal}
-          sub="All pending exam-branch approvals"
-          accent="text-white"
-          loading={(oieLoading && !oieData) || (vpLoading && !vpData)}
-        />
+        <Link href="/exam/permissions/oie" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+          <StatCard
+            icon={Inbox}
+            label="OIE Pending"
+            value={oieTotal}
+            sub="Exam clearances awaiting OIE review"
+            accent="text-action-success"
+            loading={oieLoading && !oieData}
+          />
+        </Link>
+        <Link href="/exam/permissions/vice-principal" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+          <StatCard
+            icon={UserCheck}
+            label="VP Pending"
+            value={vpTotal}
+            sub="Requests escalated to Vice Principal"
+            accent="text-action-info"
+            loading={vpLoading && !vpData}
+          />
+        </Link>
+        <Link href="/exam/permissions/oie" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+          <StatCard
+            icon={AlertTriangle}
+            label="SLA Breached"
+            value={oieSlaBreached}
+            sub="OIE queue past their 48h SLA deadline"
+            accent="text-action-warning"
+            loading={oieLoading && !oieData}
+          />
+        </Link>
+        <Link href="/exam/permissions/oie" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary">
+          <StatCard
+            icon={ShieldCheck}
+            label="Total Open"
+            value={oieTotal + vpTotal}
+            sub="All pending exam-branch approvals"
+            accent="text-white"
+            loading={(oieLoading && !oieData) || (vpLoading && !vpData)}
+          />
+        </Link>
       </div>
 
       {/* Queue */}

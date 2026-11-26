@@ -78,7 +78,7 @@ export function MessInchargeStatusBar({
         <span className="inline-flex items-center gap-1.5 min-w-0 shrink-0">
           <span
             className={`size-2 rounded-full shrink-0 ${
-              counts?.active ? "bg-action-success" : "bgtext-muted"
+              counts?.active ? "bg-action-success" : "bg-text-muted"
             }`}
           />
           <span className="text-text-muted">

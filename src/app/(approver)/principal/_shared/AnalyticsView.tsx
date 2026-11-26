@@ -126,15 +126,15 @@ export function AnalyticsView({ initialStage }: { initialStage?: string } = {}) 
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard label="Stages Tracked" value={cells.length} />
-        <KpiCard label="Total in Flight" value={totalVolume} />
+        <KpiCard label="Stages Tracked" value={cells.length} drilldown={{ label: "All approvals", href: "/principal/approvals" }} />
+        <KpiCard label="Total in Flight" value={totalVolume} drilldown={{ label: "Pending queue", href: "/principal/approvals/pending" }} />
         <KpiCard
           label="SLA Breached"
           value={totalBreached}
           tone={totalBreached > 0 ? "danger" : "ok"}
           drilldown={{ label: "View breached stages", href: "/principal/governance/analytics?breached=1" }}
         />
-        <KpiCard label="SLA Compliance" value={`${overallRate}%`} tone="ok" />
+        <KpiCard label="SLA Compliance" value={`${overallRate}%`} tone="ok" drilldown={{ label: "Overdue items", href: "/principal/approvals/overdue" }} />
       </div>
 
       {cells.length > 0 && (

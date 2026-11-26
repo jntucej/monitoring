@@ -109,9 +109,9 @@ export function StudentDirectoryView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard label="Total Students" value={students.length} tone="ok" />
-        <KpiCard label="Hostellers" value={hostelCount} tone="neutral" />
-        <KpiCard label="Day Scholars" value={dayScholarCount} tone="info" />
+        <KpiCard label="Total Students" value={students.length} tone="ok" drilldown={{ label: "Department reports", href: "/hod/reports" }} />
+        <KpiCard label="Hostellers" value={hostelCount} tone="neutral" drilldown={{ label: "Department reports", href: "/hod/reports" }} />
+        <KpiCard label="Day Scholars" value={dayScholarCount} tone="info" drilldown={{ label: "Department reports", href: "/hod/reports" }} />
       </div>
 
       {loading && students.length === 0 ? (

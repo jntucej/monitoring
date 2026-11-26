@@ -755,10 +755,10 @@ register({
           { label: "Created", value: new Date(d.created_at).toLocaleString() },
         ]),
         actionsSection([
-          { label: "All delegations", href: "/principal/delegations", variant: "ghost" },
+          { label: "All delegations", href: "/principal/governance/delegations", variant: "ghost" },
         ]),
       ],
-      detailHref: "/principal/delegations",
+      detailHref: "/principal/governance/delegations",
       detailLabel: "All delegations",
     };
   },
@@ -782,10 +782,10 @@ register({
       sections: [
         { title: "Overview", content: <p className="text-xs text-text-muted">Live academic and departmental join. See the panel for the full breakdown.</p> },
         actionsSection([
-          { label: "Academics panel", href: "/approver", variant: "primary" },
+          { label: "Academics panel", href: "/principal/people/departments", variant: "primary" },
         ]),
       ],
-      detailHref: "/approver",
+      detailHref: "/principal/people/departments",
       detailLabel: "Academics panel",
     };
   },
@@ -1115,10 +1115,10 @@ register({
           { label: "Created", value: new Date(e.created_at).toLocaleString() },
         ]),
         actionsSection([
-          { label: "Exam access", href: "/approver/exam/permissions", variant: "ghost" },
+          { label: "Exam access", href: "/exam/permissions", variant: "ghost" },
         ]),
       ],
-      detailHref: "/approver/exam/permissions",
+      detailHref: "/exam/permissions",
       detailLabel: "Exam permissions",
     };
   },
@@ -1147,10 +1147,10 @@ register({
       sections: [
         { title: "Overview", content: <p className="text-xs text-text-muted">Exam invigilation record. See the exam panel for full attendance detail.</p> },
         actionsSection([
-          { label: "Exam access", href: "/approver/exam/permissions", variant: "ghost" },
+          { label: "Exam access", href: "/exam/permissions", variant: "ghost" },
         ]),
       ],
-      detailHref: "/approver/exam/permissions",
+      detailHref: "/exam/permissions",
       detailLabel: "Exam permissions",
     };
   },

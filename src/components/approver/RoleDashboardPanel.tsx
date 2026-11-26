@@ -113,10 +113,10 @@ export function RoleDashboardPanel({
         <div className="surface-card p-6 text-center space-y-1">
           <Inbox className="w-6 h-6 mx-auto text-text-muted" />
           <p className="text-sm text-text-secondary">
-            KPI panel coming soon
+            No live KPI feed configured for this role
           </p>
           <p className="text-xs text-text-muted">
-            The backend endpoint for this role is not yet wired.
+            Use the navigation menu to open your active queues and registers.
           </p>
         </div>
       )}
@@ -125,8 +125,8 @@ export function RoleDashboardPanel({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="surface-card p-3 space-y-2">
-              <div className="h-2.5 w-1/2 bgtext-muted/10 rounded animate-pulse" />
-              <div className="h-6 w-2/3 bgtext-muted/10 rounded animate-pulse" />
+              <div className="h-2.5 w-1/2 bg-text-muted/10 rounded animate-pulse" />
+              <div className="h-6 w-2/3 bg-text-muted/10 rounded animate-pulse" />
             </div>
           ))}
         </div>

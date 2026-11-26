@@ -468,7 +468,7 @@ export function buildGateInspection(
                 Gate register
               </Link>
               <a
-                href="/principal/incidents"
+                href="/principal/operations/incidents"
                 className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
               >
                 Incidents
@@ -761,7 +761,7 @@ export function buildAuditEventInspection(
         content: role.isPrincipal ? (
           <div className="flex flex-wrap gap-2">
             <a
-              href="/principal/audit"
+              href="/principal/governance/audit"
               className="action-btn inline-flex min-h-8 items-center bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
             >
               Open audit trail

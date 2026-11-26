@@ -54,7 +54,7 @@ export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
               : "bg-amber-500/10 text-action-warning border-amber-500/30"
           }`}
         >
-          <span className={`w-4 h-4 rounded-full ${isOnCampus === null ? "bgtext-muted" : isOnCampus ? "bg-action-success animate-ping" : "bg-action-warning"}`} />
+          <span className={`w-4 h-4 rounded-full ${isOnCampus === null ? "bg-text-muted" : isOnCampus ? "bg-action-success animate-ping" : "bg-action-warning"}`} />
           {isOnCampus === null ? "UNKNOWN" : isOnCampus ? "ON CAMPUS" : "OFF CAMPUS"}
         </div>
       </div>

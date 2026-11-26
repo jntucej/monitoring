@@ -482,7 +482,7 @@ export default function RolesManagementPage() {
             {hasChildren ? (
               isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
             ) : (
-              <span className="size-4 rounded-full bgtext-muted/40" />
+              <span className="size-4 rounded-full bg-text-muted/40" />
             )}
           </button>
 

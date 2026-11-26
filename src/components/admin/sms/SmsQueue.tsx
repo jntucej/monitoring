@@ -29,7 +29,7 @@ const STATUS_COLORS: Record<string, string> = {
   delivered: "text-action-success bg-emerald-400/10",
   failed: "text-action-danger bg-action-danger/10",
   dead_letter: "text-action-danger bg-rose-400/20",
-  expired: "text-text-muted bgtext-muted/10",
+  expired: "text-text-muted bg-text-muted/10",
 };
 
 export function SmsQueue() {

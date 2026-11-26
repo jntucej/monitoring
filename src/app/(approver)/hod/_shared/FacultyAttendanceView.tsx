@@ -123,9 +123,9 @@ export function FacultyAttendanceView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard label="Absent Today" value={absentCount} tone={absentCount > 0 ? "danger" : "ok"} />
-        <KpiCard label="Late Arrivals" value={lateCount} tone={lateCount > 0 ? "warn" : "ok"} />
-        <KpiCard label="Total Faculty" value={totalCount} tone="neutral" />
+        <KpiCard label="Absent Today" value={absentCount} tone={absentCount > 0 ? "danger" : "ok"} drilldown={{ label: "Faculty directory", href: "/hod/faculty/directory" }} />
+        <KpiCard label="Late Arrivals" value={lateCount} tone={lateCount > 0 ? "warn" : "ok"} drilldown={{ label: "Faculty directory", href: "/hod/faculty/directory" }} />
+        <KpiCard label="Total Faculty" value={totalCount} tone="neutral" drilldown={{ label: "Faculty directory", href: "/hod/faculty/directory" }} />
       </div>
 
       {loading && records.length === 0 ? (
