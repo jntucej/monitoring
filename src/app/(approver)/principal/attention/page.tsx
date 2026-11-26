@@ -2,8 +2,8 @@
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
-import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
-import { PageLoading as Loading } from "@/components/principal/shared/PrincipalLoadingStates";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { PageLoading as Loading } from "@/components/shared/LoadingStates";
 import { useState } from "react";
 import { ChevronRight, ExternalLink } from "lucide-react";
 import type { AttentionItemRow } from "@/lib/institutional/attention";

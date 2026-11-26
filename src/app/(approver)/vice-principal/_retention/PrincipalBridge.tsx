@@ -10,7 +10,7 @@ export function PrincipalBridge({
   principalPending: number;
 }) {
   return (
-    <section className="surface-card bg-surface-muted p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center gap-2">
         <Network className="size-4 text-action-info" />
         <h2 className="text-sm font-semibold text-text-primary">Your chain</h2>
@@ -27,7 +27,7 @@ export function PrincipalBridge({
         <ArrowUpRight className="size-5 shrink-0 text-text-muted" />
         <div className="flex-1">
           <p className="text-xs uppercase tracking-wider text-text-muted">Principal</p>
-          <p className="text-2xl font-semibold tabular-nums text-[var(--text-info)]">
+          <p className="text-2xl font-semibold tabular-nums text-action-info">
             {principalPending}
           </p>
           <p className="text-xs text-text-muted">waiting on you</p>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, ArrowUpRight, Sparkles } from "lucide-react";
 import { usePrincipalRetention, type PrincipalWin } from "@/stores/principalRetentionStore";
-import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 function relativeTime(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();

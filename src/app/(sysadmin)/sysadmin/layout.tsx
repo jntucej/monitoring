@@ -87,32 +87,32 @@ export default function SysadminConsoleLayout({
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"] as Role[]}>
       <React.Suspense fallback={<PageLoading />}>
-        <div className="relative flex h-dvh overflow-hidden bg-bg-base">
+        <div className="relative flex h-dvh flex-col lg:flex-row overflow-hidden bg-bg-base">
           {/* ── Desktop rail ─────────────────────────────────────────── */}
-          <div className="hidden md:flex md:h-full">
+          <div className="hidden lg:flex lg:h-full">
             <Sidebar overview={overview} />
           </div>
 
-          {/* ── Mobile floating nav trigger ──────────────────────────── */}
-          <button
-            ref={hamburgerRef}
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open navigation"
-            aria-expanded={mobileOpen}
-            className={cn(
-              "md:hidden absolute left-3 top-3 z-30 inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg",
-              "border border-border bg-bg-surface/90 backdrop-blur",
-              "text-text-muted hover:text-text-primary",
-              "shadow-sm pt-safe"
-            )}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+          {/* ── Mobile top header bar ────────────────────────────────── */}
+          <header className="surface-card flex lg:hidden h-12 shrink-0 items-center justify-between bg-bg-surface px-3 border-b border-border">
+            <div className="flex items-center gap-2">
+              <button
+                ref={hamburgerRef}
+                type="button"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open navigation"
+                aria-expanded={mobileOpen}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated hover:text-text-primary"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              <span className="text-sm font-semibold text-text-primary">SysAdmin</span>
+            </div>
+          </header>
 
           {/* ── Single-mounted main content ──────────────────────────── */}
           <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
-            <div className="hidden md:flex surface-card items-center justify-between gap-3 bg-bg-surface px-4 py-2 sm:px-6">
+            <div className="hidden lg:flex surface-card items-center justify-between gap-3 bg-bg-surface px-4 py-2 sm:px-6">
               <span className="text-xs font-semibold tracking-wide text-text-muted">
                 JNTUH UCEJ · SysAdmin
               </span>

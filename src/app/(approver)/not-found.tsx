@@ -13,7 +13,7 @@ export default function ApproverNotFound() {
           This page doesn&#39;t exist in the approver workspace.
         </p>
         <Link
-          href="/operator"
+          href="/"
           className="surface-card inline-flex min-h-11 items-center gap-2 bg-action-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           Back to dashboard

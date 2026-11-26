@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { PageLoading } from "@/components/principal/shared/PrincipalLoadingStates";
+import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";

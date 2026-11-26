@@ -8,7 +8,7 @@
 
 import { memo } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
-import { PrincipalEmptyState } from "./PrincipalEmptyState";
+import { EmptyState as PrincipalEmptyState } from "@/components/shared/EmptyState";
 import { SectionHeader } from "./SectionHeader";
 
 interface RetentionResponse {

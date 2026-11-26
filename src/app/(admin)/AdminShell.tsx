@@ -1,14 +1,7 @@
 "use client";
 
-import React, { Suspense } from "react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import type { Role } from "@/lib/types";
+import React from "react";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
-  return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"] as Role[]}>
-      <Suspense fallback={<PageLoading />}>{children}</Suspense>
-    </AuthGuard>
-  );
+  return <>{children}</>;
 }

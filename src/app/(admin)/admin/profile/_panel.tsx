@@ -239,7 +239,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
           </WidgetBoundary>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InfoTile icon={Activity} tone="sky" title="Active Sessions" body={sessions === null ? "Live count unavailable" : `${sessions} signed in`} action={{ label: "Manage", href: "/admin/users" }} />
+            <InfoTile icon={Activity} tone="sky" title="Active Sessions" body={sessions === null ? "Live count unavailable" : `${sessions} signed in`} action={{ label: "Manage", href: "/admin/sessions" }} />
             <InfoTile icon={Shield} tone="rose" title="Credential Security" body="Password & session controls active" action={{ label: "Manage", href: "/admin/users" }} />
             <InfoTile icon={ScrollText} tone="emerald" title="Recent Activity" body={audit.length ? audit.slice(0, 2).map((a) => a.action || "Event").join(" · ") : "No recent events"} action={{ label: "Audit Log", href: "/admin/audit-logs" }} />
           </div>

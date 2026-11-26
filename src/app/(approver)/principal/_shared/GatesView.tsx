@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useRoleContext } from "@/hooks/useRoleContext";
-import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildGateInspection } from "@/lib/principal/registerInspections";
@@ -93,12 +93,14 @@ export function GatesView() {
             Monitored campus entry and exit gates · click any KPI or gate to inspect
           </p>
         </div>
-        <Link
-          href="/sysadmin/gates"
-          className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg-surface px-3 py-1.5 text-xs font-medium text-action-primary hover:bg-bg-elevated"
-        >
-          Establish Gates (SysAdmin) &rarr;
-        </Link>
+        {role.role === "sysadmin" && (
+          <Link
+            href="/sysadmin/gates"
+            className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg-surface px-3 py-1.5 text-xs font-medium text-action-primary hover:bg-bg-elevated"
+          >
+            Establish Gates (SysAdmin) &rarr;
+          </Link>
+        )}
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">

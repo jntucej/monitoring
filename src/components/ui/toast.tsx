@@ -94,7 +94,7 @@ function ToastContainer() {
   if (isSakuga) {
     return (
       <div
-        className="fixed bottom-6 left-6 z-toast pointer-events-auto"
+        className="fixed bottom-6 left-6 z-[60] pointer-events-auto"
         aria-live="polite"
         aria-atomic="false"
       >
@@ -105,7 +105,7 @@ function ToastContainer() {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-toast flex flex-col gap-2 pointer-events-none"
+      className="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none"
       aria-live="polite"
       aria-atomic="false"
     >

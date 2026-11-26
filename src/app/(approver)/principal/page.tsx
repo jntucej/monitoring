@@ -34,7 +34,7 @@ import { DecisionCard } from "@/components/principal/_components/DecisionCard";
 import { SectionHeader } from "@/components/principal/shared/SectionHeader";
 import { SinceLastVisitCard } from "@/components/principal/shared/SinceLastVisitCard";
 import { PrincipalWidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
-import { PrincipalEmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EmptyState as PrincipalEmptyState } from "@/components/shared/EmptyState";
 
 interface DashboardResponse {
   counts: {

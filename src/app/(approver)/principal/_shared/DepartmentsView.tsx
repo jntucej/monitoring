@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useApiResource } from "@/hooks/useApiResource";
-import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";

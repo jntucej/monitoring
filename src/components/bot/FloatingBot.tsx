@@ -126,7 +126,7 @@ export function FloatingBot() {
       {/* Hold-to-speak hint (only when closed and idle) */}
       {!open && (
         <div
-          className="fixed z-[79] text-xs uppercase tracking-wider text-text-muted pointer-events-none select-none"
+          className="fixed z-30 text-xs uppercase tracking-wider text-text-muted pointer-events-none select-none"
           style={
             pos.x < 0
               ? { right: 30, bottom: 104 }
@@ -138,7 +138,7 @@ export function FloatingBot() {
       )}
       <div
         id="bot-launcher"
-        className="fixed z-[80] floating-bot-root touch-none"
+        className="fixed z-30 floating-bot-root touch-none"
         style={style}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

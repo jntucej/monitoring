@@ -68,7 +68,12 @@ export function RoleResponsiveShell({
 
       {/* Single-mounted main content */}
       <div className="relative flex-1 overflow-y-auto overflow-x-hidden">
-        <RoleSearchBar role={manifest.role} />
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 pt-3 lg:px-6">
+          <div className="min-w-0 flex-1">
+            <RoleSearchBar role={manifest.role} />
+          </div>
+          <RoleNotificationBell className="shrink-0" />
+        </div>
         <main
           id="main-content"
           tabIndex={-1}
@@ -76,9 +81,6 @@ export function RoleResponsiveShell({
         >
           {children}
         </main>
-        {/* One bell instance; CSS places it per breakpoint (UX-010: was
-            dual-mounted, doubling polling + badge state). */}
-        <RoleNotificationBell className="fixed right-6 top-6 z-20 lg:right-6 lg:top-6" />
         <AgentConsoleDrawer role={manifest.role} />
       </div>
 
