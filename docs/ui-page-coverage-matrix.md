@@ -3,11 +3,11 @@
 **Total Discovered Routes:** 466
 **Coverage Summary (Live Browser Sweep against `http://127.0.0.1:80` @ `d2341ae7`):**
 - Route discovery coverage: 466/466 (100.0%)
-- Browser-inspected & VERIFIED: 457/466 (98.1%)
+- Browser-inspected & VERIFIED: 466/466 (100.0%)
 - API 500 errors detected: 0/466
 - Stub text detected: 0/466
 - Redirected to `/login`: 0/466
-- Blocked (visitor test account `403 ACCOUNT_INACTIVE`): 9/466
+- Desktop & mobile horizontal overflow: 0/466
 
 | # | Route | Title | Page File | Role Group | Type | Status | Evidence |
 |---|---|---|---|---|---|---|---|
@@ -468,13 +468,13 @@
 | 455 | `/settings` | Change password | `src/app/settings/page.tsx` | settings | static | VERIFIED | HTTP 200, h1='Settings', ovD=False, ovM=False |
 | 456 | `/settings/password` | — | `src/app/settings/password/page.tsx` | settings | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 457 | `/support` | Sent | `src/app/support/page.tsx` | support | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
-| 458 | `/visitor/approval-status` | — | `src/app/visitor/approval-status/page.tsx` | visitor | static | BLOCKED:ACCOUNT_INACTIVE | Visitor test account inactive (403 ACCOUNT_INACTIVE) |
-| 459 | `/visitor/checkin-out` | — | `src/app/visitor/checkin-out/page.tsx` | visitor | static | BLOCKED:ACCOUNT_INACTIVE | Visitor test account inactive (403 ACCOUNT_INACTIVE) |
-| 460 | `/visitor/history` | History | `src/app/visitor/history/page.tsx` | visitor | static | BLOCKED:ACCOUNT_INACTIVE | Visitor test account inactive (403 ACCOUNT_INACTIVE) |
-| 461 | `/visitor/host-info` | — | `src/app/visitor/host-info/page.tsx` | visitor | static | BLOCKED:ACCOUNT_INACTIVE | Visitor test account inactive (403 ACCOUNT_INACTIVE) |
-| 462 | `/visitor` | Your visit | `src/app/visitor/page.tsx` | visitor | static | BLOCKED:ACCOUNT_INACTIVE | Visitor test account inactive (403 ACCOUNT_INACTIVE) |
-| 463 | `/visitor/registration` | Registration | `src/app/visitor/registration/page.tsx` | visitor | static | BLOCKED:ACCOUNT_INACTIVE | Visitor test account inactive (403 ACCOUNT_INACTIVE) |
-| 464 | `/visitor/request` | Visit Request | `src/app/visitor/request/page.tsx` | visitor | static | BLOCKED:ACCOUNT_INACTIVE | Visitor test account inactive (403 ACCOUNT_INACTIVE) |
-| 465 | `/visitor/visit-details` | — | `src/app/visitor/visit-details/page.tsx` | visitor | static | BLOCKED:ACCOUNT_INACTIVE | Visitor test account inactive (403 ACCOUNT_INACTIVE) |
-| 466 | `/visitor/visit` | No active visit | `src/app/visitor/visit/page.tsx` | visitor | static | BLOCKED:ACCOUNT_INACTIVE | Visitor test account inactive (403 ACCOUNT_INACTIVE) |
+| 458 | `/visitor/approval-status` | — | `src/app/visitor/approval-status/page.tsx` | visitor | static | VERIFIED | HTTP 200, h1='Visitor Portal', ovD=False, ovM=False |
+| 459 | `/visitor/checkin-out` | — | `src/app/visitor/checkin-out/page.tsx` | visitor | static | VERIFIED | HTTP 200, h1='Your visit', ovD=False, ovM=False |
+| 460 | `/visitor/history` | History | `src/app/visitor/history/page.tsx` | visitor | static | VERIFIED | HTTP 200, h1='History', ovD=False, ovM=False |
+| 461 | `/visitor/host-info` | — | `src/app/visitor/host-info/page.tsx` | visitor | static | VERIFIED | HTTP 200, h1='Your visit', ovD=False, ovM=False |
+| 462 | `/visitor` | Your visit | `src/app/visitor/page.tsx` | visitor | static | VERIFIED | HTTP 200, h1='Visitor Portal', ovD=False, ovM=False |
+| 463 | `/visitor/registration` | Registration | `src/app/visitor/registration/page.tsx` | visitor | static | VERIFIED | HTTP 200, h1='Registration', ovD=False, ovM=False |
+| 464 | `/visitor/request` | Visit Request | `src/app/visitor/request/page.tsx` | visitor | static | VERIFIED | HTTP 200, h1='Visit Request', ovD=False, ovM=False |
+| 465 | `/visitor/visit-details` | — | `src/app/visitor/visit-details/page.tsx` | visitor | static | VERIFIED | HTTP 200, h1='Your visit', ovD=False, ovM=False |
+| 466 | `/visitor/visit` | No active visit | `src/app/visitor/visit/page.tsx` | visitor | static | VERIFIED | HTTP 200, h1='Your visit', ovD=False, ovM=False |
 | 467 | `/warden` | — | `src/app/warden/page.tsx` | warden | static | VERIFIED | HTTP 200, h1='Demo student', ovD=False, ovM=False |
