@@ -14,6 +14,7 @@
 //   - Auth errors keep their status (401/403) — never demoted to 500.
 
 import { NextResponse } from "next/server";
+import { log, sanitizeLogString } from "@/lib/log";
 
 export type ApiErrorCode =
   | "BAD_REQUEST"
@@ -169,15 +170,23 @@ export function handleApiError(
 ): NextResponse {
   const { apiError, logPayload } = normalizeApiError(err, ctx);
   if (apiError.status >= 500) {
-    // Full context stays server-side only.
-    console.error(`[api-error] ${ctx?.route ?? "unknown"} ${apiError.code}: ${logPayload}`);
+    // Full context stays server-side only (structured JSON via log.error).
+    log.error({
+      msg: "api.error",
+      route: sanitizeLogString(ctx?.route ?? "unknown", 256),
+      error_code: apiError.code,
+      detail: sanitizeLogString(logPayload, 1024),
+    });
   }
   const body: ApiErrorBody = {
     success: false,
     error: { code: apiError.code, message: apiError.message },
   };
   if (apiError.details !== undefined) body.error.details = apiError.details;
-  return NextResponse.json(body, { status: apiError.status });
+  return NextResponse.json(body, {
+    status: apiError.status,
+    headers: { "x-error-code": apiError.code },
+  });
 }
 
 /**

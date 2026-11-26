@@ -15,6 +15,7 @@ import { metricsMiddleware } from "@/middleware/metrics";
 import { checkDeviceBinding } from "@/lib/device-binding";
 import { verifyAccessToken } from "@/lib/auth-token";
 import { resolveEffectiveRole } from "@/middleware/entityAuthorization";
+import { log } from "@/lib/log";
 
 class AuthError extends Error {
   constructor(code: string, message: string, public status: number) {
@@ -70,7 +71,7 @@ async function handleAuthError(err: unknown): Promise<NextResponse> {
   // U3: the 500 fallback must not leak the raw error message (SQL text,
   // internal paths). Log it server-side, send a generic body.
   if (err instanceof Error && err.message) {
-    console.error(`[auth-middleware] unhandled auth-layer error: ${err.message}`);
+    log.error({ msg: "auth.middleware.error", error: err.message });
   }
   return NextResponse.json(
     { success: false, error: { code: "INTERNAL_ERROR", message: "Internal error" } },
@@ -203,6 +204,8 @@ export function withAuthorization(
         headers.set("x-mw-timestamp", String(ts));
         // Legacy header some routes still read — keep it in sync.
         headers.set("x-auth-signature", sig);
+        // U6: mark internal request so inner withRateLimit avoids duplicate http.request logs.
+        headers.set("x-u6-auth", "1");
         // Forward the body only when the original request actually had one.
         // `bodyHash !== null` is the authoritative signal: setupBodyCaching
         // returns hash: null for bodyless requests (see the `if (!raw)`

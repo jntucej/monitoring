@@ -29,6 +29,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { poolQuery } from "@/lib/postgres";
 import { createHash } from "node:crypto";
 import { routeFailsClosed } from "@/lib/rate-limit-policies";
+import { logRequest, sanitizeRequestId } from "@/lib/log";
 
 // ── Redis client (lazy singleton, reconnect strategy, no-crash handler) ────
 type RedisClient = Awaited<ReturnType<typeof import("redis").createClient>>;
@@ -384,6 +385,18 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
 ) {
   const cfg = resolveConfig(config);
   return async (req: NextRequest, ...args: TArgs): Promise<Response> => {
+    const startTime = Date.now();
+    const requestId = sanitizeRequestId(req.headers.get("x-request-id"));
+    const route = req.nextUrl?.pathname ?? "/";
+    const insideAuth = req.headers.get("x-u6-auth") === "1";
+    if (!insideAuth) {
+      try {
+        req.headers.set("x-u6-rl", "1");
+      } catch {
+        // Immutable headers in synthetic test requests
+      }
+    }
+
     let result: RateLimitResult;
     let failClosed = false;
     try {
@@ -399,12 +412,59 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
         result = checkFallbackMemoryLimit(key, cfg, true);
       } else {
         console.error("[rate-limit] store failure, failing open", err);
-        return handler(req, ...args);
+        try {
+          const res = await handler(req, ...args);
+          const alreadyLogged = res.headers.get("x-u6-logged") === "1";
+          try { res.headers.delete("x-u6-logged"); } catch {}
+          if (!alreadyLogged && !insideAuth) {
+            const errorCode = res.headers.get("x-error-code") ?? null;
+            try { res.headers.delete("x-error-code"); } catch {}
+            try { res.headers.delete("x-auth-user-id"); } catch {}
+            try { res.headers.delete("x-auth-role"); } catch {}
+            if (!res.headers.has("x-request-id")) {
+              try { res.headers.set("x-request-id", requestId); } catch {}
+            }
+            logRequest({
+              request_id: requestId,
+              method: req.method,
+              route,
+              status: res.status,
+              duration_ms: Date.now() - startTime,
+              source: "web",
+              error_code: errorCode,
+            });
+          }
+          return res;
+        } catch (handlerErr) {
+          if (!insideAuth) {
+            logRequest({
+              request_id: requestId,
+              method: req.method,
+              route,
+              status: 500,
+              duration_ms: Date.now() - startTime,
+              source: "web",
+              error_code: "INTERNAL_ERROR",
+            });
+          }
+          throw handlerErr;
+        }
       }
     }
     if (result.limited) {
       const status = failClosed ? 503 : 429;
       const code = failClosed ? "RATE_LIMIT_STORE_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED";
+      if (!insideAuth) {
+        logRequest({
+          request_id: requestId,
+          method: req.method,
+          route,
+          status,
+          duration_ms: Date.now() - startTime,
+          source: "web",
+          error_code: code,
+        });
+      }
       // U3 canonical contract: safe generic messages; no store error text.
       return NextResponse.json(
         {
@@ -423,6 +483,7 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
             "x-ratelimit-limit": String(cfg.maxRequests),
             "x-ratelimit-remaining": "0",
             "x-ratelimit-reset": result.resetTime.toISOString(),
+            "x-request-id": requestId,
             // Metrics middleware reads this to set api_metrics.rate_limit_hit
             // for forensic 429 drill-down.
             "x-ratelimit-hit": "1",
@@ -430,7 +491,44 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
         }
       );
     }
-    return attachHeaders(await handler(req, ...args), cfg, result);
+    try {
+      const rawRes = await handler(req, ...args);
+      const res = attachHeaders(rawRes, cfg, result);
+      const alreadyLogged = res.headers.get("x-u6-logged") === "1";
+      try { res.headers.delete("x-u6-logged"); } catch {}
+      if (!alreadyLogged && !insideAuth) {
+        const errorCode = res.headers.get("x-error-code") ?? null;
+        try { res.headers.delete("x-error-code"); } catch {}
+        try { res.headers.delete("x-auth-user-id"); } catch {}
+        try { res.headers.delete("x-auth-role"); } catch {}
+        if (!res.headers.has("x-request-id")) {
+          try { res.headers.set("x-request-id", requestId); } catch {}
+        }
+        logRequest({
+          request_id: requestId,
+          method: req.method,
+          route,
+          status: res.status,
+          duration_ms: Date.now() - startTime,
+          source: "web",
+          error_code: errorCode,
+        });
+      }
+      return res;
+    } catch (handlerErr) {
+      if (!insideAuth) {
+        logRequest({
+          request_id: requestId,
+          method: req.method,
+          route,
+          status: 500,
+          duration_ms: Date.now() - startTime,
+          source: "web",
+          error_code: "INTERNAL_ERROR",
+        });
+      }
+      throw handlerErr;
+    }
   };
 }
 
