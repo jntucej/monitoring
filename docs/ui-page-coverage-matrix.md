@@ -3,9 +3,9 @@
 **Total Discovered Routes:** 466
 **Coverage Summary (Live Browser Sweep against `http://127.0.0.1:80`):**
 - Route discovery coverage: 466/466 (100.0%)
-- Browser-inspected & VERIFIED: 314/466 (67.4%)
-- API 500 errors detected: 10/466
-- Stub text detected: 1/466 (fixed in `9e4bacbd`)
+- Browser-inspected & VERIFIED: 325/466 (69.7%)
+- API 500 errors detected: 0/466
+- Stub text detected: 0/466
 - Redirected to `/login` (auth/role guard): 106/466
 - Blocked (dynamic `[id]`/`[ticket]`/`[slug]`): 21/466
 - Blocked (role login 401/403): 0/466
@@ -23,7 +23,7 @@
 | 9 | `/admin/analytics/sustainability` | — | `src/app/(admin)/admin/analytics/sustainability/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 10 | `/admin/analytics/traffic` | — | `src/app/(admin)/admin/analytics/traffic/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 11 | `/admin/analytics/users` | — | `src/app/(admin)/admin/analytics/users/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
-| 12 | `/admin/announcements` | Campus Announcements | `src/app/(admin)/admin/announcements/page.tsx` | admin | static | API_500 | 500 API: 500 /api/admin/announcements |
+| 12 | `/admin/announcements` | Campus Announcements | `src/app/(admin)/admin/announcements/page.tsx` | admin | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 13 | `/admin/anti-ragging-config` | — | `src/app/(admin)/admin/anti-ragging-config/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='Anti-Ragging Alert Configurati', ovD=False, ovM=False |
 | 14 | `/admin/assignment-tree` | — | `src/app/(admin)/admin/assignment-tree/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='Hierarchy & Student Assignment', ovD=False, ovM=False |
 | 15 | `/admin/attendance/bulk-import` | Bulk Attendance | `src/app/(admin)/admin/attendance/bulk-import/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='Bulk Attendance', ovD=False, ovM=False |
@@ -40,7 +40,7 @@
 | 26 | `/admin/exceptions` | Scan Exceptions | `src/app/(admin)/admin/exceptions/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='Scan Exceptions', ovD=False, ovM=False |
 | 27 | `/admin/faculty-assignments` | Faculty Assignments | `src/app/(admin)/admin/faculty-assignments/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='Faculty Assignments', ovD=False, ovM=False |
 | 28 | `/admin/faculty/[id]` | Faculty Profile | `src/app/(admin)/admin/faculty/[id]/page.tsx` | admin | dynamic | BLOCKED_DYNAMIC_ID | Dynamic route requires live record ID |
-| 29 | `/admin/faculty` | — | `src/app/(admin)/admin/faculty/page.tsx` | admin | static | API_500 | 500 API: 500 /api/admin/faculty-tracking/monthly |
+| 29 | `/admin/faculty` | — | `src/app/(admin)/admin/faculty/page.tsx` | admin | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 30 | `/admin/gate-device-configuration` | Gate & Device Configuration | `src/app/(admin)/admin/gate-device-configuration/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='Gate & Device Configuration', ovD=False, ovM=False |
 | 31 | `/admin/gates/[id]` | Gate Metrics | `src/app/(admin)/admin/gates/[id]/page.tsx` | admin | dynamic | BLOCKED_DYNAMIC_ID | Dynamic route requires live record ID |
 | 32 | `/admin/gates` | Campus Gate Operations Mode | `src/app/(admin)/admin/gates/page.tsx` | admin | static | VERIFIED | HTTP 200, h1='Gates', ovD=False, ovM=False |
@@ -118,7 +118,7 @@
 | 104 | `/faculty/class` | Could not load classes | `src/app/(approver)/faculty/class/page.tsx` | approver | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 105 | `/faculty/correction-requests` | Correction Requests | `src/app/(approver)/faculty/correction-requests/page.tsx` | approver | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 106 | `/faculty/my-classes` | My Classes Live | `src/app/(approver)/faculty/my-classes/page.tsx` | approver | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
-| 107 | `/faculty/notifications` | Notifications | `src/app/(approver)/faculty/notifications/page.tsx` | approver | static | API_500 | 500 API: 500 /api/announcements/active, 500 /api/announcements/active |
+| 107 | `/faculty/notifications` | Notifications | `src/app/(approver)/faculty/notifications/page.tsx` | approver | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 108 | `/faculty` | Not assigned as class teacher | `src/app/(approver)/faculty/page.tsx` | approver | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 109 | `/faculty/permissions` | Exam — Faculty / HOD Stage | `src/app/(approver)/faculty/permissions/page.tsx` | approver | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 110 | `/faculty/reports` | Faculty Reports | `src/app/(approver)/faculty/reports/page.tsx` | approver | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
@@ -248,7 +248,7 @@
 | 234 | `/mess/consumption-reports` | Consumption Reports | `src/app/(mess)/mess/consumption-reports/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 235 | `/mess/daily-meal-counts` | Daily Meal Counts | `src/app/(mess)/mess/daily-meal-counts/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 236 | `/mess/inventory-stock` | Inventory and Stock | `src/app/(mess)/mess/inventory-stock/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
-| 237 | `/mess/live` | — | `src/app/(mess)/mess/live/page.tsx` | mess | static | API_500 | 500 API: 500 /api/mess/live |
+| 237 | `/mess/live` | — | `src/app/(mess)/mess/live/page.tsx` | mess | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 238 | `/mess/meal-attendance` | Meal Attendance | `src/app/(mess)/mess/meal-attendance/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 239 | `/mess/menu-management` | Menu Management | `src/app/(mess)/mess/menu-management/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 240 | `/mess/mess-issues` | Overview | `src/app/(mess)/mess/mess-issues/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
@@ -256,14 +256,14 @@
 | 242 | `/mess` | Mess Incharge Dashboard | `src/app/(mess)/mess/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 243 | `/mess/polls` | — | `src/app/(mess)/mess/polls/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='Mess Interest Polls', ovD=False, ovM=False |
 | 244 | `/mess/reviews` | Meal Reviews | `src/app/(mess)/mess/reviews/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='Meal Reviews', ovD=False, ovM=False |
-| 245 | `/mess/scan-v2` | — | `src/app/(mess)/mess/scan-v2/page.tsx` | mess | static | API_500 | 500 API: 500 /api/mess/live |
+| 245 | `/mess/scan-v2` | — | `src/app/(mess)/mess/scan-v2/page.tsx` | mess | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 246 | `/mess/scan` | Meal served | `src/app/(mess)/mess/scan/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 247 | `/mess/special-events` | Special Events | `src/app/(mess)/mess/special-events/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='Special Events', ovD=False, ovM=False |
-| 248 | `/mess/special` | — | `src/app/(mess)/mess/special/page.tsx` | mess | static | API_500 | 500 API: 500 /api/mess/live |
+| 248 | `/mess/special` | — | `src/app/(mess)/mess/special/page.tsx` | mess | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 249 | `/mess/verify-token` | Verify meal token | `src/app/(mess)/mess/verify-token/page.tsx` | mess | static | VERIFIED | HTTP 200, h1='Verify meal token', ovD=False, ovM=False |
 | 250 | `/gate/[gateId]` | Lockdown Active | `src/app/(operator)/gate/[gateId]/page.tsx` | operator | dynamic | BLOCKED_DYNAMIC_ID | Dynamic route requires live record ID |
 | 251 | `/gate` | — | `src/app/(operator)/gate/page.tsx` | operator | static | VERIFIED | HTTP 200, h1='Demo student', ovD=False, ovM=False |
-| 252 | `/operator/announcements` | Active Announcements | `src/app/(operator)/operator/announcements/page.tsx` | operator | static | API_500 | 500 API: 500 /api/announcements/active |
+| 252 | `/operator/announcements` | Active Announcements | `src/app/(operator)/operator/announcements/page.tsx` | operator | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 253 | `/operator/claim` | — | `src/app/(operator)/operator/claim/page.tsx` | operator | static | VERIFIED | HTTP 200, h1='Claim your gate', ovD=False, ovM=False |
 | 254 | `/operator/exceptions` | Today&rsquo;s Exceptions | `src/app/(operator)/operator/exceptions/page.tsx` | operator | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 255 | `/operator/gate-records` | Gate Records | `src/app/(operator)/operator/gate-records/page.tsx` | operator | static | VERIFIED | HTTP 200, h1='Gate Records', ovD=False, ovM=False |
@@ -309,15 +309,15 @@
 | 295 | `/student/marks` | — | `src/app/(student)/student/marks/page.tsx` | student | static | VERIFIED | HTTP 200, h1='Marks', ovD=False, ovM=False |
 | 296 | `/student/mess-bill` | — | `src/app/(student)/student/mess-bill/page.tsx` | student | static | VERIFIED | HTTP 200, h1='Mess Bill & Meal Opt-Outs', ovD=False, ovM=False |
 | 297 | `/student/mess` | Menu & Token | `src/app/(student)/student/mess/page.tsx` | student | static | VERIFIED | HTTP 200, h1='Mess & Dining', ovD=False, ovM=False |
-| 298 | `/student/mess/qr` | — | `src/app/(student)/student/mess/qr/page.tsx` | student | static | API_500 | 500 API: 500 /api/mess/my-qr |
+| 298 | `/student/mess/qr` | — | `src/app/(student)/student/mess/qr/page.tsx` | student | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 299 | `/student/mess/reviews` | Meal Reviews | `src/app/(student)/student/mess/reviews/page.tsx` | student | static | VERIFIED | HTTP 200, h1='Meal Reviews', ovD=False, ovM=False |
 | 300 | `/student/mess/special` | Special Items | `src/app/(student)/student/mess/special/page.tsx` | student | static | VERIFIED | HTTP 200, h1='Special Items', ovD=False, ovM=False |
 | 301 | `/student/mess/token/[eventId]` | My meal token | `src/app/(student)/student/mess/token/[eventId]/page.tsx` | student | dynamic | BLOCKED_DYNAMIC_ID | Dynamic route requires live record ID |
 | 302 | `/student/mess/token` | Mess Meal Token | `src/app/(student)/student/mess/token/page.tsx` | student | static | VERIFIED | HTTP 200, h1='Mess Meal Token', ovD=False, ovM=False |
 | 303 | `/student/my-events` | — | `src/app/(student)/student/my-events/page.tsx` | student | static | VERIFIED | HTTP 200, h1='My Events', ovD=False, ovM=False |
 | 304 | `/student/notifications/alerts` | No alerts | `src/app/(student)/student/notifications/alerts/page.tsx` | student | static | VERIFIED | HTTP 200, h1='Alerts', ovD=False, ovM=False |
-| 305 | `/student/notifications/announcements` | No announcements | `src/app/(student)/student/notifications/announcements/page.tsx` | student | static | API_500 | 500 API: 500 /api/announcements/active |
-| 306 | `/student/notifications` | Nothing here | `src/app/(student)/student/notifications/page.tsx` | student | static | API_500 | 500 API: 500 /api/announcements/active |
+| 305 | `/student/notifications/announcements` | No announcements | `src/app/(student)/student/notifications/announcements/page.tsx` | student | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
+| 306 | `/student/notifications` | Nothing here | `src/app/(student)/student/notifications/page.tsx` | student | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 307 | `/student` | — | `src/app/(student)/student/page.tsx` | student | static | VERIFIED | HTTP 200, h1='Demo student', ovD=False, ovM=False |
 | 308 | `/student/pass-application` | — | `src/app/(student)/student/pass-application/page.tsx` | student | static | VERIFIED | HTTP 200, h1='New Permission & Leave Request', ovD=False, ovM=False |
 | 309 | `/student/passes/[ticket]` | Pass not found | `src/app/(student)/student/passes/[ticket]/page.tsx` | student | dynamic | BLOCKED_DYNAMIC_ID | Dynamic route requires live record ID |
@@ -440,7 +440,7 @@
 | 426 | `/exam-branch/calendar` | Exam Calendar Categories | `src/app/exam-branch/calendar/page.tsx` | exam-branch | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 427 | `/exam-branch/discrepancies` | Discrepancy Summary | `src/app/exam-branch/discrepancies/page.tsx` | exam-branch | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 428 | `/exam-branch/docs` | Documentation Filter | `src/app/exam-branch/docs/page.tsx` | exam-branch | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
-| 429 | `/exam-branch/home` | Exam Branch Dashboard | `src/app/exam-branch/home/page.tsx` | exam-branch | static | STUB_TEXT | Stub text detected in live container (fixed in 9e4bacbd) |
+| 429 | `/exam-branch/home` | Exam Branch Dashboard | `src/app/exam-branch/home/page.tsx` | exam-branch | static | VERIFIED | Post-deploy Playwright PASS (0 500s, 0 stub, 353c7240) |
 | 430 | `/exam-branch/oie-approval-requests` | Overview | `src/app/exam-branch/oie-approval-requests/page.tsx` | exam-branch | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
 | 431 | `/exam-branch/oie-handoff` | OIE Handoff | `src/app/exam-branch/oie-handoff/page.tsx` | exam-branch | static | VERIFIED | HTTP 200, h1='OIE Handoff', ovD=False, ovM=False |
 | 432 | `/exam-branch` | Pass Queue Stats | `src/app/exam-branch/page.tsx` | exam-branch | static | VERIFIED | HTTP 200, h1='', ovD=False, ovM=False |
