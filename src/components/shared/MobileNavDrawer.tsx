@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { Drawer as HeroDrawer } from "@/components/ui/HeroDrawerPrimitive";
 import { cn } from "@/lib/utils";
 
 /**
@@ -78,6 +79,13 @@ export function MobileNavDrawer({
   if (!open) return null;
 
   return (
+    <HeroDrawer
+      isOpen
+      onClose={onClose}
+      placement="left"
+      className="w-[85%] max-w-sm h-full bg-bg-surface"
+    >
+
     <div className="fixed inset-0 z-[var(--z-sheet)] md:hidden" role="presentation">
       {/* Backdrop */}
       <div
@@ -114,7 +122,7 @@ export function MobileNavDrawer({
         </div>
       </div>
     </div>
+  )
+    </HeroDrawer>
   );
-}
-
-export default MobileNavDrawer;
+}export default MobileNavDrawer;

@@ -27,6 +27,8 @@ import { useRouter } from "next/navigation";
 import { getConsoleConfig, type ConsoleCommand } from "@/config/consoles";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Person } from "@/lib/types";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { Drawer as HeroDrawer } from "@/components/ui/HeroDrawerPrimitive";
 
 interface CommandDef {
   id: ConsoleCommand;
@@ -281,6 +283,8 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
     [navItems, navCount, active, handleSelectCommand, handleSelectPerson],
   );
 
+  const isMobile = useBreakpoint({ mobile: "(max-width: 767px)" }).mobile;
+
   // Active index helpers
   const activePersonIdx = isSearching ? active : -1;
   const activeCmdOffset = isSearching ? active - personHits.length : active;
@@ -288,17 +292,13 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
   if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[12vh] bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Command palette"
+    <HeroDrawer
+      isOpen
+      onClose={onClose}
+      placement={isMobile ? "bottom" : "top"}
+      className="w-full sm:max-w-lg md:max-w-xl h-full overflow-y-auto bg-bg-surface"
     >
-      <div
-        className="w-full max-w-md max-h-[80dvh] flex flex-col bg-bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="mx-auto w-full max-w-md max-h-[80dvh] flex flex-col bg-bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden">
         {/* Search input */}
         <div className="surface-card flex items-center gap-2 px-4 py-3">
           <Search className="w-4 h-4 text-text-muted shrink-0" />
@@ -442,6 +442,6 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
           )
         )}
       </div>
-    </div>
+    </HeroDrawer>
   );
 }

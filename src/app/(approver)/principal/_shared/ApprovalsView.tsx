@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense, lazy } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useApiResource } from "@/hooks/useApiResource";
+import { useApiResource, invalidateApiCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -130,6 +130,7 @@ export function ApprovalsView({
         setDeepTicket(null);
         setRejectNote("");
         setShowRejectInput(false);
+        invalidateApiCache(["/api/permissions", "/api/principal/dashboard", "/api/admin/overview"]);
         await refresh();
       } else {
         addToast({

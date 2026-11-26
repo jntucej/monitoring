@@ -2,6 +2,9 @@
 
 import { PermissionDetailPanel } from "@/components/approver/PermissionDetailPanel";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { Drawer as HeroDrawer } from "@/components/ui/HeroDrawerPrimitive";
+import { cn } from "@/lib/utils";
 
 export interface PermissionDetailSheetProps {
   item: PermissionItem | null;
@@ -14,43 +17,25 @@ export function PermissionDetailSheet({
   onClose,
   onActionComplete,
 }: PermissionDetailSheetProps) {
+  const isMobile = useBreakpoint({ mobile: "(max-width: 767px)" }).mobile;
   if (!item) return null;
 
   return (
-    <>
-      {/* Mobile: bottom sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-50 md:hidden">
-        <div className="surface-card max-h-[85vh] overflow-y-auto bg-bg-surface p-4 space-y-3">
-          <div className="flex justify-center">
-            <div className="h-1.5 w-10 rounded-full bg-bg-elevated" />
-          </div>
-          <PermissionDetailPanel
-            ticket={item.ticket_number}
-            onClose={onClose}
-            onActionComplete={onActionComplete}
-            isStandalonePage
-          />
-        </div>
-      </div>
-
-      {/* Desktop: side panel */}
-      <div className="fixed inset-y-0 right-0 z-50 hidden w-full max-w-md md:block">
-        <div className="surface-card h-full overflow-y-auto bg-bg-surface p-4">
-          <PermissionDetailPanel
-            ticket={item.ticket_number}
-            onClose={onClose}
-            onActionComplete={onActionComplete}
-            isStandalonePage
-          />
-        </div>
-      </div>
-
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 z-40 bg-black/50"
-        onClick={onClose}
-        aria-hidden="true"
+    <HeroDrawer
+      isOpen
+      onClose={onClose}
+      placement={isMobile ? "bottom" : "right"}
+      className={cn(
+        "bg-bg-surface",
+        isMobile ? "max-h-[85dvh] p-4 space-y-3" : "w-full max-w-md h-full p-4"
+      )}
+    >
+      <PermissionDetailPanel
+        ticket={item.ticket_number}
+        onClose={onClose}
+        onActionComplete={onActionComplete}
+        isStandalonePage
       />
-    </>
+    </HeroDrawer>
   );
 }

@@ -167,6 +167,7 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
   const isGrid0 = config?.board?.kind === "grid";
   const boardSource0 = isKanban0 || isGrid0 ? null : (config?.board?.source ?? null);
   const assignedHostel = useAuthStore((s) => s.user?.assignedHostel ?? null);
+  const userDepartmentId = useAuthStore((s) => s.user?.departmentId ?? null);
   const { data: boardData, refresh: refreshBoard } = useApiResource<ConsoleBoardResponse>(boardSource0, {
     ttlMs: 15_000,
   });
@@ -466,12 +467,12 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
     ).length;
     const discrepancies = 0; // no discrepancies source yet — placeholder
     return {
-      branch: useAuthStore.getState().user?.departmentId ?? null,
+      branch: userDepartmentId,
       pending,
       handoff,
       discrepancies,
     };
-  }, [isExamBranch, permissionItems]);
+  }, [isExamBranch, permissionItems, userDepartmentId]);
   const examBranchLoading = isExamBranch ? kanbanLoading : false;
 
   // For the exam superintendent console, derive the status-strip counts from

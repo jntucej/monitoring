@@ -33,6 +33,8 @@ export function RoleResponsiveShell({
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
@@ -45,7 +47,7 @@ export function RoleResponsiveShell({
   return (
     <div className="flex h-dvh flex-col lg:flex-row overflow-hidden bg-bg-base">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:block w-64 shrink-0 border">
+      <aside className="hidden lg:block w-64 shrink-0 border-r border-border">
         <RoleSidebar manifest={manifest} />
       </aside>
 

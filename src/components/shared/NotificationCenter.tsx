@@ -155,7 +155,7 @@ export function NotificationCenter({
     if (!Array.isArray(notifRows) || notifRows.length === 0) return derived;
 
     // Map raw notification rows (parent/student view) onto the urgency buckets.
-    const notifItems: NotificationItem[] = notifRows.map((row) => {
+    const notifItems: NotificationItem[] = notifRows.map((row, idx) => {
       const type = String(row.type ?? "info");
       const urgency: NotificationUrgency =
         type === "permission_pending" || type === "permission"
@@ -164,7 +164,7 @@ export function NotificationCenter({
           ? "urgent"
           : "info";
       return {
-        id: `notif-${String(row.id ?? Math.random())}`,
+        id: `notif-${String(row.id ?? `${type}-${row.created_at ?? idx}`)}`,
         urgency,
         type, // the registry type — drives the inline action buttons
         title: String(row.title ?? row.type ?? "Notification"),

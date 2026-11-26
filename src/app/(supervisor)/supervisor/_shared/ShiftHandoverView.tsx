@@ -4,6 +4,7 @@ import { useState } from "react";
 import { HandoverStreak } from "../_retention/HandoverStreak";
 import { useSupervisorRetention } from "@/stores/supervisorRetentionStore";
 import { useUIStore } from "@/stores/uiStore";
+import { invalidateApiCache } from "@/hooks/useApiResource";
 import { Send, CheckCircle2 } from "lucide-react";
 
 export function ShiftHandoverView() {
@@ -14,21 +15,29 @@ export function ShiftHandoverView() {
   const endShift = useSupervisorRetention((s) => s.endShift);
   const currentShiftId = useSupervisorRetention((s) => s.currentShiftId) ?? new Date().toISOString().slice(0, 13);
   const addToast = useUIStore((s) => s.success);
+  const errorToast = useUIStore((s) => s.error);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     setSubmitting(true);
     try {
-      await fetch("/api/supervisor/shift", {
+      const res = await fetch("/api/supervisor/shift", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ notes }),
-      }).catch(() => null);
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
 
       completeHandover(currentShiftId, true);
       endShift(currentShiftId, true);
       setDone(true);
+      invalidateApiCache(["/api/supervisor/"]);
       addToast("Shift handover submitted successfully");
+    } catch (err) {
+      errorToast(err instanceof Error ? err.message : "Failed to submit shift handover");
     } finally {
       setSubmitting(false);
     }

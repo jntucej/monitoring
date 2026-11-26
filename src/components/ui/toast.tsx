@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
+import { Toast as HeroToast, toast as heroToast } from "@heroui/react";
 import { useUIStore } from "@/stores/uiStore";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
 
@@ -26,31 +24,7 @@ interface ToastContextValue {
 
 const ToastContext = React.createContext<ToastContextValue | undefined>(undefined);
 
-// ponytail: two toast APIs existed (context + zustand useUIStore) but only the
-// context queue rendered. Context now proxies to useUIStore so all ~33 callers
-// of useUIStore().addToast get visible toasts too — one queue, one renderer.
-
-// Fix 7: limit toasts to max 3 in the store to prevent overflow
-
-
-const toastIcons: Record<ToastVariant, React.ReactNode> = {
-  success: <CheckCircle className="w-5 h-5" />,
-  error: <AlertCircle className="w-5 h-5" />,
-  info: <Info className="w-5 h-5" />,
-  warning: <AlertTriangle className="w-5 h-5" />,
-};
-
-const toastStyles: Record<ToastVariant, string> = {
-  success: "bg-action-primary/10 border-action-primary/30 text-action-primary",
-  error: "bg-action-danger/10 border-action-danger/30 text-action-danger",
-  info: "bg-action-info/10 border-action-info/30 text-action-info",
-  warning: "bg-action-warning/10 border-action-warning/30 text-action-warning",
-};
-
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  // Single source of truth: the zustand UI store queue (already used by
-  // useUIStore().addToast across the app). The context API becomes a thin
-  // alias so legacy useToast() callers keep working.
   const toasts = useUIStore((s) => s.toasts);
   const storeAdd = useUIStore((s) => s.addToast);
   const removeToast = useUIStore((s) => s.removeToast);
@@ -75,19 +49,41 @@ function ToastContainer() {
   const ctx = React.useContext(ToastContext);
   const isSakuga = useIsSakuga();
   const sakugaToastRef = React.useRef<HTMLElement & { show?: (text?: string) => void }>(null);
-  const lastShownIdRef = React.useRef<string | null>(null);
+  const seenIdsRef = React.useRef<Set<string>>(new Set());
 
-  const visibleToasts = ctx ? ctx.toasts.slice(-3) : [];
+  const visibleToasts = React.useMemo(() => (ctx ? ctx.toasts.slice(-3) : []), [ctx]);
   const latestToast = visibleToasts[visibleToasts.length - 1];
 
   React.useEffect(() => {
-    if (!isSakuga || !latestToast || latestToast.id === lastShownIdRef.current) return;
-    lastShownIdRef.current = latestToast.id;
+    if (!isSakuga || !latestToast || seenIdsRef.current.has(latestToast.id)) return;
+    seenIdsRef.current.add(latestToast.id);
     const text = latestToast.title
       ? `${latestToast.title}: ${latestToast.message}`
       : latestToast.message;
     sakugaToastRef.current?.show?.(text);
   }, [isSakuga, latestToast]);
+
+  React.useEffect(() => {
+    if (isSakuga || !ctx) return;
+    for (const t of visibleToasts) {
+      if (seenIdsRef.current.has(t.id)) continue;
+      seenIdsRef.current.add(t.id);
+      const variant =
+        t.variant === "error"
+          ? "danger"
+          : t.variant === "warning"
+          ? "warning"
+          : t.variant === "success"
+          ? "success"
+          : "accent";
+      heroToast(t.title ?? t.message, {
+        description: t.title ? t.message : undefined,
+        variant,
+        timeout: t.duration ?? 4000,
+        onClose: () => ctx.removeToast(t.id),
+      });
+    }
+  }, [isSakuga, ctx, visibleToasts]);
 
   if (!ctx) return null;
 
@@ -104,41 +100,11 @@ function ToastContainer() {
   }
 
   return (
-    <div
-      className="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none"
-      aria-live="polite"
-      aria-atomic="false"
-    >
-      <AnimatePresence>
-        {visibleToasts.map((t) => (
-          <motion.div
-            key={t.id}
-            initial={{ opacity: 0, x: 50, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 50, scale: 0.9 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            role={t.variant === "error" || t.variant === "warning" ? "alert" : "status"}
-            className={cn(
-              "pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg border shadow-lg text-sm max-w-sm",
-              toastStyles[t.variant]
-            )}
-          >
-            {toastIcons[t.variant]}
-            <div className="flex-1">
-              {t.title && <div className="font-semibold mb-0.5">{t.title}</div>}
-              <div>{t.message}</div>
-            </div>
-            <button
-              onClick={() => ctx.removeToast(t.id)}
-              aria-label="Dismiss notification"
-              className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
-            >
-              <X className="w-4 h-4" aria-hidden="true" />
-            </button>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </div>
+    <HeroToast.Provider
+      placement="bottom end"
+      maxVisibleToasts={3}
+      className="z-[60]"
+    />
   );
 }
 

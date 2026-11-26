@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import Link from "next/link";
-import { useApiResource } from "@/hooks/useApiResource";
+import { useApiResource, invalidateApiCache } from "@/hooks/useApiResource";
 import { useRoleContext } from "@/hooks/useRoleContext";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -63,6 +63,7 @@ export function IncidentsView() {
         }
         addToast("Alert resolved");
         setMainInspection(null);
+        invalidateApiCache(["/api/alerts", "/api/principal/dashboard", "/api/admin/overview"]);
         await refresh();
       } catch (err: unknown) {
         errorToast(err instanceof Error ? err.message : "Failed to resolve alert");

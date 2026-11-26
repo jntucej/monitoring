@@ -8,6 +8,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import { useHodRetention } from "@/stores/hodRetentionStore";
 import { SlaBadge } from "@/components/approver/SlaBadge";
 import { useUIStore } from "@/stores/uiStore";
+import { invalidateApiCache } from "@/hooks/useApiResource";
 
 interface PermissionItem {
   id: string;
@@ -87,6 +88,7 @@ export function FocusMode({
           setLocalItems(prevItemsRef.current);
           throw new Error(j?.error?.message ?? `HTTP ${res.status}`);
         }
+        invalidateApiCache(["/api/permissions", "/api/principal/dashboard", "/api/admin/overview"]);
         recordWin({
           ticket: current.ticket_number,
           outcome:

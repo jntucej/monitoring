@@ -1,10 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { Button as HeroButton } from "@heroui/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { useGlossyMotion, buttonHover, buttonTap } from "@/lib/animations";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 const buttonVariants = cva(
@@ -36,20 +35,40 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   loading?: boolean;
+  isPending?: boolean;
+  isDisabled?: boolean;
+  onPress?: () => void;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, loading, children, disabled, ...props }, ref) => {
-    const isGlossyMotion = useGlossyMotion();
+  (
+    {
+      className,
+      variant,
+      size,
+      loading,
+      isPending,
+      isDisabled,
+      children,
+      disabled,
+      onClick,
+      onPress,
+      type = "button",
+      ...props
+    },
+    ref
+  ) => {
     const isSakuga = useIsSakuga();
+    const pending = Boolean(loading || isPending);
+    const finalDisabled = Boolean(disabled || isDisabled || pending);
 
     if (isSakuga && variant !== "icon" && variant !== "ghost") {
       return (
         <sakuga-button
           variant={variant === "secondary" ? "secondary" : "primary"}
-          disabled={disabled || loading}
-          onClick={props.onClick}
-          type={props.type ?? "button"}
+          disabled={finalDisabled}
+          onClick={onClick}
+          type={type}
           className={className}
         >
           {children}
@@ -57,24 +76,38 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       );
     }
 
+    const heroVariant =
+      variant === "danger"
+        ? "danger"
+        : variant === "secondary"
+        ? "secondary"
+        : variant === "ghost" || variant === "icon"
+        ? "ghost"
+        : "primary";
+
     return (
-      <motion.button
-        className={cn(buttonVariants({ variant, size, className }))}
+      <HeroButton
         ref={ref}
-        disabled={disabled || loading}
-        whileHover={isGlossyMotion ? buttonHover : {}}
-        whileTap={isGlossyMotion ? buttonTap : {}}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        {...(props as any)}
+        type={type}
+        variant={heroVariant}
+        isDisabled={finalDisabled}
+        isPending={pending}
+        isIconOnly={variant === "icon"}
+        onPress={(e) => {
+          onPress?.();
+          onClick?.(e as unknown as React.MouseEvent<HTMLButtonElement>);
+        }}
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...(props as Record<string, unknown>)}
       >
-        {loading && (
-          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+        {pending && (
+          <svg className="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
         )}
         {children}
-      </motion.button>
+      </HeroButton>
     );
   }
 );

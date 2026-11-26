@@ -18,6 +18,7 @@ import Link from "next/link";
 import type { EntityInspection } from "@/components/shared/EntityInspector";
 import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
+import { invalidateApiCache } from "@/hooks/useApiResource";
 import { useUIStore } from "@/stores/uiStore";
 import { getAuthHeaders } from "@/lib/utils";
 import { SmartTextRef } from "@/components/nav/SmartTextRef";
@@ -616,6 +617,7 @@ function IncidentActions({ incident, role }: { incident: IncidentRecord; role: R
       });
       const json = await res.json().catch(() => ({}));
       if (json.success) {
+        invalidateApiCache(["/api/alerts", "/api/principal/dashboard", "/api/admin/overview"]);
         addToast({
           message: `Alert ${incident.id} resolved`,
           variant: "success",
@@ -1002,6 +1004,7 @@ function ExamCaseActions({ exam, role }: { exam: ExamCaseRecord; role: RoleGate 
       });
       const json = await res.json().catch(() => ({}));
       if (json.success) {
+        invalidateApiCache(["/api/exam/access-exceptions", "/api/principal/dashboard"]);
         addToast({
           message: `Exam exception ${exam.id} resolved`,
           variant: "success",
