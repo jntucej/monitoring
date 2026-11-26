@@ -1,8 +1,8 @@
-# Cloudflare Tunnel (CLI-managed) — lifecycle
+# Cloudflare Tunnel — lifecycle
 
-Tunnel config lives in Git here, not in the Cloudflare dashboard. That means:
-no token to leak, no dashboard dependency, and recreating the tunnel is a
-re-runnable command sequence rather than a manual dashboard dance.
+> **Current Auth Model (Verified 2026-11-26):** Token-managed (`CLOUDFLARE_TUNNEL_TOKEN` / `TUNNEL_TOKEN` in `.env`). See `cloudflared/config.yml` and `docs/RUNBOOK.md` § "Cloudflare Tunnel (token-managed)". The CLI-managed `credentials.json` flow below is retained as a historical/alternative reference.
+
+Tunnel config lives in Git here (`cloudflared/config.yml`), while the connector authenticates via `TUNNEL_TOKEN` (`CLOUDFLARE_TUNNEL_TOKEN` from `.env`).
 
 ## Files
 

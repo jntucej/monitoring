@@ -25,13 +25,13 @@
 
 | Service | Image / source | Port | Notes |
 |---|---|---|---|
-| `gate_web` | monitoring-web:latest | 127.0.0.1:3000 | Next.js 15 (App Router, `middleware.ts` runs at edge) |
+| `gate_web` | monitoring-web:latest | 127.0.0.1:3000 | Next.js 16 (App Router, `middleware.ts` runs at edge) |
 | `gate_worker` | monitoring-worker:latest | 3002 (internal) | Node worker + ops-agent (`worker/ops-agent.mjs`) |
 | `gate_postgres` | postgres:17 | 5432 | db `gate_monitor`, users `gate_app` (least-privilege) / `postgres` |
 | `gate_redis` | redis:7 | 6379 | rate limits, session cache |
 | `gate_caddy` | caddy | 80/443 | TLS termination → web |
 | `gate_llm_proxy` | — | — | LLM API proxy |
-| `cloudflare-ddns` | — | — | public omniroute.ucej.in |
+| `gate_cloudflared` | cloudflare/cloudflared | — | Cloudflare Tunnel ingress (`cloudflared/config.yml`) |
 | monitoring plane | prometheus, grafana, loki, node-exporter, postgres-exporter, alloy | :3001+ | Tailscale-only access |
 
 ### Middleware layers (src/)

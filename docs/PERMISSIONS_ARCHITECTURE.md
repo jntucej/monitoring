@@ -1,4 +1,8 @@
 
+# Permissions Architecture — Walkthrough Excerpt
+
+> **Note:** This file is a walkthrough excerpt (Acts 2 & 6) of the hostel permission flow. For the full permission engine and workflow architecture, see [`docs/permission-workflow-architecture.md`](permission-workflow-architecture.md) and [`docs/CONTRACT.md`](CONTRACT.md).
+
 ### Act 2 — The Caretaker's Tap
 The Girls Hostel **Caretaker** (Seetha) logs in. Sidebar shows **Pending Approvals** with a badge. She opens **`/hostel/permissions`**. The list (auto-refreshed every 30s via `useLiveRefresh`) shows HST-1001.
 

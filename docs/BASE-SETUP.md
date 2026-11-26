@@ -1,4 +1,6 @@
-# Gate Monitor - Base Environment Operator Runbook
+# Gate Monitor - Base Environment Operator Runbook (Windows / WSL2)
+
+> **Scope:** Windows + WSL2 Ubuntu 22.04 base-environment setup. For the live Debian 13 production server at `/opt/monitoring/compose`, see [`docs/RUNBOOK.md`](RUNBOOK.md).
 
 ## §1 One-time Windows host setup
 1. Open PowerShell as Administrator.

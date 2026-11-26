@@ -27,7 +27,7 @@ Go to: Repository → Settings → Secrets and variables → Actions → New rep
 cat ~/.ssh/myrepo_deploy
 
 # Telegram Bot Token
-grep TELEGRAM_BOT_TOKEN /root/monitoring/.env
+grep TELEGRAM_BOT_TOKEN /opt/monitoring/env/production.env
 ```
 
 ### Deploy Flow
@@ -79,4 +79,3 @@ gh run list --repo jntucej/monitoring --branch main
 # View logs for a specific run
 gh run view <run-id> --log-failed
 ```
-# test deploy

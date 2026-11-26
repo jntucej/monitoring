@@ -14,7 +14,7 @@
 RTO: 4 hours (system down before it is a crisis)
 RPO: 1 hour  (maximum data loss window)
 
-Backup frequency: hourly (0 * * * * master-backup.sh)
+Backup frequency: every 6h in /etc/cron.d/gate-backup (0 */6 * * * master-backup.sh; hourly target in scripts/setup-crons.sh)
 Restore drill:    quarterly, first Tuesday 03:00 — must complete in < 2h
 Chaos test:       monthly, Sunday 02:00
 ```

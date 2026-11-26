@@ -54,7 +54,10 @@ INTERNET / CAMPUS CLIENTS (Port 80 / 443)
 | **Prometheus** | `gate_prometheus` | `prom/prometheus:v3.1.0` | App & container metrics scraping | 9090 (Internal) |
 | **Alertmanager** | `gate_alertmanager` | `prom/alertmanager:v0.28.1` | Alert routing & Telegram webhook dispatch | 9093 (Internal) |
 | **cAdvisor** | `gate_cadvisor` | `gcr.io/cadvisor/cadvisor:v0.51.0` | Container CPU/memory/network metrics | 8080 (Internal) |
-| **DDNS** | `cloudflare-ddns` | `favonia/cloudflare-ddns:latest` | Dynamic DNS updater for Cloudflare | N/A |
+| **Cloudflared** | `gate_cloudflared` | `cloudflare/cloudflared` | Cloudflare Tunnel ingress (`cloudflared/config.yml`) | N/A |
+| **Falco** | `gate_falco` | `falcosecurity/falco-no-driver:0.41.0` | Runtime container security monitoring | N/A |
+| **Node Exporter** | `gate_node_exporter` | `prom/node-exporter:v1.8.2` | Host OS/hardware metrics for Prometheus | 9100 (Internal) |
+| **Migrate** | `gate_migrate` | `monitoring-web:latest` | One-shot DB migration runner (`scripts/migrate.ts`) | N/A |
 
 > **Host Observability Stack (`/opt/server-monitoring`):** `mon_grafana` (`11.5.1`), `mon_loki` (`3.4.1`), `mon_alloy` (`v1.7.1`), `mon_prometheus` (`v3.1.0`), `mon_postgres_exporter` (`v0.17.1` with `--disable-settings-metrics`), `mon_node_exporter` (`v1.8.2`), `mon_cadvisor` (`v0.51.0`).
 

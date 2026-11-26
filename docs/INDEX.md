@@ -21,7 +21,7 @@ truth; update them when architecture changes.
 | :--- | :--- |
 | `CONTRACT.md` | System contract: auth, RBAC, permission engine, action envelope, teaching capability addendum. |
 | `TECH_STACK.md` | Full stack + infra map; now includes the **AI model layer** section (M1/M2/M3). |
-| `SERVER_ARCHITECTURE.md` | Container topology (web, worker, postgres, redis, caddy, cloudflared, ollama) + how they talk. |
+| `SERVER_ARCHITECTURE.md` | Container topology (web, worker, postgres, redis, caddy, cloudflared, llm-proxy, monitoring) + how they talk. |
 | `RUNBOOK.md` | Operator runbook: restart, backup/restore, env, systemd services, cutover. |
 | `BASE-SETUP.md` | First-time server setup (DB, env, .env sync). |
 | `SECURITY.md` + `SECURITY_CHECKLIST.md` | Threat model + the security checklist the stack must satisfy. |

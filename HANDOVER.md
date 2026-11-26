@@ -21,7 +21,7 @@ residential campus (JNTUH CEJ). It watches:
 
 Core containers: `gate_postgres` (`supabase/postgres:17.6.1.136`), `gate_redis` (`redis:7-alpine`), `gate_web` (Next.js 16, 467 pages / 798 API routes),
 `gate_worker` (job scheduler + autonomous SRE loop), `gate_caddy` (reverse
-proxy + static `/status` page), `gate_llm_proxy` (OmniRoute cloud AI proxy), `gate_prometheus`, `gate_alertmanager`, `gate_cadvisor`, and `cloudflare-ddns` (plus `/opt/server-monitoring` Grafana/Loki/Alloy stack).
+proxy + static `/status` page), `gate_llm_proxy` (OmniRoute cloud AI proxy), `gate_prometheus`, `gate_alertmanager`, `gate_cadvisor`, `gate_node_exporter`, `gate_falco`, and `gate_cloudflared` (plus `/opt/server-monitoring` Grafana/Loki/Alloy stack).
 
 ```
 caddy:80 ──► web:3000 (Next.js, all routes + /api/health)
@@ -58,7 +58,7 @@ docker exec -it gate_postgres psql -U postgres -d gate_monitor
 RTO: 4 hours (system fully down before it is a crisis)
 RPO: 1 hour  (maximum acceptable data loss window)
 
-Backup: hourly (0 * * * * master-backup.sh → gate-db-*.sql.gz)
+Backup: every 6h in /etc/cron.d/gate-backup (0 */6 * * * master-backup.sh → gate-db-*.sql.gz; hourly target in scripts/setup-crons.sh)
 Verify: nightly 03:15 (verify-backup.sh → scratch DB restore drill)
 Restore drill: quarterly, first Tuesday 03:00 (quarterly-restore-drill.sh)
 Chaos test: monthly, Sunday 02:00 (monthly-chaos-test.sh)

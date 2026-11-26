@@ -18,7 +18,7 @@
 - The **operator kiosk** (`/gate`) auto-signs-in the designated default operator
   (Main Campus Gate) without a manual login.
 
-## Provisioned role accounts (13)
+## Provisioned role accounts (12)
 
 | # | Role | Login identifier | Dashboard |
 |---|------|------------------|-----------|
@@ -65,8 +65,8 @@
 ## Reset / rotate
 
 ```bash
-cd /root/monitoring
-npx tsx scripts/prov/index.mts         # (re)provision the 9 role accounts
+cd /opt/monitoring/compose
+npx tsx scripts/prov/index.mts         # (re)provision the role accounts
 npx tsx scripts/prov/mess-finalize.mjs # create MESS_INCHARGE
 ```
 
