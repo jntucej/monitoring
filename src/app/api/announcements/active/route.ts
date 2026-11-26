@@ -63,8 +63,8 @@ async function handleGet(req: NextRequest) {
           body: (a.message as string) ?? "",
           priority: (a.priority as string) ?? "normal",
           audience: (a.audience as string) ?? "all",
-          created_at: a.created_at as string,
-          expires_at: (a.expires_at as string | null) ?? null,
+          created_at: a.created_at instanceof Date ? a.created_at.toISOString() : String(a.created_at ?? ""),
+          expires_at: a.expires_at instanceof Date ? a.expires_at.toISOString() : ((a.expires_at as string | null) ?? null),
           source: "announcements" as const,
         }));
 
@@ -108,14 +108,14 @@ async function handleGet(req: NextRequest) {
       body: (f.body_md as string) ?? "",
       priority: (f.priority as string) ?? "normal",
       audience: (f.target_scope as string) ?? "global",
-      created_at: f.posted_at as string,
-      expires_at: (f.expires_at as string | null) ?? null,
+      created_at: f.posted_at instanceof Date ? f.posted_at.toISOString() : String(f.posted_at ?? ""),
+      expires_at: f.expires_at instanceof Date ? f.expires_at.toISOString() : ((f.expires_at as string | null) ?? null),
       source: "campus_feed" as const,
     }));
 
     // Merge both sources, newest-first
     const merged: UnifiedItem[] = [...legacyItems, ...feedItems].sort((a, b) =>
-      (b.created_at ?? "").localeCompare(a.created_at ?? ""),
+      String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")),
     );
 
     return NextResponse.json({ success: true, data: merged });

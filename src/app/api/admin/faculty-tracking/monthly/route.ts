@@ -110,14 +110,10 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
             COALESCE(SUM(CASE WHEN (g.entry_time AT TIME ZONE 'Asia/Kolkata')::time > TIME '09:15:00' THEN 1 ELSE 0 END), 0)::text AS late_count,
             COUNT(DISTINCT g.entry_date)::text AS days_present,
             (SELECT to_char(ar.date, 'YYYY-MM-DD') FROM attendance_records ar
-              JOIN classes c ON c.id = ar.class_id
-              JOIN faculty_assignments fa ON fa.class_id = c.id
-              WHERE fa.faculty_id = u.id AND ar.date > $1::date
+              WHERE ar.person_id = u.id AND ar.date > $1::date
               ORDER BY ar.date ASC LIMIT 1) AS next_class,
             (SELECT to_char(ar.time_in, 'HH24:MI') FROM attendance_records ar
-              JOIN classes c ON c.id = ar.class_id
-              JOIN faculty_assignments fa ON fa.class_id = c.id
-              WHERE fa.faculty_id = u.id AND ar.date > $1::date
+              WHERE ar.person_id = u.id AND ar.date > $1::date
               ORDER BY ar.date ASC, ar.time_in LIMIT 1) AS next_class_time,
             COALESCE((SELECT COUNT(*) FROM attendance_disputes ad
               JOIN users su ON su.id = ad.person_id
