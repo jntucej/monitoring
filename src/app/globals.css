@@ -1,12 +1,10 @@
 /* src/app/globals.css — SINGLE THEME · Graphite Canvas · Performance Edition */
 @import "tailwindcss";
-/* Note: @heroui/styles intentionally NOT imported at top level.
-   Its component-scoped CSS is loaded by @heroui/react via CSS-in-JS /
-   @import within each component file. Importing it here would cause
-   :root { --background, --surface, --accent, ... } to cascade BEFORE
-   our @theme inline block and silently override our graphite palette.
-   Instead, we map our custom tokens onto HeroUI's semantic variables
-   directly in @theme inline below (after the hero component layer). */
+/* HeroUI v3 component styles (button--*, modal--*, drawer--*, select--*, etc.)
+   must be imported BEFORE our @theme inline block so that our token mappings
+   in @theme inline and [data-theme] override blocks cascade ON TOP of the
+   HeroUI defaults (later declarations win at the same specificity). */
+@import "@heroui/styles";
 
 /* Stop the Tailwind v4 CSS scanner from walking non-source directories. */
 @source not "../../tests";
