@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Send Telegram notification for server startup, shutdown, or health alerts
 MESSAGE="${1:-Gate Monitor notification}"
 TOKEN="${TELEGRAM_BOT_TOKEN:-}"
@@ -10,15 +10,18 @@ if [ -z "$TOKEN" ] || [ -z "$CHAT_ID" ]; then
 fi
 
 export TOKEN CHAT_ID MESSAGE
-python3 -c '
-import os, urllib.request, urllib.parse, sys
-token = os.environ["TOKEN"]
-chat_id = os.environ["CHAT_ID"]
-text = os.environ["MESSAGE"]
-url = f"https://api.telegram.org/bot{token}/sendMessage"
-data = urllib.parse.urlencode({"chat_id": chat_id, "text": text}).encode("utf-8")
-try:
-    urllib.request.urlopen(url, data=data, timeout=5)
-except Exception as e:
-    print("Failed to send telegram notification:", e, file=sys.stderr)
+exec node -e '
+const token = process.env.TOKEN;
+const chatId = process.env.CHAT_ID;
+const text = process.env.MESSAGE;
+const url = `https://api.telegram.org/bot${token}/sendMessage`;
+const body = new URLSearchParams({ chat_id: chatId, text }).toString();
+fetch(url, {
+  method: "POST",
+  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  body,
+  signal: AbortSignal.timeout(5000),
+}).catch((err) => {
+  console.error("Failed to send telegram notification:", err?.message || err);
+});
 '
