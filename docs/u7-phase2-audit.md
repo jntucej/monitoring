@@ -9,23 +9,27 @@
 
 ## 1. Scope & Exact Count
 
-The U7 Stage 1 grep found 45 files matching `withRateLimit(withAuthorization`:
-- **1** is a comment (`src/app/api/admin/users/route.ts:118`).
-- **44** are live `export const METHOD = withRateLimit(withAuthorization(...))` sites across **43 unique route files** (`src/app/api/campus/goals/route.ts` has both `GET` and `POST`).
+Programmatic AST/regex verification across `src/app/api/**/route.ts` confirms:
+- **45** live `export const METHOD = withRateLimit(withAuthorization(...))` sites across **44** unique route files (`src/app/api/campus/goals/route.ts` has both `GET` and `POST`; `src/app/api/admin/users/route.ts` has a multi-line `GET` export plus a comment on line 118).
+- **Batch A (GET):** 27 sites
+- **Batch B (POST/PATCH):** 17 sites
+- **Batch C (UPLOAD):** 1 site
+- **Total:** `27 + 17 + 1 = 45` live sites.
 
-All **44** sites require authentication (`withAuthorization`), and **none** use Next.js `context.params` (all dynamic routes parse `req.url` / `req.nextUrl.pathname`).
+All **45** sites require authentication (`withAuthorization`), and **none** use Next.js `context.params` (all dynamic routes parse `req.url` / `req.nextUrl.pathname`).
 
 ---
 
-## 2. Complete 44-Site Inventory
+## 2. Complete 45-Site Inventory
 
-### Batch A — Read-Only `GET` Routes (28 sites)
+### Batch A — Read-Only `GET` Routes (27 sites)
 
 | # | Route | Auth / RBAC | Rate Limit Config |
 |---|---|---|---|
 | 1 | `/api/admin/hostel-tickets` | `withAuthorization` (admin path) | `{ keyPrefix: "admin_tickets", maxRequests: 60 }` |
 | 2 | `/api/admin/role-requests` | `requiredRole: ADMIN_ROLES` | `{}` (default 120/min) |
-| 3 | `/api/campus-extra/analytics` | `withAuthorization` | `{ keyPrefix: "campus_extra_analytics", maxRequests: 60 }` |
+| 3 | `/api/admin/users` (`GET`) | `requiredRole: ["sysadmin", "admin"]` | `{ windowMs: 60_000, maxRequests: 60 }` |
+| 4 | `/api/campus-extra/analytics` | `withAuthorization` | `{ keyPrefix: "campus_extra_analytics", maxRequests: 60 }` |
 | 4 | `/api/campus-extra/calendar` | `withAuthorization` | `{ keyPrefix: "campus_extra_calendar", maxRequests: 60 }` |
 | 5 | `/api/campus-extra/feedback` | `withAuthorization` | `{ keyPrefix: "campus_extra_feedback", maxRequests: 60 }` |
 | 6 | `/api/campus-extra/handover` | `withAuthorization` | `{ keyPrefix: "campus_extra_handover", maxRequests: 30 }` |
@@ -47,10 +51,8 @@ All **44** sites require authentication (`withAuthorization`), and **none** use 
 | 22 | `/api/notifications/preferences` | `withAuthorization` | `{ keyPrefix: "notif_pref_get", maxRequests: 60 }` |
 | 23 | `/api/permissions/[ticket]/document` | `withAuthorization` | `{ keyPrefix: "permission_document_get", maxRequests: 100 }` |
 | 24 | `/api/permissions/my-counts` | `withAuthorization` | `{ keyPrefix: "perm_my_counts", maxRequests: 120 }` |
-| 25 | `/api/students/[roll]` | `requiredRole: ["admin", "sysadmin", "student"]` | `{ keyPrefix: "student_details", maxRequests: 100 }` |
-| 26 | `/api/users` | `requiredRole: ["admin", "sysadmin"]` | `{ keyPrefix: "users_list", maxRequests: 600 }` |
-
-*(Note: 26 `GET` routes above + 2 `GET` routes? Wait — let's verify exact count: 26 `GET` + 17 `POST`/`PATCH` + 1 `UPLOAD` = 44 sites!)*
+| 26 | `/api/students/[roll]` | `requiredRole: ["admin", "sysadmin", "student"]` | `{ keyPrefix: "student_details", maxRequests: 100 }` |
+| 27 | `/api/users` | `requiredRole: ["admin", "sysadmin"]` | `{ keyPrefix: 'users_list', maxRequests: 600 }` |
 
 ### Batch B — Mutating `POST` / `PATCH` Routes with `assertCsrf` (17 sites)
 
@@ -99,8 +101,8 @@ All **44** sites require authentication (`withAuthorization`), and **none** use 
 
 ## 4. Migration Batches, Verification & Rollback
 
-- **Batch A (26 `GET` sites):** Mechanical swap to `withApiChain(handleGet, { route, auth: "user", requiredRole?, rateLimit })`.
+- **Batch A (27 `GET` sites):** Mechanical swap to `withApiChain(handleGet, { route, auth: "user", requiredRole?, rateLimit })`.
 - **Batch B (17 `POST`/`PATCH` sites):** Mechanical swap to `withApiChain(handlePost/Patch, { route, auth: "user", csrf: true, rateLimit })` (removing redundant inner `assertCsrf(req)`).
 - **Batch C (1 `UPLOAD` site):** Swap `permissions/[ticket]/upload` to `withApiChain(handlePost, { route, auth: "user", csrf: true, rateLimit })` (no `bodySchema`).
 - **Verification:** `tsc --noEmit`, full `vitest` + new Phase 2 regression test verifying `0` remaining `withRateLimit(withAuthorization` sites and user-scoped bucket isolation on representative Batch A/B/C routes, `unslop-ui --strict`, `npm run build`.
-- **Rollback:** Single-commit revert (`git revert <commit>`) restores all 43 files cleanly; no DB/env/Docker changes.
+- **Rollback:** Single-commit revert (`git revert <commit>`) restores all 44 files cleanly; no DB/env/Docker changes.
