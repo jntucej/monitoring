@@ -1,0 +1,9 @@
+-- Rollback for 20270131000040_group_chat.sql
+BEGIN;
+
+DROP TABLE IF EXISTS public.chat_message_receipts;
+DROP TABLE IF EXISTS public.chat_messages;
+DROP TABLE IF EXISTS public.chat_group_members;
+DROP TABLE IF EXISTS public.chat_groups;
+
+COMMIT;

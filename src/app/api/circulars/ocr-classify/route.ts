@@ -1,14 +1,18 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { assertCsrf } from "@/lib/csrf";
+import { query } from "@/lib/postgres";
 import { ok, fail } from "@/server/http/response";
 import {
   classifyCircularTargets,
   extractCircularFields,
 } from "@/lib/circulars/pipeline";
+import { buildPreAnnouncementConfig } from "@/lib/agent/knowledgeMatcher";
+import { sanitizeAgentPayload } from "@/lib/agent/redactor";
+import type { AuthContext } from "@/lib/authContext";
 import { createAiRuntime } from "../../../../../model-runtime";
 
-async function handlePost(req: NextRequest) {
+async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const csrfErr = assertCsrf(req);
   if (csrfErr) return csrfErr;
 
@@ -62,12 +66,40 @@ async function handlePost(req: NextRequest) {
 
   const targets = await classifyCircularTargets(rawText);
 
+  const { rows: suggestedGroups } = await query<{ slug: string; name: string; group_type: string; class_id: string | null }>(
+    `SELECT g.slug, g.name, g.group_type, g.class_id
+       FROM public.chat_groups g
+       JOIN public.chat_group_members m ON m.group_id = g.id
+      WHERE m.user_id = $1::uuid
+        AND g.is_archived = FALSE
+      ORDER BY g.updated_at DESC
+      LIMIT 10`,
+    [auth.userId],
+  ).catch(() => ({ rows: [] }));
+
+  const primarySlug =
+    (typeof b?.target_group_slug === "string" && b.target_group_slug.trim()) ||
+    suggestedGroups[0]?.slug ||
+    "";
+
+  const preAnnouncement = buildPreAnnouncementConfig(auth, {
+    class_id: typeof b?.class_id === "string" ? b.class_id : suggestedGroups[0]?.class_id ?? null,
+    subject_code: typeof b?.subject_code === "string" ? b.subject_code : null,
+    target_group_slug: primarySlug,
+    also_applies_to: suggestedGroups.slice(1, 4).map((g) => g.slug),
+    summary: fields.summary || fields.title || rawText.slice(0, 280),
+    require_noted: true,
+    deadline: fields.deadline ?? null,
+  });
+
   return ok({
     fields,
     targets,
     ai_extraction: aiExtraction,
     raw_ocr_text: rawText,
     attachment_url: b?.attachment_url ? String(b.attachment_url) : null,
+    suggested_groups: sanitizeAgentPayload(suggestedGroups, auth.role),
+    pre_announcement: preAnnouncement,
   });
 }
 

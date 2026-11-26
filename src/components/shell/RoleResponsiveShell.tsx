@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { Menu, X } from "lucide-react";
 import { RoleSidebar } from "./RoleSidebar";
 import { RoleNotificationBell } from "./RoleNotificationBell";
 import { RoleChrome } from "@/components/shared/RoleChrome";
 import type { RoleManifest } from "./types";
+
+const AgentConsoleDrawer = dynamic(
+  () => import("@/components/bot/AgentConsoleDrawer").then((m) => m.AgentConsoleDrawer),
+  { ssr: false },
+);
 
 /**
  * RoleResponsiveShell — single-mount responsive shell for all role consoles.
@@ -72,6 +78,7 @@ export function RoleResponsiveShell({
         {/* One bell instance; CSS places it per breakpoint (UX-010: was
             dual-mounted, doubling polling + badge state). */}
         <RoleNotificationBell className="fixed right-6 top-6 z-20 lg:right-6 lg:top-6" />
+        <AgentConsoleDrawer role={manifest.role} />
         <div className="hidden lg:block">
           <RoleChrome role={manifest.role} variant="footer" />
         </div>
