@@ -26,6 +26,7 @@ import {
 import path from "node:path";
 import crypto from "node:crypto";
 import { randomUUID } from "node:crypto";
+import { uploadBackupToS3 } from "../lib/s3-offsite.js";
 
 const BACKUP_ROOT = process.env.BACKUP_ROOT || "/opt/monitoring/backups";
 const BACKUP_DAILY = path.join(BACKUP_ROOT, "daily");
@@ -366,6 +367,19 @@ export default async function runBackupMaintenance() {
       if (pol.resource_type === "postgres") {
         result = await runPostgresBackup(pool, pol);
         lastResult = result;
+        if (pol.offsite_enabled && result?.artifact_path) {
+          const s3Res = await uploadBackupToS3({
+            filePath: result.artifact_path,
+            bucket: pol.offsite_bucket,
+            prefix: pol.offsite_prefix || "gate-monitor/backups",
+            checksumSha256: result.checksum_sha256 || "",
+          }).catch((s3Err) => ({ uploaded: false, reason: s3Err?.message || "s3_error" }));
+          if (!s3Res.uploaded) {
+            console.warn(LOG_PREFIX, `offsite S3 skipped/failed for '${pol.name}': ${s3Res.reason}`);
+          } else {
+            console.log(LOG_PREFIX, `offsite S3 uploaded: s3://${s3Res.bucket}/${s3Res.key}`);
+          }
+        }
       } else {
         result = {
           artifact_path: null, artifact_size: 0, checksum_sha256: null,
