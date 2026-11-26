@@ -79,8 +79,8 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     caretakerBlock
       ? `SELECT COUNT(*)::text AS cnt FROM public.users
           WHERE role = 'student' AND deleted_at IS NULL AND hostel_block = $1`
-      : `SELECT COUNT(*)::text AS cnt FROM public.mess_eligibility WHERE active = true`,
-    caretakerBlock ? [caretakerBlock] : [],
+      : `SELECT COUNT(*)::text AS cnt FROM public.mess_eligibility WHERE mess_day_id = $1::uuid AND eligible = true`,
+    caretakerBlock ? [caretakerBlock] : [session.id],
   );
 
   const { rows: servedRows } = await query<{ cnt: string }>(

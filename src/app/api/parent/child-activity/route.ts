@@ -87,26 +87,35 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     time_in: string | null;
     time_out: string | null;
   }>(
-    `SELECT to_char(g.entry_date, 'YYYY-MM-DD') AS date,
-            g.direction,
-            g.gate_name,
-            g.entry_time::text AS time_in,
-            g.exit_time::text AS time_out
-       FROM gate_logs g
-      WHERE g.person_id = $1::uuid
-        AND g.entry_date >= $2::date AND g.entry_date <= $3::date
-      ORDER BY g.entry_date DESC, g.entry_time DESC
+    `SELECT to_char((m.timestamp AT TIME ZONE 'Asia/Kolkata')::date, 'YYYY-MM-DD') AS date,
+            m.direction,
+            m.gate_name,
+            CASE WHEN m.direction = 'IN' THEN m.timestamp::text ELSE NULL END AS time_in,
+            CASE WHEN m.direction = 'OUT' THEN m.timestamp::text ELSE NULL END AS time_out
+       FROM public.movement_logs m
+      WHERE m.user_id = $1::uuid
+        AND (m.timestamp AT TIME ZONE 'Asia/Kolkata')::date >= $2::date
+        AND (m.timestamp AT TIME ZONE 'Asia/Kolkata')::date <= $3::date
+      ORDER BY m.timestamp DESC
       LIMIT 50`,
     [childId, from, to]
   );
 
   // Time spent on campus
   const timeR = await query<{ hours: string }>(
-    `SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (exit_time - entry_time)) / 3600), 0)::text AS hours
-       FROM gate_logs
-      WHERE person_id = $1::uuid
-        AND entry_date >= $2::date AND entry_date <= $3::date
-        AND exit_time IS NOT NULL AND entry_time IS NOT NULL`,
+    `WITH daily_moves AS (
+       SELECT (timestamp AT TIME ZONE 'Asia/Kolkata')::date AS entry_date,
+              MIN(timestamp) FILTER (WHERE direction = 'IN') AS entry_time,
+              MAX(timestamp) FILTER (WHERE direction = 'OUT') AS exit_time
+         FROM public.movement_logs
+        WHERE user_id = $1::uuid
+          AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date >= $2::date
+          AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date <= $3::date
+        GROUP BY (timestamp AT TIME ZONE 'Asia/Kolkata')::date
+     )
+     SELECT COALESCE(SUM(GREATEST(0, EXTRACT(EPOCH FROM (exit_time - entry_time)) / 3600)), 0)::text AS hours
+       FROM daily_moves
+      WHERE exit_time IS NOT NULL AND entry_time IS NOT NULL`,
     [childId, from, to]
   );
   const hoursOnCampus = Math.round(Number(timeR.rows[0]?.hours ?? 0) * 10) / 10;
@@ -118,24 +127,32 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const lmFrom = `${lmStart.getFullYear()}-${String(lmStart.getMonth() + 1).padStart(2, "0")}-01`;
   const lmTo = lmEnd.toISOString().slice(0, 10);
   const lmR = await query<{ hours: string }>(
-    `SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (exit_time - entry_time)) / 3600), 0)::text AS hours
-       FROM gate_logs
-      WHERE person_id = $1::uuid
-        AND entry_date >= $2::date AND entry_date <= $3::date
-        AND exit_time IS NOT NULL AND entry_time IS NOT NULL`,
+    `WITH daily_moves AS (
+       SELECT (timestamp AT TIME ZONE 'Asia/Kolkata')::date AS entry_date,
+              MIN(timestamp) FILTER (WHERE direction = 'IN') AS entry_time,
+              MAX(timestamp) FILTER (WHERE direction = 'OUT') AS exit_time
+         FROM public.movement_logs
+        WHERE user_id = $1::uuid
+          AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date >= $2::date
+          AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date <= $3::date
+        GROUP BY (timestamp AT TIME ZONE 'Asia/Kolkata')::date
+     )
+     SELECT COALESCE(SUM(GREATEST(0, EXTRACT(EPOCH FROM (exit_time - entry_time)) / 3600)), 0)::text AS hours
+       FROM daily_moves
+      WHERE exit_time IS NOT NULL AND entry_time IS NOT NULL`,
     [childId, lmFrom, lmTo]
   );
   const lastMonthHours = Math.round(Number(lmR.rows[0]?.hours ?? 0) * 10) / 10;
 
   // Heatmap: day-of-week x hour (0-23) counts
   const heatR = await query<{ dow: string; hr: string; n: string }>(
-    `SELECT EXTRACT(ISODOW FROM entry_date)::text AS dow,
-            EXTRACT(HOUR FROM entry_time)::text AS hr,
+    `SELECT EXTRACT(ISODOW FROM (timestamp AT TIME ZONE 'Asia/Kolkata'))::text AS dow,
+            EXTRACT(HOUR FROM (timestamp AT TIME ZONE 'Asia/Kolkata'))::text AS hr,
             COUNT(*)::text AS n
-       FROM gate_logs
-      WHERE person_id = $1::uuid
-        AND entry_date >= $2::date AND entry_date <= $3::date
-        AND entry_time IS NOT NULL
+       FROM public.movement_logs
+      WHERE user_id = $1::uuid
+        AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date >= $2::date
+        AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date <= $3::date
       GROUP BY 1, 2`,
     [childId, from, to]
   );
@@ -153,13 +170,13 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
   // Upcoming (next 5)
   const upR = await query<{ date: string; gate_name: string; time_in: string | null }>(
-    `SELECT to_char(g.entry_date, 'YYYY-MM-DD') AS date,
-            g.gate_name,
-            g.entry_time::text AS time_in
-       FROM gate_logs g
-      WHERE g.person_id = $1::uuid
-        AND g.entry_date > $2::date
-      ORDER BY g.entry_date ASC, g.entry_time ASC
+    `SELECT to_char((m.timestamp AT TIME ZONE 'Asia/Kolkata')::date, 'YYYY-MM-DD') AS date,
+            m.gate_name,
+            m.timestamp::text AS time_in
+       FROM public.movement_logs m
+      WHERE m.user_id = $1::uuid
+        AND (m.timestamp AT TIME ZONE 'Asia/Kolkata')::date > $2::date
+      ORDER BY m.timestamp ASC
       LIMIT 5`,
     [childId, to]
   );

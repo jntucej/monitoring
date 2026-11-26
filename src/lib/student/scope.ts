@@ -55,12 +55,16 @@ export async function resolveScope(userId: string): Promise<ResolvedScope> {
             sp.state AS presence_state,
             sp.block_id AS presence_block,
             sp.since::text AS presence_since,
-            me.active AS mess_active,
+            me.eligible AS mess_active,
             lm.active AS lib_active
        FROM public.users u
        LEFT JOIN public.student_details sd ON sd.user_id = u.id
        LEFT JOIN public.student_presence sp ON sp.student_id = u.id
-       LEFT JOIN public.mess_eligibility me ON me.user_id = u.id
+       LEFT JOIN LATERAL (
+         SELECT eligible FROM public.mess_eligibility
+          WHERE user_id = u.id
+          ORDER BY decided_at DESC LIMIT 1
+       ) me ON true
        LEFT JOIN public.library_memberships lm ON lm.user_id = u.id
       WHERE u.id = $1::uuid
       LIMIT 1`,

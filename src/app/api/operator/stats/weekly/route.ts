@@ -40,13 +40,21 @@ export const GET = withAuthorization(
     const which = req.nextUrl.searchParams.get("week") === "last" ? "last" : "this";
     const { from, to } = weekRange(which);
 
-    // Hours on shift from gate_logs (operator's own in/out)
+    // Hours on shift from movement_logs (operator's own in/out)
     const hoursR = await query<{ hours: string; shifts: string }>(
-      `SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (exit_time - entry_time)) / 3600), 0)::text AS hours,
+      `WITH daily_moves AS (
+         SELECT (timestamp AT TIME ZONE 'Asia/Kolkata')::date AS entry_date,
+                MIN(timestamp) FILTER (WHERE direction = 'IN') AS entry_time,
+                MAX(timestamp) FILTER (WHERE direction = 'OUT') AS exit_time
+           FROM public.movement_logs
+          WHERE user_id = $1::uuid
+            AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date >= $2::date
+            AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date <= $3::date
+          GROUP BY (timestamp AT TIME ZONE 'Asia/Kolkata')::date
+       )
+       SELECT COALESCE(SUM(GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(exit_time, entry_time) - entry_time)) / 3600)), 0)::text AS hours,
               COUNT(DISTINCT entry_date)::text AS shifts
-         FROM gate_logs
-        WHERE person_id = $1
-          AND entry_date >= $2::date AND entry_date <= $3::date`,
+         FROM daily_moves`,
       [auth.userId, from, to]
     );
 
@@ -55,11 +63,19 @@ export const GET = withAuthorization(
 
     // Per-day breakdown
     const dailyR = await query<{ day: string; hours: string }>(
-      `SELECT to_char(entry_date, 'YYYY-MM-DD') AS day,
-              COALESCE(SUM(EXTRACT(EPOCH FROM (exit_time - entry_time)) / 3600), 0)::text AS hours
-         FROM gate_logs
-        WHERE person_id = $1
-          AND entry_date >= $2::date AND entry_date <= $3::date
+      `WITH daily_moves AS (
+         SELECT (timestamp AT TIME ZONE 'Asia/Kolkata')::date AS entry_date,
+                MIN(timestamp) FILTER (WHERE direction = 'IN') AS entry_time,
+                MAX(timestamp) FILTER (WHERE direction = 'OUT') AS exit_time
+           FROM public.movement_logs
+          WHERE user_id = $1::uuid
+            AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date >= $2::date
+            AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date <= $3::date
+          GROUP BY (timestamp AT TIME ZONE 'Asia/Kolkata')::date
+       )
+       SELECT to_char(entry_date, 'YYYY-MM-DD') AS day,
+              COALESCE(SUM(GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(exit_time, entry_time) - entry_time)) / 3600)), 0)::text AS hours
+         FROM daily_moves
         GROUP BY entry_date
         ORDER BY entry_date`,
       [auth.userId, from, to]
@@ -68,11 +84,19 @@ export const GET = withAuthorization(
     // Last week for delta
     const lw = weekRange("last");
     const lwR = await query<{ hours: string; shifts: string }>(
-      `SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (exit_time - entry_time)) / 3600), 0)::text AS hours,
+      `WITH daily_moves AS (
+         SELECT (timestamp AT TIME ZONE 'Asia/Kolkata')::date AS entry_date,
+                MIN(timestamp) FILTER (WHERE direction = 'IN') AS entry_time,
+                MAX(timestamp) FILTER (WHERE direction = 'OUT') AS exit_time
+           FROM public.movement_logs
+          WHERE user_id = $1::uuid
+            AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date >= $2::date
+            AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date <= $3::date
+          GROUP BY (timestamp AT TIME ZONE 'Asia/Kolkata')::date
+       )
+       SELECT COALESCE(SUM(GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(exit_time, entry_time) - entry_time)) / 3600)), 0)::text AS hours,
               COUNT(DISTINCT entry_date)::text AS shifts
-         FROM gate_logs
-        WHERE person_id = $1
-          AND entry_date >= $2::date AND entry_date <= $3::date`,
+         FROM daily_moves`,
       [auth.userId, lw.from, lw.to]
     );
     const lastWeekHours = Math.round(Number(lwR.rows[0]?.hours ?? 0) * 10) / 10;

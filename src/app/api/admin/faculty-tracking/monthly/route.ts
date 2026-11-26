@@ -81,7 +81,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const deptParams: unknown[] = [from, to];
   if (department) deptParams.push(department);
 
-  // Per-faculty roll-up
+  // Per-faculty roll-up (derived from movement_logs IN/OUT pairs per day)
   const facR = await query<{
     user_id: string;
     name: string;
@@ -93,11 +93,21 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     next_class_time: string | null;
     disputes_count: string;
   }>(
-    `SELECT u.id::text AS user_id,
+    `WITH daily_moves AS (
+       SELECT user_id,
+              (timestamp AT TIME ZONE 'Asia/Kolkata')::date AS entry_date,
+              MIN(timestamp) FILTER (WHERE direction = 'IN') AS entry_time,
+              MAX(timestamp) FILTER (WHERE direction = 'OUT') AS exit_time
+         FROM public.movement_logs
+        WHERE (timestamp AT TIME ZONE 'Asia/Kolkata')::date >= $1::date
+          AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date <= $2::date
+        GROUP BY user_id, (timestamp AT TIME ZONE 'Asia/Kolkata')::date
+     )
+     SELECT u.id::text AS user_id,
             u.name,
             COALESCE(d.short_name, u.department_id, 'Unknown') AS department,
-            COALESCE(SUM(EXTRACT(EPOCH FROM (g.exit_time - g.entry_time)) / 3600), 0)::text AS hours_on_campus,
-            COALESCE(SUM(CASE WHEN g.entry_time > (g.entry_time + INTERVAL '15 minutes') THEN 0 ELSE 1 END), 0)::text AS late_count,
+            COALESCE(SUM(GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(g.exit_time, g.entry_time) - g.entry_time)) / 3600)), 0)::text AS hours_on_campus,
+            COALESCE(SUM(CASE WHEN (g.entry_time AT TIME ZONE 'Asia/Kolkata')::time > TIME '09:15:00' THEN 1 ELSE 0 END), 0)::text AS late_count,
             COUNT(DISTINCT g.entry_date)::text AS days_present,
             (SELECT to_char(ar.date, 'YYYY-MM-DD') FROM attendance_records ar
               JOIN classes c ON c.id = ar.class_id
@@ -119,8 +129,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
                 AND ad.status NOT IN ('RESOLVED','DISMISSED')), 0)::text AS disputes_count
        FROM users u
        LEFT JOIN departments d ON d.code = u.department_id
-       LEFT JOIN gate_logs g ON g.person_id = u.id
-          AND g.entry_date >= $1::date AND g.entry_date <= $2::date
+       LEFT JOIN daily_moves g ON g.user_id = u.id
       WHERE u.role = 'faculty'
       ${deptWhere}
       GROUP BY u.id, u.name, u.department_id, d.short_name
@@ -130,11 +139,20 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
   // Last month total hours
   const lmR = await query<{ total_hours: string; days: string }>(
-    `SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (exit_time - entry_time)) / 3600), 0)::text AS total_hours,
+    `WITH lm_moves AS (
+       SELECT user_id,
+              (timestamp AT TIME ZONE 'Asia/Kolkata')::date AS entry_date,
+              MIN(timestamp) FILTER (WHERE direction = 'IN') AS entry_time,
+              MAX(timestamp) FILTER (WHERE direction = 'OUT') AS exit_time
+         FROM public.movement_logs
+        WHERE user_id IN (SELECT id FROM users WHERE role = 'faculty')
+          AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date >= $1::date
+          AND (timestamp AT TIME ZONE 'Asia/Kolkata')::date <= $2::date
+        GROUP BY user_id, (timestamp AT TIME ZONE 'Asia/Kolkata')::date
+     )
+     SELECT COALESCE(SUM(GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(exit_time, entry_time) - entry_time)) / 3600)), 0)::text AS total_hours,
             COUNT(DISTINCT entry_date)::text AS days
-       FROM gate_logs
-      WHERE person_id IN (SELECT id FROM users WHERE role = 'faculty')
-        AND entry_date >= $1::date AND entry_date <= $2::date`,
+       FROM lm_moves`,
     [lmFrom, lmTo]
   );
 

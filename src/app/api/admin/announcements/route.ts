@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { withApiChain } from "@/lib/api-chain";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withTransaction } from "@/lib/postgres";

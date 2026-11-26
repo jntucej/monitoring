@@ -73,13 +73,13 @@ async function handleGet(req: NextRequest) {
     const { rows: scopeRows } = await query<Record<string, unknown>[]>(
       `SELECT ARRAY['global'] || COALESCE(
          ARRAY(SELECT CASE WHEN sd.department IS NOT NULL
-               THEN 'dept:' || sd.department END), {}
+               THEN 'dept:' || sd.department END), '{}'::text[]
        ) || COALESCE(
          ARRAY(SELECT CASE WHEN sd.department IS NOT NULL AND sd.semester IS NOT NULL
-               THEN 'class:' || sd.department || '-' || sd.semester END), {}
+               THEN 'class:' || sd.department || '-' || sd.semester END), '{}'::text[]
        ) || COALESCE(
          ARRAY(SELECT CASE WHEN COALESCE(sd.hostel_block, u.hostel_block) IS NOT NULL
-               THEN 'hostel:' || COALESCE(sd.hostel_block, u.hostel_block) END), {}
+               THEN 'hostel:' || COALESCE(sd.hostel_block, u.hostel_block) END), '{}'::text[]
        )
        FROM public.users u
        LEFT JOIN public.student_details sd ON sd.user_id = u.id
