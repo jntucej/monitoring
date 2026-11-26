@@ -9,16 +9,18 @@
 
 ## 1. Exhaustive AST Inventory (`src/app/api/**/route.ts`)
 
-Scanned all **798** API route files using the TypeScript compiler AST:
+Scanned all **798** API route files using the TypeScript compiler AST, covering **all 996 exported HTTP method sites** (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, including `export async function` declarations and `withMutationGuard` / `withAdminMutation` / `withMessMutation` wrappers, plus a check for aliased local `withAuthorization` variables):
 
-| Category | Site Count | Notes |
+| Category (Method-Level Sites) | Site Count | Notes |
 |---|---:|---|
-| Total `route.ts` files | 798 | Full API surface |
 | Already migrated to `withApiChain` (U7 Phase 1 + 2) | 51 | 6 Phase 1 + 45 Phase 2 |
-| **Inverted (`withRateLimit` → `withAuthorization`)** | **234** | **Across 229 unique files** |
+| **Inverted (`withRateLimit` → `withAuthorization`)** | **234** | **Across 229 unique files (0 aliased/indirect)** |
 | Correctly ordered (`withAuthorization` → `withRateLimit`) | 7 | Already safe; no migration required |
-| Other `withAuthorization` (no `withRateLimit`) | 370 | No rate-limit wrapper |
-| Public `withRateLimit` (no `withAuthorization`) | 46 | IP/key-scoped by design |
+| `withAuthorization` only (no `withRateLimit`) | 370 | No rate-limit wrapper |
+| `withRateLimit` only (public / pre-auth) | 46 | IP/key-scoped by design |
+| `withMutationGuard` / `withAdminMutation` / `withMessMutation` | 236 | Already correctly ordered (`withAuthorization` → `withRateLimit` → `assertCsrf`) |
+| Unwrapped / `export async function` handlers | 52 | `/api/health`, `/api/cron/*`, `/api/webhooks/*`, `/api/csrf`, etc. |
+| **Total exported HTTP method sites** | **996** | **`51 + 234 + 7 + 370 + 46 + 236 + 52 = 996` across 798 files** |
 
 ### Inverted Sites Breakdown (234 sites across 229 files)
 - **By HTTP method:** `GET`: 216, `POST`: 16, `PATCH`: 2
