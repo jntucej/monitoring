@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "node:fs";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import withAuthorization from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withApiChain } from "@/lib/api-chain";
 import { appendStageHistory, getScopedTicket } from "@/lib/permission-workflow";
 import { addAudit, addNotification } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
@@ -132,7 +131,12 @@ async function handlePost(req: NextRequest): Promise<Response> {
   });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), {
-  windowMs: 60_000,
-  maxRequests: 10,
+export const POST = withApiChain(handlePost, {
+  route: "/api/permissions/[ticket]/upload",
+  auth: "user",
+  csrf: true,
+  rateLimit: {
+    windowMs: 60_000,
+    maxRequests: 10,
+  },
 });
