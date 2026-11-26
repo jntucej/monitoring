@@ -12,6 +12,7 @@
 // Rate limit: 60 req/min per IP (standard admin throttle)
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -35,9 +36,7 @@ const SENSITIVE_COLS = new Set([
 // Read-only: withAuthorization enforces requiredRole; no CSRF guard
 // (CSRF applies to state-changing verbs only — the check-csrf-coverage
 // guard skips GET).
-export const GET = withRateLimit(
-  withAuthorization(
-    async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
+export const GET = withApiChain(async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
       // Parse optional filters from query string
       const url = new URL(_req.url);
       const roleFilter = url.searchParams.get("role");
@@ -106,11 +105,12 @@ export const GET = withRateLimit(
         offset,
         hasMore: offset + users.length < total,
       });
-    },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { windowMs: 60_000, maxRequests: 60 }
-);
+    }, {
+  route: "/api/admin/users",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: { windowMs: 60_000, maxRequests: 60 },
+});
 
 // ── POST: Create user ────────────────────────────────────────────────
 // withAdminMutation bakes in requiredRole ['admin','sysadmin'] plus the

@@ -2,6 +2,7 @@
 // SCAFFOLD:TICKETS — per-user ticket rollup for the KPI strip.
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -38,7 +39,11 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   return NextResponse.json({ success: true, data: counts });
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
+export const GET = withApiChain(handleGet, {
+  route: "/api/permissions/my-counts",
+  auth: "user",
+  rateLimit: {
   keyPrefix: "perm_my_counts",
   maxRequests: 120,
+},
 });

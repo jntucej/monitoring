@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
@@ -48,7 +49,11 @@ async function handleGet(
   });
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
+export const GET = withApiChain(handleGet, {
+  route: "/api/deputy-warden/delegation",
+  auth: "user",
+  rateLimit: {
   keyPrefix: "deputy_warden_delegation",
   maxRequests: 60,
+},
 });

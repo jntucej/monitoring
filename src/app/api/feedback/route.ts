@@ -1,4 +1,5 @@
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import type { AuthContext } from "@/lib/authContext";
 import { err } from "@/lib/api-response";
@@ -75,4 +76,9 @@ async function handleGet(_req: NextRequest) {
 
 export const POST = withMutationGuard(handlePost, {rateLimit: { keyPrefix: "feedback_post", maxRequests: 10, windowMs: 60 * 1000 }});
 
-export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }), { keyPrefix: "feedback_get", maxRequests: 30 });
+export const GET = withApiChain(handleGet, {
+  route: "/api/feedback",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "feedback_get", maxRequests: 30 },
+});

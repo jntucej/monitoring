@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok } from "@/server/http/response";
@@ -58,7 +59,11 @@ async function handleGet(
   }
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
+export const GET = withApiChain(handleGet, {
+  route: "/api/me/access-log",
+  auth: "user",
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 60,
+},
 });

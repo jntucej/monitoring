@@ -1,4 +1,5 @@
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit, withTransaction } from "@/lib/db";
@@ -154,5 +155,10 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ADMIN_ROLES }));
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/role-requests",
+  auth: "user",
+  requiredRole: ADMIN_ROLES,
+  rateLimit: {},
+});
 export const POST = withMutationGuard(handlePost, {requiredRole: ADMIN_ROLES});

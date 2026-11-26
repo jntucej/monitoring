@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import withAuthorization from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getScopedTicket } from "@/lib/permission-workflow";
@@ -79,7 +80,11 @@ async function handleGet(req: NextRequest): Promise<Response> {
   });
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
+export const GET = withApiChain(handleGet, {
+  route: "/api/permissions/[ticket]/document",
+  auth: "user",
+  rateLimit: {
   keyPrefix: "permission_document_get",
   maxRequests: 100,
+},
 });

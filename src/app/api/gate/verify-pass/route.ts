@@ -5,6 +5,7 @@
 // gate_passes, so gate UIs can show "approved / no pass / expired" before scan.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { createHmac, timingSafeEqual } from "crypto";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -280,5 +281,9 @@ async function handlePost(req: NextRequest, _ctx: { auth: AuthContext }): Promis
 
 const gateLimit = { windowMs: 60_000, maxRequests: 120 };
 
-export const GET = withRateLimit(withAuthorization(handleGet), gateLimit);
+export const GET = withApiChain(handleGet, {
+  route: "/api/gate/verify-pass",
+  auth: "user",
+  rateLimit: gateLimit,
+});
 export const POST = withMutationGuard(handlePost, {rateLimit: gateLimit});

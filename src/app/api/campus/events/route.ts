@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -71,7 +72,11 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
   });
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
+export const GET = withApiChain(handleGet, {
+  route: "/api/campus/events",
+  auth: "user",
+  rateLimit: {
   keyPrefix: "campus_events",
   maxRequests: 60,
+},
 });

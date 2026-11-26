@@ -1,4 +1,5 @@
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
 import { findStudentByRoll, getStudentHistory, getStudentStatus, withTransaction } from "@/lib/db";
@@ -228,7 +229,12 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "student"] }), { keyPrefix: "student_details", maxRequests: 100 });
+export const GET = withApiChain(handleGet, {
+  route: "/api/students/[roll]",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin", "student"],
+  rateLimit: { keyPrefix: "student_details", maxRequests: 100 },
+});
 export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin"]});
 
 export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["sysadmin"]});

@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { errMsg } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, randomUUID } from "crypto";
 import {
@@ -570,7 +571,12 @@ await addAudit({
   }
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_list', maxRequests: 600 });
+export const GET = withApiChain(handleGet, {
+  route: "/api/users",
+  auth: "user",
+  requiredRole: ['admin', 'sysadmin'],
+  rateLimit: { keyPrefix: 'users_list', maxRequests: 600 },
+});
 export const POST = withMutationGuard(handlePost, {requiredRole: ['admin', 'sysadmin'], rateLimit: { keyPrefix: 'users_create', maxRequests: 120 }});
 
 export const PATCH = withMutationGuard(handlePatch, {requiredRole: ['admin', 'sysadmin'], rateLimit: { keyPrefix: 'users_update', maxRequests: 120 }});

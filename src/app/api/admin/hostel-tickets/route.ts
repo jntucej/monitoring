@@ -2,6 +2,7 @@
 // SCAFFOLD:TICKETS — cross-cutting view for sysadmin / admin dashboards.
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -58,7 +59,11 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   return NextResponse.json({ success: true, data: rows });
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
+export const GET = withApiChain(handleGet, {
+  route: "/api/admin/hostel-tickets",
+  auth: "user",
+  rateLimit: {
   keyPrefix: "admin_tickets",
   maxRequests: 60,
+},
 });

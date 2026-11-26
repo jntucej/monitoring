@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -119,9 +120,13 @@ async function handlePost(
   }
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
+export const GET = withApiChain(handleGet, {
+  route: "/api/me/consent",
+  auth: "user",
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 30,
+},
 });
 export const POST = withMutationGuard(handlePost, {rateLimit: {
   windowMs: 60_000,

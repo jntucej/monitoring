@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -189,9 +190,13 @@ async function handleDelete(
   return NextResponse.json({ success: true });
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
+export const GET = withApiChain(handleGet, {
+  route: "/api/campus-extra/task-drafts",
+  auth: "user",
+  rateLimit: {
   keyPrefix: "campus_extra_task_drafts",
   maxRequests: 60,
+},
 });
 
 export const POST = withMutationGuard(handlePost, {rateLimit: {

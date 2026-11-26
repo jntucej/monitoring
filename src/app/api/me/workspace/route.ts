@@ -12,6 +12,7 @@
 // user see/not-see X?" with one route — no screenshots.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -157,7 +158,11 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }): Pro
   });
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
+export const GET = withApiChain(handleGet, {
+  route: "/api/me/workspace",
+  auth: "user",
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 60,
+},
 });
