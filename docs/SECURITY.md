@@ -12,11 +12,16 @@
 - **Cookie Flags**: `HttpOnly; Secure; SameSite=Lax` applied on all authentication cookies.
 
 ## 3. Rate Limiting & Denial of Service Protection
-- Distributed token bucket rate limiting powered by Redis (with in-memory fallback).
-- Thresholds configured per endpoint sensitivity:
-  - Auth / Login: 5 requests / min
-  - Scans: 30 requests / min
-  - Standard API: 100 requests / min
+- Distributed rate limiting powered by Redis Lua `EVALSHA` (`INCR` + `PEXPIRE` with `NOSCRIPT` recovery) and PostgreSQL fallback (`RATELIMIT_PRIMARY_STORE`, default `postgres`).
+- Central policy map (`src/lib/rate-limit-policies.ts`):
+  - `auth`: 10 requests / min (fail-closed)
+  - `otp`: 5 requests / min (fail-closed)
+  - `admin-mutation`: 20 requests / min (fail-closed)
+  - `expensive`: 5 requests / min
+  - `default`: 120 requests / min
+  - `dashboard`: 180 requests / min
+- Payload size limits (U8/U8.1): Edge `Content-Length` fast-reject + `setupBodyCaching` streamed byte limits (`1 MB` JSON / `25 MB` multipart → `413 PAYLOAD_TOO_LARGE`).
+- Unified middleware chain (U7): `withApiChain` (`src/lib/api-chain.ts`) runs `withAuthorization` before `withRateLimit` on all authenticated routes (0 inverted sites across 798 API route files).
 
 ## 4. Secrets Management
 - Production credentials stored exclusively in `/opt/monitoring/env/production.env` with `chmod 600` permissions owned by `root`.

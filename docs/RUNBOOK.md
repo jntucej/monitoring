@@ -29,9 +29,9 @@ docker compose logs -f
 docker compose logs -f web
 docker compose logs -f worker
 
-# Deploy after a source change (rebuild + recreate the web container):
-docker build -t monitoring-web:latest -f Dockerfile --target runner .
-docker compose up -d --force-recreate web
+# Deploy after a source change (rebuild + recreate web and worker):
+docker compose build web worker
+docker compose up -d --force-recreate web worker
 ```
 
 > **Note:** `docker compose up -d web` errors if it would also start

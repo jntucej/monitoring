@@ -26,7 +26,7 @@ truth; update them when architecture changes.
 | `BASE-SETUP.md` | First-time server setup (DB, env, .env sync). |
 | `SECURITY.md` + `SECURITY_CHECKLIST.md` | Threat model + the security checklist the stack must satisfy. |
 | `PERMISSIONS_ARCHITECTURE.md` | Permission engine / RBAC / credential isolation design. |
-| `WORKFLOW_ARCHITECTURE.md` | Pass / leave / approval state machines. |
+| `WORKFLOW-ARCHITECTURE.md` | Pass / leave / approval state machines. |
 | `LOGICAL_ARCHITECTURE_COMPLETE.md` | Top-down logical view (short pointer doc). |
 | `MIGRATION.md` | Migration conventions + history index. |
 | `PERFORMANCE.md` | Performance budget + profiling notes. |
