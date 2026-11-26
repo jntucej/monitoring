@@ -4,7 +4,10 @@
 
 ---
 
-## 1. 
+## 1. Purpose & Scope
+
+Multi-stage permission workflow engine for hostel, exam, memo, and staff leave requests (`src/lib/permission-workflow.ts`).
+
 ---
 
 ## 2. System Overview
@@ -23,8 +26,9 @@ Users → Next.js UI → API Routes → Workflow Engine → PostgreSQL
 
 ---
 
-## 3. 
-### Role → Stage Authorization
+## 3. Role → Stage Authorization
+
+> **Note (2026-11):** Standalone `warden` was consolidated into `principal` (migration `20261125000001`); `warden_or_principal` stage is handled by `principal`.
 
 | Role | Can act at stage |
 |---|---|

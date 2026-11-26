@@ -30,7 +30,7 @@ It starts a production Next.js server, fetches the real HTML of `/`, and enforce
   `THREE.REVISION` for three, `ResponsiveContainer` for recharts. These export
   names appear as strings only when the library is actually bundled.
 
-CI (`.github/workflows/perf.yml`) runs this gate on every push to main and blocks
+CI (`.github/workflows/infrastructure.yml`, `performance` job) runs this gate on every push to main and blocks
 the release if the budget is exceeded.
 
 ## Why

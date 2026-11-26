@@ -1,6 +1,8 @@
 # H0201 Biometric Sync Bridge
 
-Background worker that pulls attendance events from an SBTS H0201 terminal and writes them into the Gate Monitor Supabase project.
+> **Note (2026-11-26):** Legacy Supabase-era bridge documentation. `sync-bridge` is not registered in root `package.json` scripts; invoke directly with `npx tsx scripts/sync-bridge/index.ts` if needed.
+
+Background worker that pulls attendance events from an SBTS H0201 terminal and writes them into the Gate Monitor database.
 
 ## What it does
 

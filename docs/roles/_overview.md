@@ -55,7 +55,7 @@ The platform governs 28 distinct roles across six functional tiers:
 The JNTUH CEJ Gate Monitor implements a hardened, multi-tier authentication lifecycle:
 
 1. **Token Structure & Delivery:**
-   - **Access Token:** Short-lived JWT containing identity claims (`userId`, `role`, `roles`, `email`, `dh`). Transported via HttpOnly `access_token` cookie or `Authorization: Bearer ***` header.
+   - **Access Token:** Short-lived JWT containing identity claims (`userId`, `role`, `roles`, `email`, `dh`). Transported via HttpOnly `access_token` cookie or `Authorization: Bearer <token>` header.
    - **Refresh Token:** Long-lived rotating refresh token stored in an HttpOnly cookie and tracked in `public.sessions`. Token reuse detection automatically revokes all user sessions.
    - **Device Binding (`dh` claim):** The access token embeds `dh` (SHA-256 hash of the client's `device_id` cookie). On every request, `checkDeviceBinding` validates this match. Any mismatch terminates all active sessions for that user.
 2. **Revalidation (`/api/auth/session`):**

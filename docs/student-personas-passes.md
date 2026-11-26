@@ -23,7 +23,7 @@ evidence (`hostelBlock`/`roomNumber`) → default:
 | Persona | Who | Lives on campus | Curfew applies |
 |---|---|---|---|
 | **`day_scholar`** | Day scholar (comes to class, goes home each day) | No | No |
-| ****`hosteller`** | Resident (lives in the hostel) | Yes | Yes |
+| **`hosteller`** | Resident (lives in the hostel) | Yes | Yes |
 
 A persona determines **which pass types are shown** (`passTypesForPersona`)
 and **which home dashboard** renders (`/student` home: attendance/class focus
