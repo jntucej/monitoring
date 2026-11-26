@@ -22,6 +22,19 @@ Scanned all **798** API route files using the TypeScript compiler AST, covering 
 | Unwrapped / `export async function` handlers | 52 | `/api/health`, `/api/cron/*`, `/api/webhooks/*`, `/api/csrf`, etc. |
 | **Total exported HTTP method sites** | **996** | **`51 + 234 + 7 + 370 + 46 + 236 + 52 = 996` across 798 files** |
 
+### File-Level Reconciliation (All 798 Unique `route.ts` Files)
+
+| File-Level Bucket (Mutually Exclusive) | File Count | Notes |
+|---|---:|---|
+| Contains inverted `withRateLimit` → `withAuthorization` | 229 | Holds all 234 inverted sites |
+| Migrated to `withApiChain` (Phase 1 + 2) | 48 | Holds all 51 `withApiChain` sites |
+| Correctly ordered `withAuthorization` → `withRateLimit` | 6 | Holds all 7 correctly ordered sites |
+| `withAuthorization` only | 318 | No `withRateLimit` |
+| `withRateLimit` only (public / pre-auth) | 33 | IP/key-scoped |
+| `withMutationGuard` / `withAdminMutation` / `withMessMutation` only | 115 | Already correctly ordered |
+| Unwrapped / `export async function` only | 49 | 30 `cron` (`requireCronAuth`), 3 `webhook` (HMAC/secret), 2 inline `rateLimit`, 14 public/unwrapped |
+| **Total unique `route.ts` files** | **798** | **`229 + 48 + 6 + 318 + 33 + 115 + 49 = 798` (0 unaccounted)** |
+
 ### Inverted Sites Breakdown (234 sites across 229 files)
 - **By HTTP method:** `GET`: 216, `POST`: 16, `PATCH`: 2
 - **Classification:** All **234** sites are **Confirmed migration required** (all require `withAuthorization`, none are public/pre-auth, 0 false positives).
