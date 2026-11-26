@@ -44,8 +44,8 @@ The Principal interface adopts a navy theme (`#f8fafc` surface tint) with compos
 ## Data flow
 1. **Escalation Ingestion:** Requests initiate at lower tiers (e.g. student requests hostel leave via `hostel_manager` or `deputy_warden`; faculty logs disciplinary breach).
 2. **Upstream Routing:** If unresolved, exceeded SLA, or crossing risk thresholds, requests route upstream to the Principal's pending queue or via the Vice-Principal bridge (`/api/principal/inbound`).
-3. **Execution & Delegation:** The Principal can sign (`/permissions/[ticket]/sign`), amend, or delegate authority downstream (`/principal/delegations`).
-4. **Audit & Ripple Propagation:** Decisions trigger notifications, update gate validation states, record entries in the audit log (`/principal/audit`), and ripple to downstream dashboards (`ChainImpact`).
+3. **Execution & Delegation:** The Principal can sign (`/permissions/[ticket]/sign`), amend, or delegate authority downstream (`/principal/governance/delegations`).
+4. **Audit & Ripple Propagation:** Decisions trigger notifications, update gate validation states, record entries in the audit log (`/principal/governance/audit`), and ripple to downstream dashboards (`ChainImpact`).
 
 ## Security notes
 * **Authentication:** Enforced through HttpOnly JWT cookies and Bearer tokens, with session validation on each route (`/api/auth/session`).

@@ -20,7 +20,7 @@ The admin console spans over 260 routes. Functionality is organized into key fun
   Configuring campus entry/exit gates, pairing turnstile/scanner hardware devices, monitoring gate pass statuses, handling blocked pass exceptions, and inspecting ingress/egress records.
 - **Emergency & Campus Lockdown (`/admin/lockdown`):**
   Executing immediate campus-wide or perimeter gate lockdown in emergency scenarios. Streams live gate lock statuses via Server-Sent Events (SSE) and releases lockdowns with mandatory administrative justification.
-- **Mess & Hostel Operations (`/admin/mess`, `/admin/occupancy`, `/admin/complaints`):**
+- **Mess & Hostel Operations (`/admin/mess`, `/admin/occupancy`, `/admin/cases`):**
   Reviewing daily meal consumption metrics, initiating monthly/periodic mess finalization, tracking block occupancy levels, and overseeing hostel and campus complaint resolution workflows.
 - **Communication & SMS Queues (`/admin/sms/compose`, `/admin/sms/queue`, `/admin/sms/templates`, `/admin/announcements`):**
   Composing institution-wide SMS notices and circulars, managing automated template definitions (e.g. curfew breaches, gate pass acknowledgments), tracking outbound queue delivery states, and retrying failed messages.

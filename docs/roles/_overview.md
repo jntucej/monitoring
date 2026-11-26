@@ -55,11 +55,11 @@ The platform governs 28 distinct roles across six functional tiers:
 The JNTUH CEJ Gate Monitor implements a hardened, multi-tier authentication lifecycle:
 
 1. **Token Structure & Delivery:**
-   - **Access Token:** Short-lived JWT containing identity claims (`userId`, `role`, `roles`, `email`, `dh`). Transported via HttpOnly `access_token` cookie or `Authorization: Bearer <token>` header.
+   - **Access Token:** Short-lived JWT containing identity claims (`userId`, `role`, `roles`, `email`, `dh`). Transported via HttpOnly `access_token` cookie or `Authorization: Bearer ***` header.
    - **Refresh Token:** Long-lived rotating refresh token stored in an HttpOnly cookie and tracked in `public.sessions`. Token reuse detection automatically revokes all user sessions.
    - **Device Binding (`dh` claim):** The access token embeds `dh` (SHA-256 hash of the client's `device_id` cookie). On every request, `checkDeviceBinding` validates this match. Any mismatch terminates all active sessions for that user.
 2. **Revalidation (`/api/auth/session`):**
-   - Client applications revalidate session freshness against `/api/auth/session`, which verifies token signatures, checks `public.users.is_active`, and enforces mandatory password rotation (`password_must_change`).
+   - Client applications revalidate session freshness against `/api/auth/session`, which verifies token signatures, checks `public.users.status` (`'ACTIVE'`), and enforces mandatory password rotation (`password_must_change`).
 3. **Privileged Roles & Multi-Factor Authentication (MFA):**
    - Roles in `PRIVILEGED_ROLES` (`admin`, `sysadmin`) are subject to mandatory MFA challenges during login.
    - Secondary factor authentication accepts WebAuthn/FIDO2 Passkeys (`/api/auth/passkeys`) or TOTP authenticator tokens (`/api/auth/mfa/totp`).
@@ -83,13 +83,15 @@ Access controls are enforced at both the client shell and API boundary:
        │
        ▼
 ┌────────────────────────────────────────────────────────┐
-│ API Wrapper: withAuthorization (src/middleware/auth.ts)│
+│ API Wrapper: withApiChain + withAuthorization         │
+│ (src/lib/api-chain.ts, src/middleware/authorization.ts)│
 │ 1. Bearer / HttpOnly token extraction                 │
 │ 2. Device binding verification (dh claim check)       │
 │ 3. Account active & password change verification      │
 │ 4. Role check: auth.role ∈ requiredRole                │
 │    └─ Delegation fallback (public.delegations)        │
-│ 5. HMAC signing of trusted headers                    │
+│ 5. Rate limit (Redis Lua EVALSHA) + Zod validateBody  │
+│ 6. HMAC signing of trusted headers                    │
 │    (x-user-id, x-user-role, x-mw-signature)          │
 └────────────────────────────────────────────────────────┘
        │
