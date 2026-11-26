@@ -1,7 +1,7 @@
 // src/app/api/auth/change-password/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
-import { validateBody } from "@/lib/validate-body";
+import { withApiChain } from "@/lib/api-chain";
 import { ChangePasswordSchema } from "@/lib/schemas/auth";
 import { query } from "@/lib/postgres";
 import { hashPassword, verifyPassword } from "@/lib/auth-token";
@@ -19,22 +19,9 @@ import type { AuthContext } from "@/lib/authContext";
 
 async function handleChangePassword(
   req: NextRequest,
-  { auth }: { auth: AuthContext }
+  { auth, body: rawBody }: { auth: AuthContext; body: Record<string, unknown> }
 ): Promise<Response> {
-  // 1. CSRF — state-changing endpoint.
-  const csrf = assertCsrf(req);
-  if (csrf) return csrf;
-
-  // 2. Body — U5 shared Zod validation. Accepts both camelCase and snake_case
-  //    keys (the route reads currentPassword ?? current_password ??
-  //    oldPassword and newPassword ?? new_password ?? password). Malformed
-  //    JSON → 400 BAD_REQUEST; missing current/new password → 400
-  //    VALIDATION_ERROR with safe field paths.
-  const bodyRes = await validateBody(req, ChangePasswordSchema, {
-    route: "/api/auth/change-password",
-  });
-  if (!bodyRes.ok) return bodyRes.response;
-  const body = bodyRes.data;
+  const body = rawBody as { currentPassword?: string; current_password?: string; oldPassword?: string; newPassword?: string; new_password?: string; password?: string };
 
   const currentPassword = String(
     body.currentPassword ?? body.current_password ?? body.oldPassword ?? ""
@@ -162,10 +149,12 @@ async function handleChangePassword(
   });
 }
 
-// Rate-limit: 10 attempts / 15 min / IP. Prevents brute-forcing the current
-// password via this endpoint. withAuthorization first so unauthenticated
-// probes are rejected before they hit the limiter bucket.
-export const POST = withRateLimit(
-  withAuthorization(handleChangePassword),
-  { windowMs: 15 * 60 * 1000, maxRequests: 10, keyPrefix: "change-password" }
-);
+// U7: withApiChain runs withAuthorization BEFORE withRateLimit so the
+// limiter bucket is user-scoped (not IP-scoped).
+export const POST = withApiChain(handleChangePassword, {
+  route: "/api/auth/change-password",
+  auth: "user",
+  csrf: true,
+  rateLimit: { windowMs: 15 * 60 * 1000, maxRequests: 10, keyPrefix: "change-password" },
+  bodySchema: ChangePasswordSchema,
+});

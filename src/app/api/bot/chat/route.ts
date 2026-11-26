@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
-import { validateBody } from "@/lib/validate-body";
+import { withApiChain } from "@/lib/api-chain";
 import { BotChatSchema } from "@/lib/schemas/bot";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
-import { assertCsrf } from "@/lib/csrf";
 import { query } from "@/lib/postgres";
 import { retrieve } from "@/lib/rag/retriever";
 import { buildPrompt, type Turn } from "@/lib/rag/prompt";
@@ -16,10 +13,10 @@ import type { BotLang } from "@/lib/rag/config";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
-async function handler(req: NextRequest, { auth }: { auth: AuthContext }): Promise<Response> {
-  const csrf = assertCsrf(req);
-  if (csrf) return csrf;
-
+async function handler(
+  req: NextRequest,
+  { auth, body }: { auth: AuthContext; body: { message?: string; lang?: string; sourceLang?: BotLang | "auto"; conversationId?: string } }
+): Promise<Response> {
   // Batch I5: LLM kill switch. When a sysadmin sets auto_llm_enabled=FALSE
   // the route returns a clean 503 instead of streaming — the RAG/LLM
   // subsystem is stopped in one SQL UPDATE, no deploy required.
@@ -34,12 +31,6 @@ async function handler(req: NextRequest, { auth }: { auth: AuthContext }): Promi
     }
     throw e;
   }
-
-  // U5: shared Zod validation. Malformed JSON → 400 BAD_REQUEST; missing or
-  // over-4000-char message → 400 VALIDATION_ERROR with safe field paths.
-  const bodyRes = await validateBody(req, BotChatSchema, { route: "/api/bot/chat" });
-  if (!bodyRes.ok) return bodyRes.response;
-  const body = bodyRes.data;
 
   const message = (body.message ?? "").trim();
   const lang: BotLang = body.lang === "te" ? "te" : "en";
@@ -154,4 +145,12 @@ async function handler(req: NextRequest, { auth }: { auth: AuthContext }): Promi
   });
 }
 
-export const POST = withRateLimit(withAuthorization(handler), { windowMs: 60_000, maxRequests: 20 });
+// U7: withApiChain runs withAuthorization BEFORE withRateLimit so the
+// limiter bucket is user-scoped (not IP-scoped).
+export const POST = withApiChain(handler, {
+  route: "/api/bot/chat",
+  auth: "user",
+  csrf: true,
+  rateLimit: { windowMs: 60_000, maxRequests: 20 },
+  bodySchema: BotChatSchema,
+});

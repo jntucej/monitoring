@@ -16,7 +16,8 @@
 // No secrets in responses (redactSensitiveFields applied).
 
 import { NextRequest } from "next/server";
-import { withAuthorization, logAuditEvent } from "@/middleware/authorization";
+import { logAuditEvent } from "@/middleware/authorization";
+import { withApiChain } from "@/lib/api-chain";
 import { requirePermission } from "@/lib/authContext";
 import {
   ALLOWLISTED_SYSADMIN_ACTIONS,
@@ -25,8 +26,6 @@ import {
   type SystemPermission,
 } from "@/lib/sysadmin/permissions";
 import { query } from "@/lib/db";
-import { assertCsrf } from "@/lib/csrf";
-import { validateBody } from "@/lib/validate-body";
 import { BackupCenterActionSchema } from "@/lib/schemas/sysadmin";
 
 type BackupCenterData = {
@@ -124,10 +123,24 @@ async function getCenterData(): Promise<BackupCenterData> {
   };
 }
 
-const handler = withAuthorization(
-  async (req: NextRequest, { auth }): Promise<Response> => {
-    // Role gate: sysadmin (or admin via delegation)
-    const isAdminPath = req.nextUrl.pathname.startsWith("/api/sysadmin/");
+async function handleGet(
+  _req: NextRequest,
+  { auth }: { auth: { role: string } }
+): Promise<Response> {
+  if (auth.role !== "sysadmin" && auth.role !== "admin") {
+    return Response.json(
+      { error: "FORBIDDEN", message: "systemadmin or admin role required" },
+      { status: 403 }
+    );
+  }
+  const data = await getCenterData();
+  return Response.json(redactSensitiveFields(data), { status: 200 });
+}
+
+async function handlePost(
+  req: NextRequest,
+  { auth, body: rawBody }: { auth: { userId: string; role: string }; body: unknown }
+): Promise<Response> {
     if (auth.role !== "sysadmin" && auth.role !== "admin") {
       return Response.json(
         { error: "FORBIDDEN", message: "systemadmin or admin role required" },
@@ -135,31 +148,7 @@ const handler = withAuthorization(
       );
     }
 
-    if (req.method === "GET") {
-      const data = await getCenterData();
-      return Response.json(redactSensitiveFields(data), { status: 200 });
-    }
-
-    if (req.method !== "POST") {
-      return Response.json(
-        { error: "METHOD_NOT_ALLOWED", allowed: ["GET", "POST"] },
-        { status: 405, headers: { Allow: "GET, POST" } }
-      );
-    }
-
-    // POST: CSRF + permission + allowlist check
-    const csrfFail = assertCsrf(req);
-    if (csrfFail) return csrfFail;
-
-    // U5: shared Zod validation owns the size cap + the allowlist enum.
-    // Malformed JSON → 400 BAD_REQUEST; unknown action → 400 VALIDATION_ERROR
-    // (the route still re-checks the allowlist below and 403s, so a schema
-    // change can't widen it).
-    const bodyRes = await validateBody(req, BackupCenterActionSchema, {
-      route: "/api/sysadmin/backup-maintenance-center",
-    });
-    if (!bodyRes.ok) return bodyRes.response;
-    const body = bodyRes.data as { action: string; policy_id?: string; limit?: number };
+    const body = rawBody as { action: string; policy_id?: string; limit?: number };
     const action: string = body.action;
 
     if (!ALLOWLISTED_SYSADMIN_ACTIONS.includes(action as never)) {
@@ -323,9 +312,20 @@ const handler = withAuthorization(
     );
 
     return Response.json(redactSensitiveFields(result), { status: 200 });
-  },
-  { requiredRole: ["sysadmin", "admin"] }
-);
+}
 
-export const GET = handler;
-export const POST = handler;
+export const GET = withApiChain(handleGet, {
+  route: "/api/sysadmin/backup-maintenance-center",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  rateLimit: false,
+});
+
+export const POST = withApiChain(handlePost, {
+  route: "/api/sysadmin/backup-maintenance-center",
+  auth: "user",
+  requiredRole: ["sysadmin", "admin"],
+  csrf: true,
+  rateLimit: false,
+  bodySchema: BackupCenterActionSchema,
+});

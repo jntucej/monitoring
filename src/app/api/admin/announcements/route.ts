@@ -1,10 +1,9 @@
 import { NextRequest } from "next/server";
-import { withAdminMutation } from "@/server/http/mutation-guard";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withTransaction } from "@/lib/postgres";
 import { ok, fail } from "@/server/http/response";
-import { validateBody } from "@/lib/validate-body";
 import { AnnouncementSchema } from "@/lib/schemas/admin";
 import { addAudit } from "@/lib/db";
 import { assertLength, LIMITS } from "@/lib/validation";
@@ -50,15 +49,9 @@ export const GET = withRateLimit(
 );
 
 async function handlePost(
-  req: NextRequest,
-  { auth }: { auth: AuthContext },
+  _req: NextRequest,
+  { auth, body: payload }: { auth: AuthContext; body: { title: string; message?: string; body?: string; audience?: string; priority?: string; publishNow?: boolean; publishAt?: string | null } },
 ): Promise<Response> {
-  // U5: shared Zod validation owns both the size cap and the field checks
-  // in a single streamed read. Malformed JSON → 400; oversize → 413;
-  // missing/over-long fields → 400 VALIDATION_ERROR with safe paths.
-  const bodyRes = await validateBody(req, AnnouncementSchema, { route: "/api/admin/announcements" });
-  if (!bodyRes.ok) return bodyRes.response;
-  const payload = bodyRes.data;
 
   try {
     // Belt-and-suspenders: the schema already bounds title/message, but keep
@@ -127,4 +120,11 @@ async function handlePost(
   return ok(inserted, 201);
 }
 
-export const POST = withAdminMutation(handlePost, { rateLimit: RATE_LIMITS.mutation });
+export const POST = withApiChain(handlePost, {
+  route: "/api/admin/announcements",
+  auth: "user",
+  requiredRole: ["admin", "sysadmin"],
+  csrf: true,
+  rateLimit: RATE_LIMITS.mutation,
+  bodySchema: AnnouncementSchema,
+});

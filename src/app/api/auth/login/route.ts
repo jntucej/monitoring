@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { randomUUID } from "crypto";
-import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
+import { withApiChain } from "@/lib/api-chain";
 import { Policies } from "@/lib/rate-limit-policies";
-import { validateBody } from "@/lib/validate-body";
 import { LoginSchema } from "@/lib/schemas/auth";
+import { extractClientIp } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
 import { signAccessToken, signRefreshToken, verifyPassword, signPasswordResetToken } from "@/lib/auth-token";
 import { verifyDPoPProof } from "@/lib/dpop";
@@ -28,16 +28,12 @@ const GENERIC_FAILURE = {
   },
 };
 
-async function handleLoginInner(req: NextRequest) {
-  const csrfError = assertCsrf(req);
-  if (csrfError) return csrfError;
-
+async function handleLoginInner(
+  req: NextRequest,
+  { body }: { auth: null; body: { login?: string; email?: string; password?: string }; requestId: string }
+) {
   try {
-    // U5: shared Zod validation. Malformed JSON → 400 BAD_REQUEST; missing
-    // identifier/password → 400 VALIDATION_ERROR with safe field paths.
-    const bodyRes = await validateBody(req, LoginSchema, { route: "/api/auth/login" });
-    if (!bodyRes.ok) return bodyRes.response;
-    const { login, email, password } = bodyRes.data;
+    const { login, email, password } = body;
 
     const rawIdentifier = ((login || email || "") as string);
     const rawPassword = ((password || "") as string);
@@ -436,15 +432,15 @@ async function handleLoginInner(req: NextRequest) {
   }
 }
 
-// Structured observability: auto-log the request lifecycle and attach the correlation ID.
-const handleLogin = log.wrap("/api/auth/login", handleLoginInner);
-
-// U4: named policy reference. The `login:` keyPrefix (not `auth:`) preserves
-// today's per-route behavior — the legacy AUTH_SENSITIVE_KEY_PREFIXES list
-// still fail-closes on `login:` keys, so this is a documentation change,
-// not a behavior change. Inline override kept for clarity.
-export const POST = withRateLimit(handleLogin, {
-  ...Policies.auth,
-  keyPrefix: "login",  // preserve existing key namespace (legacy fail-closed)
+// U7: withApiChain composes CSRF + IP-scoped rate limit + Zod body validation + U3/U6.
+export const POST = withApiChain(handleLoginInner, {
+  route: "/api/auth/login",
+  auth: "none",
+  csrf: true,
+  rateLimit: {
+    ...Policies.auth,
+    keyPrefix: "login", // preserve existing key namespace (legacy fail-closed)
+  },
+  bodySchema: LoginSchema,
 });
 
