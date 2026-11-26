@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -101,7 +102,10 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ operation: action, result: agentJson.result, requestId });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["sysadmin"] }),
-  { keyPrefix: "sysadmin_operations", maxRequests: 30 }
-);
+export const POST = withApiChain(handlePost, {
+  route: "/api/sysadmin/operations",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["sysadmin"],
+  rateLimit: { keyPrefix: "sysadmin_operations", maxRequests: 30 },
+});

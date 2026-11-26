@@ -3,6 +3,7 @@
 // expected return time. Notifies the student's warden + audit row.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -59,7 +60,10 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ acknowledged: true, wardenNotified: !!wardenId, expectedMinutes });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["student"] }),
-  { windowMs: 60_000, maxRequests: 5 },
-);
+export const POST = withApiChain(handlePost, {
+  route: "/api/student/curfew-acknowledge",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["student"],
+  rateLimit: { windowMs: 60_000, maxRequests: 5 },
+});

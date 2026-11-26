@@ -1,5 +1,6 @@
 // src/app/api/bot/telegram-sync/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query, tgQuery, withTransaction } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { assertCsrf } from "@/lib/csrf";
@@ -406,7 +407,10 @@ export const GET = withRateLimit(
   { keyPrefix: "telegram_sync_get", maxRequests: 60 }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["sysadmin"] }),
-  { keyPrefix: "telegram_sync", maxRequests: 30 }
-);
+export const POST = withApiChain(handlePost, {
+  route: "/api/bot/telegram-sync",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["sysadmin"],
+  rateLimit: { keyPrefix: "telegram_sync", maxRequests: 30 },
+});

@@ -1,4 +1,5 @@
 import { assertCsrf } from "@/lib/csrf";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
@@ -135,7 +136,10 @@ async function handlePost(
 
 const attendLimit: RateLimitConfig = { ...RATE_LIMITS.mutation, keyPrefix: "event_attend" };
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: [...ATTEND_ROLES] }),
-  attendLimit
-);
+export const POST = withApiChain(handlePost, {
+  route: "/api/campus/events/[id]/attend",
+  auth: "user",
+  csrf: true,
+  requiredRole: [...ATTEND_ROLES],
+  rateLimit: attendLimit,
+});

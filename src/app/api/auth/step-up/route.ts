@@ -7,6 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
 import { performStepUp } from "@/lib/step-up";
@@ -62,7 +63,9 @@ async function handlePost(
   return NextResponse.json({ success: true, data: { steppedUp: true } });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost),
-  { windowMs: 60_000, maxRequests: 6, keyPrefix: "step-up" },
-);
+export const POST = withApiChain(handlePost, {
+  route: "/api/auth/step-up",
+  auth: "user",
+  csrf: false,
+  rateLimit: { windowMs: 60_000, maxRequests: 6, keyPrefix: "step-up" },
+});

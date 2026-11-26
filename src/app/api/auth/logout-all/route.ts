@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -56,7 +57,9 @@ async function handleLogoutAll(
   return response;
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handleLogoutAll),
-  { windowMs: 60 * 1000, maxRequests: 10, keyPrefix: "logout_all_limit" }
-);
+export const POST = withApiChain(handleLogoutAll, {
+  route: "/api/auth/logout-all",
+  auth: "user",
+  csrf: false,
+  rateLimit: { windowMs: 60 * 1000, maxRequests: 10, keyPrefix: "logout_all_limit" },
+});

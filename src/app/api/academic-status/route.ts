@@ -24,6 +24,7 @@
 //        dean/principal see their relevant scope).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -292,7 +293,10 @@ export const GET = withRateLimit(
   { keyPrefix: "academic-status-get", maxRequests: 30, windowMs: 60_000 },
 );
 
-export const POST = withRateLimit(
-  withAuthorization(implPost, { requiredRole: ["hod", "dean", "principal", "vice_principal", "chief_warden", "admin", "sysadmin"] }),
-  { keyPrefix: "academic-status-post", maxRequests: 20, windowMs: 60_000 },
-);
+export const POST = withApiChain(implPost, {
+  route: "/api/academic-status",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["hod", "dean", "principal", "vice_principal", "chief_warden", "admin", "sysadmin"],
+  rateLimit: { keyPrefix: "academic-status-post", maxRequests: 20, windowMs: 60_000 },
+});

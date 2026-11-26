@@ -11,6 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { TIER } from "@/server/policy/roles";
@@ -153,10 +154,13 @@ async function handlePost(
   }
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: TIER.OPERATOR }),
-  { keyPrefix: "manual_entry", maxRequests: 20, windowMs: 60_000 }
-);
+export const POST = withApiChain(handlePost, {
+  route: "/api/operator/manual-entry",
+  auth: "user",
+  csrf: true,
+  requiredRole: TIER.OPERATOR,
+  rateLimit: { keyPrefix: "manual_entry", maxRequests: 20, windowMs: 60_000 },
+});
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, { requiredRole: TIER.OPERATOR }),

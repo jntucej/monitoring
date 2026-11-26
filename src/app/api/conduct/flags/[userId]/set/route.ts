@@ -3,6 +3,7 @@
 // Auth: admin, sysadmin only.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { assertCsrf } from "@/lib/csrf";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -51,7 +52,10 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ userId: targetUserId, currentFlag: body.flag, reason: body.reason ?? "" });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(implPost, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "conduct-flag-set", maxRequests: 10, windowMs: 60_000 },
-);
+export const POST = withApiChain(implPost, {
+  route: "/api/conduct/flags/[userId]/set",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["admin", "sysadmin"],
+  rateLimit: { keyPrefix: "conduct-flag-set", maxRequests: 10, windowMs: 60_000 },
+});

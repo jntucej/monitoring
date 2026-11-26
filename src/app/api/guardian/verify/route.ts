@@ -2,6 +2,7 @@
 // POST — verify guardian link with OTP.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -62,7 +63,10 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ verified: true });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["guardian", "parent", "admin", "sysadmin"] }),
-  { windowMs: 60_000, maxRequests: 5 }
-);
+export const POST = withApiChain(handlePost, {
+  route: "/api/guardian/verify",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["guardian", "parent", "admin", "sysadmin"],
+  rateLimit: { windowMs: 60_000, maxRequests: 5 },
+});

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { assertCsrf } from "@/lib/csrf";
 import { createDatabaseBackup, listBackups, restoreDatabaseBackup } from "@/lib/backup";
 import { query } from "@/lib/postgres";
@@ -145,7 +146,10 @@ export const GET = withRateLimit(
   { keyPrefix: "admin_backup_get", maxRequests: 30 }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["sysadmin"] }),
-  { keyPrefix: "admin_backup_post", maxRequests: 20, windowMs: 60 * 1000 }
-);
+export const POST = withApiChain(handlePost, {
+  route: "/api/admin/backup",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["sysadmin"],
+  rateLimit: { keyPrefix: "admin_backup_post", maxRequests: 20, windowMs: 60 * 1000 },
+});

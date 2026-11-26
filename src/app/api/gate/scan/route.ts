@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit, rateLimitByKey } from "@/lib/rate-limit";
 import { recordScan } from "@/server/services/scan/record";
@@ -27,9 +28,7 @@ interface ScanBody {
   entryType?: "hosteller" | "day_scholar";
 }
 
-export const POST = withRateLimit(
-  withAuthorization(
-    async (req: NextRequest, { auth }: { auth: AuthContext }) => {
+export const POST = withApiChain(async (req: NextRequest, { auth }: { auth: AuthContext }) => {
       const csrf = assertCsrf(req);
       if (csrf) return csrf;
 
@@ -125,11 +124,10 @@ export const POST = withRateLimit(
         console.error("recordScan unexpected error:", err);
         return fail("INTERNAL_ERROR", "Failed to record scan", 500);
       }
-    },
-    { requiredRole: TIER.OPERATOR },
-  ),
-  // Outer IP-keyed guard: high global ceiling so it only trips on an actual
-  // DoS burst from one client IP, never on legitimate multi-kiosk campus
-  // traffic (which is bounded per-operator+gate inside the handler).
-  { keyPrefix: "gate_scan", maxRequests: 5_000, windowMs: 60_000 },
-);
+    }, {
+  route: "/api/gate/scan",
+  auth: "user",
+  csrf: true,
+  requiredRole: TIER.OPERATOR,
+  rateLimit: { keyPrefix: "gate_scan", maxRequests: 5_000, windowMs: 60_000 },
+});

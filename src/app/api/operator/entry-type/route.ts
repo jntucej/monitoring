@@ -1,4 +1,5 @@
 import { errMsg, errCode } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest, NextResponse } from "next/server";
 import withAuthorization from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -464,10 +465,13 @@ async function handlePost(
   });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] as Role[] }),
-  {
+export const POST = withApiChain(handlePost, {
+  route: "/api/operator/entry-type",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["operator", "supervisor", "admin", "sysadmin"] as Role[],
+  rateLimit: {
     windowMs: 60_000,
     maxRequests: 60,
   },
-);
+});

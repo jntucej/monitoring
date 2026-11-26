@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { assertCsrf } from "@/lib/csrf";
 import { withTransaction } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
@@ -276,9 +277,11 @@ async function handlePost(req: NextRequest): Promise<Response> {
   });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, {
-    requiredRole: [
+export const POST = withApiChain(handlePost, {
+  route: "/api/permissions/bulk",
+  auth: "user",
+  csrf: true,
+  requiredRole: [
       "caretaker",
       "deputy_warden",
       "hostel_manager",
@@ -292,9 +295,8 @@ export const POST = withRateLimit(
       "admin",
       "sysadmin",
     ],
-  }),
-  {
+  rateLimit: {
     keyPrefix: "permission_bulk",
     maxRequests: 30,
-  }
-);
+  },
+});

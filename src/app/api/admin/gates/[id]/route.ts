@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { assertCsrf } from "@/lib/csrf";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
@@ -147,7 +148,10 @@ export const GET = withRateLimit(
   adminLimit
 );
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: ["sysadmin"] }),
-  adminLimit
-);
+export const PATCH = withApiChain(handlePatch, {
+  route: "/api/admin/gates/[id]",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["sysadmin"],
+  rateLimit: adminLimit,
+});

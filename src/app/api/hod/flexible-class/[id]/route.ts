@@ -3,6 +3,7 @@
 // Extra classes are auto-approved; reschedule + substitute need HOD sign-off.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -96,7 +97,10 @@ async function implPatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ id, action: newState, reason: body.reason ?? null });
 }
 
-export const PATCH = withRateLimit(
-  withAuthorization(implPatch, { requiredRole: ["hod", "principal", "admin", "sysadmin", "vice_principal", "dean"] }),
-  { keyPrefix: "hod-flex-approval", maxRequests: 30, windowMs: 60_000 },
-);
+export const PATCH = withApiChain(implPatch, {
+  route: "/api/hod/flexible-class/[id]",
+  auth: "user",
+  csrf: true,
+  requiredRole: ["hod", "principal", "admin", "sysadmin", "vice_principal", "dean"],
+  rateLimit: { keyPrefix: "hod-flex-approval", maxRequests: 30, windowMs: 60_000 },
+});
