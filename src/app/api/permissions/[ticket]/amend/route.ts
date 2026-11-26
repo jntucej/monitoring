@@ -3,6 +3,7 @@
 // APPROVED ticket. Approver-amendment of APPROVED tickets requires step-up.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { assertCsrf } from "@/lib/csrf";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -138,7 +139,12 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }): Pr
   return ok({ ticket, updated: updates });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), {
+export const POST = withApiChain(handlePost, {
+  route: "/api/permissions/[ticket]/amend",
+  auth: "user",
+  csrf: true,
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 10,
+},
 });

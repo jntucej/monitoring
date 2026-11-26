@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -115,9 +116,14 @@ async function handleGet(
   return NextResponse.json({ success: true, data: rows });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), {
+export const POST = withApiChain(handlePost, {
+  route: "/api/emergency/sos",
+  auth: "user",
+  csrf: true,
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 10,
+},
 });
 
 export const GET = withAuthorization(handleGet);

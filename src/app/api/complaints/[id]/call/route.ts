@@ -2,6 +2,7 @@
 // POST — authority calls/contacts student about a complaint.
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { assertCsrf } from "@/lib/csrf";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -107,4 +108,9 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), { windowMs: 60_000, maxRequests: 10 });
+export const POST = withApiChain(handlePost, {
+  route: "/api/complaints/[id]/call",
+  auth: "user",
+  csrf: true,
+  rateLimit: { windowMs: 60_000, maxRequests: 10 },
+});

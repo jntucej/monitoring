@@ -1,4 +1,5 @@
 import { errMsg, errCode } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest } from "next/server";
 
 import { withAuthorization } from "@/middleware/authorization";
@@ -352,7 +353,12 @@ async function notifyGuardianSMS(
 }
 
 export const GET = withAuthorization(handleGet);
-export const PATCH = withRateLimit(withAuthorization(handlePatch), {
+export const PATCH = withApiChain(handlePatch, {
+  route: "/api/permissions/[ticket]",
+  auth: "user",
+  csrf: true,
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 60,
+},
 });

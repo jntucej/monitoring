@@ -3,6 +3,7 @@
 // GET  — list complaints (student = own, authority = role/department/hostel scoped).
 
 import { NextRequest } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { randomInt } from "node:crypto";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -224,4 +225,9 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withAuthorization(handleGet);
-export const POST = withRateLimit(withAuthorization(handlePost), { windowMs: 60_000, maxRequests: 20 });
+export const POST = withApiChain(handlePost, {
+  route: "/api/complaints",
+  auth: "user",
+  csrf: true,
+  rateLimit: { windowMs: 60_000, maxRequests: 20 },
+});

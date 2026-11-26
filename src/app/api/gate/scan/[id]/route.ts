@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { correctScan } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -89,7 +90,12 @@ async function handlePatch(
   return NextResponse.json({ success: true, data: corrected });
 }
 
-export const PATCH = withRateLimit(withAuthorization(handlePatch), {
+export const PATCH = withApiChain(handlePatch, {
+  route: "/api/gate/scan/[id]",
+  auth: "user",
+  csrf: true,
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 20,
+},
 });

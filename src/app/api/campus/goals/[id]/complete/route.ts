@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -96,4 +97,9 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
   });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), { keyPrefix: "campus_goal_complete", maxRequests: 30 });
+export const POST = withApiChain(handlePost, {
+  route: "/api/campus/goals/[id]/complete",
+  auth: "user",
+  csrf: true,
+  rateLimit: { keyPrefix: "campus_goal_complete", maxRequests: 30 },
+});

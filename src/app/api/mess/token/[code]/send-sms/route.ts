@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -108,7 +109,12 @@ async function handlePost(
   });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), {
+export const POST = withApiChain(handlePost, {
+  route: "/api/mess/token/[code]/send-sms",
+  auth: "user",
+  csrf: true,
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 10,
+},
 });

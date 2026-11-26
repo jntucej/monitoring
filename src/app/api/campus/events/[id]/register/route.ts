@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
@@ -134,7 +135,12 @@ async function handlePost(
   });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), {
+export const POST = withApiChain(handlePost, {
+  route: "/api/campus/events/[id]/register",
+  auth: "user",
+  csrf: true,
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 30,
+},
 });

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withApiChain } from "@/lib/api-chain";
 import { assertCsrf } from "@/lib/csrf";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import withAuthorization from "@/middleware/authorization";
@@ -113,7 +114,12 @@ async function handlePost(req: NextRequest): Promise<Response> {
   });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), {
+export const POST = withApiChain(handlePost, {
+  route: "/api/permissions/[ticket]/biometric",
+  auth: "user",
+  csrf: true,
+  rateLimit: {
   windowMs: 60_000,
   maxRequests: 30,
+},
 });

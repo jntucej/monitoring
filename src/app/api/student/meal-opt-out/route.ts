@@ -3,6 +3,7 @@
 // GET  — list student's meal opt-outs.
 
 import { errMsg, errCode } from "@/lib/err-msg";
+import { withApiChain } from "@/lib/api-chain";
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -108,5 +109,10 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ optOuts: rows });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), { windowMs: 60_000, maxRequests: 10 });
+export const POST = withApiChain(handlePost, {
+  route: "/api/student/meal-opt-out",
+  auth: "user",
+  csrf: true,
+  rateLimit: { windowMs: 60_000, maxRequests: 10 },
+});
 export const GET = withAuthorization(handleGet);

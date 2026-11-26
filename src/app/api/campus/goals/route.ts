@@ -96,4 +96,9 @@ export const GET = withApiChain(handleGet, {
   auth: "user",
   rateLimit: { keyPrefix: "campus_goals_get", maxRequests: 60 },
 });
-export const POST = withRateLimit(withAuthorization(handlePost), { keyPrefix: "campus_goals_post", maxRequests: 20 });
+export const POST = withApiChain(handlePost, {
+  route: "/api/campus/goals",
+  auth: "user",
+  csrf: true,
+  rateLimit: { keyPrefix: "campus_goals_post", maxRequests: 20 },
+});
