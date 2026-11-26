@@ -40,7 +40,13 @@ describe("U10 — S3 Offsite Backup Upload", () => {
   it("uploads backup with AES256 encryption and sha256 metadata when configured", async () => {
     const tmpFile = path.join(os.tmpdir(), `u10-test-${Date.now()}.sql.gz`);
     writeFileSync(tmpFile, "dummy-backup-bytes");
-    const sendMock = vi.fn().mockResolvedValue({ ETag: '"etag-123"' });
+    const sendMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ETag: '"etag-123"' })
+      .mockResolvedValueOnce({
+        ContentLength: Buffer.byteLength("dummy-backup-bytes"),
+        Metadata: { sha256: "deadbeef" },
+      });
 
     try {
       const res = await uploadBackupToS3({
@@ -61,8 +67,9 @@ describe("U10 — S3 Offsite Backup Upload", () => {
         bucket: "gate-backups",
         key: `prod/daily/${path.basename(tmpFile)}`,
         etag: '"etag-123"',
+        verified: true,
       });
-      expect(sendMock).toHaveBeenCalledTimes(1);
+      expect(sendMock).toHaveBeenCalledTimes(2);
       const cmd = sendMock.mock.calls[0][0];
       expect(cmd.input).toMatchObject({
         Bucket: "gate-backups",

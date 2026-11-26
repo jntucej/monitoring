@@ -30,7 +30,7 @@ export async function uploadBackupToS3({
     return { uploaded: false, reason: "missing_bucket" };
   }
 
-  const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
+  const { S3Client, PutObjectCommand, HeadObjectCommand } = await import("@aws-sdk/client-s3");
   const client = clientFactory
     ? clientFactory()
     : new S3Client({
@@ -53,10 +53,20 @@ export async function uploadBackupToS3({
     })
   );
 
+  // Post-upload HeadObject verification (size + sha256 metadata)
+  const head = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+  if (typeof head?.ContentLength === "number" && head.ContentLength !== body.length) {
+    throw new Error(`S3 HeadObject size mismatch: expected ${body.length}, got ${head.ContentLength}`);
+  }
+  if (checksumSha256 && head?.Metadata?.sha256 && head.Metadata.sha256 !== checksumSha256) {
+    throw new Error("S3 HeadObject sha256 metadata mismatch");
+  }
+
   return {
     uploaded: true,
     bucket,
     key,
     etag: res?.ETag ?? null,
+    verified: true,
   };
 }

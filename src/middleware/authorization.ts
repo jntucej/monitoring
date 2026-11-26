@@ -9,7 +9,7 @@ import {
   getGateStudentInfo,
   type AuthContext,
 } from "@/lib/authContext";
-import { getRequestBody, setupBodyCaching } from "@/lib/body-cache";
+import { getRequestBody, setupBodyCaching, PayloadTooLargeError } from "@/lib/body-cache";
 import { signTrustedHeaders } from "@/server/http/trusted-headers";
 import { metricsMiddleware } from "@/middleware/metrics";
 import { checkDeviceBinding } from "@/lib/device-binding";
@@ -49,6 +49,12 @@ function bearer(req: NextRequest): string {
 }
 
 async function handleAuthError(err: unknown): Promise<NextResponse> {
+  if (err instanceof PayloadTooLargeError) {
+    return NextResponse.json(
+      { success: false, error: { code: err.code, message: err.message } },
+      { status: 413 }
+    );
+  }
   if (err instanceof AuthError) {
     return NextResponse.json(
       { success: false, error: { code: (err as any).code ?? "AUTH_ERROR", message: err.message } },
@@ -100,10 +106,10 @@ export function withAuthorization(
       const hasBody =
         req.method !== "GET" && req.method !== "HEAD" &&
         req.body !== null;
-      const { req: cachedReq, hash: bodyHash } = hasBody
-        ? await setupBodyCaching(req)
-        : { req, hash: null };
       try {
+        const { req: cachedReq, hash: bodyHash } = hasBody
+          ? await setupBodyCaching(req)
+          : { req, hash: null };
         const auth = await requireAuthUser(bearer(req));
         if (!options.allowInactive && !auth.isActive) {
           throw new AuthError("ACCOUNT_INACTIVE", "Account is not active", 403);

@@ -9,6 +9,7 @@ vi.mock("@/lib/postgres", () => ({
 
 import { proxy } from "@/middleware";
 import { logAuditEvent } from "@/middleware/authorization";
+import { setupBodyCaching, PayloadTooLargeError } from "@/lib/body-cache";
 
 describe("U8 — Payload Size Limit, Request-ID & Correlation Hardening", () => {
   beforeEach(() => {
@@ -81,5 +82,35 @@ describe("U8 — Payload Size Limit, Request-ID & Correlation Hardening", () => 
     const params = mockQuery.mock.calls[0][1] as unknown[];
     const detailsJson = JSON.parse(String(params[5]));
     expect(detailsJson).toEqual({ foo: "bar", request_id: "u8-corr-id-1234" });
+  });
+
+  it("rejects invalid/negative Content-Length at edge with 400 BAD_REQUEST", async () => {
+    const req = new NextRequest("http://localhost/api/admin/announcements", {
+      method: "POST",
+      headers: { "content-length": "-5" },
+    });
+    const res = await proxy(req);
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.code).toBe("BAD_REQUEST");
+  });
+
+  it("enforces streamed byte limit in setupBodyCaching even with missing or misleading small Content-Length", async () => {
+    const chunkedStream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(600));
+        controller.enqueue(new Uint8Array(600));
+        controller.close();
+      },
+    });
+    const req = new NextRequest("http://localhost/api/admin/test", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "content-length": "10", // misleadingly small
+      },
+      body: chunkedStream,
+      duplex: "half",
+    });
+    await expect(setupBodyCaching(req, 1024)).rejects.toBeInstanceOf(PayloadTooLargeError);
   });
 });

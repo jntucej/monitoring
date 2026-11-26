@@ -233,9 +233,26 @@ export async function proxy(req: NextRequest) {
   if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
     const clHeader = req.headers.get('content-length');
     if (clHeader !== null) {
-      const contentLength = Number(clHeader);
+      const trimmedCl = clHeader.trim();
+      if (!/^\d+$/.test(trimmedCl)) {
+        const res = NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'BAD_REQUEST',
+              message: 'Invalid Content-Length header.',
+            },
+          },
+          { status: 400 }
+        );
+        res.headers.set('x-request-id', requestId);
+        res.headers.set('Content-Security-Policy', csp);
+        return res;
+      }
+      const contentLength = Number(trimmedCl);
       const isUpload =
         pathname.includes('/upload') ||
+        pathname.includes('/attachments') ||
         (req.headers.get('content-type') ?? '').toLowerCase().includes('multipart/form-data');
       const maxBytes = isUpload
         ? Number(process.env.MAX_UPLOAD_BODY_BYTES) || 26_214_400
