@@ -2,6 +2,7 @@
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { AnalyticsView } from "../../_shared/AnalyticsView";
+import { CampusAnalyticsDashboard } from "@/components/dashboard/CampusAnalyticsDashboard";
 
 export default function Page() {
   return (
@@ -16,6 +17,7 @@ export default function Page() {
         secondaryAction={{ label: "Audit Ledger", href: "/principal/governance/audit" }}
       />
       <AnalyticsView />
+      <CampusAnalyticsDashboard defaultSurface="all" />
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { CampusAnalyticsDashboard } from "@/components/dashboard/CampusAnalyticsDashboard";
 
 /**
  * Admin Analytics — re-skin of the inline Card+BarChart/PieChart layout.
@@ -428,6 +429,9 @@ function AdminAnalyticsInner() {
           </div>
         </WidgetBoundary>
       </div>
+      <WidgetBoundary name="CampusAnalyticsDashboard" title="Campus Analytics & People Telemetry">
+        <CampusAnalyticsDashboard defaultSurface="all" />
+      </WidgetBoundary>
     </div>
   );
 }

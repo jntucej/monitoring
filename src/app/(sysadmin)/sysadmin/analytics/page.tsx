@@ -16,6 +16,7 @@ import { ChartTypeSwitcher } from "@/components/admin/shared/ChartTypeSwitcher";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { CampusAnalyticsDashboard } from "@/components/dashboard/CampusAnalyticsDashboard";
 
 /**
  * SysAdmin Analytics — ported from the admin console so the root operator has
@@ -201,6 +202,9 @@ function SysAdminAnalyticsInner() {
           </div>
         </WidgetBoundary>
       </div>
+      <WidgetBoundary name="CampusAnalyticsDashboard" title="Campus Analytics & People Telemetry">
+        <CampusAnalyticsDashboard defaultSurface="all" />
+      </WidgetBoundary>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { CampusAnalyticsDashboard } from "@/components/dashboard/CampusAnalyticsDashboard";
 
 import { Suspense, useCallback } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -174,6 +175,9 @@ function VpAnalyticsInner() {
             </div>
           )}
         </div>
+      </WidgetBoundary>
+      <WidgetBoundary name="CampusAnalyticsDashboard" title="Campus Analytics & People Telemetry">
+        <CampusAnalyticsDashboard defaultSurface="all" />
       </WidgetBoundary>
     </div>
   );
