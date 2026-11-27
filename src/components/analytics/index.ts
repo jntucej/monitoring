@@ -68,3 +68,13 @@ export {
   DualSeriesBarChart,
   type BarCategory,
 } from "@/components/dashboard/DualSeriesBarChart";
+export {
+  SegmentedKpiStrip,
+  type SegmentedKpi,
+} from "@/components/dashboard/SegmentedKpiStrip";
+export {
+  StatusFilteredActivityFeed,
+  type ActivityItem,
+  type LogStatusFilter,
+  type ActivityStatus,
+} from "@/components/dashboard/StatusFilteredActivityFeed";
