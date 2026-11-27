@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Target, ArrowRight, Clock } from "lucide-react";
+import { Target, ArrowRight, Clock, Search } from "lucide-react";
 import { SlaBadge } from "@/components/approver/SlaBadge";
 
 export interface FocusItem {
@@ -16,9 +16,17 @@ export interface FocusItem {
 export function FocusZoneBase({
   item,
   onEnterFocus,
+  onInspect,
 }: {
   item: FocusItem | null;
   onEnterFocus: () => void;
+  /**
+   * Optional record-backed inspector trigger. When supplied, a secondary
+   * "Inspect" affordance opens the page's shared EntityInspector for this
+   * item instead of navigating — keeps notification/queue clicks on one
+   * drawer rather than piling overlays.
+   */
+  onInspect?: () => void;
 }) {
   if (!item) {
     return (
@@ -76,12 +84,23 @@ export function FocusZoneBase({
           Open in focus mode
           <ArrowRight className="size-4" />
         </button>
-        <Link
-          href={item.href}
-          className="surface-card flex min-h-11 flex-1 items-center justify-center bg-bg-surface px-4 py-2.5 text-sm font-medium text-text-primary transition hover:bg-bg-elevated"
-        >
-          View details
-        </Link>
+        {onInspect ? (
+          <button
+            type="button"
+            onClick={onInspect}
+            className="surface-card flex min-h-11 flex-1 items-center justify-center gap-2 bg-bg-elevated px-4 py-2.5 text-sm font-medium text-text-primary transition hover:bg-bg-surface"
+          >
+            Inspect
+            <Search className="size-4" />
+          </button>
+        ) : (
+          <Link
+            href={item.href}
+            className="surface-card flex min-h-11 flex-1 items-center justify-center bg-bg-surface px-4 py-2.5 text-sm font-medium text-text-primary transition hover:bg-bg-elevated"
+          >
+            View details
+          </Link>
+        )}
       </div>
     </section>
   );

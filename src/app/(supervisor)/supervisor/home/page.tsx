@@ -146,7 +146,9 @@ const user = useAuthStore((s) => s.user);
 
   const totalGates = d?.gates.length ?? 0;
   const gatesOnline = d?.gates.filter((g) => g.isActive && g.onPost > 0).length ?? 0;
-  const securityOnDuty = 0; // enriched by TeamRoster's own fetch
+  // Real on-duty security count: sum of per-gate onPost from the dashboard
+  // payload. Previously a hardcoded 0 (TeamRoster enriched its own fetch).
+  const securityOnDuty = d?.gates.reduce((sum, g) => sum + (g.onPost ?? 0), 0) ?? 0;
   const shiftActive = d?.shift.startedAt != null;
   const kpis: Array<{
     label: string;

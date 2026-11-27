@@ -30,6 +30,7 @@ import { PrincipalDigest } from "@/components/retention/PrincipalDigest";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { requestInspection } from "@/components/shared/roleInspectors";
 import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
 import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
@@ -126,9 +127,11 @@ const user = useAuthStore((s) => s.user);
 
   const sessionDecisions = usePrincipalRetention((s) => s.sessionDecisions);
 
-  // §13 notification → shared inspector (kept mounted; the home no longer
-  // renders a NotificationCenter so the bridge is currently dormant).
-  const { inspection, closeInspection } = useEntityInspector();
+  // §13 notification/queue → shared inspector: the focus item is record-backed
+  // and "Inspect" on the FocusZone opens the same EntityInspector a table row
+  // would. (The home no longer renders a NotificationCenter, so the bridge is
+  // driven from the focus item instead of a notice stream.)
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const d = data?.data;
   const pending =
@@ -151,6 +154,21 @@ const user = useAuthStore((s) => s.user);
       href: first.href,
     };
   }, [d?.priorityItems]);
+
+  // §13 notification/queue → shared inspector: the focus item is record-backed,
+  // so "Inspect" opens the same EntityInspector a table row would (previously
+  // this bridge was mounted but dormant because nothing called inspect()).
+  const handleInspectFocus = useCallback(() => {
+    if (!focusItem) return;
+    inspect(
+      requestInspection({
+        id: focusItem.id,
+        ticket: focusItem.ticket,
+        type: "principal",
+        status: "PENDING",
+      }),
+    );
+  }, [focusItem, inspect]);
 
   const upcoming: UpcomingItem[] =
     d?.priorityItems
@@ -271,7 +289,11 @@ const user = useAuthStore((s) => s.user);
         {/* 3. Focus zone — the one item that matters right now */}
         <div className="section-offscreen">
         <WidgetBoundary name="FocusZone" title="Focus Zone">
-          <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
+          <FocusZone
+            item={focusItem}
+            onEnterFocus={() => setFocusOpen(true)}
+            onInspect={focusItem ? handleInspectFocus : undefined}
+          />
         </WidgetBoundary>
 
         {/* 4. Chain impact + Delegation health — the leverage view */}

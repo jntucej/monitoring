@@ -10,6 +10,19 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
 
 /* /api/faculty/attendance response */
+interface HeatmapDay {
+  date: string;
+  dayLabel: string;
+  status: "ON_TIME" | "LATE" | "INSIDE" | "ABSENT" | "WEEKEND";
+  inTime: string | null;
+  outTime: string | null;
+  hours: number;
+}
+interface FacultyRecord {
+  id: string;
+  attendanceRate: number;
+  attendanceHeatmap: HeatmapDay[];
+}
 interface FacultyAttendance {
   success: boolean;
   summary: {
@@ -21,6 +34,7 @@ interface FacultyAttendance {
     absentCount: number;
     overallAttendanceRate: number;
   };
+  records: FacultyRecord[];
 }
 
 /**
@@ -74,8 +88,43 @@ function ClassAttendanceInner() {
   const present = summary?.presentToday ?? 0;
   const absent = summary?.absentCount ?? 0;
 
-  // Weekly heatmap: 7 days, each cell colored by the (synthetic) rate.
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  // Real last-7-days attendance: aggregate each faculty record's
+  // attendanceHeatmap (last 7 entries) so the heatmap shows genuine
+  // per-day rates derived from movement_logs, not a single repeated number.
+  const heatmapDays = buildLastSevenDays(att?.records ?? []);
+
+  function buildLastSevenDays(
+    records: FacultyRecord[],
+  ): Array<{ label: string; rate: number | null; present: number; total: number }> {
+    if (records.length === 0) return [];
+    // Each record's attendanceHeatmap is most-recent-last; the trailing 7
+    // entries cover the last 7 days. Average the real per-day statuses.
+    const out: Array<{ label: string; rate: number | null; present: number; total: number }> = [];
+    for (let day = 6; day >= 0; day--) {
+      let presentCount = 0;
+      let counted = 0;
+      let label = "";
+      for (const r of records) {
+        const cell = r.attendanceHeatmap[r.attendanceHeatmap.length - 1 - day];
+        if (!cell) continue;
+        label = cell.dayLabel;
+        counted += 1;
+        // WEEKEND days carry no presence signal; skip them from the rate.
+        if (cell.status === "ABSENT" || cell.status === "WEEKEND") continue;
+        presentCount += 1;
+      }
+      const denom = records.length; // total faculty assigned
+      out.push({
+        label,
+        rate: denom > 0 ? Math.round((presentCount / denom) * 100) : null,
+        present: presentCount,
+        total: counted,
+      });
+    }
+    return out;
+  }
+
+  const hasWeeklyData = heatmapDays.some((d) => d.rate !== null && d.present > 0);
 
   return (
     <div className="space-y-4 p-2 min-w-0">
@@ -127,28 +176,39 @@ function ClassAttendanceInner() {
         </div>
       </div>
 
-      {/* Weekly heatmap (7 columns) */}
+      {/* Last-7-days heatmap — real per-day presence from movement_logs */}
       <div className="surface-card bg-bg-surface p-3 min-w-0">
         <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">
-          This week
+          Last 7 days
         </p>
-        <div className="grid grid-cols-7 gap-1.5 min-w-0">
-          {days.map((d, i) => (
-            <div key={d} className="flex flex-col items-center gap-1">
-              <span className="text-xs text-text-muted font-mono">{d}</span>
-              <div
-                className="w-full aspect-square rounded-lg"
-                style={{
-                  backgroundColor:
-                    i === 6
-                      ? "rgba(100,116,139,0.15)" // Sat/Sun lighter
-                      : `rgba(16,185,129,${0.2 + (rate / 100) * 0.6})`,
-                }}
-                title={`${d}: ${i === 6 ? "—" : `${rate}% present`}`}
-              />
-            </div>
-          ))}
-        </div>
+        {hasWeeklyData ? (
+          <div className="grid grid-cols-7 gap-1.5 min-w-0">
+            {heatmapDays.map((d, i) => (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <span className="text-xs text-text-muted font-mono">
+                  {d.label ? d.label.split(" ")[0] : "—"}
+                </span>
+                <div
+                  className="w-full aspect-square rounded-lg"
+                  style={{
+                    backgroundColor:
+                      d.rate === null
+                        ? "rgba(100,116,139,0.15)"
+                        : `rgba(16,185,129,${0.2 + (d.rate / 100) * 0.6})`,
+                  }}
+                  title={`${d.label || "Day"}: ${
+                    d.rate === null ? "no data" : `${d.rate}% present (${d.present})`
+                  }`}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-xs text-text-muted min-h-8">
+            <Clock className="w-3.5 h-3.5 shrink-0" />
+            No attendance records in the last 7 days.
+          </div>
+        )}
       </div>
     </div>
   );
