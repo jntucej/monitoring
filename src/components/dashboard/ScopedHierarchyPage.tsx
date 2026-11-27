@@ -5,9 +5,10 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import type { AreaId } from "@/lib/org-map-adapters";
+import type { Role } from "@/lib/types";
 
 export interface ScopedHierarchyPageProps {
-  allowedRoles: string[];
+  allowedRoles: Role[];
   roleLabel: string;
   homeHref: string;
   area: AreaId;
