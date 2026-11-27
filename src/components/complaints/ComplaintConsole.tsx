@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { getAuthHeaders, cn } from "@/lib/utils";
+import { ToggleGroup, ToggleButton } from "@/components/ui/toggle";
 import { useExport } from "@/hooks/useExport";
 import { usePolling } from "@/hooks/usePolling";
 import { getComplaintRulesForRole } from "@/lib/complaint-rules";
@@ -168,21 +169,26 @@ export function ComplaintConsole({
 
       {/* Period + status filter */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="inline-flex gap-0.5 bg-bg-elevated p-1">
+        <ToggleGroup
+          value={period}
+          onValueChange={(val) => {
+            if (val) setPeriod(val as PeriodKey);
+          }}
+          className="p-1"
+        >
           {PERIODS.map(({ key, label }) => (
-            <button
+            <ToggleButton
               key={key}
-              type="button"
-              onClick={() => setPeriod(key)}
+              value={key}
               className={cn(
                 "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                 period === key ? "bg-action-primary text-white" : "text-text-secondary hover:bg-bg-surface"
               )}
             >
               {label}
-            </button>
+            </ToggleButton>
           ))}
-        </div>
+        </ToggleGroup>
         <select value={status} onChange={(e) => setStatus(e.target.value)} className="surface-card p-2 text-sm">
           <option value="">All statuses</option>
           <option value="submitted">Submitted</option>

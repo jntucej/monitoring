@@ -5,6 +5,7 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleButton } from "@/components/ui/toggle";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -211,22 +212,26 @@ const api = useApi();
           </div>
         </div>
 
-        <div className="surface-card flex flex-wrap items-center gap-2 pb-3">
-          <button
-            type="button"
-            onClick={() => setActiveTab("all")}
+        <ToggleGroup
+          value={activeTab}
+          onValueChange={(val) => {
+            if (val) setActiveTab(val as "all" | WorkflowType);
+          }}
+          className="flex flex-wrap items-center gap-2 pb-3"
+        >
+          <ToggleButton
+            value="all"
             className={cn(
               "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2",
               activeTab === "all" ? "bg-action-primary text-white" : "bg-bg-surface text-text-secondary border border-border"
             )}
           >
             All Workflows ({reasons.length})
-          </button>
+          </ToggleButton>
           {WORKFLOW_OPTIONS.map((opt) => (
-            <button
+            <ToggleButton
               key={opt.value}
-              type="button"
-              onClick={() => setActiveTab(opt.value)}
+              value={opt.value}
               className={cn(
                 "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2",
                 activeTab === opt.value ? "bg-action-primary text-white" : "bg-bg-surface text-text-secondary border border-border"
@@ -234,9 +239,9 @@ const api = useApi();
             >
               <opt.icon className="w-3.5 h-3.5" />
               {opt.label} ({reasons.filter((r) => r.workflow_type === opt.value).length})
-            </button>
+            </ToggleButton>
           ))}
-        </div>
+        </ToggleGroup>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative w-full sm:w-80">

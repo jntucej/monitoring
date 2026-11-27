@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { ToggleGroup, ToggleButton } from "@/components/ui/toggle";
 import {
   ChartRenderer, type ChartType, type SeriesDef,
 } from "@/components/admin/shared/ChartRenderer";
@@ -229,12 +230,17 @@ function AdminAnalyticsInner() {
         subtitle={`Traffic and occupancy from ${data?.range.from ?? "—"} to ${data?.range.to ?? "—"}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="surface-card inline-flex bg-bg-surface p-1 text-xs">
+            <ToggleGroup
+              value={String(range)}
+              onValueChange={(val) => {
+                if (val) setRange(Number(val) as 7 | 14 | 30);
+              }}
+              className="bg-bg-surface p-1 text-xs"
+            >
               {(([7, 14, 30] as const)).map((days) => (
-                <button
+                <ToggleButton
                   key={days}
-                  type="button"
-                  onClick={() => setRange(days)}
+                  value={String(days)}
                   className={`px-3 py-1 min-h-11 rounded-lg font-medium transition flex items-center justify-center ${
                     range === days
                       ? "bg-action-primary text-white shadow"
@@ -242,9 +248,9 @@ function AdminAnalyticsInner() {
                   }`}
                 >
                   {days}d
-                </button>
+                </ToggleButton>
               ))}
-            </div>
+            </ToggleGroup>
             <button
               type="button"
               onClick={exportCsv}

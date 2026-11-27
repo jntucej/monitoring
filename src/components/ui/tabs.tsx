@@ -21,8 +21,24 @@ import * as React from "react";
 import { Tabs as HeroTabs } from "@heroui/react";
 import { cn } from "@/lib/utils";
 
-const TabsRoot = ({ className, ...props }: React.ComponentProps<typeof HeroTabs>) => (
-  <HeroTabs.Root className={className} {...props} />
+export interface TabsRootProps
+  extends Omit<React.ComponentProps<typeof HeroTabs>, "selectedKey" | "onSelectionChange"> {
+  value?: string;
+  onValueChange?: (value: string) => void;
+  selectedKey?: React.ComponentProps<typeof HeroTabs>["selectedKey"];
+  onSelectionChange?: React.ComponentProps<typeof HeroTabs>["onSelectionChange"];
+}
+
+const TabsRoot = ({ className, value, onValueChange, selectedKey, onSelectionChange, ...props }: TabsRootProps) => (
+  <HeroTabs.Root
+    className={className}
+    selectedKey={value ?? selectedKey}
+    onSelectionChange={(key) => {
+      onSelectionChange?.(key);
+      if (onValueChange && typeof key === "string") onValueChange(key);
+    }}
+    {...props}
+  />
 );
 TabsRoot.displayName = "Tabs";
 
@@ -30,12 +46,24 @@ const TabsList = ({ className, ...props }: React.ComponentProps<typeof HeroTabs.
   <HeroTabs.List className={cn("surface-card flex gap-1 rounded-lg p-1", className)} {...props} />
 );
 
-const TabsTrigger = ({ className, ...props }: React.ComponentProps<typeof HeroTabs.Tab>) => (
-  <HeroTabs.Tab className={cn("text-xs font-medium", className)} {...props} />
+interface TabsTriggerProps
+  extends Omit<React.ComponentProps<typeof HeroTabs.Tab>, "id"> {
+  value?: string;
+  id?: string;
+}
+
+const TabsTrigger = ({ className, value, id, ...props }: TabsTriggerProps) => (
+  <HeroTabs.Tab id={value ?? id ?? ""} className={cn("text-xs font-medium", className)} {...props} />
 );
 
-const TabsPanel = ({ className, ...props }: React.ComponentProps<typeof HeroTabs.Panel>) => (
-  <HeroTabs.Panel className={className} {...props} />
+interface TabsPanelProps
+  extends Omit<React.ComponentProps<typeof HeroTabs.Panel>, "id"> {
+  value?: string;
+  id?: string;
+}
+
+const TabsPanel = ({ className, value, id, ...props }: TabsPanelProps) => (
+  <HeroTabs.Panel id={value ?? id ?? ""} className={className} {...props} />
 );
 
 export const Tabs = Object.assign(TabsRoot, {
@@ -44,8 +72,7 @@ export const Tabs = Object.assign(TabsRoot, {
   Panel: TabsPanel,
 });
 
-export type TabsProps = React.ComponentProps<typeof HeroTabs>;
+export type TabsProps = TabsRootProps;
 export type TabsListProps = React.ComponentProps<typeof HeroTabs.List>;
-export type TabsTriggerProps = React.ComponentProps<typeof HeroTabs.Tab>;
-export type TabsPanelProps = React.ComponentProps<typeof HeroTabs.Panel>;
+export type { TabsTriggerProps, TabsPanelProps };
 export default Tabs;

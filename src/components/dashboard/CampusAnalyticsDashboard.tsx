@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { TelemetryKpiCard, UnifiedWorkspaceFrame } from "@/components/dashboard/UnifiedDashboardWidgets";
 import { HorizontalPillBarList } from "@/components/analytics";
+import { ToggleGroup, ToggleButton } from "@/components/ui/toggle";
+import { Tabs } from "@/components/ui/tabs";
 import type { KpiTone } from "@/lib/org-map-adapters";
 import { BarChart3, Users, Activity, ArrowRight, Smartphone, Globe, Inbox, Info } from "lucide-react";
 
@@ -106,12 +108,17 @@ export function CampusAnalyticsDashboard({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex p-1 rounded-xl bg-neutral-100 border border-neutral-200/80">
+          <ToggleGroup
+            value={surface}
+            onValueChange={(val) => {
+              if (val) setSurface(val as Surface);
+            }}
+            className="p-1 rounded-xl bg-neutral-100 border border-neutral-200/80"
+          >
             {SURFACES.map((s) => (
-              <button
+              <ToggleButton
                 key={s.id}
-                type="button"
-                onClick={() => setSurface(s.id)}
+                value={s.id}
                 className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
                   surface === s.id
                     ? "bg-white text-neutral-900 font-semibold shadow-sm"
@@ -119,16 +126,21 @@ export function CampusAnalyticsDashboard({
                 }`}
               >
                 {s.label}
-              </button>
+              </ToggleButton>
             ))}
-          </div>
+          </ToggleGroup>
 
-          <div className="inline-flex p-1 rounded-xl bg-neutral-100 border border-neutral-200/80">
+          <ToggleGroup
+            value={timeframe}
+            onValueChange={(val) => {
+              if (val) setTimeframe(val as Timeframe);
+            }}
+            className="p-1 rounded-xl bg-neutral-100 border border-neutral-200/80"
+          >
             {TIMEFRAMES.map((tf) => (
-              <button
+              <ToggleButton
                 key={tf.id}
-                type="button"
-                onClick={() => setTimeframe(tf.id)}
+                value={tf.id}
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
                   timeframe === tf.id
                     ? "bg-neutral-900 text-white font-semibold shadow-sm"
@@ -136,9 +148,9 @@ export function CampusAnalyticsDashboard({
                 }`}
               >
                 {tf.label}
-              </button>
+              </ToggleButton>
             ))}
-          </div>
+          </ToggleGroup>
         </div>
       </div>
 
@@ -364,17 +376,22 @@ export function CampusAnalyticsDashboard({
       )}
 
       {/* 3-Tab Switchable 4-Step Sankey Funnel */}
-      <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 p-4 space-y-3">
+      <Tabs
+        value={funnelTab}
+        onValueChange={(val) => {
+          if (val) setFunnelTab(val as FunnelTab);
+        }}
+        className="rounded-2xl border border-neutral-200/80 bg-neutral-50 p-4 space-y-3"
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-xs font-bold text-neutral-900">
             Operational Journey &amp; Drop-Off Funnel (4-Step)
           </div>
-          <div className="inline-flex p-1 rounded-xl bg-white border border-neutral-200/80">
+          <Tabs.List className="p-1 rounded-xl bg-white border border-neutral-200/80">
             {FUNNEL_TABS.map((t) => (
-              <button
+              <Tabs.Tab
                 key={t.id}
-                type="button"
-                onClick={() => setFunnelTab(t.id)}
+                value={t.id}
                 className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
                   funnelTab === t.id
                     ? "bg-neutral-900 text-white font-semibold"
@@ -382,43 +399,45 @@ export function CampusAnalyticsDashboard({
                 }`}
               >
                 {t.label}
-              </button>
+              </Tabs.Tab>
             ))}
-          </div>
+          </Tabs.List>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {activeFunnel.map((step, idx) => {
-            const isNull = step.count === null;
-            const pct = isNull ? 0 : Math.round(((step.count ?? 0) / maxFunnel) * 100);
-            return (
-              <div
-                key={step.step}
-                className={`bg-white rounded-xl border p-3 flex items-center justify-between gap-2 ${
-                  isNull ? "border-dashed border-neutral-300 bg-neutral-50" : "border-neutral-200/80"
-                }`}
-              >
-                <div className="min-w-0">
-                  <div className="text-[11px] text-neutral-500">
-                    Step {idx + 1} {isNull ? "· not tracked" : `· ${pct}%`}
+        <Tabs.Panel value={funnelTab}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {activeFunnel.map((step, idx) => {
+              const isNull = step.count === null;
+              const pct = isNull ? 0 : Math.round(((step.count ?? 0) / maxFunnel) * 100);
+              return (
+                <div
+                  key={step.step}
+                  className={`bg-white rounded-xl border p-3 flex items-center justify-between gap-2 ${
+                    isNull ? "border-dashed border-neutral-300 bg-neutral-50" : "border-neutral-200/80"
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <div className="text-[11px] text-neutral-500">
+                      Step {idx + 1} {isNull ? "· not tracked" : `· ${pct}%`}
+                    </div>
+                    <div className="text-xs font-bold text-neutral-900 mt-0.5 truncate">{step.step}</div>
+                    {isNull && (
+                      <div className="text-[10px] font-mono text-neutral-400 mt-0.5">no telemetry source</div>
+                    )}
                   </div>
-                  <div className="text-xs font-bold text-neutral-900 mt-0.5 truncate">{step.step}</div>
-                  {isNull && (
-                    <div className="text-[10px] font-mono text-neutral-400 mt-0.5">no telemetry source</div>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-lg font-bold font-mono ${isNull ? "text-neutral-300" : "text-neutral-900"}`}>
+                      {isNull ? "—" : step.count}
+                    </span>
+                    {idx < activeFunnel.length - 1 && (
+                      <ArrowRight className="w-3.5 h-3.5 text-neutral-400 hidden lg:block" />
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={`text-lg font-bold font-mono ${isNull ? "text-neutral-300" : "text-neutral-900"}`}>
-                    {isNull ? "—" : step.count}
-                  </span>
-                  {idx < activeFunnel.length - 1 && (
-                    <ArrowRight className="w-3.5 h-3.5 text-neutral-400 hidden lg:block" />
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </Tabs.Panel>
 
         {/* Real stage-action distribution */}
         {data?.stageActions && data.stageActions.length > 0 && (
@@ -439,7 +458,7 @@ export function CampusAnalyticsDashboard({
             </div>
           </div>
         )}
-      </div>
+      </Tabs>
     </UnifiedWorkspaceFrame>
   );
 }

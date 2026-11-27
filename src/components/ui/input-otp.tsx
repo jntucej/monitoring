@@ -15,7 +15,6 @@
  */
 import * as React from "react";
 import {
-  InputOTP as HeroInputOTP,
   InputOTPRoot as HeroInputOTPRoot,
   InputOTPGroup as HeroInputOTPGroup,
   InputOTPSlot as HeroInputOTPSlot,
@@ -23,11 +22,30 @@ import {
 } from "@heroui/react";
 import { cn } from "@/lib/utils";
 
+interface InputOTPRootProps
+  extends Omit<
+    React.ComponentPropsWithRef<typeof HeroInputOTPRoot>,
+    "disabled"
+  > {
+  disabled?: boolean;
+}
+
 const InputOTPRootComponent = ({
   className,
+  disabled,
+  isDisabled,
+  children,
+  maxLength,
   ...props
-}: React.ComponentProps<typeof HeroInputOTPRoot>) => (
-  <HeroInputOTPRoot className={cn("flex items-center gap-2", className)} {...props} />
+}: InputOTPRootProps) => (
+  <HeroInputOTPRoot
+    className={cn("flex items-center gap-2", className)}
+    isDisabled={isDisabled ?? disabled}
+    maxLength={maxLength}
+    {...props}
+  >
+    {children}
+  </HeroInputOTPRoot>
 );
 InputOTPRootComponent.displayName = "InputOTP";
 
@@ -62,7 +80,7 @@ export const InputOTP = Object.assign(InputOTPRootComponent, {
   Separator: InputOTPSeparatorComponent,
 });
 
-export type InputOTPProps = React.ComponentProps<typeof HeroInputOTP>;
+export type InputOTPProps = InputOTPRootProps;
 export type InputOTPGroupProps = React.ComponentProps<typeof HeroInputOTPGroup>;
 export type InputOTPSlotProps = React.ComponentProps<typeof HeroInputOTPSlot>;
 export type InputOTPSeparatorProps = React.ComponentProps<typeof HeroInputOTPSeparator>;

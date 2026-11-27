@@ -7,6 +7,7 @@
 import React, { useCallback, useState } from "react";
 import { Calendar, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ToggleGroup, ToggleButton } from "@/components/ui/toggle";
 import { PERIOD_OPTIONS, getPeriod, type Period, type PeriodKey } from "@/lib/period";
 
 export interface PeriodPickerProps {
@@ -48,12 +49,17 @@ export function PeriodPicker({ value, onChange, className, allowCustom = true }:
   return (
     <div className={cn("inline-flex items-center gap-1", className)}>
       {/* Segmented buttons for common periods */}
-      <div className="surface-card inline-flex rounded-lg p-0.5 gap-0.5">
+      <ToggleGroup
+        value={value.key}
+        onValueChange={(val) => {
+          if (val) select(val as PeriodKey);
+        }}
+        className="p-0.5 gap-0.5"
+      >
         {PERIOD_OPTIONS.map(({ key, label }) => (
-          <button
+          <ToggleButton
             key={key}
-            type="button"
-            onClick={() => select(key)}
+            value={key}
             className={cn(
               "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               value.key === key
@@ -62,9 +68,9 @@ export function PeriodPicker({ value, onChange, className, allowCustom = true }:
             )}
           >
             {label}
-          </button>
+          </ToggleButton>
         ))}
-      </div>
+      </ToggleGroup>
 
       {/* Custom date inputs */}
       {allowCustom && value.key === "custom" && (

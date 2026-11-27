@@ -32,6 +32,7 @@ import {
   Search,
 } from "lucide-react";
 import { getAuthHeaders, cn } from "@/lib/utils";
+import { ToggleGroup, ToggleButton } from "@/components/ui/toggle";
 import { useExport } from "@/hooks/useExport";
 import { DeltaBadge } from "@/components/shared/DeltaBadge";
 import { MiniSparkline } from "@/components/shared/MiniSparkline";
@@ -297,14 +298,19 @@ export function StudentAttendancePage() {
         </div>
 
         {/* Period selector */}
-        <div className="flex flex-wrap gap-1.5">
+        <ToggleGroup
+          value={period}
+          onValueChange={(val) => {
+            if (val) setPeriod(val as PeriodKey);
+          }}
+          className="flex-wrap gap-1.5"
+        >
           {PERIOD_KEYS.map((key) => {
             const opt = PERIOD_OPTIONS.find((o) => o.key === key);
             return (
-              <button
+              <ToggleButton
                 key={key}
-                type="button"
-                onClick={() => setPeriod(key)}
+                value={key}
                 className={cn(
                   "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                   period === key
@@ -313,10 +319,10 @@ export function StudentAttendancePage() {
                 )}
               >
                 {opt?.label ?? key}
-              </button>
+              </ToggleButton>
             );
           })}
-        </div>
+        </ToggleGroup>
 
         {/* Loading */}
         {loading && !data && (

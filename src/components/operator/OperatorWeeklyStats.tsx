@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders, cn } from "@/lib/utils";
+import { ToggleGroup, ToggleButton } from "@/components/ui/toggle";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -114,21 +115,26 @@ export function OperatorWeeklyStats() {
         </div>
 
         {/* Week toggle */}
-        <div className="surface-card inline-flex rounded-lg p-0.5 gap-0.5">
+        <ToggleGroup
+          value={week}
+          onValueChange={(val) => {
+            if (val) setWeek(val as "this" | "last");
+          }}
+          className="p-0.5 gap-0.5"
+        >
           {(["this", "last"] as const).map((w) => (
-            <button
+            <ToggleButton
               key={w}
-              type="button"
-              onClick={() => setWeek(w)}
+              value={w}
               className={cn(
                 "rounded-md px-3 py-1 text-xs font-medium transition-colors",
                 week === w ? "bg-action-primary text-white" : "text-text-secondary hover:bg-bg-elevated"
               )}
             >
               {w === "this" ? "This week" : "Last week"}
-            </button>
+            </ToggleButton>
           ))}
-        </div>
+        </ToggleGroup>
 
         {/* Loading */}
         {loading && !data && (

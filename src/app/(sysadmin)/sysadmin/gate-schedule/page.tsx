@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useExport } from "@/hooks/useExport";
+import { ToggleGroup, ToggleButton } from "@/components/ui/toggle";
 import { getAuthHeaders } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
@@ -154,12 +155,17 @@ function SysadminGateScheduleInner() {
 
       {/* Period picker + CSV export */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="inline-flex rounded-lg p-0.5 gap-0.5 bg-bg-elevated border border-border">
+        <ToggleGroup
+          value={period}
+          onValueChange={(val) => {
+            if (val) setPeriod(val as PeriodKey);
+          }}
+          className="p-0.5 gap-0.5 bg-bg-elevated border border-border"
+        >
           {PERIODS.map(({ key, label }) => (
-            <button
+            <ToggleButton
               key={key}
-              type="button"
-              onClick={() => setPeriod(key)}
+              value={key}
               className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
                 period === key
                   ? "bg-action-primary text-white"
@@ -167,9 +173,9 @@ function SysadminGateScheduleInner() {
               }`}
             >
               {label}
-            </button>
+            </ToggleButton>
           ))}
-        </div>
+        </ToggleGroup>
         <div className="flex items-center gap-2">
           <button
             type="button"

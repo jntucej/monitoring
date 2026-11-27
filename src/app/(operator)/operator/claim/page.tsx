@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, KeyRound, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { InputOTP } from "@/components/ui/input-otp";
 
 /**
  * Operator claim page — redeem a 6-digit claim code minted by a supervisor
@@ -104,28 +105,36 @@ export default function OperatorClaimPage() {
         </div>
 
         <div className="surface-card bg-bg-surface p-5 space-y-4">
-          <label className="block">
-            <span className="block text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+          <div>
+            <span className="block text-xs font-semibold text-text-muted mb-2 uppercase tracking-wide">
               Claim code
             </span>
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              maxLength={12}
-              value={code}
-              onChange={(e) => {
-                setCode(e.target.value.replace(/[^0-9]/g, ""));
-                setError(null);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") submit();
-              }}
-              placeholder="e.g. 482913"
-              className="surface-card w-full px-4 py-3 bg-bg-base text-2xl font-mono tracking-[0.3em] text-text-primary placeholder:text-text-muted placeholder:text-base placeholder:tracking-normal placeholder:font-sans focus:ring-2 focus:ring-emerald-500/40 outline-none"
-              disabled={submitting}
-            />
-          </label>
+            <div className="flex justify-center py-2">
+              <InputOTP
+                maxLength={6}
+                value={code}
+                onChange={(val) => {
+                  setCode(val.replace(/[^0-9]/g, ""));
+                  setError(null);
+                }}
+                onComplete={() => submit()}
+                disabled={submitting}
+                inputMode="numeric"
+              >
+                <InputOTP.Group>
+                  <InputOTP.Slot index={0} />
+                  <InputOTP.Slot index={1} />
+                  <InputOTP.Slot index={2} />
+                </InputOTP.Group>
+                <InputOTP.Separator />
+                <InputOTP.Group>
+                  <InputOTP.Slot index={3} />
+                  <InputOTP.Slot index={4} />
+                  <InputOTP.Slot index={5} />
+                </InputOTP.Group>
+              </InputOTP>
+            </div>
+          </div>
 
           {error && (
             <div className="surface-card p-2.5 bg-rose-500/10 text-action-danger text-xs font-medium flex items-start gap-2">

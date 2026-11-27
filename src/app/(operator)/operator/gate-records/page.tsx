@@ -13,6 +13,7 @@ import { GateEventForm } from "@/components/gate/GateEventForm";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Loader2, Radio } from "lucide-react";
+import { Tabs } from "@/components/ui/tabs";
 
 type EventType =
   | "movement"
@@ -137,47 +138,53 @@ function GateRecordsConsole() {
         severity="ok"
       />
 
-      {/* Event-type tabs */}
-      <div className="flex flex-wrap gap-1.5" role="tablist">
-        {EVENT_TABS.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={activeTab === t.id}
-            onClick={() => setActiveTab(t.id)}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-              activeTab === t.id
-                ? "bg-action-primary text-bg-surface"
-                : "bg-bg-elevated text-text-secondary hover:bg-bg-elevated/80"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {/* Event-type tabs + Blueprint-driven form */}
+      <Tabs
+        value={activeTab}
+        onValueChange={(val) => {
+          if (val) setActiveTab(val as EventType);
+        }}
+      >
+        <Tabs.List className="flex flex-wrap gap-1.5 p-0 bg-transparent rounded-none">
+          {EVENT_TABS.map((t) => (
+            <Tabs.Tab
+              key={t.id}
+              value={t.id}
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                activeTab === t.id
+                  ? "bg-action-primary text-bg-surface"
+                  : "bg-bg-elevated text-text-secondary hover:bg-bg-elevated/80"
+              }`}
+            >
+              {t.label}
+            </Tabs.Tab>
+          ))}
+        </Tabs.List>
 
-      {/* Blueprint-driven form for the active event type */}
-      <div className="surface-card bg-bg-surface p-4 sm:p-5 space-y-3 min-w-0">
-        <GateEventForm
-          key={activeTab}
-          role={role}
-          gateType={activeEvent.gateType}
-          eventType={activeEvent.id}
-          context="default"
-          autoLoad
-          onSubmit={handleRecord}
-        />
-        {error && (
-          <p className="text-sm text-action-danger" role="alert">
-            {error}
-          </p>
-        )}
-        {lastRecorded && !error && (
-          <p className="text-sm text-action-primary">
-            Recorded {lastRecorded.eventType} — outcome {lastRecorded.outcome}
-          </p>
-        )}
-      </div>
+        <Tabs.Panel value={activeTab} className="pt-2">
+          <div className="surface-card bg-bg-surface p-4 sm:p-5 space-y-3 min-w-0">
+            <GateEventForm
+              key={activeTab}
+              role={role}
+              gateType={activeEvent.gateType}
+              eventType={activeEvent.id}
+              context="default"
+              autoLoad
+              onSubmit={handleRecord}
+            />
+            {error && (
+              <p className="text-sm text-action-danger" role="alert">
+                {error}
+              </p>
+            )}
+            {lastRecorded && !error && (
+              <p className="text-sm text-action-primary">
+                Recorded {lastRecorded.eventType} — outcome {lastRecorded.outcome}
+              </p>
+            )}
+          </div>
+        </Tabs.Panel>
+      </Tabs>
 
       {/* Live IN/OUT feed */}
       <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">

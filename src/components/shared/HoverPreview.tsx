@@ -1,59 +1,35 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { Popover } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 /**
  * HoverPreview — the "hover → tooltip/preview" layer of the inspection
- * hierarchy. Wraps any element and, on hover (or focus, for keyboard),
- * shows a compact preview card without leaving the page.
+ * hierarchy. Backed by HeroUI v3 Popover (React Aria): opens on hover,
+ * focus, or tap; auto-flips off viewport edges; closes on outside press
+ * or Escape.
  *
  * Usage:
- *
  *   <HoverPreview preview={<StudentQuickCard row={r} />}>
  *     <button>…row content…</button>
  *   </HoverPreview>
- *
- * The preview is intentionally compact (a few key facts + state) — the
- * full context/history/actions live in `EntityInspector` (click → panel).
  */
 
 export interface HoverPreviewProps {
-  /** The compact preview shown on hover. */
+  /** The compact preview shown on hover / tap. */
   preview: ReactNode;
   /** The element to wrap. */
   children: ReactNode;
   /** Position of the preview relative to the trigger. Default "top". */
   position?: "top" | "bottom" | "left" | "right";
-  /** Extra ms before the preview shows (debounce so it doesn't flicker). */
+  /** Extra ms before the preview shows on hover (debounce so it doesn't flicker). */
   delayMs?: number;
   /** Render the trigger inline (no extra wrapper). Default true. */
   inline?: boolean;
   /** Class for the preview card. */
   previewClassName?: string;
 }
-
-const POSITIONS: Record<
-  NonNullable<HoverPreviewProps["position"]>,
-  { trigger: string; card: string }
-> = {
-  top: {
-    trigger: "relative group",
-    card: "bottom-full left-1/2 -translate-x-1/2 mb-2",
-  },
-  bottom: {
-    trigger: "relative group",
-    card: "top-full left-1/2 -translate-x-1/2 mt-2",
-  },
-  left: {
-    trigger: "relative group",
-    card: "top-1/2 right-full -translate-y-1/2 mr-2",
-  },
-  right: {
-    trigger: "relative group",
-    card: "top-1/2 left-full -translate-y-1/2 ml-2",
-  },
-};
 
 export function HoverPreview({
   preview,
@@ -63,47 +39,47 @@ export function HoverPreview({
   inline = true,
   previewClassName,
 }: HoverPreviewProps) {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [timer, setTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
-  const openSoon = () => {
+  const handleMouseEnter = () => {
     if (timer) clearTimeout(timer);
-    setTimer(setTimeout(() => setOpen(true), delayMs));
+    setTimer(setTimeout(() => setIsOpen(true), delayMs));
   };
-  const closeSoon = () => {
+
+  const handleMouseLeave = () => {
     if (timer) clearTimeout(timer);
     setTimer(null);
-    setOpen(false);
+    setIsOpen(false);
   };
 
-  const pos = POSITIONS[position];
-
-  const wrapper = (
-    <span
-      className={cn(pos.trigger, "inline-flex max-w-full", !inline && "block w-full")}
-      onMouseEnter={openSoon}
-      onMouseLeave={closeSoon}
-      onFocus={openSoon}
-      onBlur={closeSoon}
-      tabIndex={-1}
-    >
-      {children}
-      {open && (
-        <span
-          role="tooltip"
-          className={cn(
-            "absolute z-[70] surface-card bg-bg-surface p-3 text-xs text-text-primary shadow-lg border border-border max-w-64 w-max",
-            pos.card,
-            previewClassName,
-          )}
-        >
+  return (
+    <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
+      <Popover.Trigger
+        className={cn(
+          inline ? "inline-flex max-w-full" : "block w-full",
+          "cursor-pointer text-left focus:outline-none"
+        )}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {children}
+      </Popover.Trigger>
+      <Popover.Content
+        placement={position}
+        className={cn(
+          "z-[70] surface-card bg-bg-surface p-3 text-xs text-text-primary shadow-lg border border-border max-w-64 w-max",
+          previewClassName
+        )}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <Popover.Dialog className="outline-none">
           {preview}
-        </span>
-      )}
-    </span>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
   );
-
-  return wrapper;
 }
 
 /**

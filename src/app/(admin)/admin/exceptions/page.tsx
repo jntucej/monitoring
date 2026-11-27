@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { scanInspection } from "@/components/shared/inspectionModels";
-import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 /* ── response shape (mirrors /api/admin/exceptions) ── */

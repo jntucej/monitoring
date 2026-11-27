@@ -15,7 +15,6 @@ import { RoleExportButton } from "@/components/shared/RoleExportButton";
 import { ActiveFilterBar } from "@/components/shared/ActiveFilterBar";
 import { DataTable } from "@/components/ui/DataTable";
 import { EntityInspector, KVPairs } from "@/components/shared/EntityInspector";
-import { HoverPreview } from "@/components/shared/HoverPreview";
 import { useRoleContext } from "@/hooks/useRoleContext";
 import { SlaBadge } from "@/components/approver/SlaBadge";
 import type { PermissionItem } from "@/components/approver/PermissionRow";

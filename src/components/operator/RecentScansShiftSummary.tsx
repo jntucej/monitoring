@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders, cn } from "@/lib/utils";
+import { ToggleGroup, ToggleButton } from "@/components/ui/toggle";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -122,21 +123,26 @@ export function RecentScansShiftSummary() {
         </div>
 
         {/* Period toggle */}
-        <div className="surface-card inline-flex rounded-lg p-0.5 gap-0.5">
+        <ToggleGroup
+          value={period}
+          onValueChange={(val) => {
+            if (val) setPeriod(val as PeriodKey);
+          }}
+          className="p-0.5 gap-0.5"
+        >
           {PERIODS.map(({ key, label }) => (
-            <button
+            <ToggleButton
               key={key}
-              type="button"
-              onClick={() => setPeriod(key)}
+              value={key}
               className={cn(
                 "rounded-md px-3 py-1 text-xs font-medium transition-colors",
                 period === key ? "bg-action-primary text-white" : "text-text-secondary hover:bg-bg-elevated"
               )}
             >
               {label}
-            </button>
+            </ToggleButton>
           ))}
-        </div>
+        </ToggleGroup>
 
         {/* Loading */}
         {loading && !data && (

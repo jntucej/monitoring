@@ -31,6 +31,8 @@ import {
 import { useNavigation } from "@/hooks/useNavigation";
 import type { NavItem } from "@/hooks/useNavigation";
 import { getConsoleConfig } from "@/config/consoles";
+import { Tooltip } from "@/components/ui/tooltip";
+import { Popover } from "@/components/ui/popover";
 
 export interface IconRailChild {
   label: string;
@@ -63,15 +65,17 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 function LocalTooltip({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <span className="relative group flex items-center justify-center">
-      {children}
-      <span
-        role="tooltip"
-        className="surface-card absolute left-full ml-3 px-2.5 py-1 bg-bg-elevated text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 text-text-primary"
+    <Tooltip delay={150}>
+      <Tooltip.Trigger className="flex items-center justify-center">
+        {children}
+      </Tooltip.Trigger>
+      <Tooltip.Content
+        placement="right"
+        className="surface-card ml-2 px-2.5 py-1 bg-bg-elevated text-xs font-medium whitespace-nowrap z-50 text-text-primary border border-border shadow-md"
       >
         {label}
-      </span>
-    </span>
+      </Tooltip.Content>
+    </Tooltip>
   );
 }
 
@@ -137,65 +141,71 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
           const active = isGroupActive(group);
           const open = openGroupId === group.id;
           return (
-            <div
+            <Popover
               key={group.id}
-              className="relative"
-              onMouseEnter={() => setOpenGroupId(group.id)}
-              onMouseLeave={() => setOpenGroupId(null)}
+              isOpen={open}
+              onOpenChange={(next) => setOpenGroupId(next ? group.id : null)}
             >
-              <button
-                type="button"
-                aria-label={group.label}
-                aria-expanded={open}
-                onClick={() => setOpenGroupId(open ? null : group.id)}
-                className={`size-6 rounded-xl flex items-center justify-center transition-colors ${
-                  active
-                    ? "bg-action-primary/15 text-action-primary"
-                    : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
-                }`}
+              <Popover.Trigger
+                className="relative"
+                onMouseEnter={() => setOpenGroupId(group.id)}
+                onMouseLeave={() => setOpenGroupId(null)}
               >
-                <GroupIcon className="w-4 h-4" />
-              </button>
-              {active && (
-                <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-action-primary" />
-              )}
-              {/* Desktop flyout */}
-              <div
-                className={`absolute left-full top-0 z-50 ml-2 w-56 rounded-xl border bg-bg-elevated shadow-xl overflow-hidden transition-opacity ${
-                  open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                }`}
-                style={{ borderColor: "var(--border)" }}
-                role="menu"
-                aria-label={group.label}
-              >
-                <p
-                  className="px-3 pt-2 pb-1 text-xs uppercase tracking-wide font-semibold"
-                  style={{ color: "var(--text-muted)" }}
+                <button
+                  type="button"
+                  aria-label={group.label}
+                  aria-expanded={open}
+                  className={`size-6 rounded-xl flex items-center justify-center transition-colors ${
+                    active
+                      ? "bg-action-primary/15 text-action-primary"
+                      : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
+                  }`}
                 >
-                  {group.label}
-                </p>
-                {group.children.map((child) => {
-                  const childActive =
-                    pathname === child.href ||
-                    (child.href.length > 2 && pathname!.startsWith(child.href));
-                  return (
-                    <a
-                      key={child.href}
-                      href={child.href}
-                      role="menuitem"
-                      onClick={() => setOpenGroupId(null)}
-                      className={`flex items-center gap-2 px-3 py-2 text-xs transition-colors ${
-                        childActive
-                          ? "text-action-primary font-semibold bg-action-primary/10"
-                          : "text-text-secondary hover:bg-bg-surface hover:text-text-primary"
-                      }`}
-                    >
-                      <span className="truncate">{child.label}</span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
+                  <GroupIcon className="w-4 h-4" />
+                </button>
+                {active && (
+                  <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-action-primary" />
+                )}
+              </Popover.Trigger>
+              <Popover.Content
+                placement="right top"
+                className="z-50 ml-2 w-56 rounded-xl border bg-bg-elevated shadow-xl overflow-hidden p-0"
+                style={{ borderColor: "var(--border)" }}
+                onMouseEnter={() => setOpenGroupId(group.id)}
+                onMouseLeave={() => setOpenGroupId(null)}
+              >
+                <Popover.Dialog className="outline-none" aria-label={group.label}>
+                  <div role="menu" aria-label={group.label}>
+                  <p
+                    className="px-3 pt-2 pb-1 text-xs uppercase tracking-wide font-semibold"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {group.label}
+                  </p>
+                  {group.children.map((child) => {
+                    const childActive =
+                      pathname === child.href ||
+                      (child.href.length > 2 && pathname!.startsWith(child.href));
+                    return (
+                      <a
+                        key={child.href}
+                        href={child.href}
+                        role="menuitem"
+                        onClick={() => setOpenGroupId(null)}
+                        className={`flex items-center gap-2 px-3 py-2 text-xs transition-colors ${
+                          childActive
+                            ? "text-action-primary font-semibold bg-action-primary/10"
+                            : "text-text-secondary hover:bg-bg-surface hover:text-text-primary"
+                        }`}
+                      >
+                        <span className="truncate">{child.label}</span>
+                      </a>
+                    );
+                  })}
+                  </div>
+                </Popover.Dialog>
+              </Popover.Content>
+            </Popover>
           );
         })
       ) : (

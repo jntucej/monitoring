@@ -11,7 +11,6 @@
  */
 import * as React from "react";
 import { Popover as HeroPopover } from "@heroui/react";
-import { cn } from "@/lib/utils";
 
 function PopoverBase({ ...props }: React.ComponentProps<typeof HeroPopover.Root>) {
   return <HeroPopover.Root {...props} />;
