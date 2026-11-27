@@ -63,3 +63,8 @@ export {
   SpatialPeopleMap,
   SpatialPeopleMapWorkspace,
 } from "@/components/dashboard/SpatialPeopleMap";
+export { GenderDonutChart, type DonutSlice } from "@/components/dashboard/GenderDonutChart";
+export {
+  DualSeriesBarChart,
+  type BarCategory,
+} from "@/components/dashboard/DualSeriesBarChart";

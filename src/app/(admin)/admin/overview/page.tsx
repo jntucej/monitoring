@@ -34,11 +34,14 @@ import { DataFreshness } from "@/components/shared/DataFreshness";
 
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
+import { useApiResource } from "@/hooks/useApiResource";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
+import { GenderDonutChart } from "@/components/dashboard/GenderDonutChart";
+import { DualSeriesBarChart } from "@/components/dashboard/DualSeriesBarChart";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
@@ -131,6 +134,32 @@ function AdminOverviewInner() {
 
   // Poll only while online; pause when offline (RC10/SD5).
   usePolling(load, { intervalMs: 30_000, enabled: !isOffline });
+
+  // Board 2 — campus demographics (gender breakdown). Loaded INDEPENDENTLY of
+  // the overview fetch so a transient /api/students/stats error or rate limit
+  // does not blank the operational-metrics panel. Explicit error/empty state.
+  const {
+    data: statsData,
+    error: statsError,
+    loading: statsLoading,
+    refresh: statsRefresh,
+  } = useApiResource<{ success: boolean; data: { total: number; byGender?: Array<{ gender: string; count: number; color?: string }> } }>(
+    "/api/students/stats",
+    { ttlMs: 60_000 },
+  );
+  const genderSlices = (statsData?.data?.byGender ?? []).map((g) => ({
+    label: g.gender ? g.gender.charAt(0).toUpperCase() + g.gender.slice(1) : "Unknown",
+    value: g.count,
+    // The API returns Tailwind bg-* classes; map to a concrete CSS color so the
+    // SVG stroke is theme-consistent. Male -> info blue, Female -> a distinct
+    // accent; Unknown -> muted.
+    color:
+      g.gender === "female"
+        ? "var(--action-info)"
+        : g.gender === "male"
+          ? "var(--action-primary)"
+          : "var(--text-muted)",
+  }));
 
   // RC10/SD5 — track connectivity; resume polling + refresh on reconnect.
   useEffect(() => {
@@ -430,6 +459,46 @@ function AdminOverviewInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      {/* Board 2 — campus demographics & operations (independently loaded panels) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <WidgetBoundary name="GenderDonut" title="Student Gender Breakdown">
+          {statsLoading && !statsData ? (
+            <div className="p-4 text-sm text-text-muted">Loading demographics…</div>
+          ) : statsError && !statsData ? (
+            <div className="p-4 text-sm text-action-danger flex items-center justify-between gap-2">
+              <span>Demographics unavailable: {statsError}</span>
+              <button
+                type="button"
+                onClick={() => statsRefresh()}
+                className="surface-card px-2 py-1 text-xs hover:bg-bg-elev-2"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <div className="p-4">
+              <GenderDonutChart slices={genderSlices} centerLabel={String(statsData?.data?.total ?? 0)} />
+            </div>
+          )}
+        </WidgetBoundary>
+
+        <WidgetBoundary name="UsersByStatus" title="Active vs Suspended Users">
+          <div className="p-4">
+            <DualSeriesBarChart
+              data={[
+                {
+                  label: "Identity",
+                  a: data?.identity?.active ?? 0,
+                  b: (data?.identity?.suspended ?? 0) + (data?.identity?.deprovisioned ?? 0),
+                },
+              ]}
+              seriesA={{ label: "Active", color: "var(--action-success)" }}
+              seriesB={{ label: "Suspended + Deprovisioned", color: "var(--action-warning)" }}
+            />
+          </div>
+        </WidgetBoundary>
+      </div>
 
       {/* Module Cards */}
       <div>
