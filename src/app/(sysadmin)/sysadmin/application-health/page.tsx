@@ -11,6 +11,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Activity, AlertTriangle } from "lucide-react";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ObservabilityStackPanel } from "@/components/sysadmin/monitoring/ObservabilityStackPanel";
 
 interface HealthData {
   status: "healthy" | "degraded" | "unhealthy";
@@ -174,6 +175,9 @@ function ApplicationHealthInner() {
             )}
           </div>
         )}
+      </WidgetBoundary>
+      <WidgetBoundary name="ObservabilityStackPanel" title="Observability Stack & Live Logs">
+        <ObservabilityStackPanel />
       </WidgetBoundary>
 
     </div>

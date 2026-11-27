@@ -18,6 +18,7 @@ import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver/wardenConsoleModels";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 
 
 function KpiTile({
@@ -122,6 +123,9 @@ return (
           <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
           <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
           <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+          <WidgetBoundary name="SpatialPeopleMap" title="Exam-Day Hall & Invigilation Map">
+            <SpatialPeopleMapWorkspace defaultArea="exam" lockedArea compact />
+          </WidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

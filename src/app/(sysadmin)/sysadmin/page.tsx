@@ -17,6 +17,8 @@ import { AdminAlertsPanel } from "@/components/approver/AdminAlertsPanel";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
+import { ObservabilityStackPanel } from "@/components/sysadmin/monitoring/ObservabilityStackPanel";
 
 /**
  * SysAdmin Command Center — the live operational-state cockpit.
@@ -90,6 +92,12 @@ export default function SysadminCommandCenterPage() {
       </WidgetBoundary>
       <WidgetBoundary name="NotificationCenter" title="Notification Center">
         <NotificationCenter />
+      </WidgetBoundary>
+      <WidgetBoundary name="ObservabilityStackPanel" title="Observability Stack & Live Logs">
+        <ObservabilityStackPanel />
+      </WidgetBoundary>
+      <WidgetBoundary name="SpatialPeopleMap" title="Institutional & DevOps Command Map">
+        <SpatialPeopleMapWorkspace defaultArea="institutional" compact />
       </WidgetBoundary>
 
     </>

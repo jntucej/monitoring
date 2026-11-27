@@ -23,6 +23,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { TelemetryKpiCard } from "@/components/dashboard/UnifiedDashboardWidgets";
 
 interface TelegramStudent {
   id: string;
@@ -326,57 +327,40 @@ export default function SysadminBotPage() {
           </div>
         </div>
 
-        {/* Summary Cards */}
+        {/* Summary Cards (AI Command Center Telemetry Strip) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-bg-surface p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-text-secondary">Total Students</span>
-              <Users className="w-4 h-4 text-text-muted" />
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-white">{summary.total.toLocaleString()}</span>
-              <span className="text-xs text-text-muted">enrolled</span>
-            </div>
-          </div>
-
-          <div className="bg-bg-surface p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-text-secondary">Linked to Telegram</span>
-              <LinkIcon className="w-4 h-4 text-blue-400" />
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-blue-400">{summary.linked.toLocaleString()}</span>
-              <span className="text-xs text-text-muted">
-                {summary.total > 0 ? `${Math.round((summary.linked / summary.total) * 100)}%` : "0%"}
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-bg-surface p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-text-secondary">Verified Accounts</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-emerald-400">
-                {summary.verified.toLocaleString()}
-              </span>
-              <span className="text-xs text-text-muted">active</span>
-            </div>
-          </div>
-
-          <div className="bg-bg-surface p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-text-secondary">Unverified</span>
-              <AlertCircle className="w-4 h-4 text-[color:var(--action-primary)]" />
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-[color:var(--action-primary)]">
-                {summary.unverified.toLocaleString()}
-              </span>
-              <span className="text-xs text-text-muted">pending</span>
-            </div>
-          </div>
+          <TelemetryKpiCard
+            label="Total Students"
+            value={summary.total.toLocaleString()}
+            delta="enrolled"
+            sub="Campus directory"
+            tone="navy"
+            segments={4}
+          />
+          <TelemetryKpiCard
+            label="Linked to Telegram"
+            value={summary.linked.toLocaleString()}
+            delta={summary.total > 0 ? `${Math.round((summary.linked / summary.total) * 100)}%` : "0%"}
+            sub="Bot paired"
+            tone="indigo"
+            segments={summary.total > 0 ? Math.max(1, Math.round((summary.linked / summary.total) * 4)) : 1}
+          />
+          <TelemetryKpiCard
+            label="Verified Accounts"
+            value={summary.verified.toLocaleString()}
+            delta="active"
+            sub="Push ready"
+            tone="emerald"
+            segments={summary.total > 0 ? Math.max(1, Math.round((summary.verified / summary.total) * 4)) : 1}
+          />
+          <TelemetryKpiCard
+            label="Unverified"
+            value={summary.unverified.toLocaleString()}
+            delta="pending"
+            sub="Awaiting OTP"
+            tone="amber"
+            segments={summary.unverified > 0 ? 2 : 4}
+          />
         </div>
 
         {/* Search & Filter Toolbar */}

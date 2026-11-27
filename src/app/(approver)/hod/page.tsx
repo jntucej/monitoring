@@ -2,6 +2,7 @@
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { ApprovalsView } from "./_shared/ApprovalsView";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 
 export default function PendingApprovalsPage() {
   return (
@@ -20,6 +21,7 @@ export default function PendingApprovalsPage() {
         ]}
       />
       <ApprovalsView status="PENDING" title="Pending approvals" />
+      <SpatialPeopleMapWorkspace defaultArea="department" lockedArea compact />
     </div>
   );
 }

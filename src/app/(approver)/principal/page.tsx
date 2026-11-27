@@ -35,6 +35,7 @@ import { SectionHeader } from "@/components/principal/shared/SectionHeader";
 import { SinceLastVisitCard } from "@/components/principal/shared/SinceLastVisitCard";
 import { PrincipalWidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import { PrincipalEmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 
 interface DashboardResponse {
   counts: {
@@ -416,6 +417,9 @@ export default function PrincipalCommandCenter() {
           setRejectNote("");
         }}
       />
+      <PrincipalWidgetBoundary name="SpatialPeopleMap" title="Institutional Command Map">
+        <SpatialPeopleMapWorkspace defaultArea="institutional" compact />
+      </PrincipalWidgetBoundary>
     </PrincipalShell>
   );
 }

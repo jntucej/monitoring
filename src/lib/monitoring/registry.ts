@@ -31,6 +31,48 @@ export const QUERY_REGISTRY: Record<string, NamedQuery> = {
     query: 'count by (name) (container_last_seen{name=~"gate_.*|mon_.*"})',
     type: "instant",
   },
+  "host.cpu": {
+    id: "host.cpu",
+    description: "Host CPU utilization % (node_exporter)",
+    query: '100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)',
+    type: "instant",
+  },
+  "host.memory": {
+    id: "host.memory",
+    description: "Host memory utilization % (node_exporter)",
+    query: '(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100',
+    type: "instant",
+  },
+  "host.disk": {
+    id: "host.disk",
+    description: "Root filesystem usage % (node_exporter)",
+    query: '(1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) * 100',
+    type: "instant",
+  },
+  "host.load1": {
+    id: "host.load1",
+    description: "Host 1m load average (node_exporter)",
+    query: "node_load1",
+    type: "instant",
+  },
+  "pg.up": {
+    id: "pg.up",
+    description: "PostgreSQL exporter liveness",
+    query: "pg_up",
+    type: "instant",
+  },
+  "pg.connections": {
+    id: "pg.connections",
+    description: "Active PostgreSQL connections",
+    query: "sum(pg_stat_activity_count)",
+    type: "instant",
+  },
+  "targets.up": {
+    id: "targets.up",
+    description: "Prometheus scrape targets up",
+    query: "up",
+    type: "instant",
+  },
 };
 
 export function getNamedQuery(id: string): NamedQuery | null {

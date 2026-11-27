@@ -1,4 +1,5 @@
 const PROM_URL = process.env.MONITORING_PROM_URL || "http://mon_prometheus:9090";
+const PROM_FALLBACK_URL = process.env.GATE_PROM_URL || "http://gate_prometheus:9090";
 const LOKI_URL = process.env.MONITORING_LOKI_URL || "http://mon_loki:3100";
 
 const ALLOWED_PREFIXES = [
@@ -31,19 +32,31 @@ export async function promQuery(query: string, time?: string) {
   if (!isAllowedPromQuery(query)) throw new Error("QUERY_NOT_ALLOWED");
   const params = new URLSearchParams({ query });
   if (time) params.set("time", time);
-  return monFetch(`${PROM_URL}/api/v1/query?${params.toString()}`);
+  try {
+    return await monFetch(`${PROM_URL}/api/v1/query?${params.toString()}`);
+  } catch {
+    return await monFetch(`${PROM_FALLBACK_URL}/api/v1/query?${params.toString()}`);
+  }
 }
 
 export async function promQueryRange(query: string, start: string, end: string, step = "30s") {
   if (!isAllowedPromQuery(query)) throw new Error("QUERY_NOT_ALLOWED");
   const params = new URLSearchParams({ query, start, end, step });
-  return monFetch(`${PROM_URL}/api/v1/query_range?${params.toString()}`);
+  try {
+    return await monFetch(`${PROM_URL}/api/v1/query_range?${params.toString()}`);
+  } catch {
+    return await monFetch(`${PROM_FALLBACK_URL}/api/v1/query_range?${params.toString()}`);
+  }
 }
 
 export async function lokiQueryRange(query: string, start: string, end: string, limit = 5000) {
   const capped = Math.min(Math.max(1, limit), 5000);
-  const params = new URLSearchParams({ query, start, end, limit: String(capped) });
+  const params = new URLSearchParams({ query, start, end, limit: String(capped), direction: "backward" });
   return monFetch(`${LOKI_URL}/loki/api/v1/query_range?${params.toString()}`);
+}
+
+export async function lokiLabelValues(label = "container") {
+  return monFetch(`${LOKI_URL}/loki/api/v1/label/${encodeURIComponent(label)}/values`);
 }
 
 export const MONITORING_GRAFANA_URL =

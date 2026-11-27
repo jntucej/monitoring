@@ -13,6 +13,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { PermissionList } from "@/components/approver/PermissionList";
 import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import type { Role } from "@/lib/types";
 
 const ALLOWED_ROLES: Role[] = ["hostel_manager","deputy_warden","caretaker","warden"] as Role[];
@@ -46,6 +47,7 @@ function Inner() {
         workflowType="hostel"
         allowForward
       />
+      <SpatialPeopleMapWorkspace defaultArea="hostel" lockedArea compact />
 
     </div>
   );

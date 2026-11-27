@@ -7,6 +7,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 
 import { FacultyTracking } from "@/components/admin/FacultyTracking";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { BarcodeRatioCard } from "@/components/dashboard/UnifiedDashboardWidgets";
 import { useAuthStore } from "@/stores/authStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { getAuthHeaders } from "@/lib/utils";
@@ -152,11 +153,35 @@ function FacultyAttendanceInner() {
           </div>
         </div>
       ) : (
-        <FacultyTracking
-          records={records}
-          summary={summary}
-          departmentSummaries={departmentSummaries}
-        />
+        <div className="space-y-4">
+          {summary.totalFaculty > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <BarcodeRatioCard
+                title="Attendance"
+                pct={Math.round((summary.presentToday / summary.totalFaculty) * 100)}
+                countLabel={`${summary.presentToday} of ${summary.totalFaculty} present`}
+                tone="emerald"
+              />
+              <BarcodeRatioCard
+                title="Absences"
+                pct={Math.round((summary.absentCount / summary.totalFaculty) * 100)}
+                countLabel={`${summary.absentCount} absent today`}
+                tone="amber"
+              />
+              <BarcodeRatioCard
+                title="Delayed"
+                pct={Math.round((summary.lateArrivals / summary.totalFaculty) * 100)}
+                countLabel={`${summary.lateArrivals} late arrivals`}
+                tone="indigo"
+              />
+            </div>
+          )}
+          <FacultyTracking
+            records={records}
+            summary={summary}
+            departmentSummaries={departmentSummaries}
+          />
+        </div>
       )}
 
     </div>

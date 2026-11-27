@@ -12,6 +12,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import {
   ShieldCheck,
   AlertTriangle,
@@ -292,6 +293,9 @@ function ExamBranchPassQueueInner() {
             </ul>
           )}
         </div>
+      </WidgetBoundary>
+      <WidgetBoundary name="SpatialPeopleMap" title="Exam-Day Hall & Invigilation Map">
+        <SpatialPeopleMapWorkspace defaultArea="exam" lockedArea compact />
       </WidgetBoundary>
 
     </div>

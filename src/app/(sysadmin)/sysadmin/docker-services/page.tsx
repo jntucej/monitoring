@@ -10,6 +10,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { DockerFleetPanel } from "@/components/sysadmin/monitoring/DockerFleetPanel";
+import { ObservabilityStackPanel } from "@/components/sysadmin/monitoring/ObservabilityStackPanel";
 import { AlertTriangle, Container } from "lucide-react";
 import { SysAdminGroupTrace } from "@/components/nav/level4/SysAdminGroupTrace";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -233,6 +234,9 @@ function DockerServicesInner() {
 
       {/* Host-level Prometheus fleet charts (existing panel) */}
       <DockerFleetPanel />
+
+      {/* Full Observability Stack + Live Loki Container Logs */}
+      <ObservabilityStackPanel />
 
     </div>
   );

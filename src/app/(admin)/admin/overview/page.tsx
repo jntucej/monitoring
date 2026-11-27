@@ -38,6 +38,7 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
@@ -499,6 +500,10 @@ function AdminOverviewInner() {
           </WidgetBoundary>
         </div>
       </section>
+
+      <WidgetBoundary name="SpatialPeopleMap" title="Institutional Command Map">
+        <SpatialPeopleMapWorkspace defaultArea="institutional" compact />
+      </WidgetBoundary>
 
       {/* RC6/AX2 — info strip restyled to a neutral, non-alert tone so it no longer mimics an alert.
           (contrast verify-first; not assumed a failure) */}

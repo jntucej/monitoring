@@ -22,6 +22,7 @@ import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 
 /* my-classes response shape */
 interface MyClassesResponse {
@@ -193,6 +194,9 @@ return (
       </WidgetBoundary>
       <WidgetBoundary name="NotificationCenter" title="Notification Center">
         <NotificationCenter />
+      </WidgetBoundary>
+      <WidgetBoundary name="SpatialPeopleMap" title="Department & Class Map">
+        <SpatialPeopleMapWorkspace defaultArea="department" lockedArea compact />
       </WidgetBoundary>
 
     </div>

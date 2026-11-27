@@ -2,6 +2,7 @@
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { EscalationsView } from "./_shared/EscalationsView";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 
 export default function ApprovalsPage() {
   return (
@@ -16,6 +17,7 @@ export default function ApprovalsPage() {
         secondaryAction={{ label: "Active Gates", href: "/supervisor/gates/live" }}
       />
       <EscalationsView />
+      <SpatialPeopleMapWorkspace defaultArea="security" lockedArea compact />
     </div>
   );
 }

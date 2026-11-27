@@ -2,6 +2,7 @@
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { ApprovalsView } from "./_shared/ApprovalsView";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 
 export default function Page() {
   return (
@@ -16,6 +17,7 @@ export default function Page() {
         secondaryAction={{ label: "VP Dashboard", href: "/vice-principal/home" }}
       />
       <ApprovalsView status="PENDING" title="Pending approvals" />
+      <SpatialPeopleMapWorkspace defaultArea="hostel" lockedArea enforceVpPrivacy compact />
     </div>
   );
 }
