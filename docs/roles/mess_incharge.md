@@ -18,6 +18,10 @@ The mess incharge balances operational dining logistics (verifying student meal 
 - **/mess/reviews**: Student meal feedback monitoring. Tracks dish ratings, taste and hygiene feedback, student complaints, and official replies.
 - **/mess/mess-issues**: Operational incident log covering equipment breakdowns, cold chain failures, contractor disputes, and kitchen hygiene issues.
 - **/mess/operational-requests**: Administrative workflows for requisitioning additional kitchen equipment, emergency provisions, or staff overtime.
+- **/mess/live**: Real-time live counter view showing current meal service status, active scans, and queue depth.
+- **/mess/polls**: Mess satisfaction polls and feedback collection.
+- **/mess/scan-v2**: Next-generation scanning terminal with improved token validation and offline fallback.
+- **/mess/profile**: Mess incharge personal profile and notification settings.
 
 ## Key API endpoints
 | Endpoint | Method(s) | What it does |

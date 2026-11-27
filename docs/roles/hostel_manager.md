@@ -14,6 +14,7 @@ Unlike caretakers whose scope is restricted to individual blocks, the hostel man
 - **/hostel-manager/housekeeping-tasks**: Operational oversight of housekeeping schedules, sanitation checklists, and common area cleaning audits across hostel premises.
 - **/hostel-manager/maintenance**: Preventive and emergency infrastructure maintenance planning, tracking vendor repairs, electrical systems, and civil works.
 - **/hostel-manager/resource-management**: Hostel inventory and asset management, covering furniture, fixtures, appliances, water supply systems, and hostel facilities.
+- **/hostel-manager/profile**: Hostel manager personal profile and notification preferences.
 - **/hostel/permissions**: Hierarchical out-pass and leave permission review portal. Hostel managers approve long-term leave, emergency exits, and multi-day passes routed beyond deputy wardens.
 
 ## Key API endpoints

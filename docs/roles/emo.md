@@ -3,10 +3,10 @@
 ## Overview
 The `emo` (Estate Maintenance Officer) role represents the institutional estate, campus engineering, and central physical infrastructure oversight authority. This role is a focused administrative role operating primarily within the campus complaints, physical infrastructure, and maintenance subsystem.
 
-In the current Next.js application, `emo` acts as a specialized backend authority without a dedicated standalone UI page suite (0 dedicated page routes). EMO functions are consumed via the complaints console and maintenance APIs, giving the Estate Maintenance Officer full authority to review, triage, inspect, cosign, and audit campus-wide physical works, electrical grids, water lines, civil infrastructure complaints, and contractor SLA breaches.
+In the current Next.js application, `emo` has a dedicated 4-page UI suite (`/emo`, `/emo/complaints`, `/emo/complaints/[id]`, `/emo/profile`) plus maintenance APIs, giving the Estate Maintenance Officer full authority to review, triage, inspect, cosign, and audit campus-wide physical works, electrical grids, water lines, civil infrastructure complaints, and contractor SLA breaches.
 
 ## Pages & workflows
-- **Limited UI Surface**: The `emo` role has no dedicated `/emo/*` page routes in the current web build. Estate maintenance personnel interact through the shared complaints console (`ComplaintConsole`), administrative complaint views, or direct API integration.
+- **Dedicated EMO Console (4 pages)**: `/emo`, `/emo/complaints`, `/emo/complaints/[id]`, `/emo/profile`. Estate maintenance personnel use a dedicated complaints console scoped to campus-wide infrastructure (civil, plumbing, electrical, HVAC, sanitation), with cosign authority for major repair authorizations.
 - **Estate & Infrastructure Oversight Workflow**:
   - Review campus-wide infrastructure complaints across all categories (civil, plumbing, electrical, HVAC, sanitation).
   - Triage critical complaints requiring campus engineering intervention.
@@ -52,7 +52,7 @@ In the current Next.js application, `emo` acts as a specialized backend authorit
 ## Gaps & Research
 
 ### Institutional context
-The EMO is the institutional authority for campus engineering and central physical infrastructure oversight. The EMO has no dedicated UI surface in the current build — it operates through shared consoles (complaints console, maintenance APIs).
+The EMO is the institutional authority for campus engineering and central physical infrastructure oversight. The EMO has a dedicated 4-page console (`/emo`, `/emo/complaints`, `/emo/complaints/[id]`, `/emo/profile`) plus shared maintenance APIs.
 
 Per Indian university facility management:
 - EMO is the technical authority for all campus engineering matters
@@ -60,7 +60,7 @@ Per Indian university facility management:
 - EMO reports to Principal for major infrastructure decisions
 
 ### Missing (not in app yet)
-1. **Dedicated EMO dashboard** — no dedicated UI surface for the EMO role
+1. ~~Dedicated EMO dashboard~~ — now available: 4-page EMO console (`/emo`, `/emo/complaints`, `/emo/complaints/[id]`, `/emo/profile`)
 2. **Estate asset register** — no structured asset register with maintenance history
 3. **Vendor SLA dashboard** — no visual SLA tracking for vendors
 4. **Major repair workflow** — no structured workflow for major repair cosign

@@ -21,6 +21,9 @@ The Vice-Principal interface utilizes a royal-purple theme (`#faf5ff` surface ti
 ### 3. Examination & Hostel Synchronization
 * **Examination Coordination (`/vice-principal/examinations`, `/vice-principal/examination-coordination`, `/oie/*`):** Synchronizes with the Office of the Controller of Examinations and OIE regarding examination scheduling, malpractice reviews, and candidate hall access.
 * **Hostel & Security Summaries (`/vice-principal/hostel-security-summaries`):** Aggregated, non-PII operational view of hostel block curfews, mess operations, and campus perimeter integrity.
+* **Analytics & Escalation (`/vice-principal/analytics`, `/vice-principal/escalated-requests`):** Department performance analytics and escalated request tracking requiring VP intervention.
+* **Pending Approvals & History (`/vice-principal/pending-approvals`, `/vice-principal/history`, `/vice-principal/history/7-days`, `/vice-principal/history/30-days`, `/vice-principal/history/90-days`):** Central pending approval queue and time-bounded decision history views.
+* **Profile (`/vice-principal/profile`):** VP personal profile and notification preferences.
 
 ## Key API endpoints
 

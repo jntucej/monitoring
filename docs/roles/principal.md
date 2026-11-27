@@ -15,12 +15,19 @@ The Principal interface adopts a navy theme (`#f8fafc` surface tint) with compos
 
 ### 2. Multi-Tier Approval Chain & Escalations
 * **Approvals Pipeline (`/principal/approvals`, `/principal/approvals/pending`, `/principal/approvals/escalated`, `/principal/approvals/overdue`, `/principal/approvals/delegated`):** Serves as the final decision point for escalated requests. Leave requests and gate passes exceeding standard durations, or flagged by Deputy Wardens and HODs, surface here.
-* **VP Bridge & Inbound Flags (`/principal/inbound`):** Review items specifically flagged and surfaced upstream by the Vice-Principal for executive attention, allowing immediate response or co-signing.
+* **Attention & Decisions (`/principal/attention`, `/principal/decisions`):** Review items flagged upstream by the Vice-Principal and other approvers, execute executive decisions, and track decision history.
 
 ### 3. Campus Operations & Oversight
 * **Hostel & Curfew Oversight (`/principal/operations/hostel`, `/deputy-warden/curfew-oversight`, `/deputy-warden/home`, `/hostel-manager/*`):** Campus-level roll-up of hostel blocks, curfew compliance, night attendance reconciliation, and escalated student disciplinary cases.
 * **Gate Operations & Security (`/principal/operations/gates`, `/principal/operations/incidents`, `/supervisor/*`):** Live monitoring of gate desks, supervisor logs, emergency lockdowns, perimeter alerts, and security incidents.
 * **Academic & Examination Oversight (`/principal/examinations`, `/principal/people/departments`, `/sysadmin/academic-status`):** Real-time monitoring of departmental academic performance and two-person authorization of `DEBARRED` or `SUSPENDED` student statuses.
+
+### 4. Operational Surfaces & People
+* **Cases & Circulars (`/principal/cases`, `/principal/circulars`):** Review campus-wide escalated cases and institution-wide circulars issued to the Principal.
+* **Emergency & Escalations (`/principal/emergency`, `/principal/escalations`):** Emergency command center and escalation queue for time-critical campus events.
+* **Passes & People (`/principal/passes`, `/principal/people`, `/principal/people/assignment-tree`, `/principal/people/attendance`, `/principal/people/departments/[code]`):** Institutional pass oversight, organizational assignment tree, attendance roll-ups, and department-level people views.
+* **Operations Hub (`/principal/operations`, `/principal/operations/gates`, `/principal/operations/gates/[id]`):** Gate-level operational detail with drill-down into individual gate status.
+* **Profile (`/principal/profile`):** Principal personal profile, MFA settings, and notification preferences.
 
 ## Key API endpoints
 

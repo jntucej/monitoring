@@ -10,7 +10,7 @@ The Dean also has access to campus-wide governance, system administration report
 ## Pages & workflows
 
 ### 1. Academic Standing & Status Governance
-* **Academic Status Console (`/sysadmin/academic-status`):** The primary operational interface where the Dean reviews students flagged for disciplinary actions, attendance shortages, or academic disqualifications.
+* **Academic Status Console (API: `/api/academic-status`):** The Dean reviews students flagged for disciplinary actions, attendance shortages, or academic disqualifications. Note: the Dean is a **DB-only role** with no dedicated UI console — all actions are performed through API calls and shared admin/sysadmin surfaces.
 * **Two-Person Debarment Chain:** When an HOD flags a student as debarred in their department, or when the Chief Warden escalates a major hostel violation, the record enters the pending academic status queue. The Dean inspects the case history, evidence, and HOD notes before co-signing the final debarment order.
 
 ### 2. Institutional Compliance & Oversight

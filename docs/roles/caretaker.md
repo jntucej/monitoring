@@ -9,7 +9,9 @@ Caretakers operate primarily through the complaints and maintenance workflow eng
 - **/caretaker and /caretaker/home**: Caretaker operational landing page and summary dashboard. Integrates the `ComplaintConsole` (`/caretaker/complaints`) and displays key metrics from `/api/caretaker/summary` (pending repairs, SLA breaches, active workers).
 - **/caretaker/complaints and /caretaker/complaints/[id]**: Core complaint resolution interface. Lists student grievances filtered by category, urgency, and block. The detail view permits updating complaint status, adding internal work notes, uploading repair proof photos, assigning workers, and recording resolution details.
 - **/caretaker/maintenance**: Maintenance scheduling and task tracker for routine block inspections, servicing cycles, and preventive upkeep.
+- **/caretaker/mess**: Mess-related complaint and observation tracking for the block's dining area.
 - **/caretaker/workers**: Roster and task assignment portal for maintenance workers and housekeeping staff assigned to the block.
+- **/caretaker/profile**: Caretaker personal profile, shift preferences, and notification settings.
 - **/hostel/permissions**: Resident permission queue allowing caretakers to review and verify student leave requests and block-level permissions within their hostel scope.
 
 ## Key API endpoints
