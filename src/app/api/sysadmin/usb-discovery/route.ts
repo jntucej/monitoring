@@ -19,8 +19,11 @@ const GET = withAuthorization(
       return Response.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
-    // Run the discovery script host-side via the ops-agent
-    const agentStatus = await fetch("http://worker:3002/ops/host_diagnostics", {
+    // Run the discovery script host-side via the ops-agent. The resolvable
+    // hostname from the web container is `gate_worker` (the container_name);
+    // the bare compose service name `worker` does not resolve here.
+    const agentHost = process.env.OPS_AGENT_URL || "http://gate_worker:3002";
+    const agentStatus = await fetch(`${agentHost}/ops/host_diagnostics`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

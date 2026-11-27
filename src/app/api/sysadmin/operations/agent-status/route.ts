@@ -13,7 +13,10 @@ import { ok, fail } from "@/server/http/response";
  * Read-only, sysadmin + admin only.
  */
 
-const OPS_AGENT_URL = process.env.OPS_AGENT_URL || "http://worker:3002";
+// The ops-agent binds 127.0.0.1:3002 inside the gate_worker container. Use
+// the resolvable hostname `gate_worker` (container_name) — bare `worker` does
+// not resolve from the web container. Override with OPS_AGENT_URL if needed.
+const OPS_AGENT_URL = process.env.OPS_AGENT_URL || "http://gate_worker:3002";
 
 async function handleGet(_req: NextRequest) {
   try {

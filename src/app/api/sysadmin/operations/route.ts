@@ -24,8 +24,12 @@ import crypto from "node:crypto";
  * Response:      { ok: boolean, operation: string, result: object | null, error?: string }
  */
 
+// The ops-agent binds 127.0.0.1:3002 inside the gate_worker container. The
+// resolvable service hostname from the web container is `gate_worker` (the
+// container_name) — the bare compose service name `worker` does NOT resolve in
+// this topology. Override with OPS_AGENT_URL if the network changes.
 const OPS_AGENT_URL =
-  process.env.OPS_AGENT_URL || "http://worker:3002";
+  process.env.OPS_AGENT_URL || "http://gate_worker:3002";
 
 const ALLOWED_OPS = new Set([
   "retry_failed_notifications",
