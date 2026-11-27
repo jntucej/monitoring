@@ -24,6 +24,8 @@ async function handleGet(_req: Request, { auth }: { auth: AuthContext }) {
       WHERE created_at >= NOW() - INTERVAL '7 days'
       ORDER BY created_at DESC
       LIMIT 100`,
+    [],
+    { currentUserId: auth.userId, currentRole: auth.role },
   );
 
   return ok({ traces: sanitizeAgentPayload(rows, auth.role) });
