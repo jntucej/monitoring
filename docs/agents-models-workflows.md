@@ -158,3 +158,62 @@ host or compose change.
 - Ollama present + running; `127.0.0.1:11434` loopback-only; containers cannot
   reach it (`ollama:11434` ENOTFOUND, worker `host.docker.internal:11434` ENOTFOUND).
 - Restart policies + healthchecks + Telegram alert chain confirmed live.
+
+## 8. Built this session (post-audit)
+
+### 8.1 Demand-aware AI resource manager (the orchestration layer)
+`model-runtime/resource-manager.ts` (new) + wired into `model-runtime/index.ts`
+implement the spec's "demand scheduler + model lifecycle manager" — the piece a
+naive start/stop model switcher lacks:
+- **§8 memory-pressure eviction** — host free-RAM drives M2/M3 idle-timeouts;
+  under critical pressure it *refuses* heavy AI so the SaaS core always wins
+  (verified: ample→warm 90s, critical(512MB)→idle 0 + admission refused).
+- **§16 AI lease** — exclusive lease table so M2 (OCR) and M3 (doc-intel) are
+  never loaded concurrently.
+- **§17 priorities P0–P3** — an interactive (P1) job may evict an idle
+  background (P3) heavy model; never steals a live lease.
+- `rt.aiStatus()` surfaces pressure + leases to the sysadmin ops console
+  (`/api/sysadmin/operations/agent-status` now returns `ai_status`).
+
+### 8.2 Model defaults aligned to the 8 GB CPU spec
+`model-runtime/config.ts` now defaults **M1 = `qwen3:0.6b`** (narrow command
+router, warm) and **M3 = `qwen3:1.7b`** (doc extraction — not the heavier 3B).
+M2 = OCR (per-burst, serialized with M3 via `serializedDoc`). `qwen3:0.6b` was
+pulled onto Ollama. M3's `qwen3:1.7b` was already present.
+
+### 8.3 Unified AI Agent Command Center (5 HeroUI v3 tabs)
+New hub `/sysadmin/agent-command-center` (gated sysadmin+admin) consolidates the
+previously-scattered agent/bot/automation/infra surfaces into 5 tabs:
+**Overview** (KPI + agent-activity curves), **Approvals & Guardrails** (operator-
+action queue + kill-switches + forecasts), **Traces & @agent Funnel** (live
+activity feed + step-level trace inspection), **Knowledge Base (RAG)**, and
+**Infra, Workers & Tools** (reuses `DockerFleetPanel` + `ObservabilityStackPanel`).
+All 5 tabs are built on the real admin/sysadmin APIs; no mock data, no
+`Math.random()`, no fabricated numbers; every panel has an explicit
+empty-state vs retryable-error distinction. One outer sysadmin shell only
+(no second sidebar/topnav); one `useEntityInspector` controller (no stacked
+overlays). New: `agent-command-center/{AgentCommandCenter,Overview,
+ApprovalsGuardrails,TracesFunnel,KnowledgeBase,InfraWorkers}.tsx` + the page +
+the "AI Command Center" nav entry (`Command` icon in `sysadmin/Sidebar.tsx`).
+
+### 8.4 Silent failure-swallowing fix (spec §3)
+`/sysadmin/actions` previously swallowed forecast + kill-switch fetch failures
+with `.catch(() => {})` (a 429 made those panels silently "empty"). Now each
+panel sets a per-panel error + renders a retryable error card (Retry re-fetches
+that panel only). Same retryable-error contract is enforced across the new
+Command Center tabs. `DockerFleetPanel` + `reports` still have the swallowing
+pattern (open, see §9).
+
+### 8.5 Open (authorization-gated) — Ollama host reachability
+All AI/model features are still **unreachable from the containers** because
+Ollama binds `127.0.0.1:11434` (loopback) and the worker has no
+`host.docker.internal` mapping. The fix is a host change (systemd restart +
+compose `extra_hosts`), so it is **not applied unilaterally**. A
+ready-to-apply script is at the scratch path
+(`fix-ollama-reachability.sh`): bind Ollama to the Tailscale IP
+(`OLLAMA_HOST=100.122.7.62:11434` — Tailscale-only, never public 0.0.0.0),
+add `extra_hosts: host.docker.internal:host-gateway` to the worker service,
+set `AI_M1_URL`/`AI_M3_URL=http://host.docker.internal:11434`. Until applied,
+the model-runtime degrades safely (the resource manager assumes "ample"
+pressure and refuses nothing, but model calls time out → the AI features report
+unavailable rather than fabricate results).

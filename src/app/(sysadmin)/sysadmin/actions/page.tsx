@@ -73,8 +73,12 @@ export default function OperatorActionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [forecasts, setForecasts] = useState<Forecast[]>([]);
   const [health, setHealth] = useState<LiveHealth | null>(null);
+  const [forecastError, setForecastError] = useState<string | null>(null);
+  const [forecastLoading, setForecastLoading] = useState(true);
   const [controls, setControls] = useState<AutomationControl[]>([]);
   const [ladder, setLadder] = useState<EscalationStep[]>([]);
+  const [controlsError, setControlsError] = useState<string | null>(null);
+  const [controlsLoading, setControlsLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
   const { request } = useApi();
   const user = useAuthStore((s) => s.user);
@@ -95,6 +99,10 @@ export default function OperatorActionsPage() {
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setForecastError(null);
+    setForecastLoading(true);
+    setControlsError(null);
+    setControlsLoading(true);
 
     // Each data source is fetched INDEPENDENTLY so that a 429 or transient
     // failure on one endpoint cannot cascade-blank the other two panels.
@@ -116,19 +124,29 @@ export default function OperatorActionsPage() {
       "/api/sysadmin/forecasts"
     )
       .then((res) => {
-        setForecasts(res.data?.forecasts ?? []);
-        setHealth(res.data?.latestSnapshot ?? null);
+        if (res.success && res.data) {
+          setForecasts(res.data.forecasts ?? []);
+          setHealth(res.data.latestSnapshot ?? null);
+        } else {
+          setForecastError(res.error ?? res.code ?? "Forecasts unavailable");
+        }
       })
-      .catch(() => { /* non-fatal — forecasts panel stays empty */ });
+      .catch((err) => setForecastError(String(err)))
+      .finally(() => setForecastLoading(false));
 
     const controlsP = request<{ controls: AutomationControl[]; ladder: EscalationStep[] }>(
       "/api/sysadmin/automation-controls"
     )
       .then((res) => {
-        setControls(res.data?.controls ?? []);
-        setLadder(res.data?.ladder ?? []);
+        if (res.success && res.data) {
+          setControls(res.data.controls ?? []);
+          setLadder(res.data.ladder ?? []);
+        } else {
+          setControlsError(res.error ?? res.code ?? "Kill-switches unavailable");
+        }
       })
-      .catch(() => { /* non-fatal — kill-switch panel stays empty */ });
+      .catch((err) => setControlsError(String(err)))
+      .finally(() => setControlsLoading(false));
 
     await Promise.allSettled([actionsP, forecastsP, controlsP]);
   }, [filter, request]);
@@ -233,7 +251,14 @@ export default function OperatorActionsPage() {
       )}
 
       <div className="section-offscreen">
-      {forecasts.length > 0 && (
+      {forecastLoading ? (
+        <div className="mb-3 surface-card p-2 text-xs text-text-muted">Loading forecasts…</div>
+      ) : forecastError ? (
+        <div role="alert" className="mb-3 surface-card flex flex-wrap items-center justify-between gap-2 bg-rose-500/10 p-2 text-xs text-action-danger">
+          <span>Forecasts unavailable: {forecastError}</span>
+          <button type="button" onClick={() => void refresh()} className="font-semibold underline">Retry</button>
+        </div>
+      ) : forecasts.length > 0 ? (
         <div className="mb-3 flex flex-col gap-2">
           {forecasts.slice(0, 5).map((f) => (
             <div
@@ -248,9 +273,18 @@ export default function OperatorActionsPage() {
             </div>
           ))}
         </div>
+      ) : (
+        <div className="mb-3 surface-card p-2 text-xs text-text-muted">No forecast breaches in the latest snapshot.</div>
       )}
 
-      {controls.length > 0 && (
+      {controlsLoading ? (
+        <div className="surface-card mb-4 p-3 text-xs text-text-muted">Loading kill switches…</div>
+      ) : controlsError ? (
+        <div role="alert" className="surface-card mb-4 flex flex-wrap items-center justify-between gap-2 bg-rose-500/10 p-3 text-xs text-action-danger">
+          <span>Kill-switch panel unavailable: {controlsError}</span>
+          <button type="button" onClick={() => void refresh()} className="font-semibold underline">Retry</button>
+        </div>
+      ) : controls.length > 0 ? (
         <div className="surface-card mb-4 p-3" style={{ borderColor: "var(--border)" }}>
           <div className="mb-2 text-sm font-semibold">Automation Kill Switches</div>
           <div className="flex flex-col gap-2">
@@ -289,6 +323,8 @@ export default function OperatorActionsPage() {
             </div>
           )}
         </div>
+      ) : (
+        <div className="surface-card mb-4 p-3 text-xs text-text-muted">No automation kill switches defined.</div>
       )}
 
       <div className="flex flex-wrap gap-2 py-3">

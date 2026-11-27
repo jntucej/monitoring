@@ -215,6 +215,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "SysAdmin Console",
           items: [
+            { href: "/sysadmin/agent-command-center", label: "AI Command Center", icon: "Command", badge: "NEW" },
             { href: "/sysadmin/admin-center", label: "Admin Center", icon: "LayoutGrid", badge: "NEW" },
             { href: "/sysadmin/application-health", label: "Health", icon: "Activity", badge: "LIVE" },
             { href: "/sysadmin/monitoring", label: "Monitoring", icon: "BarChart3", badge: "LIVE" },
