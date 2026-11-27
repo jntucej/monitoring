@@ -9,6 +9,7 @@ import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import { PermissionList } from "@/components/approver/PermissionList";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import type { Role } from "@/lib/types";
@@ -39,6 +40,7 @@ function DeputyWardenOutpassInner() {
           fetchUrl="/api/permissions?workflow_type=hostel&status=PENDING&stage=deputy_warden"
           allowForward
         />
+        <SpatialPeopleMapWorkspace defaultArea="hostel" lockedArea compact />
       </div>
     </WidgetBoundary>
   );

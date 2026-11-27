@@ -13,6 +13,7 @@ import { DoorOpen, ChevronRight } from "lucide-react";
 
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { QuickActions } from "@/components/operator/shared/QuickActions";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import { PageHeader } from "@/components/operator/shared/PageHeader";
 import { useAuthStore } from "@/stores/authStore";
 import { useGateStore } from "@/stores/gateStore";
@@ -101,6 +102,9 @@ export default function OperatorPage() {
           </WidgetBoundary>
           <WidgetBoundary name="QuickActions" title="Quick Actions">
             <QuickActions />
+          </WidgetBoundary>
+          <WidgetBoundary name="SpatialPeopleMap" title="Gate & Shift Security Map">
+            <SpatialPeopleMapWorkspace defaultArea="security" lockedArea compact />
           </WidgetBoundary>
 
         </div>

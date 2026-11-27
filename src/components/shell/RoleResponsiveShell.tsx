@@ -19,6 +19,26 @@ const AgentConsoleDrawer = dynamic(
  * and mobile breakpoints, preventing duplicate API fetches, polling timers,
  * and duplicate #main-content landmarks.
  */
+export type UiPreset = "ops-mono" | "erp-analytic" | "telemetry-cmd";
+
+export function resolveUiPreset(role: string): UiPreset {
+  switch (role) {
+    case "sysadmin":
+    case "supervisor":
+      return "telemetry-cmd";
+    case "principal":
+    case "vice_principal":
+    case "dean":
+    case "hod":
+    case "admin":
+    case "hostel_manager":
+    case "exam_branch":
+      return "erp-analytic";
+    default:
+      return "ops-mono";
+  }
+}
+
 export function RoleResponsiveShell({
   manifest,
   children,
@@ -27,6 +47,7 @@ export function RoleResponsiveShell({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const uiPreset = resolveUiPreset(manifest.role);
 
   useEffect(() => {
     if (!open) return;
@@ -45,7 +66,10 @@ export function RoleResponsiveShell({
   }, [open]);
 
   return (
-    <div className="flex h-dvh flex-col lg:flex-row overflow-hidden bg-bg-base">
+    <div
+      data-ui-preset={uiPreset}
+      className="flex h-dvh flex-col lg:flex-row overflow-hidden bg-bg-base"
+    >
       {/* Desktop sidebar */}
       <aside className="hidden lg:block w-64 shrink-0 border-r border-border">
         <RoleSidebar manifest={manifest} />
