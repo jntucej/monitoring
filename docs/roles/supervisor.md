@@ -7,11 +7,12 @@ The supervisor acts as the primary operational authority for gate security, poss
 
 ## Pages & workflows
 - **/supervisor and /supervisor/home**: Supervisor operations console. Displays live gate overview, shift summary, open escalations, and incident queues.
-- **/supervisor/gates, /supervisor/gates/live, /supervisor/gates/wall, and /supervisor/gates/activity**: Comprehensive gate monitoring suite. `/gates/wall` provides a multi-gate grid view showing live statuses, camera streams, and active operators. `/gates/activity` streams real-time entry and exit events across all campus boundaries.
+- **/supervisor/gates, /supervisor/gates/live, /supervisor/gates/wall, and /supervisor/gates/activity**: Comprehensive gate monitoring suite. `/supervisor/gates/wall` provides a multi-gate grid view showing live statuses, camera streams, and active operators. `/supervisor/gates/activity` streams real-time entry and exit events across all campus boundaries.
 - **/supervisor/response, /supervisor/response/escalations, /supervisor/response/exceptions, and /supervisor/response/incidents**: Incident response center. Handles escalated gate alerts, unauthorized egress attempts, expired passes, watchlist matches, and security breaches requiring supervisor intervention or sign-off.
 - **/supervisor/shift, /supervisor/shift/live, /supervisor/shift/handover, and /supervisor/shift/history**: Guard shift lifecycle management. Tracks active shifts in real time, executes digital shift handovers with open exception checklists, and reviews historical logs.
 - **/supervisor/team, /supervisor/team/workers, /supervisor/team/shifts, and /supervisor/team/curfew**: Staff and curfew management. Manages guard roster schedules, assigns operators to specific gates, monitors curfew compliance, and issues gate claim codes.
 - **/supervisor/reports**: Operational reporting and analytical summaries covering movement trends, gate congestion, curfew breaches, and incident resolution times.
+- **/supervisor/security**: Campus security posture overview, active guard alerts, and critical perimeter notices.
 - **/supervisor/profile**: Supervisor profile, credentials, and notification settings.
 
 ## Key API endpoints
@@ -32,6 +33,9 @@ The supervisor acts as the primary operational authority for gate security, poss
 | `/gate/stream` | GET | SSE stream delivering instant real-time scan events, alerts, and state changes across all gates. |
 | `/gate/devices` | GET | Live telemetry for gate hardware and connected operator terminals. |
 | `/gate/verify-leave-chain` | GET | Validates the hierarchical leave approval chain for contested student movements. |
+| `/supervisor/gates/hardware-health` | GET | Aggregated hardware health metrics and scanner diagnostic statuses across gates. |
+| `/supervisor/gates/headcount` | GET | Real-time on-campus vs off-campus student/visitor headcounts across all gates. |
+| `/supervisor/visitors/pre-register` | GET, POST | Pre-registers expected campus visitors and manages temporary gate clearances. |
 
 ## Data flow
 1. **Multi-Gate Monitoring & Live Telemetry**:

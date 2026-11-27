@@ -10,20 +10,7 @@ When acting on gates, workers can operate scanning surfaces and manual entry scr
 - **/worker/work-orders**: List and detail views of assigned facilities work orders, maintenance tasks, and their resolution statuses.
 - **/worker/shifts**: Personal shift schedule, roster assignments, duty timings, and supervisor contact information.
 - **/worker/history**: Historical audit log of completed jobs, recorded gate entries, and shift activity.
-- **/gate and /gate/[gateId]**: Accessible when assigned to gate assist duty, providing full camera barcode/QR scanning, entry/exit logging, and pass validation.
-- **/operator/manual-entry**: Manual entry logging screen for roll numbers and visitor tokens when scanning is unavailable.
-- **/operator/pass-verification**: Verification portal for out-passes and hostel exit permits.
-- **/operator/kiosk-pin**: Fast terminal sign-in via kiosk PIN for shared guard posts.
-- **/operator/claim**: Gate desk binding for workers assigned to dynamic gate shifts.
-- **/operator/lookup**: Identity and roll number inquiry console.
-- **/operator/exceptions**: Local exception review for flagged scans during duty shifts.
-- **/operator/transactions**: Movement transaction audit view for the active gate session.
-- **/operator/stats**: Gate throughput statistics and shift volume counts.
-- **/operator/mode**: View or update operational mode of the assigned gate desk.
-- **/operator/announcements**: Campus security announcements and broadcast messages.
-- **/operator/notifications**: System and shift notification center.
-- **/operator/password**: Password rotation and account security.
-- **/operator/profile**: Worker identity, contact info, and role assignment.
+- **/worker/profile**: Worker identity, contact information, and role profile.
 
 ## Key API endpoints
 | Endpoint | Method(s) | What it does |
@@ -32,16 +19,9 @@ When acting on gates, workers can operate scanning surfaces and manual entry scr
 | `/workers/my-shift` | GET | Fetches active shift details, post location, shift start/end times, and supervisor info. |
 | `/workers/my-work-orders` | GET | Lists detailed work orders assigned to the worker with status and priority filters. |
 | `/workers/personal-history` | GET | Returns historical log of past shifts, completed maintenance jobs, and attendance records. |
-| `/workers/shifts` | GET | Retrieves roster schedule and upcoming shift changes. |
-| `/operator/kiosk-session` | GET, POST | Authenticates the worker at an unattended gate terminal using a PIN or trusted kiosk network. |
-| `/operator/claim-gate` | POST | Associates the worker with a physical gate post for the duration of the shift. |
-| `/operator/manual-entry` | GET, POST | Records manual student or visitor movements at gate kiosks. |
-| `/operator/lookup` | GET | Searches student records and active permission passes. Takes `?id=<roll\|name\|employee-id>` (a single identifier, not `?roll=`). |
-| `/operator/last-scan` | GET | Retrieves the most recent scan at the gate desk for review or correction. |
-| `/operator/recent-scans/summary` | GET | Returns scan volume summaries and recent movements at the gate post. |
-| `/operator/transactions` | GET | Fetches paginated movement transaction logs. |
-| `/operator/passes/batch-verify` | POST | Verifies multiple gate permits concurrently. |
-| `/operator/entry-type` | POST | Records special entry classifications (e.g. Day Scholar In, Home In). |
+| `/workers/assignments` | GET, POST | Retrieves active worker assignments and logs task progress updates. |
+| `/workers/attendance` | DELETE, GET, POST | Worker shift attendance clock-in, clock-out, and status checks. |
+| `/workers/types` | GET, POST | Retrieves worker skill specializations and trade categories. |
 
 ## Data flow
 1. **Work Order & Shift Ingestion**:

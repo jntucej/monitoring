@@ -10,22 +10,22 @@ Like `admin`, `sysadmin` is member of `PRIVILEGED_ROLES` and is subject to manda
 ---
 
 ## Pages & workflows
-The sysadmin console includes all standard management pages plus an infrastructure and diagnostics surface (over 270 routes):
+The sysadmin console spans 79 pages in the sysadmin route group covering deep infrastructure diagnostics and system operations:
 
-- **Deployment & Service Operations (`/sysadmin/deployments`, `/sysadmin/services`, `/sysadmin/docker-services`, `/sysadmin/application-health`):**
-  Inspecting Docker container statuses, container memory/CPU utilization, real-time service health, deployment revision logs, and triggering controlled restarts.
-- **Database & Data Store Diagnostics (`/sysadmin/database-health`, `/sysadmin/backup`, `/sysadmin/data`, `/sysadmin/redis-worker`):**
+- **Deployment & Service Operations (`/sysadmin/deployments`, `/sysadmin/docker-services`, `/sysadmin/application-health`, `/sysadmin/infrastructure`):**
+  Inspecting Docker container statuses, container memory/CPU utilization, real-time service health, deployment revision logs, and infrastructure topology.
+- **Database & Data Store Diagnostics (`/sysadmin/database-health`, `/sysadmin/backup`, `/sysadmin/backup-maintenance`, `/sysadmin/data`, `/sysadmin/redis-worker`):**
   Monitoring PostgreSQL connection pools, query execution latencies, database backup retention and integrity verifications, Redis worker queue depths, and dead-letter queues.
-- **Security Posture & Policy Drift (`/sysadmin/security`, `/sysadmin/compliance`, `/sysadmin/retention-policies`):**
-  Tracking CIS/system compliance metrics, reviewing RLS (Row Level Security) drift across PostgreSQL tables, checking secret rotations, and configuring system data retention windows.
-- **Roles, Permissions & Delegations (`/sysadmin/roles`, `/sysadmin/permission-policies`, `/sysadmin/access`, `/sysadmin/access-keys`):**
-  Managing granular role definitions in `config_roles_registry`, inspecting the live role graph, establishing permission policies, and issuing programmatic access API keys.
-- **Disaster Recovery & Drills (`/sysadmin/drills`, `/sysadmin/actions`):**
-  Executing and rearming simulated resilience drills (network partitions, failover testing, database disconnection drills), subject to two-person approval safeguards.
+- **Security Posture & Policy Drift (`/sysadmin/security`, `/sysadmin/security/posture`, `/sysadmin/compliance`, `/sysadmin/retention-policies`, `/sysadmin/safety`):**
+  Tracking CIS/system compliance metrics, reviewing RLS (Row Level Security) drift across PostgreSQL tables, checking secret rotations, safety scorecards, and configuring system data retention windows.
+- **Roles, Permissions & Delegations (`/sysadmin/roles`, `/sysadmin/access`, `/sysadmin/access-keys`, `/sysadmin/consent`):**
+  Managing granular role definitions in `config_roles_registry`, inspecting the live role graph, consent agreements, and issuing programmatic access API keys.
+- **System Actions & Administration Center (`/sysadmin/actions`, `/sysadmin/admin-center`, `/sysadmin/center`, `/sysadmin/system`, `/sysadmin/maintenance`):**
+  Executing system maintenance operations, reviewing actions subject to two-person approval safeguards, system diagnostics, and administrative center oversight.
 - **Autonomous Agents & Background Jobs (`/sysadmin/autonomous`, `/sysadmin/cron`, `/sysadmin/jobs`, `/sysadmin/scheduled-jobs`, `/sysadmin/bot`):**
   Inspecting cron scheduler ticks, autonomous monitoring agent health, Telegram bot anomaly detections, and automated background synchronization tasks.
-- **System Navigation & App Topography (`/sysadmin/app-map`, `/sysadmin/navigation`, `/sysadmin/exit-reasons`):**
-  Inspecting the full application page tree, route boundaries, navigation hierarchies, and system exit code configurations.
+- **System Navigation & App Topography (`/sysadmin/app-map`, `/sysadmin/navigation`, `/sysadmin/exit-reasons`, `/sysadmin/feature-flags`, `/sysadmin/webhooks`, `/sysadmin/integrations`):**
+  Inspecting the full application page tree, route boundaries, navigation hierarchies, feature flags, webhook endpoints, integration connectors, and system exit code configurations.
 
 ---
 
@@ -49,6 +49,8 @@ The 15 most important endpoints across the sysadmin surface:
 | `/api/sysadmin/automation-controls` | `GET` | View state of background auto-remediation, auto-scaling, and cron loops |
 | `/api/sysadmin/automation-controls/[id]` | `PATCH` | Pause, throttle, or resume specific automated agents or tasks |
 | `/api/sysadmin/bot/anomaly` | `GET`, `POST` | Inspect and triage security anomalies detected by the autonomous monitoring bot |
+| `/api/sysadmin/infrastructure` | `GET` | Aggregated system infrastructure status and host resource metrics |
+| `/api/sysadmin/approvals/two-person` | `GET`, `POST` | Manage two-person approval workflows and authorization signatures |
 
 ---
 

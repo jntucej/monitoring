@@ -10,24 +10,24 @@ Both `admin` and `sysadmin` belong to `PRIVILEGED_ROLES` (`src/lib/roles.ts`) an
 ---
 
 ## Pages & workflows
-The admin console spans over 260 routes. Functionality is organized into key functional areas:
+The admin console spans 73 pages in the admin route group. Functionality is organized into key functional areas:
 
-- **User & Persona Management (`/admin/users`, `/admin/students`, `/admin/faculty`, `/admin/staff`, `/admin/parents`, `/admin/workers`, `/admin/visitors`):**
+- **User & Persona Management (`/admin/users`, `/admin/students`, `/admin/students/[id]`, `/admin/students/import`, `/admin/faculty`, `/admin/faculty/[id]`, `/admin/faculty-assignments`, `/admin/staff`, `/admin/staff/[id]`, `/admin/parents`, `/admin/workers`, `/admin/visitors`, `/admin/student-representatives`):**
   Provisioning, modifying, and deactivating user profiles across all institution personas. Handles enrollment code generation, mobile enrollment links, temporary password resets, and role assignments.
-- **Attendance & Academic Operations (`/admin/attendance`, `/admin/classes`, `/admin/departments`, `/admin/academic-automation`):**
+- **Attendance & Academic Operations (`/admin/attendance`, `/admin/attendance/bulk-import`, `/admin/classes`, `/admin/departments`, `/admin/academic`, `/admin/academic-automation`, `/admin/subjects`):**
   Bulk importing attendance registers, monitoring daily class attendance rosters, managing department assignments, tracking academic automation jobs, and reviewing attendance exception escalations.
-- **Gate & Access Control (`/admin/gates`, `/admin/gate-device-configuration`, `/admin/passes`, `/admin/exceptions`):**
+- **Gate & Access Control (`/admin/gates`, `/admin/gates/[id]`, `/admin/gates/schedule`, `/admin/gate-device-configuration`, `/admin/passes`, `/admin/exceptions`, `/admin/ops`):**
   Configuring campus entry/exit gates, pairing turnstile/scanner hardware devices, monitoring gate pass statuses, handling blocked pass exceptions, and inspecting ingress/egress records.
 - **Emergency & Campus Lockdown (`/admin/lockdown`):**
   Executing immediate campus-wide or perimeter gate lockdown in emergency scenarios. Streams live gate lock statuses via Server-Sent Events (SSE) and releases lockdowns with mandatory administrative justification.
-- **Mess & Hostel Operations (`/admin/mess`, `/admin/occupancy`, `/admin/cases`):**
+- **Mess & Hostel Operations (`/admin/mess`, `/admin/mess/analytics`, `/admin/mess/days`, `/admin/mess/items`, `/admin/mess/today`, `/admin/occupancy`, `/admin/cases`, `/admin/complaints/categories`, `/admin/complaints/chains`):**
   Reviewing daily meal consumption metrics, initiating monthly/periodic mess finalization, tracking block occupancy levels, and overseeing hostel and campus complaint resolution workflows.
-- **Communication & SMS Queues (`/admin/sms/compose`, `/admin/sms/queue`, `/admin/sms/templates`, `/admin/announcements`):**
-  Composing institution-wide SMS notices and circulars, managing automated template definitions (e.g. curfew breaches, gate pass acknowledgments), tracking outbound queue delivery states, and retrying failed messages.
-- **Security & Session Governance (`/admin/security`, `/admin/sessions`, `/admin/audit-logs`, `/admin/roles`):**
-  Managing temporary IP allowlists, reviewing security lockouts, auditing active user sessions, enforcing session revocations, monitoring audit logs, and issuing time-bounded operational delegations.
-- **Analytics & Reporting (`/admin/analytics`, `/admin/reports`, `/admin/sustainability`):**
-  High-level occupancy trends, predictive traffic modeling, user engagement analytics, inactive user reporting, and compliance export dashboards.
+- **Communication & Notifications (`/admin/sms/compose`, `/admin/sms/queue`, `/admin/announcements`, `/admin/circulars`, `/admin/events`, `/admin/notification-settings`):**
+  Composing institution-wide SMS notices and circulars, tracking outbound queue delivery states, retrying failed messages, and configuring notification channels.
+- **Security & Session Governance (`/admin/profile/security`, `/admin/sessions`, `/admin/audit-logs`, `/admin/roles`, `/admin/permission-policies`, `/admin/assignment-tree`, `/admin/anti-ragging-config`, `/admin/institutional-configuration`, `/admin/workflow-configuration`):**
+  Managing temporary IP allowlists, reviewing security lockouts, auditing active user sessions, enforcing session revocations, monitoring audit logs, and configuring institutional policy hierarchies.
+- **Analytics & Reporting (`/admin/overview`, `/admin/dashboard`, `/admin/analytics`, `/admin/analytics/advanced`, `/admin/analytics/occupancy`, `/admin/analytics/predictive`, `/admin/analytics/sustainability`, `/admin/analytics/traffic`, `/admin/analytics/users`, `/admin/reports`, `/admin/sustainability`, `/admin/health`, `/admin/support`, `/admin/kb`, `/admin/alumni`):**
+  High-level occupancy trends, predictive traffic modeling, user engagement analytics, inactive user reporting, system health telemetry, knowledge base, and compliance export dashboards.
 
 ---
 
@@ -51,6 +51,9 @@ The 15 most important endpoints for admin operations:
 | `/api/admin/sms/queue` | `GET` | Inspect outbound SMS dispatcher queue statuses and failure reasons |
 | `/api/admin/roles/delegate` | `GET`, `POST` | Issue or review active time-bound delegations (`public.delegations`) |
 | `/api/admin/security/lockout` | `GET`, `POST` | Inspect locked out accounts (failed logins) and manually unlock accounts |
+| `/api/admin/sms/templates` | `GET`, `POST` | Manage institution SMS and communication template definitions |
+| `/api/admin/gates` | `GET`, `POST` | Configure and audit campus perimeter gates and checkpoints |
+| `/api/admin/permission-policies` | `GET`, `POST` | Define and audit role-based permission policies |
 
 ---
 

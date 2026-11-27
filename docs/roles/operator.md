@@ -15,6 +15,7 @@ The operator UI is designed as an operational scanning kiosk surface rather than
 - **/operator/lookup**: Search and lookup interface to query student identity, active status, hostel affiliation, and pass status.
 - **/operator/exceptions**: Exception review surface for flagged scans, curfew breaches, invalid leave chains, or unauthorized exit attempts.
 - **/operator/transactions**: Movement logs and transaction audit history for the current shift and gate.
+- **/operator/gate-records**: Multi-event logging and blueprint recording console (movement, visitor, pass, exception, vehicle, device, shift) with live SSE event feed.
 - **/operator/stats**: Real-time gate statistics, including entry/exit volume, hourly breakdown, exit reason distributions, and weekly trends.
 - **/operator/mode**: Administrative gate mode switch (Normal, Curfew, Lockdown, Maintenance, Free Flow).
 - **/operator/announcements**: Gate broadcast view for campus security alerts and operational announcements.
@@ -37,9 +38,11 @@ The operator UI is designed as an operational scanning kiosk surface rather than
 | `/operator/last-scan` | GET | Fetches the most recent scan record for display and rollback/edit actions. |
 | `/operator/recent-scans/summary` | GET | Returns summary statistics and recent movements processed at the operator's gate. |
 | `/operator/transactions` | GET | Paginated movement transactions log filtered by gate, date, and direction. |
-| `/operator/mode` | GET, POST | Reads or updates the gate operational mode (e.g. curfew, lockdown). |
+| `/operator/mode` | POST | Updates the gate operational mode (e.g. OPEN, CURFEW, MAINTENANCE). |
 | `/operator/entry-type` | POST | Overrides or updates the entry classification (e.g. Day Scholar In, Home In). |
 | `/operator/passes/batch-verify` | POST | Validates a batch of gate passes during peak transit hours. |
+| `/operator/gate/device-health` | POST | Reports gate terminal device hardware health telemetry. |
+| `/gate/events` | GET, POST | Records and lists standardized gate events (movement, visitor, pass, exception, vehicle, device, shift). |
 
 ## Data flow
 1. **Gate Ingress/Egress Scan**:
