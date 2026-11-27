@@ -8,6 +8,7 @@ import {
   BellOff,
   Calendar as CalendarIcon,
   Check,
+  X,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -142,6 +143,8 @@ export function UnifiedCampusCalendar() {
   };
 
   const isFollowed = (code: string) => followedCategories.includes(code);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   return (
     <WidgetBoundary title="Unified Campus Calendar">
@@ -224,10 +227,20 @@ export function UnifiedCampusCalendar() {
             {cells.map((cell, i) => (
               <div
                 key={i}
-                className={`min-h14 rounded border p-1 text-xs ${
-                  cell.isCurrentMonth
-                    ? "border-border/50 bg-bg-elevated/30"
-                    : "border-transparent"
+                onClick={() => {
+                  if (cell.day && cell.dateStr) {
+                    setSelectedDate(cell.dateStr);
+                    setSelectedEvent(eventsByDay[cell.dateStr]?.[0] ?? null);
+                  }
+                }}
+                className={`min-h-14 rounded border p-1 text-xs transition-colors ${
+                  cell.day ? "cursor-pointer hover:border-action-primary/50" : ""
+                } ${
+                  selectedDate === cell.dateStr
+                    ? "border-action-primary bg-action-primary/5"
+                    : cell.isCurrentMonth
+                      ? "border-border/50 bg-bg-elevated/30"
+                      : "border-transparent"
                 } ${
                   cell.day &&
                   eventsByDay[cell.dateStr]?.some((e) => e.followable)
@@ -242,9 +255,15 @@ export function UnifiedCampusCalendar() {
                   eventsByDay[cell.dateStr]
                     ?.slice(0, 3)
                     .map((ev, j) => (
-                      <div
+                      <button
                         key={j}
-                        className="surface-card truncate px-1 py-0.5 text-xs mb-0.5"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDate(cell.dateStr);
+                          setSelectedEvent(ev);
+                        }}
+                        className="surface-card block w-full text-left truncate px-1 py-0.5 text-xs mb-0.5 hover:opacity-90"
                         style={{
                           backgroundColor: `${CATEGORY_COLORS[ev.category] ?? "var(--text-muted)"}25`,
                           color: CATEGORY_COLORS[ev.category] ?? "var(--text-muted)",
@@ -252,14 +271,22 @@ export function UnifiedCampusCalendar() {
                         title={`${ev.title} — ${ev.owner ?? "Campus"}`}
                       >
                         {ev.title}
-                      </div>
+                      </button>
                     ))}
                 {cell.day &&
                   eventsByDay[cell.dateStr] &&
                   eventsByDay[cell.dateStr].length > 3 && (
-                    <div className="text-xs text-text-muted">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDate(cell.dateStr);
+                        setSelectedEvent(eventsByDay[cell.dateStr]?.[0] ?? null);
+                      }}
+                      className="text-xs font-medium text-action-primary hover:underline"
+                    >
                       +{eventsByDay[cell.dateStr]!.length - 3} more
-                    </div>
+                    </button>
                   )}
               </div>
             ))}
@@ -305,6 +332,73 @@ export function UnifiedCampusCalendar() {
                   </button>
                 </div>
               ))
+            )}
+          </div>
+        )}
+
+        {/* Selected Day / Event Detail Drawer */}
+        {selectedDate && (
+          <div className="mt-4 rounded-xl border border-border bg-bg-surface p-3.5 space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-xs font-semibold text-text-primary">
+                {new Date(`${selectedDate}T00:00:00`).toLocaleDateString("en-IN", {
+                  weekday: "short",
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}{" "}
+                · {(eventsByDay[selectedDate] ?? []).length} event(s)
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedDate(null);
+                  setSelectedEvent(null);
+                }}
+                className="p-1 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated"
+                aria-label="Close day details"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            {(eventsByDay[selectedDate] ?? []).length === 0 ? (
+              <p className="text-xs text-text-muted">No scheduled events on this date.</p>
+            ) : (
+              <div className="space-y-2">
+                {(eventsByDay[selectedDate] ?? []).map((ev) => {
+                  const isSel = selectedEvent?.id === ev.id;
+                  return (
+                    <div
+                      key={ev.id}
+                      onClick={() => setSelectedEvent(ev)}
+                      className={`cursor-pointer rounded-lg border p-2.5 text-xs transition-colors ${
+                        isSel
+                          ? "border-action-primary bg-action-primary/5"
+                          : "border-border/60 bg-bg-elevated/30 hover:border-border"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-text-primary">{ev.title}</span>
+                        <span
+                          className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase"
+                          style={{
+                            backgroundColor: `${CATEGORY_COLORS[ev.category] ?? "var(--text-muted)"}25`,
+                            color: CATEGORY_COLORS[ev.category] ?? "var(--text-muted)",
+                          }}
+                        >
+                          {ev.category}
+                        </span>
+                      </div>
+                      <div className="mt-1 text-[11px] text-text-muted">
+                        {ev.time ? `${ev.time} · ` : ""}
+                        {ev.location ? `${ev.location} · ` : ""}
+                        {ev.owner ?? "Campus"}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         )}

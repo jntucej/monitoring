@@ -57,10 +57,18 @@ const SERVICE_META: Record<string, { icon: React.ComponentType<{ className?: str
  * found states are exposed through the inspector's state placeholders.
  */
 
+interface ServiceLogEntry {
+  ts?: string;
+  level?: string;
+  message?: string;
+}
+
 function serviceInspectionModel(
   serviceId: string,
   data: HealthData | null,
   health: string | undefined,
+  logs: ServiceLogEntry[] = [],
+  logsLoading = false
 ): EntityInspection {
   const meta = SERVICE_META[serviceId];
   const Icon = meta?.icon ?? Server;
@@ -179,6 +187,26 @@ function serviceInspectionModel(
       ),
     },
     {
+      title: "Live Service Logs",
+      content: logsLoading ? (
+        <p className="text-xs text-text-muted">Loading recent logs for {serviceId}…</p>
+      ) : logs.length === 0 ? (
+        <p className="text-xs text-text-muted">No recent log lines returned for {serviceId}.</p>
+      ) : (
+        <div className="max-h-48 overflow-y-auto space-y-1.5 font-mono text-[11px]">
+          {logs.map((entry, idx) => (
+            <div key={idx} className="rounded-md border border-border/60 bg-bg-elevated/40 px-2 py-1">
+              <div className="flex items-center justify-between gap-2 text-[10px] text-text-muted">
+                <span>{entry.level ?? "INFO"}</span>
+                <span>{entry.ts ? new Date(entry.ts).toLocaleTimeString("en-IN") : ""}</span>
+              </div>
+              <div className="text-text-primary break-words">{entry.message ?? ""}</div>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
       title: "Actions",
       content: (
         <div className="flex flex-wrap gap-2">
@@ -209,12 +237,15 @@ export function ServiceInspector({ serviceId, onClose }: { serviceId: string; on
   const [data, setData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [logs, setLogs] = useState<ServiceLogEntry[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
 
-  // Lazy-load health details on mount; cachedFetch handles auth headers.
+  // Lazy-load health details + live Loki logs on mount; cachedFetch handles auth headers.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setLogsLoading(true);
     cachedFetch<{ data: HealthData }>("/api/admin/health/overview")
       .then((json) => {
         if (cancelled) return;
@@ -225,6 +256,22 @@ export function ServiceInspector({ serviceId, onClose }: { serviceId: string; on
         if (cancelled) return;
         setError(err instanceof Error ? err.message : String(err));
         setLoading(false);
+      });
+
+    cachedFetch<{ data?: { logs?: ServiceLogEntry[] }; logs?: ServiceLogEntry[] }>(
+      `/api/sysadmin/loki-logs?service=${encodeURIComponent(serviceId)}&limit=10`
+    )
+      .then((json) => {
+        if (cancelled) return;
+        const rows = json?.data?.logs ?? json?.logs ?? [];
+        setLogs(Array.isArray(rows) ? rows : []);
+        setLogsLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLogs([]);
+          setLogsLoading(false);
+        }
       });
     return () => { cancelled = true; };
   }, [serviceId]);
@@ -237,7 +284,7 @@ export function ServiceInspector({ serviceId, onClose }: { serviceId: string; on
   // the inspector never shows a blank panel).
   const health = undefined;
   const model = data
-    ? serviceInspectionModel(serviceId, data, health)
+    ? serviceInspectionModel(serviceId, data, health, logs, logsLoading)
     : null;
 
   if (error) {
