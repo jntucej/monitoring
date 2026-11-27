@@ -69,7 +69,7 @@ export function FeatureContextPage({
   }, [area]);
 
   const kpis = adapter?.kpis ?? [];
-  const activeNodes = adapter?.nodes.filter((n) => n.status === "active").length ?? 0;
+  const activeNodes = adapter?.nodes.filter((n) => n.status === "online").length ?? 0;
   const totalNodes = adapter?.nodes.length ?? 0;
   const activePct = totalNodes > 0 ? Math.round((activeNodes / totalNodes) * 100) : 0;
 
