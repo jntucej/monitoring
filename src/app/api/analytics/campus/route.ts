@@ -102,6 +102,7 @@ async function handleGet(req: NextRequest, _context?: { auth: AuthContext }) {
     count: hourMap.get(h) ?? 0,
   }));
 
+  // Top-dept breakdown — real counts from the query above, empty when no users.
   const topDepts =
     deptRes.rows.length > 0
       ? deptRes.rows.map((d) => ({
@@ -109,26 +110,16 @@ async function handleGet(req: NextRequest, _context?: { auth: AuthContext }) {
           count: Number(d.cnt),
           pct: totalPeople > 0 ? Math.round((Number(d.cnt) / totalPeople) * 100) : 0,
         }))
-      : [
-          { name: "CSE", count: 420, pct: 32 },
-          { name: "IT", count: 310, pct: 24 },
-          { name: "ECE", count: 260, pct: 20 },
-          { name: "EEE", count: 180, pct: 14 },
-          { name: "ME", count: 130, pct: 10 },
-        ];
+      : [];
 
+  // Top actions from the real audit stream.
   const topActions =
     auditRes.rows.length > 0
       ? auditRes.rows.map((a) => ({ action: a.action, count: Number(a.cnt) }))
-      : [
-          { action: "gate.scan.entry", count: 412 },
-          { action: "permission.approve", count: 184 },
-          { action: "auth.login", count: 156 },
-          { action: "circular.ack", count: 98 },
-        ];
+      : [];
 
   const dropOffRate =
-    totalPerms > 0 ? Number(((rejectedPerms / totalPerms) * 100).toFixed(1)) : 4.2;
+    totalPerms > 0 ? Number(((rejectedPerms / totalPerms) * 100).toFixed(1)) : null;
 
   return ok({
     surface,
@@ -157,9 +148,9 @@ async function handleGet(req: NextRequest, _context?: { auth: AuthContext }) {
       },
       {
         label: "Rejection / Drop-Off",
-        value: `${dropOffRate}%`,
+        value: dropOffRate === null ? "—" : `${dropOffRate}%`,
         delta: `${rejectedPerms} rejected`,
-        tone: dropOffRate > 15 ? ("rose" as const) : ("amber" as const),
+        tone: dropOffRate !== null && dropOffRate > 15 ? ("rose" as const) : ("amber" as const),
         sub: "Workflow completion",
       },
       {
