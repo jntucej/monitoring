@@ -103,6 +103,28 @@ export const QUERY_REGISTRY: Record<string, NamedQuery> = {
     query: "sum(api_requests_total)",
     type: "instant",
   },
+  // Host uptime (node_exporter) — seconds since boot; backs the System Health
+  // KPI on /sysadmin/monitoring.
+  "host.uptime": {
+    id: "host.uptime",
+    description: "Host uptime (seconds, node_exporter)",
+    query: "node_time_seconds - node_boot_time_seconds",
+    type: "instant",
+  },
+  // PostgreSQL health / connections (pg_exporter) — Database section.
+  "pg.latency": {
+    id: "pg.latency",
+    description: "PostgreSQL exporter liveness (1=up)",
+    query: "pg_up",
+    type: "instant",
+  },
+  // Prometheus self-scrape — Observability section: is the scrape pipeline up?
+  "prometheus.up": {
+    id: "prometheus.up",
+    description: "Prometheus scrape target liveness",
+    query: "up",
+    type: "instant",
+  },
 };
 
 export function getNamedQuery(id: string): NamedQuery | null {

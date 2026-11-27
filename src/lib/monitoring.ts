@@ -63,6 +63,64 @@ export const MONITORING_GRAFANA_URL =
   process.env.MONITORING_GRAFANA_URL || "http://100.122.7.62:3001";
 
 /**
+ * Grafana credentials for the SERVER-SIDE proxy only. The dedicated read-only
+ * "viewer" service-account token (or basic-auth user) is held here in process
+ * env and NEVER sent to the browser — the iframe points at /api/sysadmin/grafana/*
+ * which streams the dashboard with these credentials server-side.
+ */
+const GRAFANA_TOKEN = process.env.MONITORING_GRAFANA_TOKEN || "";
+const GRAFANA_BASIC_USER = process.env.MONITORING_GRAFANA_USER || "";
+const GRAFANA_BASIC_PASS = process.env.MONITORING_GRAFANA_PASS || "";
+
+function grafanaAuthHeadersInternal(): Record<string, string> {
+  const h: Record<string, string> = {};
+  if (GRAFANA_TOKEN) h["Authorization"] = `Bearer ${GRAFANA_TOKEN}`;
+  else if (GRAFANA_BASIC_USER) {
+    h["Authorization"] =
+      "Basic " + Buffer.from(`${GRAFANA_BASIC_USER}:${GRAFANA_BASIC_PASS}`).toString("base64");
+  }
+  return h;
+}
+export function grafanaAuthHeaders(): Record<string, string> {
+  return grafanaAuthHeadersInternal();
+}
+
+/**
+ * Probe Grafana's /api/health to determine embeddability. Returns a structured
+ * result so the UI can render an explicit "unavailable" state (never fake
+ * data). Never throws.
+ */
+export async function grafanaHealth(timeoutMs = 4000): Promise<{
+  reachable: boolean;
+  version?: string;
+  commit?: string;
+  error?: string;
+}> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${MONITORING_GRAFANA_URL}/api/health`, {
+      signal: ctrl.signal,
+      cache: "no-store",
+      headers: grafanaAuthHeaders(),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      return { reachable: false, error: `grafana ${res.status}: ${text.slice(0, 160)}` };
+    }
+    const json = (await res.json().catch(() => ({}))) as { version?: string; commit?: string };
+    return { reachable: true, version: json.version, commit: json.commit };
+  } catch (e) {
+    return {
+      reachable: false,
+      error: e instanceof Error ? e.message : "grafana unreachable",
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
  * Best-effort client error reporting. Posts to /api/dev/contact so the
  * developer gets notified; never throws, never blocks the UI.
  * Guarded with a per-session cap to avoid a spammy error-boundary loop.

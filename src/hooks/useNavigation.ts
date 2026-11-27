@@ -217,6 +217,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/sysadmin/admin-center", label: "Admin Center", icon: "LayoutGrid", badge: "NEW" },
             { href: "/sysadmin/application-health", label: "Health", icon: "Activity", badge: "LIVE" },
+            { href: "/sysadmin/monitoring", label: "Monitoring", icon: "BarChart3", badge: "LIVE" },
             { href: "/sysadmin/docker-services", label: "Services", icon: "Server" },
             { href: "/sysadmin/deployments", label: "Deployments", icon: "Rocket" },
             { href: "/sysadmin/backup", label: "Backup", icon: "HardDrive" },
