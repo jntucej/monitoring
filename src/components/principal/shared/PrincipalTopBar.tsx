@@ -4,6 +4,7 @@
 
 import { memo } from "react";
 import { Crown, Bell, Menu } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 
 interface PrincipalTopBarProps {
@@ -26,6 +27,7 @@ export const PrincipalTopBar = memo(function PrincipalTopBar({
           <Menu className="h-5 w-5" />
         </button>
         <div className="flex items-center gap-2">
+          <BrandLogo variant="mark" size="xs" motion="static" className="shrink-0" />
           <Crown className="h-5 w-5 text-action-warning" />
           <span className="text-sm font-semibold text-text-primary">Principal Console</span>
         </div>

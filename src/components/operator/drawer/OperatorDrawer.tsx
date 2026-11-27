@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { X, Home, FileText, Wrench, User, LogOut } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { DrawerCategory } from "./DrawerCategory";
@@ -151,6 +152,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
               {/* Header */}
               <div className="surface-card flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">
+                  <BrandLogo variant="mark" size="xs" motion="static" className="shrink-0" />
                   <Home className="w-5 h-5 text-action-primary" />
                   <span className="text-sm font-bold text-text-primary">
                     {user?.name || "Operator"}
@@ -208,6 +210,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
     >
       {/* Rail header */}
       <div className="surface-card flex items-center gap-2 px-4 py-4">
+        <BrandLogo variant="mark" size="xs" motion="static" className="shrink-0" />
         <Home className="w-5 h-5 text-action-primary" />
         <span className="text-sm font-bold text-text-primary">
           Gate Monitor

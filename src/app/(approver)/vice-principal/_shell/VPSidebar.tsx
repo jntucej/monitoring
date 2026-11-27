@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, Flame, Target } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import { cn } from "@/lib/utils";
 import { useVPRetention } from "@/stores/vpRetentionStore";
@@ -73,13 +74,16 @@ export function VPSidebar({
 
   return (
     <div className="flex h-full w-full flex-col bg-bg-surface">
-      <header className="shrink-0 border-b border-border px-4 py-3">
-        <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
-          Vice Principal
-        </p>
-        <p className="text-sm font-semibold text-text-primary">
-          Oversight Console
-        </p>
+      <header className="shrink-0 border-b border-border px-4 py-3 flex items-center gap-3">
+        <BrandLogo variant="mark" size="sm" motion="reactive" className="shrink-0" />
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wider text-text-muted truncate">
+            Vice Principal
+          </p>
+          <p className="text-sm font-semibold text-text-primary truncate">
+            Oversight Console
+          </p>
+        </div>
       </header>
 
       <nav className="flex-1 overflow-y-auto p-2" aria-label="Vice Principal navigation">

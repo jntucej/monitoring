@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { RoleSidebar } from "./RoleSidebar";
 import { RoleNotificationBell } from "./RoleNotificationBell";
 import { RoleSearchBar } from "@/components/shared/RoleSearchBar";
@@ -44,6 +45,7 @@ export function RoleMobileShell({
           >
             <Menu className="size-5" />
           </button>
+          <BrandLogo variant="mark" size="xs" motion="static" className="shrink-0" />
           <span className="text-sm font-semibold text-text-primary">
             {manifest.brand.short}
           </span>

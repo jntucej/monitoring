@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { cn } from "@/lib/utils";
 import type { NavGroup, NavLink, NavEntry, NavContext, NavChild, RoleManifest } from "./types";
 
@@ -96,13 +97,16 @@ export function RoleSidebar({
 
   return (
     <div className="flex h-full w-full flex-col bg-bg-surface">
-      <header className="surface-card shrink-0 px-4 py-3">
-        <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
-          {manifest.brand.short}
-        </p>
-        <p className="text-sm font-semibold text-text-primary">
-          {manifest.brand.long}
-        </p>
+      <header className="surface-card shrink-0 px-4 py-3 flex items-center gap-3">
+        <BrandLogo variant="mark" size="sm" motion="reactive" className="shrink-0" />
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wider text-text-muted truncate">
+            {manifest.brand.short}
+          </p>
+          <p className="text-sm font-semibold text-text-primary truncate">
+            {manifest.brand.long}
+          </p>
+        </div>
       </header>
 
       <nav

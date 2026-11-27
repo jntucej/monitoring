@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, Flame, Target } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import { cn } from "@/lib/utils";
 import {
@@ -72,13 +73,16 @@ export function HodSidebar({
 
   return (
     <div className="flex h-full w-full flex-col bg-bg-surface">
-      <header className="shrink-0 border-b border-border px-4 py-3">
-        <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
-          HOD
-        </p>
-        <p className="text-sm font-semibold text-text-primary">
-          Department Console
-        </p>
+      <header className="shrink-0 border-b border-border px-4 py-3 flex items-center gap-3">
+        <BrandLogo variant="mark" size="sm" motion="reactive" className="shrink-0" />
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wider text-text-muted truncate">
+            HOD
+          </p>
+          <p className="text-sm font-semibold text-text-primary truncate">
+            Department Console
+          </p>
+        </div>
       </header>
 
       <nav className="flex-1 overflow-y-auto p-2" aria-label="HOD navigation">

@@ -6,6 +6,7 @@ import { memo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {LayoutDashboard, Building2, Eye, MessageSquare, Share2, FileText, UserCircle, Inbox, Clock, Users, AlertTriangle, Settings, History, PieChart, AlertCircle, Flame, Bell, Calendar, BookOpen, Thermometer, CheckCircle2, ShieldCheck, Crown}  from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { PrincipalSidebarCategory } from "./PrincipalSidebarCategory";
 import { PrincipalTopBar } from "./PrincipalTopBar";
 import type { NotificationItem } from "./PrincipalNotifications";
@@ -141,6 +142,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
 
         {/* Desktop sidebar header */}
         <div className="surface-card hidden md:flex h-14 items-center gap-2 px-4">
+          <BrandLogo variant="mark" size="sm" motion="reactive" className="shrink-0" />
           <Crown className="h-5 w-5 text-action-warning" />
           <span className="text-sm font-semibold text-text-primary">Principal</span>
         </div>
