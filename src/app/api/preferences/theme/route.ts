@@ -34,9 +34,18 @@ export async function GET(req: NextRequest) {
     [claims.id],
   );
 
+  let theme = rows[0]?.ui_theme;
+  if (!theme) {
+    const st = await query<{ gender: string | null }>(
+      `SELECT gender FROM public.students WHERE id = $1 LIMIT 1`,
+      [claims.id],
+    ).catch(() => ({ rows: [] as Array<{ gender: string | null }> }));
+    theme = st.rows[0]?.gender?.toLowerCase() === "female" ? "sakuga" : "graphite";
+  }
+
   return Response.json({
     success: true,
-    ui_theme: rows[0]?.ui_theme ?? "graphite",
+    ui_theme: theme,
   });
 }
 
