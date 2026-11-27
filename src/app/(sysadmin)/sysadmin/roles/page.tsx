@@ -26,6 +26,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useUIStore } from "@/stores/uiStore";
 import { getAuthHeaders } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 
 /** Shape of the read-only /api/roles-graph response. */
 interface RolesGraphPayload {
@@ -1073,6 +1074,9 @@ export default function RolesManagementPage() {
             </div>
           </div>
         )}
+        <div className="mt-6">
+          <SpatialPeopleMapWorkspace defaultArea="institutional" compact />
+        </div>
       </div>
     </AuthGuard>
   );

@@ -96,9 +96,6 @@ export default function SysadminCommandCenterPage() {
       <WidgetBoundary name="ObservabilityStackPanel" title="Observability Stack & Live Logs">
         <ObservabilityStackPanel />
       </WidgetBoundary>
-      <WidgetBoundary name="SpatialPeopleMap" title="Institutional & DevOps Command Map">
-        <SpatialPeopleMapWorkspace defaultArea="institutional" compact />
-      </WidgetBoundary>
 
     </>
   );

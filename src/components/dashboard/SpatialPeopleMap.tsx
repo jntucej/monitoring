@@ -307,11 +307,11 @@ export function SpatialPeopleMapWorkspace({
 
   return (
     <div className={compact ? "text-neutral-900 font-sans antialiased" : "min-h-screen bg-[#F5F6F7] p-2 sm:p-4 lg:p-6 text-neutral-900 font-sans antialiased selection:bg-neutral-900 selection:text-white"}>
-      <div className={compact ? "bg-white rounded-3xl shadow-sm border border-neutral-200/80 overflow-hidden flex flex-col lg:flex-row min-h-[720px]" : "max-w-[1540px] mx-auto bg-white rounded-3xl shadow-sm border border-neutral-200/80 overflow-hidden flex flex-col lg:flex-row min-h-[840px]"}>
+      <div className={compact ? "bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-neutral-200/80 overflow-hidden flex flex-col lg:flex-row lg:min-h-[720px]" : "max-w-[1540px] mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-neutral-200/80 overflow-hidden flex flex-col lg:flex-row lg:min-h-[840px]"}>
       {/* =================================================================== */}
       {/* ZONE 1: LEFT NAVIGATION RAIL (Unified Reference Sidebar)            */}
       {/* =================================================================== */}
-      <aside className="w-full lg:w-64 bg-[#FAFAFB] border-b lg:border-b-0 lg:border-r border-neutral-200/80 p-4 flex flex-col justify-between shrink-0 z-20">
+      <aside className={`${lockedArea ? "hidden lg:flex" : "flex"} w-full lg:w-64 bg-[#FAFAFB] border-b lg:border-b-0 lg:border-r border-neutral-200/80 p-3 sm:p-4 flex-col justify-between shrink-0 z-20`}>
         <div className="overflow-y-auto">
           {/* Brand Header */}
           <div className="flex items-center justify-between px-2 mb-5">
@@ -1146,7 +1146,7 @@ export function SpatialPeopleMap({
   );
 
   return (
-    <section className="flex-1 bg-white rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col min-h-[480px] lg:min-h-0 overflow-hidden relative">
+    <section className="flex-1 bg-white rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col min-h-[340px] sm:min-h-[480px] lg:min-h-0 overflow-hidden relative">
       {/* Toolbar Header */}
       <div className="px-4 py-3 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2.5 bg-white z-10">
         <div>
@@ -1660,7 +1660,7 @@ export function SpatialPeopleMap({
         </svg>
 
         {/* Bottom-Left Telemetry & Focus Legend */}
-        <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-2 pointer-events-none">
+        <div className="hidden sm:flex absolute bottom-3 left-3 flex-wrap items-center gap-2 pointer-events-none">
           <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-sm flex items-center gap-3 text-[11px] text-slate-600">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500" /> On-Duty / Present
