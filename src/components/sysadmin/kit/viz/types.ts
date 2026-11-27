@@ -136,6 +136,34 @@ export interface SankeyProps {
   className?: string;
 }
 
+// ── HorizontalPillBarList ────────────────────────────────
+export interface HorizontalPillBar {
+  key?: string;
+  label: string;
+  /** Numeric value driving the fill. */
+  value: number;
+  /** Explicit readout (overrides the derived one, e.g. "1,204"). */
+  valueLabel?: string;
+  /** When set, the fill uses this status colour instead of the default. */
+  status?: VizStatus;
+  /** "pct" appends % to the derived value readout. */
+  unit?: "pct" | "count";
+  meta?: string;
+}
+
+// ── RadialGaugeCard ───────────────────────────────────────
+export interface RadialGaugeCardProps {
+  title: string;
+  /** 0..100, or null for an explicit N/A empty state. */
+  value: number | null;
+  status?: VizStatus;
+  unit?: string;
+  meta?: string;
+  size?: number;
+  onInspect?: () => void;
+  className?: string;
+}
+
 // ── ChainDots ──────────────────────────────────────────────
 export interface ChainStage {
   id: string;

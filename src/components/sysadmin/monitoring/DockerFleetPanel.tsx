@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Server, RefreshCw, ExternalLink } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import { RadialGaugeCard } from "@/components/analytics";
 
 interface PromSample {
   metric: Record<string, string>;
@@ -86,6 +87,16 @@ export function DockerFleetPanel() {
     return `${(mib / 1024).toFixed(2)} GiB`;
   };
 
+  // Top-4 CPU consumers as radial gauges. Prometheus reports raw core-count
+  // (e.g. 0.12), so we render a RELATIVE load (value / busiest * 100) — never
+  // a fabricated absolute %. Containers with no CPU sample show N/A.
+  const busiestCpu = rows.reduce((m, r) => Math.max(m, r.cpu), 0);
+  const topCpu = [...rows]
+    .filter((r) => r.cpu > 0)
+    .sort((a, b) => b.cpu - a.cpu)
+    .slice(0, 4);
+  const gaugeStatus = (pct: number) => (pct >= 85 ? "error" : pct >= 60 ? "warn" : "ok");
+
   return (
     <div className="rounded-xl border border-border bg-bg-surface">
       <div className="surface-card flex items-center justify-between p-4">
@@ -107,6 +118,31 @@ export function DockerFleetPanel() {
           Refresh
         </button>
       </div>
+
+      {/* Per-node radial gauges (Board 3) — top CPU consumers */}
+      {!error && topCpu.length > 0 && (
+        <div className="px-4 pb-2">
+          <div className="mb-2 text-[11px] font-semibold text-text-muted">
+            Busiest containers (CPU, relative to peak)
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {topCpu.map((r) => {
+              const pct = busiestCpu > 0 ? (r.cpu / busiestCpu) * 100 : 0;
+              return (
+                <RadialGaugeCard
+                  key={r.name}
+                  title={r.name}
+                  value={Number.isFinite(pct) ? Math.round(pct) : null}
+                  status={gaugeStatus(pct)}
+                  unit="%"
+                  meta={`${r.cpu.toFixed(2)} cores`}
+                  size={104}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {error ? (
         <div className="surface-card p-4 m-4 bg-rose-500/10 text-action-danger text-xs">

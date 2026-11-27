@@ -41,6 +41,8 @@ export {
   GeoMap,
   Sankey,
   ChainDots,
+  HorizontalPillBarList,
+  RadialGaugeCard,
 } from "@/components/sysadmin/kit/viz";
 export type * from "@/components/sysadmin/kit/viz/types";
 export {

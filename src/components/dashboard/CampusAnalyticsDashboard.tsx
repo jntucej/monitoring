@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { TelemetryKpiCard, UnifiedWorkspaceFrame } from "@/components/dashboard/UnifiedDashboardWidgets";
+import { HorizontalPillBarList } from "@/components/analytics";
 import type { KpiTone } from "@/lib/org-map-adapters";
 import { BarChart3, Users, Activity, ArrowRight, Smartphone, Globe, Inbox, Info } from "lucide-react";
 
@@ -266,16 +267,17 @@ export function CampusAnalyticsDashboard({
         <div className="rounded-2xl border border-neutral-200/80 bg-white p-4">
           <div className="text-xs font-bold text-neutral-900 mb-3">Entry Channels</div>
           {data?.entryChannels && data.entryChannels.length > 0 ? (
-            <div className="space-y-2">
-              {data.entryChannels.map((c) => (
-                <div key={c.channel} className="flex items-center justify-between text-xs">
-                  <span className="text-neutral-700">{c.channel}</span>
-                  <span className="font-mono font-semibold text-emerald-700">
-                    {c.pct === null ? "—" : `${c.pct}%`}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <HorizontalPillBarList
+              items={data.entryChannels.map((c) => ({
+                key: c.channel,
+                label: c.channel,
+                value: c.pct ?? 0,
+                valueLabel: c.pct === null ? undefined : `${c.pct}%`,
+                unit: "pct",
+                status: "info",
+              }))}
+              showValues
+            />
           ) : (
             <div className="text-xs text-neutral-400 flex items-center gap-1.5">
               <Info className="w-3 h-3" />
