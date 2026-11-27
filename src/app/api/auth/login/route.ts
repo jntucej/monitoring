@@ -370,6 +370,43 @@ async function handleLoginInner(
       console.error("[login] session family persist failed:", err);
     }
 
+    let studentMeta: {
+      gender?: string | null;
+      studentType?: string | null;
+      hostelBlock?: string | null;
+      roomNumber?: string | null;
+      persona?: "hosteller" | "day_scholar";
+    } = {};
+    if (user.role === "student") {
+      try {
+        const stRes = await query<{
+          student_type: string | null;
+          gender: string | null;
+          hostel_block: string | null;
+          room_number: string | null;
+        }>(
+          `SELECT student_type, gender, hostel_block, room_number FROM students WHERE id = $1 LIMIT 1`,
+          [user.id]
+        );
+        const st = stRes.rows[0];
+        if (st) {
+          const isHosteller =
+            Boolean(st.student_type && st.student_type.toUpperCase().startsWith("H")) ||
+            Boolean(st.hostel_block) ||
+            Boolean(st.room_number);
+          studentMeta = {
+            gender: st.gender,
+            studentType: st.student_type,
+            hostelBlock: st.hostel_block,
+            roomNumber: st.room_number,
+            persona: isHosteller ? "hosteller" : "day_scholar",
+          };
+        }
+      } catch {
+        /* non-fatal */
+      }
+    }
+
     const response = NextResponse.json({
       success: true,
       data: {
@@ -388,6 +425,7 @@ async function handleLoginInner(
           status: user.status,
           department_id: user.department_id,
           gate_id: user.gate_id,
+          ...studentMeta,
         },
       },
     });
