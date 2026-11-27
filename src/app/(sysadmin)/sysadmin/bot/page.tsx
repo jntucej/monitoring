@@ -84,7 +84,7 @@ export default function SysadminBotPage() {
         }>(url);
 
         if (res.success && res.data) {
-          setSummary(res.data.summary);
+          setSummary(res.data.summary ?? { total: 0, linked: 0, verified: 0, unverified: 0 });
           setStudents(res.data.students || []);
         } else {
           addToast({
