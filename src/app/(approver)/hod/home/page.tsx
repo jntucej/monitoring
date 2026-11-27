@@ -27,6 +27,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface PriorityItem {
   id: string;
@@ -60,6 +62,11 @@ interface HodOverviewData {
     myRank: number;
     totalDepts: number;
   };
+  insights: {
+    thisWeek: number;
+    lastWeek: number;
+    avgResponseSec: number;
+  };
   schedule: ScheduleSlot[];
 }
 
@@ -74,6 +81,7 @@ function KpiTile({
   value,
   tone = "ok",
   linkHref,
+  onInspect,
 }: {
   label: string;
   value: string | number;
@@ -81,6 +89,10 @@ function KpiTile({
   /** (UX-006) Drill-down target: makes the tile a link to the underlying
    *  records so "I see a number, now what?" is answered in one click. */
   linkHref?: string;
+  /** Record-backed inspector trigger. Takes precedence over linkHref when
+   *  supplied — opens the page's shared EntityInspector instead of
+   *  navigating. */
+  onInspect?: () => void;
 }) {
   const toneClass =
     tone === "bad"
@@ -94,6 +106,18 @@ function KpiTile({
       <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
     </div>
   );
+  if (onInspect) {
+    return (
+      <button
+        type="button"
+        onClick={onInspect}
+        aria-label={`${label}: ${value}. Inspect`}
+        className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary transition-colors hover:bg-[var(--bg-elev-2)] text-left"
+      >
+        {tile}
+      </button>
+    );
+  }
   if (linkHref) {
     return (
       <a
@@ -119,6 +143,49 @@ const user = useAuthStore((s) => s.user);
   const sessionDecisions = useHodRetention((s) => s.sessionDecisions);
 
   const d = data?.data;
+
+  // Single page-level inspector controller: KPI tiles + focus item open the
+  // same EntityInspector (one drawer, never stacked). Mirrors the VP
+  // inspectQueue pattern.
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const inspectQueue = (kind: "pending" | "escalated") => {
+    const pendingCount = d?.counts.pending ?? 0;
+    const escalatedCount = d?.counts.escalated ?? 0;
+    inspect({
+      kind: "escalation",
+      title: kind === "pending" ? "Pending approvals" : "Escalated requests",
+      subtitle: kind === "pending" ? `${pendingCount} in queue` : `${escalatedCount} escalated`,
+      sections: [
+        {
+          title: "Overview",
+          content: (
+            <KVPairs
+              items={[
+                { label: "Pending approvals", value: String(pendingCount) },
+                { label: "Escalated", value: String(escalatedCount) },
+                { label: "Overdue", value: String(d?.counts.overdue ?? 0) },
+              ]}
+            />
+          ),
+        },
+        {
+          title: "Actions",
+          content: (
+            <ActionRow>
+              <InspectorButton
+                href={kind === "pending" ? "/hod/approvals/pending" : "/hod/approvals/escalated"}
+                variant="primary"
+              >
+                Open queue
+              </InspectorButton>
+            </ActionRow>
+          ),
+        },
+      ],
+      detailHref: kind === "pending" ? "/hod/approvals/pending" : "/hod/approvals/escalated",
+      detailLabel: "Open queue",
+    });
+  };
   const pending =
     (d?.counts.pending ?? 0) +
     (d?.counts.escalated ?? 0) +
@@ -189,8 +256,8 @@ const user = useAuthStore((s) => s.user);
       <LivePulseStrip items={[{ id: "queue", label: "HOD Queue", valueLabel: "Live", tone: "warn", benchmark: "Review pending department requests" }, { id: "sla", label: "SLA Target", valueLabel: "< 2h", tone: "info", benchmark: "Forward approved passes to VP" }]} />
         <WidgetBoundary name="HodKpis" title="HOD KPIs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiTile label="Pending approvals" value={d?.counts.pending ?? 0} linkHref="/hod/approvals" />
-            <KpiTile label="Escalated" value={d?.counts.escalated ?? 0} tone={(d?.counts.escalated ?? 0) > 0 ? "warn" : "ok"} linkHref="/hod/approvals" />
+            <KpiTile label="Pending approvals" value={d?.counts.pending ?? 0} onInspect={() => inspectQueue("pending")} />
+            <KpiTile label="Escalated" value={d?.counts.escalated ?? 0} tone={(d?.counts.escalated ?? 0) > 0 ? "warn" : "ok"} onInspect={() => inspectQueue("escalated")} />
             <KpiTile label="Faculty present" value={d?.faculty.total ? `${d.faculty.presentToday}/${d.faculty.total}` : "—"} linkHref="/hod/faculty/directory" />
             <KpiTile label="Dept rank" value={d?.pulse.myRank ? `#${d.pulse.myRank}/${d.pulse.totalDepts}` : "—"} linkHref="/hod/reports" />
           </div>
@@ -254,9 +321,9 @@ const user = useAuthStore((s) => s.user);
         {/* 6. Scorecard */}
         <WidgetBoundary name="Scorecard" title="Scorecard">
           <Scorecard
-            thisWeek={d?.counts.todayDecisions ?? 0}
-            lastWeek={0}
-            avgResponseSec={0}
+            thisWeek={d?.insights.thisWeek ?? 0}
+            lastWeek={d?.insights.lastWeek ?? 0}
+            avgResponseSec={d?.insights.avgResponseSec ?? 0}
           />
         </WidgetBoundary>
 
@@ -280,6 +347,7 @@ const user = useAuthStore((s) => s.user);
 
         {/* 9. Retention & Analytics Widgets */}
 
+        <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
       </div>
     </>
   );

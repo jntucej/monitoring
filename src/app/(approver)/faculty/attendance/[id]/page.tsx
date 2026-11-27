@@ -87,6 +87,7 @@ function ClassAttendanceInner() {
   const rate = summary?.overallAttendanceRate ?? 0;
   const present = summary?.presentToday ?? 0;
   const absent = summary?.absentCount ?? 0;
+  const delayed = summary?.lateArrivals ?? 0;
 
   // Real last-7-days attendance: aggregate each faculty record's
   // attendanceHeatmap (last 7 entries) so the heatmap shows genuine
@@ -154,8 +155,8 @@ function ClassAttendanceInner() {
         </div>
       ) : null}
 
-      {/* Today's counts */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
+      {/* Today's counts — present / absent / delayed / rate */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 min-w-0">
         <div className="surface-card bg-emerald-500/5 p-3 min-w-0">
           <p className="text-xs uppercase font-bold tracking-wider text-action-success flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" /> Present
@@ -167,6 +168,12 @@ function ClassAttendanceInner() {
             <XCircle className="w-3.5 h-3.5" /> Absent
           </p>
           <p className="text-2xl font-bold text-action-danger mt-1">{absent}</p>
+        </div>
+        <div className="surface-card bg-amber-500/5 p-3 min-w-0">
+          <p className="text-xs uppercase font-bold tracking-wider text-action-warning flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5" /> Delayed
+          </p>
+          <p className="text-2xl font-bold text-action-warning mt-1">{delayed}</p>
         </div>
         <div className="surface-card bg-bg-surface p-3 min-w-0">
           <p className="text-xs uppercase font-bold tracking-wider text-text-muted">

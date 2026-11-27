@@ -24,10 +24,11 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
       students: { total: 0, onCampus: 0, offCampus: 0 },
       pulse: { myRate: 0, collegeAvg: 0, myRank: 0, totalDepts: 0 },
       schedule: [],
+      insights: { thisWeek: 0, lastWeek: 0, avgResponseSec: 0 },
     });
   }
 
-  const [countsRes, priorityRes, facultyRes, studentsRes, pulseRes, scheduleRes] =
+  const [countsRes, priorityRes, facultyRes, studentsRes, pulseRes, scheduleRes, insightsRes] =
     await Promise.all([
       // Approval counts for this department
       query<{
@@ -197,12 +198,41 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
            ORDER BY c.section`,
         [auth.userId]
       ).catch(() => ({ rows: [] as any[] })),
+
+      // Personal pace vs. previous 7d (insights) — mirrors the VP dashboard
+      // but scoped to this HOD's department and the 'hod' approval stage.
+      query<{ this_week: string; last_week: string; avg_response_sec: string }>(
+        `WITH buckets AS (
+           SELECT
+             COUNT(*) FILTER (WHERE p.updated_at >= NOW() - INTERVAL '7 days') AS this_week,
+             COUNT(*) FILTER (
+               WHERE p.updated_at >= NOW() - INTERVAL '14 days'
+                 AND p.updated_at <  NOW() - INTERVAL '7 days'
+             ) AS last_week
+           FROM permissions p
+           JOIN users u ON u.id = p.requester_user_id
+           WHERE p.current_stage = 'hod'
+             AND p.status IN ('APPROVED','REJECTED')
+             AND u.department_id = $1
+         )
+         SELECT this_week, last_week,
+           COALESCE((SELECT AVG(EXTRACT(EPOCH FROM (p.updated_at - p.created_at)))
+                    FROM permissions p
+                    JOIN users u ON u.id = p.requester_user_id
+                    WHERE p.current_stage = 'hod'
+                      AND p.status IN ('APPROVED','REJECTED')
+                      AND u.department_id = $1
+                      AND p.updated_at >= NOW() - INTERVAL '7 days'), 0)::numeric AS avg_response_sec
+         FROM buckets`,
+        [deptId]
+      ).catch(() => ({ rows: [{ this_week: "0", last_week: "0", avg_response_sec: "0" }] })),
     ]);
 
   const c = countsRes.rows[0];
   const f = facultyRes.rows[0];
   const s = studentsRes.rows[0];
   const p = pulseRes.rows[0];
+  const ins = insightsRes.rows[0] ?? { this_week: "0", last_week: "0", avg_response_sec: "0" };
   const now = Date.now();
 
   return ok({
@@ -250,6 +280,11 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
       endsAt: r.ends_at,
       marked: r.marked,
     })),
+    insights: {
+      thisWeek: Number(ins.this_week),
+      lastWeek: Number(ins.last_week),
+      avgResponseSec: Number(ins.avg_response_sec),
+    },
   });
 }
 
