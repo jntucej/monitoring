@@ -158,11 +158,23 @@ const HIERARCHIES: HierarchyDef[] = [
   },
 ];
 
+interface LiveCandidate {
+  id: string;
+  name: string;
+  unique_id?: string;
+  role: string;
+  status?: string;
+  department_id?: string | null;
+  assigned_hostel?: string | null;
+}
+
 export function SysAdminRolesHierarchyMap() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [layoutMode, setLayoutMode] = useState<"tree" | "constellation">("tree");
   const [selectedCode, setSelectedCode] = useState<string>(HIERARCHIES[0].nodes[0].code);
   const [counts, setCounts] = useState<RolesGraphApiPayload>({});
+  const [candidatesByRole, setCandidatesByRole] = useState<Record<string, LiveCandidate[]>>({});
+  const [loadingRole, setLoadingRole] = useState<string | null>(null);
 
   const hierarchy = HIERARCHIES[activeIdx];
   const SVG_W = 860;
@@ -189,6 +201,37 @@ export function SysAdminRolesHierarchyMap() {
     setActiveIdx(idx);
     setSelectedCode(HIERARCHIES[idx].nodes[0].code);
   };
+
+  // Progressive reveal: fetch real backend users for the clicked role
+  useEffect(() => {
+    if (!selectedCode || candidatesByRole[selectedCode]) return;
+    let alive = true;
+    setLoadingRole(selectedCode);
+    fetch(`/api/users?role=${encodeURIComponent(selectedCode)}&limit=8`, {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (!alive) return;
+        const rows = (json?.data?.users ?? json?.users ?? json?.data ?? []) as LiveCandidate[];
+        setCandidatesByRole((prev) => ({
+          ...prev,
+          [selectedCode]: Array.isArray(rows) ? rows : [],
+        }));
+      })
+      .catch(() => {
+        if (alive) {
+          setCandidatesByRole((prev) => ({ ...prev, [selectedCode]: [] }));
+        }
+      })
+      .finally(() => {
+        if (alive) setLoadingRole(null);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [selectedCode, candidatesByRole]);
 
   // Compute target coordinates for Sequential Tree or Polar Constellation
   const targetPositions = useMemo(() => {
@@ -525,6 +568,43 @@ export function SysAdminRolesHierarchyMap() {
                   Two-Person Rule: {selectedNode.twoPerson}
                 </div>
               )}
+            </div>
+
+            {/* Live Backend Candidates for Selected Role */}
+            <div className="pt-2 border-t border-slate-200 space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600">
+                <span>Live Backend Accounts ({selectedNode.code})</span>
+                {loadingRole === selectedNode.code && (
+                  <span className="text-slate-500">Loading…</span>
+                )}
+              </div>
+              <div className="max-h-40 overflow-y-auto space-y-1.5">
+                {(candidatesByRole[selectedNode.code] ?? []).length === 0 &&
+                loadingRole !== selectedNode.code ? (
+                  <div className="text-[11px] text-slate-500 italic">
+                    No active accounts returned for this role.
+                  </div>
+                ) : (
+                  (candidatesByRole[selectedNode.code] ?? []).map((c) => (
+                    <div
+                      key={c.id}
+                      className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[11px]"
+                    >
+                      <div className="min-w-0">
+                        <div className="font-semibold text-slate-900 truncate">{c.name}</div>
+                        <div className="font-mono text-[10px] text-slate-600 truncate">
+                          {c.unique_id ?? c.id}
+                          {c.department_id ? ` · ${c.department_id}` : ""}
+                          {c.assigned_hostel ? ` · ${c.assigned_hostel}` : ""}
+                        </div>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                        {c.status ?? "ACTIVE"}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
 
