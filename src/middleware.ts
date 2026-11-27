@@ -136,7 +136,7 @@ export async function proxy(req: NextRequest) {
     return res;
   }
 
-  const BYPASS_PATHS = ['/api/health', '/metrics', '/api/metrics'];
+  const BYPASS_PATHS = ['/api/health', '/metrics', '/api/metrics', '/api/brand'];
   if (BYPASS_PATHS.some(p => pathname.startsWith(p))) {
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set('x-request-id', requestId);
