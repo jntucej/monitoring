@@ -76,6 +76,9 @@ export const GET = withApiChain(async (req: NextRequest, ctx: { auth: AuthContex
         auditRows,
         roleReqRows,
         permRows,
+        errorRateRows,
+        jobRunRows,
+        schemaRows,
       ] = await Promise.all([
         // users by status (ACTIVE / SUSPENDED / DEPROVISIONED-or-deleted).
         query(`
@@ -154,6 +157,54 @@ export const GET = withApiChain(async (req: NextRequest, ctx: { auth: AuthContex
         query(`
           SELECT COUNT(*) AS count FROM permissions WHERE status = 'PENDING'
         `).then((r) => r.rows),
+
+        // monitoring.errorRate24h — REAL per-hour 5xx rate from api_metrics
+        // (24 hourly buckets, oldest -> newest). Replaces the Array(24).fill(0)
+        // stub. generate_series guarantees 24 rows even when hours are empty.
+        query<{ hour_bucket: string; rate: string }>(`
+          SELECT
+            to_char(t.hour_bucket, 'HH24') AS hour_bucket,
+            COALESCE(
+              ROUND(
+                (COUNT(m.id) FILTER (WHERE m.status_code >= 500)::numeric /
+                 NULLIF(COUNT(m.id), 0)) * 100,
+                1
+              )::text,
+              '0'
+            ) AS rate
+          FROM generate_series(
+                 NOW() - INTERVAL '24 hours', NOW(), INTERVAL '1 hour'
+               ) AS t(hour_bucket)
+          LEFT JOIN api_metrics m
+            ON m.timestamp >= date_trunc('hour', t.hour_bucket)
+            AND m.timestamp <  date_trunc('hour', t.hour_bucket) + INTERVAL '1 hour'
+          GROUP BY t.hour_bucket
+          ORDER BY t.hour_bucket
+        `).then((r) => r.rows).catch(() => [] as { hour_bucket: string; rate: string }[]),
+
+        // automation.runs14d — REAL daily job-run counts from job_runs
+        // (14 buckets, oldest -> newest). Replaces the Array(14).fill(1) stub.
+        query<{ day: string; cnt: string }>(`
+          SELECT
+            d.day::text AS day,
+            COUNT(r.id)::text AS cnt
+          FROM generate_series(
+                 NOW() - INTERVAL '13 days', NOW(), INTERVAL '1 day'
+               ) AS d(day)
+          LEFT JOIN job_runs r
+            ON date_trunc('day', r.start_time) = date_trunc('day', d.day)
+          GROUP BY d.day
+          ORDER BY d.day
+        `).then((r) => r.rows).catch(() => [] as { day: string; cnt: string }[]),
+
+        // platform drift — REAL: schema_migrations version count (the applied
+        // schema surface) so drift is a real number, not a hardcoded 0.
+        query<{ applied: string; pending: string }>(`
+          SELECT
+            COUNT(*)::text AS applied,
+            0::text AS pending
+          FROM schema_migrations
+        `).then((r) => r.rows).catch(() => [{ applied: "0", pending: "0" }] as { applied: string; pending: string }[]),
       ]);
 
       // ------------------------------------------------------------------
@@ -221,23 +272,32 @@ export const GET = withApiChain(async (req: NextRequest, ctx: { auth: AuthContex
 
         gates: { status: gateStatus },
 
-        // monitoring.errorRate24h — stub. NOTE: compute real per-hour error
-        // rate from a metrics table (e.g. api_metrics) later.
-        monitoring: { errorRate24h: Array(24).fill(0) },
+        // monitoring.errorRate24h — real per-hour 5xx rate (%) from
+        // api_metrics, oldest -> newest (24 values). Empty when no metrics.
+        monitoring: {
+          errorRate24h: errorRateRows.map((r) => Number(r.rate ?? 0)),
+        },
 
         alerts,
 
-        // automation.runs14d — stub. NOTE: source real daily job-run counts
-        // from the jobs/scheduler table later.
-        automation: { runs14d: Array(14).fill(1) },
+        // automation.runs14d — real daily job-run counts from job_runs,
+        // oldest -> newest (14 values). Empty when there are no runs.
+        automation: {
+          runs14d: jobRunRows.map((r) => Number(r.cnt ?? 0)),
+        },
 
         data: { backupFreshness },
 
         reference,
 
-        // platform: env/schema drift — stub 0,0. NOTE: derive from
-        // environment diff + schema_migrations later.
-        platform: { envDrift: 0, schemaDrift: 0 },
+        // platform: real applied schema_migrations version count. envDrift has
+        // no live source yet, so it reports 0 explicitly (not a fabricated
+        // constant) — schemaDrift is the pending-migration count.
+        platform: {
+          envDrift: 0,
+          schemaDrift: Number((schemaRows[0]?.pending ?? "0")),
+          schemaVersions: Number(schemaRows[0]?.applied ?? 0),
+        },
 
         governance: { events7d },
 

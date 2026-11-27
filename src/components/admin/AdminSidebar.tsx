@@ -71,7 +71,7 @@ export interface AdminOverviewPayload {
   automation?: { runs14d: number[] };
   data?: { backupFreshness: number };
   reference?: { departments: number; courses: number; sections: number };
-  platform?: { envDrift: number; schemaDrift: number };
+  platform?: { envDrift: number; schemaDrift: number; schemaVersions?: number };
   governance?: { events7d: number[] };
   operations?: { traffic24h: number[] };
   analytics?: { traffic7d: number[] };
