@@ -197,6 +197,7 @@ export async function query<T extends QueryResultRow = any>(
     }
     if (options?.currentRole) {
       await client.query("SELECT set_config('app.current_role', $1, false)", [options.currentRole]);
+      await client.query("SELECT set_config('app.role', $1, false)", [options.currentRole]);
     }
     return await client.query<T>(text, params);
   } catch (err) {
@@ -246,6 +247,10 @@ export async function withTransaction<T>(
     if (options?.currentRole) {
       await client.query(
         "SELECT set_config($$app.current_role$$, $1, true)",
+        [options.currentRole],
+      );
+      await client.query(
+        "SELECT set_config($$app.role$$, $1, true)",
         [options.currentRole],
       );
       await client.query(
