@@ -56,7 +56,7 @@ async function handleGet(_req: NextRequest) {
   const { rows: reuseRows } = await query(
     `SELECT COUNT(*)::int AS n FROM public.audit_logs
       WHERE action = 'REFRESH_REUSE_DETECTED'
-        AND created_at > NOW() - INTERVAL '5 minutes'`
+        AND timestamp > NOW() - INTERVAL '5 minutes'`
   ).catch(() => ({ rows: [{ n: 0 }] as Array<{ n: number }> }));
   const reuseCount = Number((reuseRows as Array<{ n: number }>)[0]?.n ?? 0);
   lines.push("# HELP refresh_reuse_detected_total Refresh-token reuse events (last 5m)");
