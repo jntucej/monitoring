@@ -26,15 +26,6 @@ function GateCardInspector({ gate, onInspect }: { gate: Gate; onInspect: (m: Ent
   if (loading || error) {
     return (
       <div className="flex items-center gap-2 text-xs text-text-muted px-3 py-4">
-      <ContextSituationBar
-        roleLabel="System Admin"
-        purpose="Manage and monitor gates for campus operations."
-        why="Use this view to cross-check hardware state before dispatching a field maintenance team."
-        contextLabel="Gates"
-        statusSummary="Review current gates state and take action below."
-        primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
-        secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
-      />
         {error ? "Could not load gate details" : "Loading gate…"}
       </div>
     );
@@ -274,9 +265,18 @@ const api = useApi();
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <ContextSituationBar
+          roleLabel="System Admin"
+          purpose="Manage and monitor gates, operator bindings, claim codes, and kiosk defaults."
+          why="Use this view to onboard operators onto gates, mint 6-digit claim codes, and configure kiosk terminals."
+          contextLabel="Gates & Operator Onboarding"
+          statusSummary="Review current gates state, assign operators, or mint claim codes below."
+          primaryAction={{ label: "Enroll New Person", href: "/sysadmin/people" }}
+          secondaryAction={{ label: "Access Keys", href: "/sysadmin/access-keys" }}
+        />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <p className="text-2xl font-bold text-white flex items-center gap-2.5">
+            <p className="text-2xl font-bold text-text-primary flex items-center gap-2.5">
               <DoorOpen className="size-5 text-action-success" /> Gate Management
             </p>
             <p className="text-sm text-text-muted mt-1">{gates.length} gates · add / edit / assign operators · all DB-driven</p>
@@ -293,7 +293,7 @@ const api = useApi();
             <div key={g.id} className="surface-card bg-bg-elevated p-4 space-y-3 cursor-pointer hover:bg-bg-surface transition-colors" onClick={() => openGateInspector(g)}>
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <div className="text-sm font-bold text-white">{g.name}</div>
+                  <div className="text-sm font-bold text-text-primary">{g.name}</div>
                   <div className="text-xs text-text-muted mt-0.5">{g.location || "—"}</div>
                 </div>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase shrink-0 ${g.is_active ? "bg-emerald-500/15 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
@@ -321,40 +321,40 @@ const api = useApi();
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <form onSubmit={saveGate} className="surface-card bg-bg-elevated w-full max-w-md p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
                   {editing ? <Pencil className="w-4 h-4 text-action-info" /> : <Plus className="w-4 h-4 text-action-success" />}
                   {editing ? "Edit Gate" : "New Gate"}
                 </h2>
-                <button type="button" onClick={() => setShowAdd(false)} className="text-text-muted hover:text-white p-2 min-h-11 min-w-11 flex items-center justify-center"><X className="w-5 h-5" /></button>
+                <button type="button" onClick={() => setShowAdd(false)} className="text-text-muted hover:text-text-primary p-2 min-h-11 min-w-11 flex items-center justify-center"><X className="w-5 h-5" /></button>
               </div>
               <div className="space-y-3 text-xs">
                 <div>
                   <label className="text-text-muted block mb-1">Gate code *</label>
                   <input required value={form.gateCode} onChange={(e) => setForm({ ...form, gateCode: e.target.value })}
-                    placeholder="e.g. MAIN_BOYS" className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-white font-mono focus:outline-none focus:" />
+                    placeholder="e.g. MAIN_BOYS" className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-text-primary font-mono focus:outline-none focus:" />
                 </div>
                 <div>
                   <label className="text-text-muted block mb-1">Display name *</label>
                   <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="e.g. Main Gate - Boys" className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-white focus:outline-none focus:" />
+                    placeholder="e.g. Main Gate - Boys" className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-text-primary focus:outline-none focus:" />
                 </div>
                 <div>
                   <label className="text-text-muted block mb-1">Location description</label>
                   <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
-                    placeholder="e.g. North campus near block 3" className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-white focus:outline-none focus:" />
+                    placeholder="e.g. North campus near block 3" className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-text-primary focus:outline-none focus:" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-text-muted block mb-1">Type</label>
                     <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
-                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-white focus:outline-none focus:">
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-text-primary focus:outline-none focus:">
                       {GATE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="text-text-muted block mb-1">Audience scope</label>
                     <select value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })}
-                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-white focus:outline-none focus:">
+                      className="surface-card w-full min-h-11 px-3 py-2 bg-bg-surface text-text-primary focus:outline-none focus:">
                       {AUDIENCES.map((a) => <option key={a.value} value={a.value}>{a.label}</option>)}
                     </select>
                   </div>
@@ -373,10 +373,10 @@ const api = useApi();
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <div className="surface-card bg-bg-elevated w-full max-w-md p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
                   <UserCog className="w-5 h-5 text-action-success" /> Assign Operator → {assigningGate.name}
                 </h2>
-                <button type="button" onClick={() => setAssigningGate(null)} className="text-text-muted hover:text-white"><X className="w-5 h-5" /></button>
+                <button type="button" onClick={() => setAssigningGate(null)} className="text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
               </div>
               <div className="space-y-3 text-xs">
                 <div>
@@ -384,14 +384,14 @@ const api = useApi();
                   <div className="relative">
                     <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
                     <input autoFocus value={userQuery} onChange={(e) => searchUsers(e.target.value)}
-                      placeholder="Type at least 2 chars..." className="surface-card w-full min-h-11 pl-9 pr-3 py-2 bg-bg-surface text-white focus:outline-none focus:" />
+                      placeholder="Type at least 2 chars..." className="surface-card w-full min-h-11 pl-9 pr-3 py-2 bg-bg-surface text-text-primary focus:outline-none focus:" />
                   </div>
                 </div>
                 <div className="max-h-5 overflow-y-auto space-y-1.5 divide-y divide-slate-800/50">
                   {userResults.map((u) => (
                     <div key={u.id} className="pt-2 first:pt-0 flex items-center justify-between gap-2">
                       <div>
-                        <div className="font-semibold text-white">{u.name || u.email || u.id}</div>
+                        <div className="font-semibold text-text-primary">{u.name || u.email || u.id}</div>
                         <div className="text-xs text-text-muted">{u.role} · {u.uniqueId || u.email}</div>
                       </div>
                       <button type="button" onClick={() => assignUserToGate(u)}
@@ -433,7 +433,7 @@ const api = useApi();
           <div className="surface-card bg-bg-elevated p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
                   <Monitor className="w-4 h-4 text-action-success" /> Kiosk Default Operator
                 </h3>
                 <p className="text-xs text-text-muted mt-0.5">
@@ -452,14 +452,14 @@ const api = useApi();
               <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-bg-surface/60 text-xs">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-white">{kioskOperator.name || kioskOperator.email || kioskOperator.id}</span>
+                    <span className="font-bold text-text-primary">{kioskOperator.name || kioskOperator.email || kioskOperator.id}</span>
                     <span className="surface-card px-2 py-0.5 bg-emerald-500/15 text-action-success font-mono text-xs">Active Kiosk ID</span>
                   </div>
                   <div className="text-text-muted font-mono text-xs">Unique ID: {kioskOperator.uniqueId || "—"}</div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <select value={kioskGate} onChange={(e) => setKioskGate(e.target.value)}
-                    className="surface-card px-2.5 py-1.5 min-h-11 bg-bg-surface text-white text-xs focus:outline-none">
+                    className="surface-card px-2.5 py-1.5 min-h-11 bg-bg-surface text-text-primary text-xs focus:outline-none">
                     <option value="">Select Default Gate…</option>
                     {gates.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
                   </select>
@@ -475,7 +475,7 @@ const api = useApi();
                   No operator account is currently designated as the kiosk default. Choose an operator below to promote them.
                 </p>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                  <select id="kiosk-select" className="surface-card px-3 py-2 min-h-11 bg-bg-surface text-white text-xs focus:outline-none flex-1">
+                  <select id="kiosk-select" className="surface-card px-3 py-2 min-h-11 bg-bg-surface text-text-primary text-xs focus:outline-none flex-1">
                     <option value="">Select operator account…</option>
                   </select>
                   <button type="button" onClick={() => {
