@@ -27,11 +27,11 @@ async function handleGet(req: NextRequest, _context?: { auth: AuthContext }) {
          COUNT(*) FILTER (WHERE role = 'student') AS students,
          COUNT(*) FILTER (WHERE role IN ('faculty', 'hod')) AS faculty,
          COUNT(*) FILTER (WHERE role NOT IN ('student', 'faculty', 'hod')) AS staff
-       FROM users WHERE is_active = true`
+       FROM users WHERE status = 'ACTIVE'`
     ).catch(() => ({ rows: [{ total: "0", students: "0", faculty: "0", staff: "0" }] })),
 
     query<{ active: string }>(
-      `SELECT COUNT(*) AS active FROM user_sessions WHERE expires_at > NOW()`
+      `SELECT COUNT(*) AS active FROM sessions WHERE revoked_at IS NULL AND expires_at > NOW()`
     ).catch(() => ({ rows: [{ active: "0" }] })),
 
     query<{ total: string; approved: string; rejected: string; avg_mins: string }>(
@@ -54,8 +54,8 @@ async function handleGet(req: NextRequest, _context?: { auth: AuthContext }) {
     ).catch(() => ({ rows: [] })),
 
     query<{ dept: string; cnt: string }>(
-      `SELECT COALESCE(department, 'General') AS dept, COUNT(*) AS cnt
-       FROM users WHERE is_active = true
+      `SELECT COALESCE(department_id, 'General') AS dept, COUNT(*) AS cnt
+       FROM users WHERE status = 'ACTIVE'
        GROUP BY 1 ORDER BY 2 DESC LIMIT 6`
     ).catch(() => ({ rows: [] })),
 

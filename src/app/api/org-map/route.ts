@@ -43,7 +43,7 @@ async function handleGet(req: NextRequest, context?: { auth: AuthContext }) {
   // Hydrate live telemetry from PostgreSQL (graceful fallback if any table is empty/absent)
   const [staffRes, pendingRes, delegationRes, gateRes] = await Promise.all([
     query<{ total: string; active: string }>(
-      `SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE is_active = true) AS active FROM users WHERE role != 'student'`
+      `SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status = 'ACTIVE') AS active FROM users WHERE role != 'student'`
     ).catch(() => ({ rows: [{ total: "0", active: "0" }] })),
     query<{ pending: string; escalated: string }>(
       `SELECT
@@ -52,7 +52,7 @@ async function handleGet(req: NextRequest, context?: { auth: AuthContext }) {
        FROM permissions`
     ).catch(() => ({ rows: [{ pending: "0", escalated: "0" }] })),
     query<{ active: string }>(
-      `SELECT COUNT(*) AS active FROM delegations WHERE is_active = true AND (expires_at IS NULL OR expires_at > NOW())`
+      `SELECT COUNT(*) AS active FROM delegations WHERE revoked_at IS NULL AND (expires_at IS NULL OR expires_at > NOW())`
     ).catch(() => ({ rows: [{ active: "0" }] })),
     query<{ total: string; active: string }>(
       `SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE is_active = true) AS active FROM gates`
