@@ -23,4 +23,5 @@ export const SwitchContent = HeroSwitch.Content;
 export const SwitchIcon = HeroSwitch.Icon;
 
 export type SwitchProps = React.ComponentProps<typeof HeroSwitch.Root>;
+export { Switch };
 export default Switch;
