@@ -10,6 +10,7 @@
 
 import { loadConfig, type AiConfig } from "./config";
 import { ModelManager, type WorkerName, type WorkerBackend } from "./manager";
+import { AiResourceManager, type Priority } from "./resource-manager";
 import { ConversationWorker } from "./conversation/index";
 import { runOcr, hasUsableTextLayer } from "./ocr/index";
 import { DocumentIntelligenceWorker } from "./document-intelligence/index";
@@ -87,6 +88,7 @@ export interface AiRuntime {
   routeConversation(
     messages: { role: "system" | "user" | "assistant"; content: string }[],
     tools?: ToolSpec[],
+    priority?: Priority,
   ): Promise<ToolAction | { reply: string }>;
   runDocumentPipeline(input: {
     pdf: Buffer;
@@ -94,17 +96,27 @@ export interface AiRuntime {
     textLayer?: string;
     metadata?: Record<string, unknown>;
     schemaFields?: string[];
-  }): Promise<{ ocr: unknown; doc: DocumentExtraction; usedOcr: boolean }>;
+  }, priority?: Priority): Promise<{ ocr: unknown; doc: DocumentExtraction; usedOcr: boolean }>;
+  /** Demand-aware resource manager (spec §8/§16/§17): memory-pressure + leases. */
+  resource: AiResourceManager;
   health(): import("./manager.js").WorkerHealth[];
+  /** Resource-manager snapshot (pressure, leases, eviction) for the ops UI. */
+  aiStatus(): ReturnType<AiResourceManager["status"]>;
   stopAll(): Promise<void>;
 }
 
 export function createAiRuntime(env: NodeJS.ProcessEnv = process.env): AiRuntime {
   const cfg = loadConfig(env);
   const backend = new TrackingOllamaBackend(cfg);
+  // §8: the resource manager decides the idle-timeout per host RAM pressure,
+  // so the manager no longer uses a single fixed idleMs for heavy workers.
+  const resource = new AiResourceManager();
   const manager = new ModelManager(
     backend,
-    (n) => (n === "m1" ? cfg.m1IdleStopMs : cfg.idleStopMs),
+    (n) => {
+      // M1 stays on its own (longer, warm) timer; M2/M3 follow memory pressure.
+      return n === "m1" ? cfg.m1IdleStopMs : resource.effectiveIdleMs(n as "m2" | "m3");
+    },
     cfg.serializedDoc,
   );
   const convo = new ConversationWorker(cfg);
@@ -112,26 +124,40 @@ export function createAiRuntime(env: NodeJS.ProcessEnv = process.env): AiRuntime
 
   return {
     config: cfg,
-    async routeConversation(messages, tools) {
-      return manager.use("m1", () => convo.route({ messages, tools }, cfg.requestTimeoutMs));
+    resource,
+    async routeConversation(messages, tools, priority = "P1") {
+      return manager.use("m1", () => convo.route({ messages, tools }, cfg.requestTimeoutMs), priority);
     },
-    async runDocumentPipeline(input) {
+    async runDocumentPipeline(input, priority = "P2") {
+      // §16/§17: take an exclusive lease on the heavy workers; if host RAM is
+      // critical, refuse so the SaaS core is protected (defer the job).
+      const admission = resource.admit("m3", priority);
+      if (!admission.ok) {
+        throw new Error(`AI deferred: ${admission.reason}`);
+      }
+      const leaseM2 = resource.acquire("m2", "doc-pipeline", priority);
       const usedOcr = !hasUsableTextLayer(input.textLayer);
-      const ocrOut = usedOcr ? await manager.use("m2", () => runOcr(cfg, { pdf: input.pdf, timeoutMs: cfg.requestTimeoutMs })) : null;
+      const ocrOut = usedOcr
+        ? await manager.use("m2", () => runOcr(cfg, { pdf: input.pdf, timeoutMs: cfg.requestTimeoutMs }), priority)
+        : null;
+      resource.release("m2", leaseM2.holder);
       const text = input.textLayer ?? (ocrOut as { text?: string })?.text ?? "";
-      logger.info({ usedOcr, textLen: text.length }, "doc pipeline");
+      logger.info({ usedOcr, textLen: text.length, priority }, "doc pipeline");
+      const leaseM3 = resource.acquire("m3", "doc-pipeline", priority);
       const doc = await manager.use("m3", () =>
         docIntel.extract(
           { text, metadata: input.metadata, schemaFields: input.schemaFields ?? [] },
           cfg.requestTimeoutMs,
         ),
       );
+      resource.release("m3", leaseM3.holder);
       // Release M3 after the pipeline completes so it isn't resident on a
       // document-heavy service that mostly runs M1.
       await manager.stopWorker("m3");
       return { ocr: ocrOut, doc, usedOcr };
     },
     health: () => manager.health(),
+    aiStatus: () => resource.status(),
     stopAll: () => manager.stopAll(),
   };
 }

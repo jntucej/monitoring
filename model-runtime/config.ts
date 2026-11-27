@@ -6,7 +6,7 @@
 
 export interface OllamaEndpoint {
   url: string;      // base, e.g. http://ollama:11434
-  model: string;    // model tag, e.g. qwen3:1.7b
+  model: string;    // model tag, e.g. qwen3:0.6b (M1) / qwen3:1.7b (M3)
   ctx: number;      // num_ctx
 }
 
@@ -31,12 +31,16 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AiConfig {
   return {
     m1: {
       url: env.AI_M1_URL || "http://ollama:11434",
-      model: env.AI_M1_MODEL || "qwen3:1.7b",
+      // M1 = narrow command router (intent + tool selection). Spec: Qwen3-0.6B
+      // (tiny, agent-oriented, 32K ctx). Kept warm while active.
+      model: env.AI_M1_MODEL || "qwen3:0.6b",
       ctx: num(env.AI_M1_CTX, 4096),
     },
     m3: {
       url: env.AI_M3_URL || "http://ollama:11434",
-      model: env.AI_M3_MODEL || "qwen2.5:3b",
+      // M3 = document classification/extraction. Spec: Qwen3-1.7B Q4 (not the
+      // heavier 3B — 8 GB CPU server). On-demand; never simultaneous with M2.
+      model: env.AI_M3_MODEL || "qwen3:1.7b",
       ctx: num(env.AI_M3_CTX, 8192),
     },
     ocrCmd: env.AI_OCR_CMD || "python3 -m model_runtime.ocr",

@@ -62,7 +62,9 @@ export class ModelManager {
   }
 
   /** Ensure the worker is READY (start it lazily), then run the job. */
-  async use<T>(name: WorkerName, job: () => Promise<T>): Promise<T> {
+  async use<T>(name: WorkerName, job: () => Promise<T>, priority?: string): Promise<T> {
+    void priority; // priority is honored by the AiResourceManager (admission/leases);
+    // the manager itself only tracks the lifecycle state machine.
     const s = this.slots[name];
     if (!this.backend.isResident(name)) {
       s.state = "STARTING";

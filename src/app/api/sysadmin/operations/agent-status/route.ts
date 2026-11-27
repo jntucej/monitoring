@@ -3,6 +3,7 @@ import { withApiChain } from "@/lib/api-chain";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
+import { createAiRuntime } from "@model-runtime";
 
 /**
  * GET /api/sysadmin/operations/agent-status
@@ -19,21 +20,34 @@ import { ok, fail } from "@/server/http/response";
 const OPS_AGENT_URL = process.env.OPS_AGENT_URL || "http://gate_worker:3002";
 
 async function handleGet(_req: NextRequest) {
+  let opsAgent = { reachable: false, uptime_s: null as number | null, registered_ops: [] as string[] };
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 3000);
     const r = await fetch(`${OPS_AGENT_URL}/health`, { signal: ctrl.signal });
     clearTimeout(timer);
-    if (!r.ok) return ok({ reachable: false, uptime_s: null, registered_ops: [] });
-    const j = await r.json();
-    return ok({
-      reachable: true,
-      uptime_s: j?.uptime ?? null,
-      registered_ops: j?.ops ?? [],
-    });
+    if (!r.ok) {
+      opsAgent = { reachable: false, uptime_s: null, registered_ops: [] };
+    } else {
+      const j = await r.json();
+      opsAgent = { reachable: true, uptime_s: j?.uptime ?? null, registered_ops: j?.ops ?? [] };
+    }
   } catch {
-    return ok({ reachable: false, uptime_s: null, registered_ops: [] });
+    opsAgent = { reachable: false, uptime_s: null, registered_ops: [] };
   }
+
+  // §8/§16/§17 — surface the AI resource-manager state (host RAM pressure,
+  // heavy-model leases, eviction). Read-only; no model I/O, no secrets. The
+  // resource manager degrades safely (ample pressure) if node:os is absent.
+  let ai_status: unknown = null;
+  try {
+    const rt = createAiRuntime();
+    ai_status = rt.aiStatus();
+  } catch {
+    ai_status = { error: "ai runtime unavailable" };
+  }
+
+  return ok({ ...opsAgent, ai_status });
 }
 
 export const GET = withApiChain(handleGet, {
