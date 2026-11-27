@@ -128,3 +128,6 @@ worker/node_modules/
 lighthouse-report.json
 lhci-report/
 gitleaks
+.worktrees/
+.worktrees/
+.worktrees/

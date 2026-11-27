@@ -1,0 +1,69 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "input": {
+    "maxFileSize": 52428800
+  },
+  "output": {
+    "filePath": "repomix-frontend.xml",
+    "style": "xml",
+    "filePathStyle": "target-relative",
+    "parsableStyle": true,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "compress": true,
+    "showLineNumbers": false
+  },
+  "include": [
+    "src/app/**/*.tsx",
+    "src/components/**/*.tsx",
+    "src/app/**/*.css"
+  ],
+  "ignore": {
+    "useGitignore": false,
+    "useDotIgnore": false,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "src/app/api/**",
+      "src/app/bootstrap/**",
+      "src/app/manifest.ts",
+      "src/app/icon.tsx",
+      "src/server/**",
+      "src/contracts/**",
+      "src/metrics/**",
+      "src/lib/**",
+      "src/hooks/**",
+      "src/stores/**",
+      "src/context/**",
+      "src/types/**",
+      "src/config/**",
+      "src/instrumentation.ts",
+      "src/middleware.ts",
+      "database/**",
+      "tests/**",
+      "worker/**",
+      "packages/**",
+      "scripts/**",
+      "public/**",
+      "compose/**",
+      "docs/**",
+      "k8s/**",
+      "systemd/**",
+      "team/**",
+      "load/**",
+      "security/**",
+      "release-evidence/**",
+      "txt/**",
+      "videoeditor/**",
+      "monitoring/**",
+      "cloudflared/**",
+      "db/**"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
