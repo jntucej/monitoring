@@ -19,14 +19,34 @@ export async function register() {
   // still runs in the Node web server via the Next.js instrumentation API.
   if (process.env.NEXT_RUNTIME === "edge") return;
 
-  // Fail closed in production if kiosk is left in open mode without PIN or trusted IP restriction
+  // Fail closed in production if kiosk is left in open mode without PIN or trusted IP restriction.
+  // We keep the hard exit (open kiosk mode is a real security hole). But we write a
+  // crash-loop marker FIRST so a future `restart: always` loop is diagnosable — the
+  // operator (or a /api/health probe / monitoring scrape) can see *why* the web
+  // container keeps dying instead of a silent spin. The marker is best-effort:
+  // if even writing it fails, we still exit (fail-closed wins over a marker).
   if (
     process.env.NODE_ENV === "production" &&
     !process.env.KIOSK_SESSION_REQUIRE_PIN &&
     !process.env.TRUSTED_KIOSK_IPS
   ) {
+    try {
+      const { writeFileSync } = await import("node:fs");
+      writeFileSync(
+        "/tmp/gate-web-boot-failure.txt",
+        `[${new Date().toISOString()}] KIOSK boot-guard FATAL: ` +
+          `KIOSK_SESSION_REQUIRE_PIN=true or TRUSTED_KIOSK_IPS must be set in ` +
+          `production. The container will crash-loop under restart:always. ` +
+          `Fix: add KIOSK_SESSION_REQUIRE_PIN=true to the web service env and ` +
+          `recreate. (Do NOT disable the guard to escape the loop — open kiosk ` +
+          `mode is a security hole.)`,
+        "utf8",
+      );
+    } catch {
+      /* marker is best-effort; the guard still exits below */
+    }
     console.error(
-      "FATAL: KIOSK_SESSION_REQUIRE_PIN=true or TRUSTED_KIOSK_IPS must be set in production to prevent open kiosk mode."
+      "FATAL: KIOSK_SESSION_REQUIRE_PIN=true or TRUSTED_KIOSK_IPS must be set in production to prevent open kiosk mode.",
     );
     process.exit(1);
   }
