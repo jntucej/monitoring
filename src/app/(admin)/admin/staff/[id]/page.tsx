@@ -7,7 +7,7 @@ import {
   ArrowLeft, User, Mail, Phone, Building2, Clock, Briefcase,
 } from "lucide-react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { getAuthHeaders } from "@/lib/utils";

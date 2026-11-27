@@ -7,7 +7,7 @@ import { AlertCircle, Plus, CheckCircle2, Lock, Wrench, Moon, Check } from "luci
 import Link from "next/link";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { gateInspection } from "@/components/shared/inspectionModels";

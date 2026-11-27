@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Upload, FileSpreadsheet, Download, Loader2, ShieldAlert } from "lucide-react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 

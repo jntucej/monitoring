@@ -5,7 +5,7 @@ import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import {Search, CheckCircle2, XCircle, Clock, QrCode, ChevronRight}  from "lucide-react";
 import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";

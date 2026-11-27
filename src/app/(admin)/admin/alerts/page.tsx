@@ -7,7 +7,7 @@ import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { AlertTriangle, Bell, CheckCircle, Check, RefreshCw, ExternalLink, ShieldCheck } from "lucide-react";
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 import { useToast } from "@/components/ui/toast";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Alert } from "@/lib/types";
 

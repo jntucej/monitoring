@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity, TrendingUp, Users, AlertTriangle, Download, RefreshCw,
 } from "lucide-react";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import {
   ChartRenderer, type ChartType, type SeriesDef,

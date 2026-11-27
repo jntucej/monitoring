@@ -1,5 +1,5 @@
 "use client";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { AnnouncementsManager } from "@/components/admin/AnnouncementsManager";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";

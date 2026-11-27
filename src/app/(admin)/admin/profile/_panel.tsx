@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
 import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";

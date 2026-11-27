@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   EntityInspector,

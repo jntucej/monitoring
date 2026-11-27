@@ -7,7 +7,7 @@ import {
   Activity, TrendingUp, Users, Download, RefreshCw,
 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import {
   ChartRenderer, type ChartType, type SeriesDef,

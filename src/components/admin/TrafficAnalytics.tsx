@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { KpiCard } from "@/components/shared/KpiCard";
 import { ChartRenderer, type ChartType, type SeriesDef } from "@/components/admin/shared/ChartRenderer";
 import { ChartTypeSwitcher } from "@/components/admin/shared/ChartTypeSwitcher";
 import {
@@ -25,29 +26,6 @@ const SEVERITY_COLORS: Record<string, string> = {
   critical: "var(--action-danger)",
 };
 
-/* ─── KPI card ───────────────────────────────────────────────────────────── */
-function KpiCard({
-  label, value, icon: Icon, tint, sub,
-}: {
-  label: string; value: string; icon: React.ElementType;
-  tint: string; sub?: string;
-}) {
-  return (
-    <div className="surface-card bg-bg-surface p-4">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-text-primary">{value}</p>
-          {sub && <p className="mt-0.5 text-xs text-text-muted">{sub}</p>}
-        </div>
-        <div className="flex size-6 items-center justify-center rounded-lg"
-             style={{ background: `${tint}22`, color: tint }}>
-          <Icon className="size-4" />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ─── Chart card with its own switcher ───────────────────────────────────── */
 function ChartCard({

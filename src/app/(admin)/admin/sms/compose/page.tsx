@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { SmsComposer } from "@/components/admin/sms/SmsComposer";

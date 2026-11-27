@@ -11,7 +11,7 @@
  */
 
 import { useApiResource } from "@/hooks/useApiResource";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { TrendingDown } from "lucide-react";
 

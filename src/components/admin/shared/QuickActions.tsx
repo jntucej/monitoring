@@ -13,7 +13,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 /**
  * QuickActions — a compact set of role-aware quick-action buttons.

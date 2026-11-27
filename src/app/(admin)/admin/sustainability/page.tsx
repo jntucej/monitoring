@@ -1,7 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/admin/shared/PageHeader";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { SustainabilityDashboard } from "@/components/admin/SustainabilityDashboard";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, Suspense, useEffect } from "react";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 
 import { PageLoading } from "@/components/shared/LoadingStates";

@@ -22,6 +22,14 @@ export interface KpiCardProps {
   tone?: "ok" | "warn" | "danger" | "info" | "neutral";
   className?: string;
   /**
+   * (analytics panels) Optional leading icon chip. When set, a rounded square
+   * tinted with `tint` is rendered in the top-right of the card. The card
+   * body otherwise stays identical to the no-icon variant.
+   */
+  icon?: React.ElementType;
+  /** Hex/var color for the icon chip background (and text). Optional. */
+  tint?: string;
+  /**
    * (PR-05A) Drill-down target. When provided the card becomes interactive
    * (a11y: keyboard-focusable, aria-label includes the label + value).
    * Omit for purely informational cards.
@@ -56,6 +64,8 @@ export function KpiCard({
   value,
   tone = "neutral",
   className,
+  icon: Icon,
+  tint,
   drilldown,
   sub,
   onClick,
@@ -84,36 +94,49 @@ export function KpiCard({
   const body = (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-bg-surface p-4 h-full",
+        "relative flex items-start justify-between rounded-2xl border border-border bg-bg-surface p-4 h-full",
         onClick && "cursor-pointer transition-colors hover:border-action-primary/40",
         className
       )}
     >
-      <p className="text-xs font-medium text-text-muted">{label}</p>
-      <p
-        className={cn(
-          "mt-1 text-2xl font-semibold tabular-nums",
-          toneClasses[tone] ?? toneClasses.neutral
-        )}
-      >
-        {value ?? "—"}
-      </p>
-      {sub != null && <p className="mt-0.5 text-xs text-text-muted">{sub}</p>}
-      {hint ? <p className="mt-1 text-[11px] text-text-muted">{hint}</p> : null}
-      {drilldown && (
-        <p className="mt-2 flex items-center gap-1 text-xs font-medium text-action-primary">
-          {drilldown.label} <ChevronRight className="h-3 w-3" />
+      <div className="min-w-0">
+        <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
+        <p
+          className={cn(
+            "mt-1 text-2xl font-semibold tabular-nums",
+            toneClasses[tone] ?? toneClasses.neutral
+          )}
+        >
+          {value ?? "—"}
         </p>
-      )}
-      {freshness && lastFetched !== undefined ? (
-        <div className="mt-3 pt-2 border-t border-border">
-          <DataFreshness
-            timestamp={lastFetched}
-            status={freshnessStatus}
-            autoRefresh
-          />
+        {sub != null && <p className="mt-0.5 text-xs text-text-muted">{sub}</p>}
+        {hint ? <p className="mt-1 text-[11px] text-text-muted">{hint}</p> : null}
+        {drilldown && (
+          <p className="mt-2 flex items-center gap-1 text-xs font-medium text-action-primary">
+            {drilldown.label} <ChevronRight className="h-3 w-3" />
+          </p>
+        )}
+        {freshness && lastFetched !== undefined ? (
+          <div className="mt-3 pt-2 border-t border-border">
+            <DataFreshness
+              timestamp={lastFetched}
+              status={freshnessStatus}
+              autoRefresh
+            />
+          </div>
+        ) : null}
+      </div>
+      {Icon && (
+        <div
+          className="flex size-6 shrink-0 items-center justify-center rounded-lg"
+          style={{
+            background: tint ? `${tint}22` : undefined,
+            color: tint ?? "var(--text-muted)",
+          }}
+        >
+          <Icon className="size-4" />
         </div>
-      ) : null}
+      )}
     </div>
   );
 

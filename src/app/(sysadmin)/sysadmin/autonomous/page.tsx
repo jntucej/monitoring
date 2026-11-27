@@ -15,7 +15,7 @@ import {
   FileWarning,
 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders, cn } from "@/lib/utils";

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { OccupancyHeatmap } from "@/components/admin/OccupancyHeatmap";
 import { CampusDigitalTwin } from "@/components/admin/CampusDigitalTwin";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";

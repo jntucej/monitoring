@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ShieldAlert, ShieldOff, Loader2, Clock,
 } from "lucide-react";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";

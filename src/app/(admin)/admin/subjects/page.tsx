@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import {BookOpen, Search, Building2}  from "lucide-react";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";

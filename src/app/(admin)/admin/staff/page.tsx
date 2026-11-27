@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
 import {Search, X, Briefcase, Mail, ChevronRight, GraduationCap, Wrench}  from "lucide-react";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";

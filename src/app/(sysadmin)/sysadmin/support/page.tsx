@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SupportDashboard } from "@/components/admin/SupportDashboard";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
