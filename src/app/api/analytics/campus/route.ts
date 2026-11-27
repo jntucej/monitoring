@@ -60,7 +60,7 @@ async function handleGet(req: NextRequest, _context?: { auth: AuthContext }) {
     ).catch(() => ({ rows: [] })),
 
     query<{ total: string }>(
-      `SELECT COUNT(*) AS total FROM circulars`
+      `SELECT COUNT(*) AS total FROM announcements`
     ).catch(() => ({ rows: [{ total: "0" }] })),
 
     query<{ action: string; cnt: string }>(
