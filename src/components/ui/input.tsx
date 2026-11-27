@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Input as HeroInput } from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
 
@@ -13,10 +14,6 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, helper, error, icon, type, id, ...props }, ref) => {
-    // WCAG 3.3.1: associate the error/helper text with the input via
-    // aria-describedby so screen readers announce it when the field has focus.
-    // useId must be called unconditionally — fall back to a generated
-    // identifier when the caller supplies its own `id`.
     const isSakuga = useIsSakuga();
     const generatedId = React.useId();
     const uid = id ?? generatedId;
@@ -36,7 +33,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
+            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted z-10">
               {icon}
             </div>
           )}
@@ -63,10 +60,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               className={cn("w-full", className)}
             />
           ) : (
-            <input
+            <HeroInput
               id={uid}
               type={type}
               ref={ref}
+              fullWidth
               aria-invalid={error ? "true" : undefined}
               aria-describedby={describedBy}
               className={cn(
@@ -75,7 +73,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 error && "border-action-danger focus:ring-action-danger",
                 className
               )}
-              {...props}
+              {...(props as Record<string, unknown>)}
             />
           )}
         </div>
@@ -85,7 +83,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             role="alert"
             className="mt-1 text-sm text-action-danger flex items-center gap-1"
           >
-            ⚠️{" "}
             {typeof error === "string"
               ? error
               : (error as unknown as { message?: string }).message || String(error)}

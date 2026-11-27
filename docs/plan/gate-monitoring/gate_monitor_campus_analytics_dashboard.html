@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gate Monitor — monitor.ucej.in | Campus Analytics</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            canvas: '#F6F7F9',
+            surface: '#FFFFFF',
+            borderSubtle: '#EAECEF',
+            slateLabel: '#64748B',
+            brandOrange: '#FF6B2C',
+            brandBlue: '#3B82F6',
+            brandGreen: '#10B981',
+            brandIndigo: '#1E1B4B',
+          },
+          boxShadow: {
+            bento: '0 1px 3px rgba(15, 23, 42, 0.03), 0 4px 12px -4px rgba(15, 23, 42, 0.04)',
+            bentoHover: '0 8px 20px -6px rgba(15, 23, 42, 0.07), 0 2px 6px -2px rgba(15, 23, 42, 0.03)',
+            tooltip: '0 12px 28px -6px rgba(15, 23, 42, 0.14), 0 4px 10px -4px rgba(15, 23, 42, 0.06)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      background-color: #F6F7F9;
+      color: #0F172A;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Semantic Gradients */
+    .grad-orange {
+      background: linear-gradient(90deg, #FF551A 0%, #FF844B 100%);
+    }
+    .grad-orange-v {
+      background: linear-gradient(180deg, #FF551A 0%, #FF844B 100%);
+    }
+    .grad-blue {
+      background: linear-gradient(90deg, #3B82F6 0%, #4F7DF3 100%);
+    }
+    .grad-green {
+      background: linear-gradient(90deg, #10B981 0%, #22C55E 100%);
+    }
+    .grad-indigo {
+      background: linear-gradient(90deg, #1E1B4B 0%, #312E81 100%);
+    }
+
+    /* Calm High-Density Bento Card */
+    .bento-card {
+      background: #FFFFFF;
+      border: 1px solid #EAECEF;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 4px 12px -4px rgba(15, 23, 42, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .bento-card:hover {
+      border-color: #DFE4EC;
+      box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.06), 0 2px 6px -2px rgba(15, 23, 42, 0.03);
+    }
+
+    /* Pill Bar Smooth Animation */
+    .pill-fill {
+      transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Hourly 24-Bar Chart Styles */
+    .hour-bar {
+      background-color: #E2E8F0;
+      transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hour-bar.is-peak {
+      background-color: #FED7AA;
+    }
+    .hour-bar:hover {
+      background-color: #FDBA74;
+    }
+    .hour-bar.active {
+      background: linear-gradient(180deg, #FF551A 0%, #FF844B 100%);
+      box-shadow: 0 6px 14px -3px rgba(255, 85, 26, 0.4);
+    }
+
+    /* Live SSE Pulse Dot */
+    @keyframes ssePulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.75); opacity: 0.25; }
+    }
+    .sse-ring {
+      animation: ssePulse 2.1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Campus SVG Map Zones */
+    .campus-zone {
+      transition: filter 0.2s ease, opacity 0.2s ease, stroke-width 0.2s ease;
+      cursor: pointer;
+    }
+    .campus-zone:hover {
+      filter: brightness(0.95) drop-shadow(0 4px 10px rgba(15, 23, 42, 0.12));
+    }
+
+    /* Sankey SVG Hover Isolation */
+    .sankey-link, .sankey-node {
+      transition: opacity 0.2s ease, filter 0.2s ease;
+      cursor: pointer;
+    }
+    .sankey-dimmed {
+      opacity: 0.14 !important;
+    }
+    .sankey-active {
+      opacity: 1 !important;
+      filter: drop-shadow(0 4px 10px rgba(255, 85, 26, 0.2));
+    }
+
+    /* Subtle Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex bg-canvas text-slate-900 overflow-x-hidden">
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebarBackdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] z-40 hidden lg:hidden"></div>
+
+  <!-- ========================================================= -->
+  <!-- LEFT SIDEBAR                                              -->
+  <!-- ========================================================= -->
+  <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-50 h-screen w-[248px] shrink-0 bg-white border-r border-borderSubtle flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out">
+    <!-- Top Brand + Nav -->
+    <div class="flex-1 overflow-y-auto px-3.5 py-4">
+      <!-- Brand Header -->
+      <div class="flex items-center justify-between px-1.5 mb-5">
+        <button onclick="selectSidebarNav('Analytics')" class="flex items-center gap-2.5 text-left group focus:outline-none">
+          <div class="w-9 h-9 rounded-xl grad-orange flex items-center justify-center shadow-sm shadow-orange-500/25 shrink-0 group-hover:scale-[1.03] transition-transform">
+            <!-- Orange Shield / Gate Emblem -->
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/>
+              <path d="M9 14v-3a3 3 0 0 1 6 0v3"/>
+              <line x1="8" y1="14" x2="16" y2="14"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <div class="text-[15px] font-extrabold tracking-tight text-slate-900 leading-tight">Gate Monitor</div>
+            <div class="text-[11px] font-medium text-slateLabel truncate">monitor.ucej.in</div>
+          </div>
+        </button>
+
+        <button onclick="toggleMobileSidebar(false)" class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Close sidebar">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Navigation List -->
+      <nav id="sidebarNav" class="space-y-1 text-[13px] font-medium">
+        <div class="px-2.5 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Telemetry</div>
+        <button data-nav="Analytics" onclick="selectSidebarNav('Analytics')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#FFF3EC] text-[#FF6B2C] font-semibold transition-all">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 shrink-0"></i>
+          <span>Analytics</span>
+        </button>
+        <button data-nav="Live Gate Feed" onclick="selectSidebarNav('Live Gate Feed')" class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <span class="flex items-center gap-2.5">
+            <i data-lucide="radio" class="w-4 h-4 shrink-0"></i>
+            <span>Live Gate Feed</span>
+          </span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        </button>
+        <button data-nav="Campus Heatmap" onclick="selectSidebarNav('Campus Heatmap')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <i data-lucide="map" class="w-4 h-4 shrink-0"></i>
+          <span>Campus Heatmap</span>
+        </button>
+
+        <div class="px-2.5 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Operations</div>
+        <button data-nav="Curfew & Passes" onclick="selectSidebarNav('Curfew & Passes')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <i data-lucide="ticket-check" class="w-4 h-4 shrink-0"></i>
+          <span>Curfew &amp; Passes</span>
+        </button>
+        <button data-nav="Circulars" onclick="selectSidebarNav('Circulars')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>
+          <span>Circulars</span>
+        </button>
+        <button data-nav="Attendance" onclick="selectSidebarNav('Attendance')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <i data-lucide="calendar-check-2" class="w-4 h-4 shrink-0"></i>
+          <span>Attendance</span>
+        </button>
+        <button data-nav="Hostel & Mess" onclick="selectSidebarNav('Hostel & Mess')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <i data-lucide="building-2" class="w-4 h-4 shrink-0"></i>
+          <span>Hostel &amp; Mess</span>
+        </button>
+
+        <div class="px-2.5 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">System &amp; AI</div>
+        <button data-nav="@agent Logs" onclick="selectSidebarNav('@agent Logs')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i>
+          <span>@agent Logs</span>
+        </button>
+        <button data-nav="Kiosk Health" onclick="selectSidebarNav('Kiosk Health')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <i data-lucide="cpu" class="w-4 h-4 shrink-0"></i>
+          <span>Kiosk Health</span>
+        </button>
+        <button data-nav="Access & Roles" onclick="selectSidebarNav('Access & Roles')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <i data-lucide="shield-check" class="w-4 h-4 shrink-0"></i>
+          <span>Access &amp; Roles</span>
+        </button>
+        <button data-nav="Settings" onclick="selectSidebarNav('Settings')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+          <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Bottom Route / Role View Toggle -->
+    <div class="p-3 border-t border-borderSubtle bg-[#FAFBFD]">
+      <div class="flex items-center justify-between mb-2 px-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Route / Role View</span>
+        <span id="roleModeBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-[#FF6B2C] border border-orange-200/70">Diagnostic</span>
+      </div>
+      <div class="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl text-[11px] font-semibold">
+        <button id="viewAdminBtn" onclick="switchRoleView('admin')" class="py-1.5 px-2 rounded-lg bg-white text-slate-900 shadow-xs transition-all text-center">
+          Admin
+        </button>
+        <button id="viewPrincipalBtn" onclick="switchRoleView('principal')" class="py-1.5 px-2 rounded-lg text-slate-500 hover:text-slate-800 transition-all text-center">
+          Principal
+        </button>
+      </div>
+      <p id="roleViewSubtext" class="mt-2 px-1 text-[10.5px] text-slateLabel leading-snug">
+        SysAdmin / Admin view · Diagnostic drill-down enabled.
+      </p>
+    </div>
+  </aside>
+
+  <!-- ========================================================= -->
+  <!-- MAIN WORKSPACE                                            -->
+  <!-- ========================================================= -->
+  <div class="flex-1 min-w-0 flex flex-col">
+
+    <!-- TOP STICKY HEADER & LIVE STATUS STRIP -->
+    <header class="sticky top-0 z-30 bg-canvas/92 backdrop-blur-md border-b border-borderSubtle px-4 sm:px-6 py-3">
+      <div class="max-w-[1480px] mx-auto space-y-2.5">
+        <!-- Row A: Breadcrumb + Surface Switcher + Filters + Timeframe -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+          <!-- Left: Mobile Toggle + Route Breadcrumb + Surface Switcher -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="toggleMobileSidebar(true)" class="lg:hidden p-2 rounded-xl bg-white border border-borderSubtle text-slate-600 hover:text-slate-900 shadow-bento" aria-label="Open navigation">
+              <i data-lucide="menu" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Route Breadcrumb -->
+            <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-borderSubtle text-[12px] font-semibold text-slate-700 shadow-2xs">
+              <i data-lucide="terminal" class="w-3.5 h-3.5 text-[#FF6B2C]"></i>
+              <span id="routeBreadcrumb" class="font-mono text-[11.5px] text-slate-800">/admin/analytics</span>
+            </div>
+
+            <!-- Surface / Module Switcher Dropdown -->
+            <div class="relative" id="surfaceDropdownWrap">
+              <button onclick="toggleSurfaceMenu()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FFF3EC] border border-orange-200/80 text-[#D94E14] text-[12.5px] font-semibold hover:bg-orange-100/70 transition-colors">
+                <span id="surfaceDot" class="w-2 h-2 rounded-full bg-[#FF6B2C]"></span>
+                <span id="surfaceLabel">All Campus</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-75"></i>
+              </button>
+
+              <div id="surfaceMenu" class="hidden absolute left-0 mt-2 w-60 bg-white rounded-2xl border border-borderSubtle shadow-tooltip p-1.5 z-50">
+                <div class="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Operational Surface</div>
+                <button onclick="selectSurface('all', 'All Campus', '#FF6B2C')" class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-[12.5px] font-medium text-slate-800 hover:bg-slate-50 transition-colors">
+                  <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#FF6B2C]"></span>All Campus</span>
+                  <span class="text-[10.5px] text-slate-400">100%</span>
+                </button>
+                <button onclick="selectSurface('kiosks', 'Gate Kiosks', '#F97316')" class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-[12.5px] font-medium text-slate-800 hover:bg-slate-50 transition-colors">
+                  <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#F97316]"></span>Gate Kiosks</span>
+                  <span class="text-[10.5px] text-slate-400">QR / RFID</span>
+                </button>
+                <button onclick="selectSurface('student_parent', 'Student & Parent', '#3B82F6')" class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-[12.5px] font-medium text-slate-800 hover:bg-slate-50 transition-colors">
+                  <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#3B82F6]"></span>Student &amp; Parent</span>
+                  <span class="text-[10.5px] text-slate-400">Passes</span>
+                </button>
+                <button onclick="selectSurface('faculty', 'Faculty & Academics', '#6366F1')" class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-[12.5px] font-medium text-slate-800 hover:bg-slate-50 transition-colors">
+                  <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#6366F1]"></span>Faculty &amp; Academics</span>
+                  <span class="text-[10.5px] text-slate-400">Attendance</span>
+                </button>
+                <button onclick="selectSurface('hostel', 'Hostel & Mess', '#10B981')" class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-[12.5px] font-medium text-slate-800 hover:bg-slate-50 transition-colors">
+                  <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#10B981]"></span>Hostel &amp; Mess</span>
+                  <span class="text-[10.5px] text-slate-400">Blocks 1–4</span>
+                </button>
+                <button onclick="selectSurface('agent', 'Agent & Chat', '#8B5CF6')" class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-[12.5px] font-medium text-slate-800 hover:bg-slate-50 transition-colors">
+                  <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#8B5CF6]"></span>Agent &amp; Chat</span>
+                  <span class="text-[10.5px] text-slate-400">@agent</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Filter Popover + Timeframe Switcher -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Filter Popover -->
+            <div class="relative" id="filterWrap">
+              <button onclick="toggleFilterPopover()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-borderSubtle text-[12px] font-semibold text-slate-700 hover:border-slate-300 shadow-2xs transition-all">
+                <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-[#FF6B2C]"></i>
+                <span>Filters</span>
+                <span id="filterCountBadge" class="hidden px-1.5 py-0.5 rounded-full bg-[#FFF3EC] text-[#FF6B2C] text-[10px] font-bold leading-none tabular-nums">0</span>
+              </button>
+
+              <!-- Filter Popover Content -->
+              <div id="filterPopover" class="hidden absolute right-0 mt-2 w-[310px] sm:w-[340px] bg-white rounded-2xl border border-borderSubtle shadow-tooltip p-4 z-50 space-y-3.5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  <div>
+                    <h3 class="text-[13px] font-bold text-slate-900">Role, Persona &amp; Scope</h3>
+                    <p class="text-[11px] text-slateLabel">Aggregated slice — no individual PII</p>
+                  </div>
+                  <button onclick="resetAllFilters()" class="text-[11.5px] font-semibold text-[#FF6B2C] hover:underline">Reset</button>
+                </div>
+
+                <!-- Role Tier -->
+                <div>
+                  <label for="fRole" class="block text-[11px] font-semibold text-slate-500 mb-1">Role Tier</label>
+                  <select id="fRole" class="w-full rounded-xl border border-borderSubtle bg-[#FAFBFD] px-3 py-2 text-[12.5px] font-medium text-slate-800 focus:outline-none focus:border-[#FF6B2C]">
+                    <option value="All">All Roles</option>
+                    <option value="Student">Student</option>
+                    <option value="Parent">Parent</option>
+                    <option value="Faculty">Faculty</option>
+                    <option value="Warden">Warden</option>
+                    <option value="Security">Security</option>
+                  </select>
+                </div>
+
+                <!-- Persona Pills -->
+                <div>
+                  <span class="block text-[11px] font-semibold text-slate-500 mb-1.5">Persona</span>
+                  <div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-[11.5px] font-semibold">
+                    <button type="button" data-persona="All" onclick="selectDraftPersona('All')" class="persona-pill py-1.5 rounded-lg bg-white text-slate-900 shadow-xs">All</button>
+                    <button type="button" data-persona="Hosteller" onclick="selectDraftPersona('Hosteller')" class="persona-pill py-1.5 rounded-lg text-slate-500 hover:text-slate-800">Hosteller</button>
+                    <button type="button" data-persona="Day Scholar" onclick="selectDraftPersona('Day Scholar')" class="persona-pill py-1.5 rounded-lg text-slate-500 hover:text-slate-800">Day Scholar</button>
+                  </div>
+                </div>
+
+                <!-- Department + Hostel Block -->
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label for="fDept" class="block text-[11px] font-semibold text-slate-500 mb-1">Department</label>
+                    <select id="fDept" class="w-full rounded-xl border border-borderSubtle bg-[#FAFBFD] px-2.5 py-2 text-[12px] font-medium text-slate-800 focus:outline-none focus:border-[#FF6B2C]">
+                      <option value="All">All Depts</option>
+                      <option value="IT">IT</option>
+                      <option value="CSE">CSE</option>
+                      <option value="ECE">ECE</option>
+                      <option value="EEE">EEE</option>
+                      <option value="ME">ME</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="fBlock" class="block text-[11px] font-semibold text-slate-500 mb-1">Hostel Block</label>
+                    <select id="fBlock" class="w-full rounded-xl border border-borderSubtle bg-[#FAFBFD] px-2.5 py-2 text-[12px] font-medium text-slate-800 focus:outline-none focus:border-[#FF6B2C]">
+                      <option value="All">All Blocks</option>
+                      <option value="Boys Block 1">Boys Block 1</option>
+                      <option value="Boys Block 2">Boys Block 2</option>
+                      <option value="Girls Block 1">Girls Block 1</option>
+                      <option value="Girls Block 2">Girls Block 2</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                  <button type="button" onclick="toggleFilterPopover(false)" class="px-3 py-1.5 rounded-xl text-[12px] font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+                  <button type="button" onclick="applyDraftFilters()" class="px-4 py-1.5 rounded-xl grad-orange text-white text-[12px] font-semibold shadow-sm hover:brightness-105 transition-all">Apply Filters</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Timeframe Segmented Control -->
+            <div class="flex items-center bg-white border border-borderSubtle rounded-xl p-1 shadow-2xs overflow-x-auto max-w-full">
+              <button data-tf="24h" onclick="selectTimeframe('24h')" class="tf-btn px-2.5 py-1 rounded-lg text-[11.5px] font-semibold bg-[#FFF3EC] text-[#FF6B2C] transition-all whitespace-nowrap">24h</button>
+              <button data-tf="Today" onclick="selectTimeframe('Today')" class="tf-btn px-2.5 py-1 rounded-lg text-[11.5px] font-medium text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">Today</button>
+              <button data-tf="7D" onclick="selectTimeframe('7D')" class="tf-btn px-2.5 py-1 rounded-lg text-[11.5px] font-medium text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">7D</button>
+              <button data-tf="30D" onclick="selectTimeframe('30D')" class="tf-btn px-2.5 py-1 rounded-lg text-[11.5px] font-medium text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">30D</button>
+              <button data-tf="Semester" onclick="selectTimeframe('Semester')" class="tf-btn px-2.5 py-1 rounded-lg text-[11.5px] font-medium text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">Semester</button>
+              <button data-tf="AY" onclick="selectTimeframe('AY')" class="tf-btn px-2.5 py-1 rounded-lg text-[11.5px] font-medium text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">AY</button>
+              <button data-tf="Custom" onclick="selectTimeframe('Custom')" class="tf-btn px-2.5 py-1 rounded-lg text-[11.5px] font-medium text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">Custom</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row B: Live Status Strip (Isolated SSE + Health Probes + Privacy + Admin Endpoint Chip) -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Pulsing Emerald SSE Pill -->
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11.5px] font-semibold text-emerald-700">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="sse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-400"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              <span>Live Campus Traffic:</span>
+              <span id="liveSseCounter" class="font-bold text-emerald-900 tabular-nums">342 active</span>
+            </div>
+
+            <!-- Health Probes Excluded -->
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50/70 border border-emerald-200/60 text-[11.5px] font-medium text-emerald-700">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600 shrink-0"></i>
+              <span>Health Probes Excluded <span class="hidden sm:inline text-emerald-600/80">(Uptime Kuma · /api/me/health)</span></span>
+            </div>
+
+            <!-- Aggregated Zero PII -->
+            <div id="privacyBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-borderSubtle text-[11px] font-medium text-slateLabel">
+              <i data-lucide="lock" class="w-3 h-3 text-slate-400"></i>
+              <span id="privacyBadgeText">Aggregated · Zero PII/UUIDs</span>
+            </div>
+
+            <!-- Active Filters Summary Chip -->
+            <div id="activeFiltersChip" class="hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/70 text-[11px] font-semibold text-blue-700">
+              <span id="activeFiltersText"></span>
+              <button onclick="resetAllFilters()" class="hover:text-blue-900" aria-label="Clear filters">
+                <i data-lucide="x" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Admin-Only Diagnostic Endpoint Preview Chip -->
+          <div id="adminControlsGroup" class="flex items-center gap-2">
+            <button onclick="openEndpointModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-borderSubtle hover:border-orange-300 text-[11px] font-semibold text-slate-600 hover:text-[#FF6B2C] transition-colors">
+              <i data-lucide="code-2" class="w-3.5 h-3.5 text-[#FF6B2C]"></i>
+              <span>Endpoint Preview</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ========================================================= -->
+    <!-- MAIN BENTO GRID                                           -->
+    <!-- ========================================================= -->
+    <main class="flex-1 px-4 sm:px-6 py-4 max-w-[1480px] w-full mx-auto space-y-4">
+
+      <!-- 6 TOP KPI SUMMARY CARDS -->
+      <section id="kpiGrid" aria-label="Campus KPIs" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5">
+        <!-- Rendered by JS -->
+      </section>
+
+      <!-- ROW 1: HOURLY CAMPUS & GATE ACTIVITY (8 COLS) + MOST USED ROUTES (4 COLS) -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Hourly Campus & Gate Activity (24h) -->
+        <div class="bento-card p-5 lg:col-span-8 flex flex-col justify-between relative">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-orange-50 text-[#FF6B2C] flex items-center justify-center">
+                <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+              </span>
+              <div>
+                <h2 class="text-[14px] font-bold text-slate-900 leading-tight">Hourly Campus &amp; Gate Activity (24h)</h2>
+                <p class="text-[11px] text-slateLabel">Peak windows: 8–10 AM Entry · 1 PM Lunch · 8–9 PM Curfew</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-[11px] font-semibold">
+              <span class="px-2.5 py-0.5 rounded-full bg-orange-50 text-[#FF6B2C] border border-orange-100">Curfew &amp; Gate Peaks</span>
+            </div>
+          </div>
+
+          <!-- Chart Area with Floating Tooltip -->
+          <div class="relative pt-14 pb-1">
+            <!-- Floating Tooltip -->
+            <div id="hourlyTooltip" class="absolute top-0 z-20 pointer-events-none transition-all duration-150 ease-out" style="left: 50%; transform: translateX(-50%);">
+              <div class="bg-white border border-borderSubtle shadow-tooltip rounded-2xl px-3.5 py-2 text-center min-w-[152px]">
+                <div class="flex items-center justify-center gap-1.5">
+                  <span id="hTtCount" class="text-[14px] font-extrabold text-slate-900 tabular-nums">612 scans</span>
+                  <span id="hTtTag" class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 text-[#FF6B2C]">Curfew Peak</span>
+                </div>
+                <div id="hTtHour" class="text-[11px] font-medium text-slateLabel mt-0.5">20:00 – 21:00 · 24h</div>
+              </div>
+              <div class="w-2.5 h-2.5 bg-white border-r border-b border-borderSubtle rotate-45 mx-auto -mt-1.5"></div>
+            </div>
+
+            <!-- Y-Axis + 24 Bars -->
+            <div class="flex items-end gap-2.5 h-[205px]">
+              <div id="hourlyYAxis" class="flex flex-col justify-between h-full text-[10px] font-semibold text-slate-400 tabular-nums pr-1 pb-5 select-none">
+                <!-- Rendered by JS -->
+              </div>
+
+              <div class="flex-1 h-full relative flex flex-col justify-end">
+                <!-- Dashed Gridlines -->
+                <div class="absolute inset-0 bottom-5 flex flex-col justify-between pointer-events-none">
+                  <div class="border-b border-dashed border-slate-100 w-full"></div>
+                  <div class="border-b border-dashed border-slate-100 w-full"></div>
+                  <div class="border-b border-dashed border-slate-100 w-full"></div>
+                  <div class="border-b border-dashed border-slate-100 w-full"></div>
+                  <div class="border-b border-slate-100 w-full"></div>
+                </div>
+
+                <!-- 24 Vertical Pill Bars -->
+                <div id="hourlyBars" class="relative z-10 grid gap-1 sm:gap-1.5 items-end h-[182px] w-full" style="grid-template-columns: repeat(24, minmax(0, 1fr));">
+                  <!-- Rendered by JS -->
+                </div>
+
+                <!-- X-Axis Labels -->
+                <div class="flex items-center justify-between text-[10px] font-medium text-slate-400 mt-2 px-0.5 tabular-nums select-none">
+                  <span>00h</span>
+                  <span>04h</span>
+                  <span>08h</span>
+                  <span>12h</span>
+                  <span>16h</span>
+                  <span>20h</span>
+                  <span>23h</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Most Used Routes (Orange Pill Bars) -->
+        <div class="bento-card p-5 lg:col-span-4 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-orange-50 text-[#FF6B2C] flex items-center justify-center">
+                <i data-lucide="route" class="w-3.5 h-3.5"></i>
+              </span>
+              <h2 class="text-[14px] font-bold text-slate-900">Most Used Routes</h2>
+            </div>
+            <span class="text-[11px] font-semibold text-slate-400">Hits</span>
+          </div>
+          <div id="topRoutesList" class="space-y-2.5 flex-1 flex flex-col justify-center">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ROW 2: UCEJ CAMPUS SPATIAL MAP + TOP DEPTS & BLOCKS + ENTRY CHANNELS -->
+      <section class="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr_1fr] gap-4">
+        <!-- UCEJ Campus Spatial Map -->
+        <div class="bento-card p-5 flex flex-col">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-orange-50 text-[#FF6B2C] flex items-center justify-center">
+                <i data-lucide="map-pinned" class="w-3.5 h-3.5"></i>
+              </span>
+              <div>
+                <h2 class="text-[14px] font-bold text-slate-900 leading-tight">UCEJ Campus Spatial Map</h2>
+                <p class="text-[10.5px] text-slateLabel">JNTUH UCEJ Zones · Hover for activity</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button onclick="zoomCampusMap(0.2)" class="px-2 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 border border-borderSubtle text-[11px] font-semibold text-slate-600 transition-colors">Zoom+</button>
+              <button onclick="zoomCampusMap(-0.2)" class="px-2 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 border border-borderSubtle text-[11px] font-semibold text-slate-600 transition-colors">Zoom-</button>
+              <button onclick="resetCampusMapZoom()" class="px-2 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 border border-borderSubtle text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors">Reset</button>
+            </div>
+          </div>
+
+          <!-- Interactive SVG Campus Schematic -->
+          <div id="campusMapContainer" class="relative flex-1 min-h-[250px] bg-[#FAFBFD] border border-slate-100 rounded-2xl overflow-hidden select-none">
+            <!-- Hover Tooltip -->
+            <div id="campusTooltip" class="hidden absolute z-20 pointer-events-none bg-white border border-borderSubtle shadow-tooltip rounded-xl px-3 py-2 text-[11.5px] min-w-[155px]">
+              <div id="cTtName" class="font-bold text-slate-900">Main Gate &amp; Kiosk</div>
+              <div class="flex items-center justify-between gap-3 mt-0.5">
+                <span id="cTtScans" class="font-semibold text-slate-600 tabular-nums">1,420 scans</span>
+                <span id="cTtShare" class="text-[10.5px] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 text-[#FF6B2C] tabular-nums">24%</span>
+              </div>
+            </div>
+
+            <!-- Zoomable SVG Viewport -->
+            <div id="campusMapViewport" class="w-full h-full flex items-center justify-center transition-transform duration-300 ease-out" style="transform: scale(1);">
+              <svg id="campusSvg" viewBox="0 0 560 320" class="w-full h-full p-2" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="campusDots" width="16" height="16" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="0.8" fill="#E2E8F0" />
+                  </pattern>
+                </defs>
+                <!-- Subtle Campus Ground Grid -->
+                <rect width="560" height="320" fill="url(#campusDots)" rx="12" />
+
+                <!-- Stylized Campus Roads & Pathways -->
+                <path d="M 15 268 L 545 268" stroke="#E2E8F0" stroke-width="10" stroke-linecap="round" />
+                <path d="M 278 268 L 278 32" stroke="#E2E8F0" stroke-width="9" stroke-linecap="round" />
+                <path d="M 95 162 L 470 162" stroke="#E2E8F0" stroke-width="7" stroke-linecap="round" />
+                <path d="M 15 268 L 545 268" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="6 6" />
+                <path d="M 278 268 L 278 32" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="5 5" />
+
+                <!-- Zone 1: Main Gate & Kiosk (Bottom Center) -->
+                <g class="campus-zone" data-zone="main_gate">
+                  <rect id="zone_main_gate" x="210" y="246" width="136" height="44" rx="12" fill="#FF6B2C" stroke="#FFFFFF" stroke-width="2" />
+                  <text x="278" y="266" text-anchor="middle" font-size="10.5" font-weight="700" fill="#FFFFFF">Main Gate &amp; Kiosk</text>
+                  <text id="lbl_main_gate" x="278" y="280" text-anchor="middle" font-size="9" font-weight="600" fill="#FFEDD5">High Activity</text>
+                </g>
+
+                <!-- Zone 2: Academic Block A (IT/CSE) -->
+                <g class="campus-zone" data-zone="acad_a">
+                  <rect id="zone_acad_a" x="34" y="176" width="154" height="62" rx="14" fill="#FF844B" stroke="#FFFFFF" stroke-width="2" />
+                  <text x="111" y="203" text-anchor="middle" font-size="10.5" font-weight="700" fill="#FFFFFF">Academic Block A</text>
+                  <text id="lbl_acad_a" x="111" y="218" text-anchor="middle" font-size="9" font-weight="600" fill="#FFF7ED">IT / CSE</text>
+                </g>
+
+                <!-- Zone 3: Academic Block B (ECE/EEE/ME) -->
+                <g class="campus-zone" data-zone="acad_b">
+                  <rect id="zone_acad_b" x="370" y="176" width="156" height="62" rx="14" fill="#3B82F6" stroke="#FFFFFF" stroke-width="2" />
+                  <text x="448" y="203" text-anchor="middle" font-size="10.5" font-weight="700" fill="#FFFFFF">Academic Block B</text>
+                  <text id="lbl_acad_b" x="448" y="218" text-anchor="middle" font-size="9" font-weight="600" fill="#DBEAFE">ECE / EEE / ME</text>
+                </g>
+
+                <!-- Zone 4: Boys Hostel 1 -->
+                <g class="campus-zone" data-zone="boys_1">
+                  <rect id="zone_boys_1" x="28" y="24" width="112" height="52" rx="12" fill="#3B82F6" stroke="#FFFFFF" stroke-width="2" />
+                  <text x="84" y="47" text-anchor="middle" font-size="10" font-weight="700" fill="#FFFFFF">Boys Hostel 1</text>
+                  <text id="lbl_boys_1" x="84" y="61" text-anchor="middle" font-size="8.5" font-weight="600" fill="#DBEAFE">Block 1</text>
+                </g>
+
+                <!-- Zone 5: Boys Hostel 2 -->
+                <g class="campus-zone" data-zone="boys_2">
+                  <rect id="zone_boys_2" x="150" y="24" width="108" height="52" rx="12" fill="#10B981" stroke="#FFFFFF" stroke-width="2" />
+                  <text x="204" y="47" text-anchor="middle" font-size="10" font-weight="700" fill="#FFFFFF">Boys Hostel 2</text>
+                  <text id="lbl_boys_2" x="204" y="61" text-anchor="middle" font-size="8.5" font-weight="600" fill="#D1FAE5">Block 2</text>
+                </g>
+
+                <!-- Zone 6: Girls Hostel 1 -->
+                <g class="campus-zone" data-zone="girls_1">
+                  <rect id="zone_girls_1" x="302" y="24" width="108" height="52" rx="12" fill="#10B981" stroke="#FFFFFF" stroke-width="2" />
+                  <text x="356" y="47" text-anchor="middle" font-size="10" font-weight="700" fill="#FFFFFF">Girls Hostel 1</text>
+                  <text id="lbl_girls_1" x="356" y="61" text-anchor="middle" font-size="8.5" font-weight="600" fill="#D1FAE5">Block 3</text>
+                </g>
+
+                <!-- Zone 7: Girls Hostel 2 -->
+                <g class="campus-zone" data-zone="girls_2">
+                  <rect id="zone_girls_2" x="420" y="24" width="112" height="52" rx="12" fill="#3B82F6" stroke="#FFFFFF" stroke-width="2" />
+                  <text x="476" y="47" text-anchor="middle" font-size="10" font-weight="700" fill="#FFFFFF">Girls Hostel 2</text>
+                  <text id="lbl_girls_2" x="476" y="61" text-anchor="middle" font-size="8.5" font-weight="600" fill="#DBEAFE">Block 4</text>
+                </g>
+
+                <!-- Zone 8: Central Mess -->
+                <g class="campus-zone" data-zone="mess">
+                  <rect id="zone_mess" x="116" y="96" width="136" height="48" rx="12" fill="#FF844B" stroke="#FFFFFF" stroke-width="2" />
+                  <text x="184" y="118" text-anchor="middle" font-size="10.5" font-weight="700" fill="#FFFFFF">Central Mess</text>
+                  <text id="lbl_mess" x="184" y="131" text-anchor="middle" font-size="8.5" font-weight="600" fill="#FFF7ED">Dining Peak</text>
+                </g>
+
+                <!-- Zone 9: Exam Halls -->
+                <g class="campus-zone" data-zone="exam_halls">
+                  <rect id="zone_exam_halls" x="308" y="96" width="136" height="48" rx="12" fill="#22C55E" stroke="#FFFFFF" stroke-width="2" />
+                  <text x="376" y="118" text-anchor="middle" font-size="10.5" font-weight="700" fill="#FFFFFF">Exam Halls</text>
+                  <text id="lbl_exam_halls" x="376" y="131" text-anchor="middle" font-size="8.5" font-weight="600" fill="#DCFCE7">Normal Load</text>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Intensity Legend -->
+            <div class="absolute bottom-2 left-2.5 flex items-center gap-2.5 bg-white/92 backdrop-blur-xs border border-borderSubtle rounded-full px-2.5 py-1 text-[10px] font-semibold text-slate-500">
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#FF6B2C]"></span>High</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#3B82F6]"></span>Med-High</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#10B981]"></span>Normal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Departments & Hostel Blocks (Royal Blue Pill Bars) -->
+        <div class="bento-card p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-blue-50 text-[#3B82F6] flex items-center justify-center">
+                <i data-lucide="building" class="w-3.5 h-3.5"></i>
+              </span>
+              <h2 class="text-[14px] font-bold text-slate-900">Top Depts &amp; Blocks</h2>
+            </div>
+            <span class="text-[11px] font-semibold text-slate-400">Active</span>
+          </div>
+          <div id="topDeptsList" class="space-y-2.5 flex-1 flex flex-col justify-center">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Entry Channels (Emerald Green Pill Bars) -->
+        <div class="bento-card p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-emerald-50 text-[#10B981] flex items-center justify-center">
+                <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+              </span>
+              <h2 class="text-[14px] font-bold text-slate-900">Entry Channels</h2>
+            </div>
+            <span class="text-[11px] font-semibold text-slate-400">Sessions</span>
+          </div>
+          <div id="entryChannelsList" class="space-y-2.5 flex-1 flex flex-col justify-center">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ROW 3: DEVICE & OS SPLIT + TOP ACTIONS TRIGGERED + CLIENT / BROWSER BREAKDOWN -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Device & OS Split -->
+        <div class="bento-card p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+              </span>
+              <h2 class="text-[14px] font-bold text-slate-900">Device &amp; OS Split</h2>
+            </div>
+            <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">Mobile-First</span>
+          </div>
+
+          <!-- Side-by-side Mobile vs Desktop -->
+          <div class="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-[#F8FAFC] border border-slate-100 mb-4">
+            <!-- Mobile -->
+            <div class="space-y-2">
+              <div class="flex items-center gap-1.5 text-[11.5px] font-semibold text-slateLabel">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5 text-[#3B82F6]"></i>
+                <span>Mobile</span>
+              </div>
+              <div class="flex items-baseline gap-1.5">
+                <span id="mobileVal" class="text-[21px] font-extrabold text-slate-900 tabular-nums leading-none">2,840</span>
+                <span id="mobilePct" class="text-[11px] font-bold text-[#3B82F6] tabular-nums">78%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-200/80 overflow-hidden">
+                <div id="mobileBar" class="h-full rounded-full grad-blue pill-fill" style="width: 78%;"></div>
+              </div>
+            </div>
+
+            <!-- Desktop -->
+            <div class="space-y-2 border-l border-slate-200/80 pl-3">
+              <div class="flex items-center justify-end gap-1.5 text-[11.5px] font-semibold text-slateLabel">
+                <i data-lucide="monitor" class="w-3.5 h-3.5 text-[#10B981]"></i>
+                <span>Desktop / Kiosk</span>
+              </div>
+              <div class="flex items-baseline justify-end gap-1.5">
+                <span id="desktopVal" class="text-[21px] font-extrabold text-slate-900 tabular-nums leading-none">801</span>
+                <span id="desktopPct" class="text-[11px] font-bold text-[#10B981] tabular-nums">22%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-200/80 overflow-hidden flex justify-end">
+                <div id="desktopBar" class="h-full rounded-full grad-green pill-fill" style="width: 22%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Chunky Rounded OS Pills -->
+          <div>
+            <p class="text-[10.5px] font-bold uppercase tracking-wider text-slate-400 mb-2">Operating System</p>
+            <div id="osPillsGrid" class="grid grid-cols-2 gap-2.5">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Actions Triggered (Royal Blue Pill Bars) -->
+        <div class="bento-card p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-blue-50 text-[#3B82F6] flex items-center justify-center">
+                <i data-lucide="mouse-pointer-click" class="w-3.5 h-3.5"></i>
+              </span>
+              <h2 class="text-[14px] font-bold text-slate-900">Top Actions Triggered</h2>
+            </div>
+            <span class="text-[11px] font-semibold text-slate-400">Events</span>
+          </div>
+          <div id="topActionsList" class="space-y-2 flex-1 flex flex-col justify-center">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Client / Browser Breakdown (Emerald Green Pill Bars) -->
+        <div class="bento-card p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-emerald-50 text-[#10B981] flex items-center justify-center">
+                <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+              </span>
+              <h2 class="text-[14px] font-bold text-slate-900">Client / Browser Breakdown</h2>
+            </div>
+            <span class="text-[11px] font-semibold text-slate-400">Clients</span>
+          </div>
+          <div id="browsersList" class="space-y-2.5 flex-1 flex flex-col justify-center">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- BOTTOM FULL-WIDTH: 4-STEP SANKEY DIAGRAM (SWITCHABLE 3-TAB FUNNELS) -->
+      <section class="bento-card p-5 relative">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-full bg-orange-50 text-[#FF6B2C] flex items-center justify-center shrink-0">
+              <i data-lucide="workflow" class="w-4 h-4"></i>
+            </span>
+            <div>
+              <h2 class="text-[14.5px] font-bold text-slate-900 leading-tight">Operational Journey &amp; Drop-Off Map</h2>
+              <p class="text-[11.5px] text-slateLabel">Strict flow conservation · Hover any node or ribbon to inspect step conversion</p>
+            </div>
+          </div>
+
+          <!-- 3-Tab Funnel Switcher -->
+          <div class="flex items-center bg-[#F1F5F9] p-1 rounded-xl border border-slate-200/70 overflow-x-auto max-w-full">
+            <button data-funnel="gate_pass" onclick="selectSankeyFunnel('gate_pass')" class="funnel-tab px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-white text-[#FF6B2C] shadow-xs transition-all whitespace-nowrap">
+              Gate Pass Funnel
+            </button>
+            <button data-funnel="circular" onclick="selectSankeyFunnel('circular')" class="funnel-tab px-3 py-1.5 rounded-lg text-[12px] font-medium text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap">
+              Circular 'Noted' Funnel
+            </button>
+            <button data-funnel="agent" onclick="selectSankeyFunnel('agent')" class="funnel-tab px-3 py-1.5 rounded-lg text-[12px] font-medium text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap">
+              Agent &amp; Doubt Funnel
+            </button>
+          </div>
+        </div>
+
+        <!-- Legend Strip -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-2 border-b border-slate-100 text-[11.5px] font-medium text-slateLabel">
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full grad-orange"></span>
+              Completed / Active Path
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#94A3B8]"></span>
+              Drop-Off / Blocked
+            </span>
+          </div>
+          <div id="sankeyCompletionSummary" class="text-[12px] font-bold text-slate-800 tabular-nums">
+            End-to-End Completion: <span class="text-[#FF6B2C]">61.4%</span>
+          </div>
+        </div>
+
+        <!-- Floating Sankey Hover Tooltip -->
+        <div id="sankeyTooltip" class="hidden fixed z-50 pointer-events-none bg-white border border-borderSubtle shadow-tooltip rounded-2xl px-3.5 py-2.5 min-w-[205px]">
+          <div id="skTtTitle" class="text-[12px] font-bold text-slate-900">Pass Drafted → Parent Consent</div>
+          <div id="skTtSub" class="text-[10.5px] font-medium text-slateLabel mt-0.5">Step 1 to Step 2 Transition</div>
+          <div class="flex items-center justify-between gap-4 mt-1.5 pt-1.5 border-t border-slate-100">
+            <span id="skTtCount" class="text-[13px] font-extrabold text-[#FF6B2C] tabular-nums">1,240 passes</span>
+            <span id="skTtPct" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-[#FF6B2C] tabular-nums">82.0%</span>
+          </div>
+        </div>
+
+        <!-- Horizontal Scroll Wrapper for Narrow Viewports -->
+        <div class="w-full overflow-x-auto pb-2">
+          <div class="min-w-[880px]">
+            <!-- 4 Step Labels -->
+            <div class="grid grid-cols-4 px-3 mb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <div>Step 1 <span class="font-medium normal-case text-slate-400 ml-1">Initiation</span></div>
+              <div class="pl-5">Step 2 <span class="font-medium normal-case text-slate-400 ml-1">Verification</span></div>
+              <div class="pl-8">Step 3 <span class="font-medium normal-case text-slate-400 ml-1">Approval / Action</span></div>
+              <div class="pl-12">Step 4 <span class="font-medium normal-case text-slate-400 ml-1">Completion</span></div>
+            </div>
+
+            <!-- SVG Sankey Canvas -->
+            <svg id="sankeySvg" viewBox="0 0 1000 320" class="w-full h-auto block select-none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Dynamically rendered by JS -->
+            </svg>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- ADMIN ENDPOINT PREVIEW MODAL (Zero alert() / confirm())   -->
+  <!-- ========================================================= -->
+  <div id="endpointModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center p-4" onclick="if(event.target === this) closeEndpointModal()">
+    <div class="bg-white border border-borderSubtle rounded-2xl shadow-tooltip max-w-xl w-full p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg bg-orange-50 text-[#FF6B2C] flex items-center justify-center">
+            <i data-lucide="server" class="w-4 h-4"></i>
+          </span>
+          <div>
+            <h3 class="text-[14px] font-bold text-slate-900">Aggregated Analytics Endpoint Preview</h3>
+            <p class="text-[11px] text-slateLabel">Single round-trip query powering all dashboard widgets</p>
+          </div>
+        </div>
+        <button onclick="closeEndpointModal()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Live Query String -->
+      <div class="bg-slate-900 text-slate-100 rounded-xl p-3 font-mono text-[11.5px] flex items-center justify-between gap-2 overflow-x-auto">
+        <code id="endpointUrlDisplay" class="whitespace-nowrap text-emerald-300">GET /api/admin/analytics/alyze?surface=all&amp;timeframe=24h</code>
+        <button onclick="copyEndpointUrl()" class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-sans font-semibold text-white transition-colors">
+          Copy
+        </button>
+      </div>
+
+      <!-- Simulated JSON Payload Summary -->
+      <div>
+        <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
+          <span>Response Payload Schema (Zero PII / UUIDs)</span>
+          <span class="text-emerald-600">200 OK · Redis Cached</span>
+        </div>
+        <pre id="endpointJsonPreview" class="bg-[#F8FAFC] border border-borderSubtle rounded-xl p-3 text-[11px] font-mono text-slate-700 overflow-x-auto max-h-56 leading-relaxed"></pre>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="closeEndpointModal()" class="px-4 py-1.5 rounded-xl bg-slate-900 text-white text-[12px] font-semibold hover:bg-slate-800 transition-colors">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subtle Floating Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-2 transition-all duration-200 bg-slate-900 text-white text-[12px] font-semibold px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2">
+    <span class="w-2 h-2 rounded-full bg-[#FF6B2C]"></span>
+    <span id="toastText">Synced</span>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- APPLICATION STATE, DETERMINISTIC GENERATOR & RENDERERS    -->
+  <!-- ========================================================= -->
+  <script>
+    /**
+     * Unified Application State
+     * Mirrors GET /api/admin/analytics/alyze?surface=&timeframe=&role=&persona=&dept=&block=
+     */
+    const appState = {
+      roleView: 'admin', // 'admin' | 'principal'
+      surface: 'all',
+      surfaceLabel: 'All Campus',
+      timeframe: '24h',
+      filters: {
+        role: 'All',
+        persona: 'All',
+        dept: 'All',
+        block: 'All',
+      },
+      draftPersona: 'All',
+      selectedHourIdx: 20, // Default highlight on 8 PM Curfew Peak
+      activeFunnel: 'gate_pass', // 'gate_pass' | 'circular' | 'agent'
+      mapZoom: 1,
+    };
+
+    let currentPayload = null;
+    let liveActiveCount = 342;
+
+    /**
+     * Surface Weight Profiles
+     */
+    const SURFACE_CONFIG = {
+      all:            { mult: 1.00, liveBase: 342, mobileShare: 0.78, label: 'All Campus' },
+      kiosks:         { mult: 0.42, liveBase: 118, mobileShare: 0.32, label: 'Gate Kiosks' },
+      student_parent: { mult: 0.68, liveBase: 214, mobileShare: 0.91, label: 'Student & Parent' },
+      faculty:        { mult: 0.36, liveBase: 86,  mobileShare: 0.54, label: 'Faculty & Academics' },
+      hostel:         { mult: 0.48, liveBase: 149, mobileShare: 0.86, label: 'Hostel & Mess' },
+      agent:          { mult: 0.31, liveBase: 74,  mobileShare: 0.82, label: 'Agent & Chat' },
+    };
+
+    const TIMEFRAME_SCALE = {
+      '24h':      1.0,
+      'Today':    0.86,
+      '7D':       6.1,
+      '30D':      24.5,
+      'Semester': 92.0,
+      'AY':       184.0,
+      'Custom':   14.2,
+    };
+
+    /**
+     * Deterministic seeded random for realistic, stable recalculations
+     */
+    function seeded(n) {
+      const x = Math.sin(n * 9137 + 14821) * 43758.5453;
+      return x - Math.floor(x);
+    }
+
+    function fmtNum(val) {
+      if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (val >= 10000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+      return Math.round(val).toLocaleString();
+    }
+
+    /**
+     * Core Data Generator — simulates GET /api/admin/analytics/alyze
+     */
+    function computeAnalytics(state) {
+      const surf = SURFACE_CONFIG[state.surface] || SURFACE_CONFIG.all;
+      const tfScale = TIMEFRAME_SCALE[state.timeframe] || 1.0;
+
+      // Filter multipliers
+      let fMult = 1.0;
+      if (state.filters.role !== 'All') fMult *= 0.44;
+      if (state.filters.persona === 'Hosteller') fMult *= 0.62;
+      if (state.filters.persona === 'Day Scholar') fMult *= 0.38;
+      if (state.filters.dept !== 'All') fMult *= 0.28;
+      if (state.filters.block !== 'All') fMult *= 0.24;
+
+      const m = Math.max(0.08, surf.mult * tfScale * fMult);
+      const seedKey =
+        state.surface.length * 13 +
+        state.timeframe.length * 29 +
+        state.filters.role.length * 7 +
+        state.filters.dept.length * 11 +
+        state.filters.block.length * 19 +
+        state.filters.persona.length * 5;
+
+      // 1. 6 KPI Cards
+      const activeSessions = Math.max(24, Math.round(3640 * m));
+      const approvalMins = Math.max(1, Math.floor(2 + seeded(seedKey + 1) * 3));
+      const approvalSecs = Math.floor(12 + seeded(seedKey + 2) * 45);
+      const dropOffRate = (11.4 + seeded(seedKey + 3) * 8.2).toFixed(1);
+      const circularsNoted = Math.min(98.5, 84.2 + seeded(seedKey + 4) * 10.6).toFixed(1);
+      const agentInteractions = Math.max(12, Math.round(1280 * m));
+      const frictionScans = Math.max(2, Math.round(64 * Math.pow(m, 0.72)));
+
+      const kpis = [
+        {
+          title: 'Active Sessions & Scans',
+          icon: 'scan-line',
+          value: fmtNum(activeSessions),
+          delta: `+${(9.2 + seeded(seedKey + 10) * 8).toFixed(1)}%`,
+          good: true,
+          sub: `${fmtNum(Math.round(activeSessions * 0.62))} gate QR/RFID`,
+        },
+        {
+          title: 'Avg. Session / Approval',
+          icon: 'clock-3',
+          value: `${approvalMins}m ${approvalSecs}s`,
+          delta: `-${(4.1 + seeded(seedKey + 11) * 6).toFixed(1)}%`,
+          good: true,
+          sub: 'Pass consent to approval',
+        },
+        {
+          title: 'Drop-Off / Rejection',
+          icon: 'user-x',
+          value: `${dropOffRate}%`,
+          delta: `${seeded(seedKey + 12) > 0.4 ? '-' : '+'}${(1.2 + seeded(seedKey + 13) * 3.1).toFixed(1)}%`,
+          good: seeded(seedKey + 12) > 0.4,
+          sub: 'Expired or denied passes',
+        },
+        {
+          title: 'Circulars Noted Rate',
+          icon: 'check-circle-2',
+          value: `${circularsNoted}%`,
+          delta: `+${(2.4 + seeded(seedKey + 14) * 4.5).toFixed(1)}%`,
+          good: true,
+          sub: 'Verified student/faculty ack',
+        },
+        {
+          title: 'Form & @agent Actions',
+          icon: 'sparkles',
+          value: fmtNum(agentInteractions),
+          delta: `+${(14.5 + seeded(seedKey + 15) * 9).toFixed(1)}%`,
+          good: true,
+          sub: `${fmtNum(Math.round(agentInteractions * 0.48))} @agent tool hits`,
+        },
+        {
+          title: 'Friction & Failed Scans',
+          icon: 'alert-triangle',
+          value: fmtNum(frictionScans),
+          delta: `-${(6.4 + seeded(seedKey + 16) * 7).toFixed(1)}%`,
+          good: true,
+          sub: 'Rage clicks · QR fail · 403',
+        },
+      ];
+
+      // 2. Hourly Campus & Gate Activity (24h)
+      // Realistic campus rhythm: quiet overnight, 8-10 AM entry peak, 1 PM lunch peak, 8-9 PM curfew peak
+      const hourlyProfile = [
+        0.10, 0.08, 0.06, 0.06, 0.09, 0.16, 0.34, 0.62,
+        0.92, 0.96, 0.84, 0.66, 0.72, 0.90, 0.76, 0.64,
+        0.74, 0.80, 0.72, 0.78, 0.98, 0.91, 0.48, 0.24,
+      ];
+      const hourlyBars = hourlyProfile.map((w, h) => {
+        const jitter = 0.90 + seeded(seedKey + h * 5) * 0.22;
+        const count = Math.max(4, Math.round(580 * m * w * jitter));
+        let tag = 'Normal Flow';
+        let isPeak = false;
+        if (h >= 8 && h <= 10) { tag = 'Morning Entry Peak'; isPeak = true; }
+        else if (h === 13) { tag = 'Lunch Break Peak'; isPeak = true; }
+        else if (h >= 20 && h <= 21) { tag = 'Curfew Peak'; isPeak = true; }
+        else if (h >= 0 && h <= 4) { tag = 'Night Watch'; }
+        return {
+          hour: h,
+          label: `${String(h).padStart(2, '0')}:00 – ${String((h + 1) % 24).padStart(2, '0')}:00`,
+          count,
+          tag,
+          isPeak,
+        };
+      });
+
+      // 3. Most Used Routes (Orange)
+      const routeDefs = [
+        { label: '/student', w: 1.0 },
+        { label: '/gate/[gateId]', w: 0.84 },
+        { label: '/chat', w: 0.71 },
+        { label: '/faculty/attendance', w: 0.56 },
+        { label: '/student/passes', w: 0.49 },
+        { label: '/deputy-warden/curfew', w: 0.38 },
+      ];
+      const topRoutes = routeDefs.map((r, i) => ({
+        label: r.label,
+        value: Math.max(8, Math.round(2950 * m * r.w * (0.9 + seeded(seedKey + 40 + i) * 0.2))),
+      }));
+
+      // 4. Campus Spatial Zones (9 JNTUH UCEJ Zones)
+      const zoneDefs = [
+        { id: 'main_gate',  name: 'Main Gate & Kiosk',           w: 1.00 },
+        { id: 'acad_a',     name: 'Academic Block A (IT/CSE)',   w: 0.86 },
+        { id: 'mess',       name: 'Central Mess',                w: 0.78 },
+        { id: 'acad_b',     name: 'Academic Block B (ECE/EEE/ME)', w: 0.64 },
+        { id: 'boys_1',     name: 'Boys Hostel 1',               w: 0.58 },
+        { id: 'girls_2',    name: 'Girls Hostel 2',              w: 0.52 },
+        { id: 'boys_2',     name: 'Boys Hostel 2',               w: 0.41 },
+        { id: 'girls_1',    name: 'Girls Hostel 1',              w: 0.37 },
+        { id: 'exam_halls', name: 'Exam Halls',                  w: 0.29 },
+      ];
+      const rawZones = zoneDefs.map((z, i) => {
+        const scans = Math.max(6, Math.round(1420 * m * z.w * (0.88 + seeded(seedKey + 60 + i) * 0.24)));
+        return { ...z, scans };
+      });
+      const totalZoneScans = rawZones.reduce((acc, z) => acc + z.scans, 0) || 1;
+      const maxZoneScans = Math.max(...rawZones.map((z) => z.scans), 1);
+      const campusZones = {};
+      rawZones.forEach((z) => {
+        const ratio = z.scans / maxZoneScans;
+        let intensity = 'normal';
+        let fill = '#10B981';
+        if (ratio >= 0.72) { intensity = 'high'; fill = '#FF6B2C'; }
+        else if (ratio >= 0.48) { intensity = 'med'; fill = '#3B82F6'; }
+        campusZones[z.id] = {
+          ...z,
+          share: Math.max(1, Math.round((z.scans / totalZoneScans) * 100)),
+          intensity,
+          fill,
+        };
+      });
+
+      // 5. Top Departments & Hostel Blocks (Royal Blue)
+      const deptDefs = [
+        { label: 'IT Dept', w: 1.00 },
+        { label: 'CSE Dept', w: 0.91 },
+        { label: 'Boys Block 1', w: 0.77 },
+        { label: 'ECE Dept', w: 0.68 },
+        { label: 'Girls Block 2', w: 0.58 },
+        { label: 'EEE Dept', w: 0.45 },
+      ];
+      const topDepts = deptDefs.map((d, i) => ({
+        label: d.label,
+        value: Math.max(5, Math.round(1840 * m * d.w * (0.9 + seeded(seedKey + 80 + i) * 0.2))),
+      }));
+
+      // 6. Entry Channels (Emerald Green)
+      const channelDefs = [
+        { label: 'Direct App', w: 1.00 },
+        { label: 'Gate Kiosk', w: 0.79 },
+        { label: 'Circular Notification', w: 0.64 },
+        { label: 'SMS Deep-Link', w: 0.48 },
+        { label: '@agent Drawer', w: 0.36 },
+      ];
+      const entryChannels = channelDefs.map((c, i) => ({
+        label: c.label,
+        value: Math.max(5, Math.round(2120 * m * c.w * (0.9 + seeded(seedKey + 95 + i) * 0.2))),
+      }));
+
+      // 7. Device & OS Split
+      const mobShare = surf.mobileShare;
+      const totalDev = activeSessions;
+      const mobileCount = Math.round(totalDev * mobShare);
+      const desktopCount = Math.max(0, totalDev - mobileCount);
+      const mobilePct = Math.round(mobShare * 100);
+      const desktopPct = 100 - mobilePct;
+
+      const androidPct = Math.round(mobilePct * 0.72);
+      const iosPct = Math.max(4, mobilePct - androidPct);
+      const winPct = Math.round(desktopPct * 0.64);
+      const macPct = Math.max(2, desktopPct - winPct);
+
+      const devices = {
+        mobileCount,
+        desktopCount,
+        mobilePct,
+        desktopPct,
+        os: [
+          { name: 'Android', pct: androidPct, style: 'grad-green', icon: 'smartphone' },
+          { name: 'Windows', pct: winPct, style: 'grad-blue', icon: 'monitor' },
+          { name: 'iOS', pct: iosPct, style: 'grad-indigo', icon: 'smartphone' },
+          { name: 'macOS', pct: macPct, style: 'grad-indigo', icon: 'laptop' },
+        ],
+      };
+
+      // 8. Top Actions Triggered (Royal Blue)
+      const actionDefs = [
+        { label: 'Mark Noted', w: 1.00 },
+        { label: 'Verify Pass', w: 0.86 },
+        { label: 'Request Outpass', w: 0.74 },
+        { label: 'Confirm Attendance', w: 0.66 },
+        { label: '@agent Pending Check', w: 0.51 },
+        { label: 'Curfew Check-in', w: 0.44 },
+      ];
+      const topActions = actionDefs.map((a, i) => ({
+        label: a.label,
+        value: Math.max(6, Math.round(2410 * m * a.w * (0.9 + seeded(seedKey + 110 + i) * 0.2))),
+      }));
+
+      // 9. Client / Browser Breakdown (Emerald Green)
+      const browserDefs = [
+        { label: 'Chrome Mobile', w: 1.00 },
+        { label: 'Kiosk PWA', w: 0.68 },
+        { label: 'Desktop Chrome', w: 0.54 },
+        { label: 'Safari', w: 0.41 },
+        { label: 'Edge / Other', w: 0.22 },
+      ];
+      const browsers = browserDefs.map((b, i) => ({
+        label: b.label,
+        value: Math.max(4, Math.round(2290 * m * b.w * (0.9 + seeded(seedKey + 130 + i) * 0.2))),
+      }));
+
+      // 10. 3 Switchable 4-Step Sankey Funnels with STRICT FLOW CONSERVATION
+      function buildConservedFunnel(baseVolume, unit, steps, dropRates) {
+        const s1 = Math.max(20, Math.round(baseVolume));
+        const d2 = Math.min(s1 - 4, Math.max(1, Math.round(s1 * dropRates[0])));
+        const s2 = s1 - d2;
+
+        const d3 = Math.min(s2 - 3, Math.max(1, Math.round(s2 * dropRates[1])));
+        const s3 = s2 - d3;
+
+        const d4 = Math.min(s3 - 2, Math.max(1, Math.round(s3 * dropRates[2])));
+        const s4 = s3 - d4;
+
+        return {
+          unit,
+          totalStart: s1,
+          completionRate: ((s4 / s1) * 100).toFixed(1),
+          steps: [
+            { col: 0, active: { id: 'a1', label: steps[0].active, count: s1 } },
+            { col: 1, active: { id: 'a2', label: steps[1].active, count: s2 }, dropoff: { id: 'd2', label: steps[1].dropoff, count: d2 } },
+            { col: 2, active: { id: 'a3', label: steps[2].active, count: s3 }, dropoff: { id: 'd3', label: steps[2].dropoff, count: d3 } },
+            { col: 3, active: { id: 'a4', label: steps[3].active, count: s4 }, dropoff: { id: 'd4', label: steps[3].dropoff, count: d4 } },
+          ],
+        };
+      }
+
+      const sankey = {
+        gate_pass: buildConservedFunnel(
+          1480 * m,
+          'passes',
+          [
+            { active: 'Pass Drafted' },
+            { active: 'Parent Consent', dropoff: 'Drop Off: Expired / Cancelled' },
+            { active: 'Warden/HOD Approval', dropoff: 'Drop Off: Parent Denied' },
+            { active: 'Gate Scan Out', dropoff: 'Drop Off: Quota Blocked' },
+          ],
+          [0.14 + seeded(seedKey + 151) * 0.05, 0.13 + seeded(seedKey + 152) * 0.05, 0.11 + seeded(seedKey + 153) * 0.04]
+        ),
+        circular: buildConservedFunnel(
+          4200 * m,
+          'recipients',
+          [
+            { active: 'Circular Published' },
+            { active: 'Viewed in Feed/Chat', dropoff: 'Drop Off: Unopened' },
+            { active: 'Clicked "Mark Noted"', dropoff: 'Drop Off: Viewed Unnoted' },
+            { active: 'Action / Deadline Met', dropoff: 'Drop Off: Missed Deadline' },
+          ],
+          [0.11 + seeded(seedKey + 161) * 0.04, 0.10 + seeded(seedKey + 162) * 0.04, 0.09 + seeded(seedKey + 163) * 0.04]
+        ),
+        agent: buildConservedFunnel(
+          980 * m,
+          'threads',
+          [
+            { active: 'Opened @agent Drawer' },
+            { active: 'Tool / KB Hit', dropoff: 'Drop Off: Dismissed Early' },
+            { active: 'Draft Action Card', dropoff: 'Drop Off: Escalated to Authority' },
+            { active: 'Confirmed & Sent', dropoff: 'Drop Off: Abandoned Draft' },
+          ],
+          [0.18 + seeded(seedKey + 171) * 0.05, 0.16 + seeded(seedKey + 172) * 0.05, 0.12 + seeded(seedKey + 173) * 0.04]
+        ),
+      };
+
+      return {
+        kpis,
+        hourlyBars,
+        topRoutes,
+        campusZones,
+        topDepts,
+        entryChannels,
+        devices,
+        topActions,
+        browsers,
+        sankey,
+      };
+    }
+
+    /* =========================================================
+     * RENDER FUNCTIONS
+     * ========================================================= */
+
+    function renderDashboard() {
+      currentPayload = computeAnalytics(appState);
+      renderKPIs();
+      renderHourlyChart();
+      renderPillBars('topRoutesList', currentPayload.topRoutes, 'grad-orange');
+      renderCampusZones();
+      renderPillBars('topDeptsList', currentPayload.topDepts, 'grad-blue');
+      renderPillBars('entryChannelsList', currentPayload.entryChannels, 'grad-green');
+      renderDevicesAndOS();
+      renderPillBars('topActionsList', currentPayload.topActions, 'grad-blue', true);
+      renderPillBars('browsersList', currentPayload.browsers, 'grad-green');
+      renderSankey();
+      updateFilterBadges();
+      lucide.createIcons();
+    }
+
+    function renderKPIs() {
+      const container = document.getElementById('kpiGrid');
+      container.innerHTML = currentPayload.kpis
+        .map(
+          (k) => `
+          <div class="bento-card p-3.5 sm:p-4 flex flex-col justify-between gap-2.5">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-7 h-7 rounded-full bg-orange-50 text-[#FF6B2C] flex items-center justify-center shrink-0">
+                <i data-lucide="${k.icon}" class="w-3.5 h-3.5"></i>
+              </span>
+              <span class="text-[11.5px] font-semibold text-slateLabel leading-tight line-clamp-2">${k.title}</span>
+            </div>
+            <div>
+              <div class="flex items-baseline justify-between gap-1.5">
+                <span class="text-[20px] sm:text-[22px] font-extrabold tracking-tight text-slate-900 tabular-nums leading-none">${k.value}</span>
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full tabular-nums ${
+                  k.good ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                }">${k.delta}</span>
+              </div>
+              <p class="text-[10.5px] font-medium text-slate-400 mt-1.5 truncate">${k.sub}</p>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function renderHourlyChart() {
+      const bars = currentPayload.hourlyBars;
+      const maxVal = Math.max(...bars.map((b) => b.count), 10);
+      const niceMax = Math.ceil(maxVal / 100) * 100 || 100;
+
+      document.getElementById('hourlyYAxis').innerHTML = [1, 0.75, 0.5, 0.25, 0]
+        .map((r) => `<span>${fmtNum(Math.round(niceMax * r))}</span>`)
+        .join('');
+
+      document.getElementById('hourlyBars').innerHTML = bars
+        .map((b, idx) => {
+          const pct = Math.max(10, Math.round((b.count / niceMax) * 100));
+          const isActive = idx === appState.selectedHourIdx;
+          return `
+            <div class="h-full flex items-end justify-center cursor-pointer"
+                 onmouseenter="highlightHourBar(${idx})"
+                 onclick="highlightHourBar(${idx})">
+              <div class="hour-bar ${b.isPeak ? 'is-peak' : ''} ${isActive ? 'active' : ''} w-full max-w-[15px] rounded-full"
+                   style="height: ${pct}%;"></div>
+            </div>
+          `;
+        })
+        .join('');
+
+      updateHourlyTooltip();
+    }
+
+    function highlightHourBar(idx) {
+      appState.selectedHourIdx = idx;
+      document.querySelectorAll('#hourlyBars .hour-bar').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+      updateHourlyTooltip();
+    }
+
+    function updateHourlyTooltip() {
+      const b = currentPayload.hourlyBars[appState.selectedHourIdx];
+      if (!b) return;
+      document.getElementById('hTtCount').textContent = `${fmtNum(b.count)} scans`;
+      const tagEl = document.getElementById('hTtTag');
+      tagEl.textContent = b.tag;
+      tagEl.className = b.isPeak
+        ? 'text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 text-[#FF6B2C]'
+        : 'text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600';
+      document.getElementById('hTtHour').textContent = `${b.label} · ${appState.timeframe}`;
+
+      const rawPct = ((appState.selectedHourIdx + 0.5) / 24) * 100;
+      const clamped = Math.max(15, Math.min(85, rawPct));
+      document.getElementById('hourlyTooltip').style.left = `calc(${clamped}% + 10px)`;
+    }
+
+    /**
+     * Renders chunky rounded pill-shaped horizontal data bars
+     * Label sits inside the left of the colored pill bar, exact count aligned cleanly on the right
+     */
+    function renderPillBars(containerId, items, gradientClass, compact = false) {
+      const container = document.getElementById(containerId);
+      const maxVal = Math.max(...items.map((i) => i.value), 1);
+      const minVal = Math.min(...items.map((i) => i.value), 0);
+      const hClass = compact ? 'h-7' : 'h-8';
+
+      container.innerHTML = items
+        .map((item) => {
+          const norm = maxVal === minVal ? 1 : (item.value - minVal) / (maxVal - minVal);
+          const widthPct = Math.round(44 + norm * 38); // 44% to 82% so text fits cleanly + right count has room
+          return `
+            <div class="relative w-full ${hClass} rounded-full bg-[#F1F5F9] flex items-center justify-between pr-2 overflow-hidden group">
+              <div class="${gradientClass} pill-fill h-full rounded-full flex items-center px-3 min-w-[44%] group-hover:brightness-105 transition-all"
+                   style="width: ${widthPct}%;">
+                <span class="text-[11.5px] font-semibold text-white truncate">${item.label}</span>
+              </div>
+              <span class="shrink-0 ml-2 text-[11px] font-bold text-slate-700 tabular-nums">${fmtNum(item.value)}</span>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderCampusZones() {
+      Object.values(currentPayload.campusZones).forEach((z) => {
+        const rect = document.getElementById(`zone_${z.id}`);
+        const lbl = document.getElementById(`lbl_${z.id}`);
+        if (rect) rect.setAttribute('fill', z.fill);
+        if (lbl) lbl.textContent = `${fmtNum(z.scans)} · ${z.share}%`;
+      });
+    }
+
+    function renderDevicesAndOS() {
+      const d = currentPayload.devices;
+      document.getElementById('mobileVal').textContent = fmtNum(d.mobileCount);
+      document.getElementById('mobilePct').textContent = `${d.mobilePct}%`;
+      document.getElementById('mobileBar').style.width = `${Math.max(4, d.mobilePct)}%`;
+
+      document.getElementById('desktopVal').textContent = fmtNum(d.desktopCount);
+      document.getElementById('desktopPct').textContent = `${d.desktopPct}%`;
+      document.getElementById('desktopBar').style.width = `${Math.max(4, d.desktopPct)}%`;
+
+      document.getElementById('osPillsGrid').innerHTML = d.os
+        .map(
+          (os) => `
+          <div class="${os.style} h-9 rounded-full px-3 flex items-center justify-between shadow-2xs hover:brightness-105 transition-all">
+            <span class="flex items-center gap-1.5 text-[11.5px] font-semibold text-white truncate">
+              <i data-lucide="${os.icon}" class="w-3.5 h-3.5 opacity-90 shrink-0"></i>
+              <span class="truncate">${os.name}</span>
+            </span>
+            <span class="px-2 py-0.5 rounded-full bg-white/95 text-[10px] font-extrabold text-slate-800 tabular-nums shrink-0 ml-1">
+              ${os.pct}%
+            </span>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    /* =========================================================
+     * 4-STEP SANKEY DIAGRAM (STRICT CONSERVATION OF FLOW)
+     * ========================================================= */
+    function renderSankey() {
+      const svg = document.getElementById('sankeySvg');
+      const funnel = currentPayload.sankey[appState.activeFunnel];
+      const total = funnel.totalStart;
+
+      document.getElementById('sankeyCompletionSummary').innerHTML =
+        `End-to-End Completion: <span class="text-[#FF6B2C]">${funnel.completionRate}%</span> <span class="text-slate-400 font-medium">(${fmtNum(funnel.steps[3].active.count)} / ${fmtNum(total)} ${funnel.unit})</span>`;
+
+      const colX = [26, 304, 588, 868];
+      const nodeW = 64;
+      const maxBarH = 160;
+      const activeTopY = 48;
+      const dropBaseY = 236;
+
+      // Compute node geometry proportionally to total volume
+      const nodes = [];
+      const nodeById = {};
+
+      funnel.steps.forEach((step, idx) => {
+        const a = step.active;
+        const aH = Math.max(24, Math.round((a.count / total) * maxBarH));
+        const aNode = {
+          id: a.id,
+          col: idx,
+          label: a.label,
+          count: a.count,
+          pctOfStart: ((a.count / total) * 100).toFixed(1),
+          type: 'active',
+          x: colX[idx],
+          y: activeTopY,
+          h: aH,
+        };
+        nodes.push(aNode);
+        nodeById[aNode.id] = aNode;
+
+        if (step.dropoff) {
+          const d = step.dropoff;
+          const dH = Math.max(18, Math.round((d.count / total) * maxBarH));
+          const dNode = {
+            id: d.id,
+            col: idx,
+            label: d.label,
+            count: d.count,
+            pctOfStart: ((d.count / total) * 100).toFixed(1),
+            type: 'dropoff',
+            x: colX[idx],
+            y: dropBaseY,
+            h: Math.min(62, dH),
+          };
+          nodes.push(dNode);
+          nodeById[dNode.id] = dNode;
+        }
+      });
+
+      // Build links (each Step i active node splits cleanly into Step i+1 active + Step i+1 dropoff)
+      const links = [];
+      for (let i = 0; i < 3; i++) {
+        const src = nodeById[`a${i + 1}`];
+        const nextActive = nodeById[`a${i + 2}`];
+        const nextDrop = nodeById[`d${i + 2}`];
+
+        const activeShareOfSrc = nextActive.count / src.count;
+        const activeRibbonH = Math.max(8, src.h * activeShareOfSrc);
+        const dropRibbonH = Math.max(6, src.h - activeRibbonH);
+
+        // Active continuation ribbon (top slice of src -> full height of nextActive)
+        links.push({
+          id: `link_${src.id}_${nextActive.id}`,
+          source: src.id,
+          target: nextActive.id,
+          title: `${src.label} → ${nextActive.label}`,
+          sub: `Step ${i + 1} → Step ${i + 2} Conversion`,
+          count: nextActive.count,
+          stepPct: (activeShareOfSrc * 100).toFixed(1),
+          type: 'active',
+          x0: src.x + nodeW,
+          y0Top: src.y,
+          y0Bot: src.y + activeRibbonH,
+          x1: nextActive.x,
+          y1Top: nextActive.y,
+          y1Bot: nextActive.y + nextActive.h,
+        });
+
+        // Drop-off ribbon (bottom slice of src -> full height of nextDrop)
+        links.push({
+          id: `link_${src.id}_${nextDrop.id}`,
+          source: src.id,
+          target: nextDrop.id,
+          title: `${src.label} → ${nextDrop.label}`,
+          sub: `Step ${i + 1} → Step ${i + 2} Drop-Off`,
+          count: nextDrop.count,
+          stepPct: ((nextDrop.count / src.count) * 100).toFixed(1),
+          type: 'dropoff',
+          x0: src.x + nodeW,
+          y0Top: src.y + activeRibbonH,
+          y0Bot: src.y + src.h,
+          x1: nextDrop.x,
+          y1Top: nextDrop.y,
+          y1Bot: nextDrop.y + nextDrop.h,
+        });
+      }
+
+      // Render SVG
+      let html = `
+        <defs>
+          <linearGradient id="skOrangeNode" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FF551A" />
+            <stop offset="100%" stop-color="#FF844B" />
+          </linearGradient>
+          <linearGradient id="skGrayNode" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#94A3B8" />
+            <stop offset="100%" stop-color="#CBD5E1" />
+          </linearGradient>
+          <linearGradient id="skOrangeRibbon" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#FF6B2C" stop-opacity="0.34" />
+            <stop offset="50%" stop-color="#FF844B" stop-opacity="0.22" />
+            <stop offset="100%" stop-color="#FF551A" stop-opacity="0.36" />
+          </linearGradient>
+          <linearGradient id="skGrayRibbon" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#94A3B8" stop-opacity="0.26" />
+            <stop offset="100%" stop-color="#CBD5E1" stop-opacity="0.32" />
+          </linearGradient>
+        </defs>
+      `;
+
+      // Links layer
+      html += `<g>`;
+      links.forEach((l) => {
+        const cx = (l.x0 + l.x1) / 2;
+        const d = `
+          M ${l.x0} ${l.y0Top}
+          C ${cx} ${l.y0Top}, ${cx} ${l.y1Top}, ${l.x1} ${l.y1Top}
+          L ${l.x1} ${l.y1Bot}
+          C ${cx} ${l.y1Bot}, ${cx} ${l.y0Bot}, ${l.x0} ${l.y0Bot}
+          Z
+        `;
+        html += `
+          <path class="sankey-link"
+                data-source="${l.source}"
+                data-target="${l.target}"
+                data-title="${l.title}"
+                data-sub="${l.sub}"
+                data-count="${fmtNum(l.count)} ${funnel.unit}"
+                data-pct="${l.stepPct}%"
+                data-type="${l.type}"
+                d="${d}"
+                fill="${l.type === 'active' ? 'url(#skOrangeRibbon)' : 'url(#skGrayRibbon)'}" />
+        `;
+      });
+      html += `</g>`;
+
+      // Nodes layer
+      html += `<g>`;
+      nodes.forEach((n) => {
+        const fill = n.type === 'active' ? 'url(#skOrangeNode)' : 'url(#skGrayNode)';
+        const rx = Math.min(12, n.h / 2);
+        const labelY = n.type === 'active' ? n.y - 20 : n.y - 18;
+        const metaY = n.type === 'active' ? n.y - 6 : n.y - 5;
+        const textAnchor = n.col === 3 ? 'end' : 'start';
+        const textX = n.col === 3 ? n.x + nodeW : n.x;
+
+        html += `
+          <g class="sankey-node"
+             data-node-id="${n.id}"
+             data-title="${n.label}"
+             data-sub="Step ${n.col + 1} · ${n.pctOfStart}% of initial volume"
+             data-count="${fmtNum(n.count)} ${funnel.unit}"
+             data-pct="${n.pctOfStart}%"
+             data-type="${n.type}">
+            <text x="${textX}" y="${labelY}" text-anchor="${textAnchor}" font-size="11.5" font-weight="700" fill="${n.type === 'active' ? '#0F172A' : '#475569'}">${n.label}</text>
+            <text x="${textX}" y="${metaY}" text-anchor="${textAnchor}" font-size="10" font-weight="600" fill="#64748B">${fmtNum(n.count)} · ${n.pctOfStart}%</text>
+            <rect x="${n.x}" y="${n.y}" width="${nodeW}" height="${n.h}" rx="${rx}" ry="${rx}" fill="${fill}" />
+          </g>
+        `;
+      });
+      html += `</g>`;
+
+      svg.innerHTML = html;
+      attachSankeyHoverEvents();
+    }
+
+    function attachSankeyHoverEvents() {
+      const svg = document.getElementById('sankeySvg');
+      const links = svg.querySelectorAll('.sankey-link');
+      const nodes = svg.querySelectorAll('.sankey-node');
+      const tooltip = document.getElementById('sankeyTooltip');
+
+      const showTip = (e, ds) => {
+        document.getElementById('skTtTitle').textContent = ds.title;
+        document.getElementById('skTtSub').textContent = ds.sub;
+        const cEl = document.getElementById('skTtCount');
+        const pEl = document.getElementById('skTtPct');
+        cEl.textContent = ds.count;
+        pEl.textContent = ds.pct;
+
+        if (ds.type === 'dropoff') {
+          cEl.className = 'text-[13px] font-extrabold text-slate-600 tabular-nums';
+          pEl.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 tabular-nums';
+        } else {
+          cEl.className = 'text-[13px] font-extrabold text-[#FF6B2C] tabular-nums';
+          pEl.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-[#FF6B2C] tabular-nums';
+        }
+
+        tooltip.classList.remove('hidden');
+        const x = Math.min(window.innerWidth - 230, e.clientX + 14);
+        const y = Math.max(12, e.clientY - 78);
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+      };
+
+      const reset = () => {
+        links.forEach((l) => l.classList.remove('sankey-dimmed', 'sankey-active'));
+        nodes.forEach((n) => n.classList.remove('sankey-dimmed', 'sankey-active'));
+        tooltip.classList.add('hidden');
+      };
+
+      nodes.forEach((node) => {
+        node.addEventListener('mouseenter', (e) => {
+          const id = node.dataset.nodeId;
+          const connected = new Set([id]);
+          links.forEach((l) => {
+            if (l.dataset.source === id || l.dataset.target === id) {
+              l.classList.add('sankey-active');
+              l.classList.remove('sankey-dimmed');
+              connected.add(l.dataset.source);
+              connected.add(l.dataset.target);
+            } else {
+              l.classList.add('sankey-dimmed');
+              l.classList.remove('sankey-active');
+            }
+          });
+          nodes.forEach((n) => {
+            if (connected.has(n.dataset.nodeId)) {
+              n.classList.add('sankey-active');
+              n.classList.remove('sankey-dimmed');
+            } else {
+              n.classList.add('sankey-dimmed');
+              n.classList.remove('sankey-active');
+            }
+          });
+          showTip(e, node.dataset);
+        });
+        node.addEventListener('mousemove', (e) => showTip(e, node.dataset));
+        node.addEventListener('mouseleave', reset);
+      });
+
+      links.forEach((link) => {
+        link.addEventListener('mouseenter', (e) => {
+          links.forEach((l) => {
+            l.classList.toggle('sankey-active', l === link);
+            l.classList.toggle('sankey-dimmed', l !== link);
+          });
+          nodes.forEach((n) => {
+            const match = n.dataset.nodeId === link.dataset.source || n.dataset.nodeId === link.dataset.target;
+            n.classList.toggle('sankey-active', match);
+            n.classList.toggle('sankey-dimmed', !match);
+          });
+          showTip(e, link.dataset);
+        });
+        link.addEventListener('mousemove', (e) => showTip(e, link.dataset));
+        link.addEventListener('mouseleave', reset);
+      });
+    }
+
+    /* =========================================================
+     * INTERACTIVE CONTROLS
+     * ========================================================= */
+
+    function toggleMobileSidebar(open) {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full', !open);
+      document.getElementById('sidebarBackdrop').classList.toggle('hidden', !open);
+    }
+
+    function selectSidebarNav(name) {
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        const active = btn.dataset.nav === name;
+        if (active) {
+          btn.classList.add('bg-[#FFF3EC]', 'text-[#FF6B2C]', 'font-semibold');
+          btn.classList.remove('text-slate-600');
+        } else {
+          btn.classList.remove('bg-[#FFF3EC]', 'text-[#FF6B2C]', 'font-semibold');
+          btn.classList.add('text-slate-600');
+        }
+      });
+      toggleMobileSidebar(false);
+      if (name !== 'Analytics') {
+        showToast(`${name} telemetry synced with ${appState.surfaceLabel}`);
+      }
+    }
+
+    function switchRoleView(mode) {
+      appState.roleView = mode;
+      const isAdmin = mode === 'admin';
+
+      // Sidebar toggle styling
+      document.getElementById('viewAdminBtn').className = isAdmin
+        ? 'py-1.5 px-2 rounded-lg bg-white text-slate-900 shadow-xs transition-all text-center'
+        : 'py-1.5 px-2 rounded-lg text-slate-500 hover:text-slate-800 transition-all text-center';
+      document.getElementById('viewPrincipalBtn').className = !isAdmin
+        ? 'py-1.5 px-2 rounded-lg bg-white text-slate-900 shadow-xs transition-all text-center'
+        : 'py-1.5 px-2 rounded-lg text-slate-500 hover:text-slate-800 transition-all text-center';
+
+      // Badges & Breadcrumb
+      document.getElementById('routeBreadcrumb').textContent = isAdmin
+        ? '/admin/analytics'
+        : '/principal/governance/analytics';
+
+      const roleBadge = document.getElementById('roleModeBadge');
+      if (isAdmin) {
+        roleBadge.textContent = 'Diagnostic';
+        roleBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-[#FF6B2C] border border-orange-200/70';
+        document.getElementById('roleViewSubtext').textContent = 'SysAdmin / Admin view · Diagnostic drill-down enabled.';
+        document.getElementById('privacyBadgeText').textContent = 'Aggregated · Zero PII/UUIDs';
+        document.getElementById('adminControlsGroup').classList.remove('hidden');
+      } else {
+        roleBadge.textContent = 'Read-Only';
+        roleBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/70';
+        document.getElementById('roleViewSubtext').textContent = 'Principal Executive View · Read-Only · Zero PII.';
+        document.getElementById('privacyBadgeText').textContent = 'Read-Only · Zero PII Executive View';
+        document.getElementById('adminControlsGroup').classList.add('hidden');
+      }
+
+      showToast(isAdmin ? 'Switched to /admin/analytics' : 'Switched to /principal/governance/analytics (Read-Only)');
+    }
+
+    function toggleSurfaceMenu() {
+      document.getElementById('surfaceMenu').classList.toggle('hidden');
+      document.getElementById('filterPopover').classList.add('hidden');
+    }
+
+    function selectSurface(key, label, dotColor) {
+      appState.surface = key;
+      appState.surfaceLabel = label;
+      document.getElementById('surfaceLabel').textContent = label;
+      document.getElementById('surfaceDot').style.backgroundColor = dotColor;
+      document.getElementById('surfaceMenu').classList.add('hidden');
+
+      // Update live SSE baseline gently for the selected surface
+      liveActiveCount = SURFACE_CONFIG[key].liveBase;
+      document.getElementById('liveSseCounter').textContent = `${liveActiveCount} active`;
+
+      renderDashboard();
+      showToast(`Surface switched to ${label}`);
+    }
+
+    function selectTimeframe(tf) {
+      appState.timeframe = tf;
+      document.querySelectorAll('.tf-btn').forEach((btn) => {
+        const active = btn.dataset.tf === tf;
+        btn.className = active
+          ? 'tf-btn px-2.5 py-1 rounded-lg text-[11.5px] font-semibold bg-[#FFF3EC] text-[#FF6B2C] transition-all whitespace-nowrap'
+          : 'tf-btn px-2.5 py-1 rounded-lg text-[11.5px] font-medium text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap';
+      });
+      renderDashboard();
+      if (tf === 'Custom') {
+        showToast('Custom range preset applied (Last 14 Days)');
+      }
+    }
+
+    function toggleFilterPopover(force) {
+      const pop = document.getElementById('filterPopover');
+      const willOpen = typeof force === 'boolean' ? force : pop.classList.contains('hidden');
+      pop.classList.toggle('hidden', !willOpen);
+      document.getElementById('surfaceMenu').classList.add('hidden');
+
+      if (willOpen) {
+        // Sync draft inputs with current state
+        document.getElementById('fRole').value = appState.filters.role;
+        document.getElementById('fDept').value = appState.filters.dept;
+        document.getElementById('fBlock').value = appState.filters.block;
+        selectDraftPersona(appState.filters.persona);
+      }
+    }
+
+    function selectDraftPersona(val) {
+      appState.draftPersona = val;
+      document.querySelectorAll('.persona-pill').forEach((btn) => {
+        const active = btn.dataset.persona === val;
+        btn.className = active
+          ? 'persona-pill py-1.5 rounded-lg bg-white text-slate-900 shadow-xs'
+          : 'persona-pill py-1.5 rounded-lg text-slate-500 hover:text-slate-800';
+      });
+    }
+
+    function applyDraftFilters() {
+      appState.filters.role = document.getElementById('fRole').value;
+      appState.filters.persona = appState.draftPersona;
+      appState.filters.dept = document.getElementById('fDept').value;
+      appState.filters.block = document.getElementById('fBlock').value;
+      toggleFilterPopover(false);
+      renderDashboard();
+      showToast('Filters applied across all widgets');
+    }
+
+    function resetAllFilters() {
+      appState.filters = { role: 'All', persona: 'All', dept: 'All', block: 'All' };
+      document.getElementById('fRole').value = 'All';
+      document.getElementById('fDept').value = 'All';
+      document.getElementById('fBlock').value = 'All';
+      selectDraftPersona('All');
+      toggleFilterPopover(false);
+      renderDashboard();
+      showToast('All scope filters reset');
+    }
+
+    function updateFilterBadges() {
+      const parts = [];
+      if (appState.filters.role !== 'All') parts.push(appState.filters.role);
+      if (appState.filters.persona !== 'All') parts.push(appState.filters.persona);
+      if (appState.filters.dept !== 'All') parts.push(appState.filters.dept);
+      if (appState.filters.block !== 'All') parts.push(appState.filters.block);
+
+      const countBadge = document.getElementById('filterCountBadge');
+      const chip = document.getElementById('activeFiltersChip');
+      if (parts.length > 0) {
+        countBadge.textContent = parts.length;
+        countBadge.classList.remove('hidden');
+        document.getElementById('activeFiltersText').textContent = parts.join(' · ');
+        chip.classList.remove('hidden');
+      } else {
+        countBadge.classList.add('hidden');
+        chip.classList.add('hidden');
+      }
+    }
+
+    function selectSankeyFunnel(funnelKey) {
+      appState.activeFunnel = funnelKey;
+      document.querySelectorAll('.funnel-tab').forEach((btn) => {
+        const active = btn.dataset.funnel === funnelKey;
+        btn.className = active
+          ? 'funnel-tab px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-white text-[#FF6B2C] shadow-xs transition-all whitespace-nowrap'
+          : 'funnel-tab px-3 py-1.5 rounded-lg text-[12px] font-medium text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap';
+      });
+      renderSankey();
+    }
+
+    /* Campus Spatial Map Zoom & Hover */
+    function zoomCampusMap(delta) {
+      appState.mapZoom = Math.max(0.85, Math.min(1.85, +(appState.mapZoom + delta).toFixed(2)));
+      document.getElementById('campusMapViewport').style.transform = `scale(${appState.mapZoom})`;
+    }
+
+    function resetCampusMapZoom() {
+      appState.mapZoom = 1;
+      document.getElementById('campusMapViewport').style.transform = 'scale(1)';
+    }
+
+    function setupCampusMapHover() {
+      const container = document.getElementById('campusMapContainer');
+      const tooltip = document.getElementById('campusTooltip');
+
+      container.querySelectorAll('.campus-zone').forEach((zoneEl) => {
+        zoneEl.addEventListener('mouseenter', (e) => {
+          const z = currentPayload?.campusZones?.[zoneEl.dataset.zone];
+          if (!z) return;
+          document.getElementById('cTtName').textContent = z.name;
+          document.getElementById('cTtScans').textContent = `${fmtNum(z.scans)} scans / users`;
+          const shareEl = document.getElementById('cTtShare');
+          shareEl.textContent = `${z.share}%`;
+          shareEl.className =
+            z.intensity === 'high'
+              ? 'text-[10.5px] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 text-[#FF6B2C] tabular-nums'
+              : z.intensity === 'med'
+              ? 'text-[10.5px] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-[#3B82F6] tabular-nums'
+              : 'text-[10.5px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-[#10B981] tabular-nums';
+
+          tooltip.classList.remove('hidden');
+          moveMapTip(e);
+        });
+        zoneEl.addEventListener('mousemove', moveMapTip);
+        zoneEl.addEventListener('mouseleave', () => tooltip.classList.add('hidden'));
+      });
+
+      function moveMapTip(e) {
+        const rect = container.getBoundingClientRect();
+        const x = Math.min(rect.width - 170, Math.max(8, e.clientX - rect.left + 12));
+        const y = Math.max(8, e.clientY - rect.top - 54);
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+      }
+    }
+
+    /* Admin Endpoint Preview Modal */
+    function buildEndpointUrl() {
+      const params = new URLSearchParams();
+      params.set('surface', appState.surface);
+      params.set('timeframe', appState.timeframe);
+      if (appState.filters.role !== 'All') params.set('role', appState.filters.role.toLowerCase());
+      if (appState.filters.persona !== 'All') params.set('persona', appState.filters.persona.toLowerCase().replace(' ', '_'));
+      if (appState.filters.dept !== 'All') params.set('dept', appState.filters.dept);
+      if (appState.filters.block !== 'All') params.set('block', appState.filters.block);
+      return `GET /api/admin/analytics/alyze?${params.toString()}`;
+    }
+
+    function openEndpointModal() {
+      const url = buildEndpointUrl();
+      document.getElementById('endpointUrlDisplay').textContent = url;
+      const summary = {
+        meta: {
+          route: '/admin/analytics',
+          piiRedacted: true,
+          healthProbesExcluded: ['/api/me/health', 'Uptime-Kuma/*'],
+        },
+        kpis: currentPayload.kpis.map((k) => ({ title: k.title, value: k.value, delta: k.delta })),
+        hourlyBars: `[24 intervals · peak=${fmtNum(Math.max(...currentPayload.hourlyBars.map((b) => b.count)))}]`,
+        topRoutes: currentPayload.topRoutes.slice(0, 3),
+        campusZones: `${Object.keys(currentPayload.campusZones).length} JNTUH UCEJ zones`,
+        sankey: {
+          activeTab: appState.activeFunnel,
+          completionRate: `${currentPayload.sankey[appState.activeFunnel].completionRate}%`,
+          flowConserved: true,
+        },
+      };
+      document.getElementById('endpointJsonPreview').textContent = JSON.stringify(summary, null, 2);
+      document.getElementById('endpointModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeEndpointModal() {
+      document.getElementById('endpointModal').classList.add('hidden');
+    }
+
+    function copyEndpointUrl() {
+      const text = document.getElementById('endpointUrlDisplay').textContent;
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      showToast('Endpoint query copied to clipboard');
+    }
+
+    /* Toast Helper */
+    let toastTimeout = null;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toastText').textContent = msg;
+      el.classList.remove('opacity-0', 'translate-y-2');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        el.classList.add('opacity-0', 'translate-y-2');
+      }, 2400);
+    }
+
+    // Close popovers on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#surfaceDropdownWrap')) {
+        document.getElementById('surfaceMenu').classList.add('hidden');
+      }
+      if (!e.target.closest('#filterWrap')) {
+        document.getElementById('filterPopover').classList.add('hidden');
+      }
+    });
+
+    // Isolated SSE Stream Simulation (updates only the Live Traffic badge, never re-renders charts)
+    setInterval(() => {
+      const step = Math.floor(Math.random() * 9) - 4; // -4 to +4
+      liveActiveCount = Math.max(18, liveActiveCount + step);
+      const el = document.getElementById('liveSseCounter');
+      if (el) el.textContent = `${liveActiveCount} active`;
+    }, 3000);
+
+    // Boot Dashboard
+    window.addEventListener('DOMContentLoaded', () => {
+      renderDashboard();
+      setupCampusMapHover();
+    });
+  </script>
+</body>
+</html>

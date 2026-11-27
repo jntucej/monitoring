@@ -65,7 +65,12 @@ export function HistoryView({
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={d?.chart ?? []}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+              <XAxis
+                dataKey="date"
+                minTickGap={24}
+                tick={{ fontSize: 11 }}
+                tickFormatter={(v: string) => (typeof v === "string" && v.length >= 10 ? v.slice(5) : v)}
+              />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
               <Bar dataKey="approved" stackId="a" fill="var(--action-primary)" />

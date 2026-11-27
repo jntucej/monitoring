@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
-import { RoleChrome } from "@/components/shared/RoleChrome";
+import { RoleSearchBar } from "@/components/shared/RoleSearchBar";
+import { RoleNotificationBell } from "@/components/shell/RoleNotificationBell";
 import { PrincipalSidebar } from "./PrincipalSidebar";
-import { PrincipalNotificationBell } from "./PrincipalNotificationBell";
 import { FocusMode } from "../_retention/FocusMode";
 
 export function PrincipalDesktopShell({ children }: { children: React.ReactNode }) {
@@ -20,7 +20,7 @@ export function PrincipalDesktopShell({ children }: { children: React.ReactNode 
 
   return (
     <div className="flex h-dvh flex-col lg:flex-row overflow-hidden bg-bg-base">
-      <aside className="hidden lg:block w-64 shrink-0 border">
+      <aside className="hidden lg:block w-64 shrink-0 border-r border-border">
         <PrincipalSidebar mode="expanded" />
       </aside>
 
@@ -36,24 +36,23 @@ export function PrincipalDesktopShell({ children }: { children: React.ReactNode 
           </button>
           <span className="text-sm font-semibold text-text-primary">Principal</span>
         </div>
-        <PrincipalNotificationBell />
+        <RoleNotificationBell />
       </header>
 
       <div className="relative flex-1 overflow-y-auto overflow-x-hidden">
         <ScrollEdgeBlue className="h-full">
-          <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 lg:py-6 pb-[max(4rem,env(safe-area-inset-bottom))] lg:pb-24">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 pt-3 sm:px-6 lg:px-8">
+            <div className="min-w-0 flex-1">
+              <RoleSearchBar role="principal" />
+            </div>
+            <RoleNotificationBell className="hidden lg:inline-flex shrink-0" />
+          </div>
+          <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 lg:py-6 pb-[env(safe-area-inset-bottom)]">
             {children}
           </main>
         </ScrollEdgeBlue>
-        <div className="hidden lg:block">
-          <RoleChrome role="principal" variant="footer" />
-        </div>
-        <div className="lg:hidden">
-          <RoleChrome role="principal" variant="mobile" />
-        </div>
       </div>
 
-      <PrincipalNotificationBell className="hidden lg:block fixed right-6 top-6 z-20" />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
       {open && (

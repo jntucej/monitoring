@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useRoleContext } from "@/hooks/useRoleContext";
-import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildHostelInspection } from "@/lib/principal/registerInspections";
@@ -38,11 +38,6 @@ export function HostelView() {
   const { data, loading } = useApiResource<HostelBlocksResponse>("/api/hostel/blocks", {
     ttlMs: 30_000,
   });
-  const {
-    inspection: ourInspection,
-    inspect: ourInspect,
-    closeInspection,
-  } = useEntityInspector();
 
   const role = useRoleContext();
   const gate: RoleGate = {
@@ -198,7 +193,6 @@ export function HostelView() {
         </div>
       )}
 
-      <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
       <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Chip } from "@heroui/react";
 import { cn } from "@/lib/utils";
 
 export type BadgeVariant =
@@ -22,46 +23,44 @@ const badgeColors: Record<BadgeVariant, string> = {
   error: "bg-action-danger/10 text-action-danger",
 };
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+const dotColors: Record<BadgeVariant, string> = {
+  entry: "var(--action-primary)",
+  exit: "var(--action-danger)",
+  dayout: "var(--action-warning)",
+  leave: "var(--action-info)",
+  offline: "var(--action-warning)",
+  success: "var(--action-primary)",
+  error: "var(--action-danger)",
+};
+
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
   dot?: boolean;
 }
 
-const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
+const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant = "entry", dot = true, children, ...props }, ref) => {
     return (
-      <div
+      <Chip
         ref={ref}
+        size="sm"
+        variant="soft"
         className={cn(
           "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium",
           badgeColors[variant],
           className
         )}
-        {...props}
+        {...(props as Record<string, unknown>)}
       >
         {dot && (
           <span
-            className="size-2 rounded-full"
-            style={{
-              backgroundColor:
-                variant === "entry"
-                  ? "var(--action-primary)"
-                  : variant === "exit"
-                  ? "var(--action-danger)"
-                  : variant === "dayout"
-                  ? "var(--action-warning)"
-                  : variant === "leave"
-                  ? "var(--action-info)"
-                  : variant === "offline"
-                  ? "var(--action-warning)"
-                  : variant === "success"
-                  ? "var(--action-primary)"
-                  : "var(--action-danger)",
-            }}
+            className="size-2 rounded-full shrink-0"
+            style={{ backgroundColor: dotColors[variant] }}
+            aria-hidden="true"
           />
         )}
-        {children}
-      </div>
+        <Chip.Label>{children}</Chip.Label>
+      </Chip>
     );
   }
 );

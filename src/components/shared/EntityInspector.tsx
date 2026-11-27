@@ -125,6 +125,9 @@ export interface EntityInspectorProps {
  *   - When `inspection` is null the panel shows a state placeholder
  *     (loading / empty / error / unauthorized / missing) per design rule 31.
  */
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { Drawer as HeroDrawer } from "@/components/ui/HeroDrawerPrimitive";
+
 export function EntityInspector({
   inspection,
   onClose,
@@ -139,6 +142,8 @@ export function EntityInspector({
   onBack,
   pivots,
 }: EntityInspectorProps) {
+  const isMobile = useBreakpoint({ mobile: "(max-width: 767px)" }).mobile;
+  const drawerPlacement = isMobile ? "bottom" : "right";
   // When the caller passes no explicit `state`, the panel is considered
   // "closed" when inspection is null → render nothing (a stuck "loading"
   // overlay covering the whole page is the /principal bug). When the caller
@@ -204,41 +209,31 @@ export function EntityInspector({
   // If there is no inspection model, render the state placeholder.
   if (!inspection) {
     return (
-      <div
-        className="fixed inset-0 z-[80] flex justify-end"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Entity inspector"
+      <HeroDrawer
+        isOpen
+        onClose={onClose}
+        placement={drawerPlacement}
+        className={cn("w-full sm:max-w-lg md:max-w-xl h-full overflow-y-auto p-5 flex flex-col bg-bg-surface", className)}
       >
-        <div
-          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-        <aside
-          className={cn(
-            "surface-card relative w-full max-w-md h-full overflow-y-auto bg-bg-surface p-5 flex flex-col",
-            className,
-          )}
-        >
-          <header className="flex items-center justify-between mb-4">
-            <p className="text-xs text-text-muted">Inspector</p>
-            <button
-              ref={closeBtnRef}
-              onClick={onClose}
-              className="surface-card min-h-9 min-w-9 shrink-0 flex items-center justify-center hover:bg-bg-surface/60 text-text-primary focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none"
-              aria-label="Close inspector"
-            >
-              <X className="size-4" />
-            </button>
-          </header>
+        <header className="flex items-center justify-between mb-4">
+          <p className="text-xs text-text-muted">Inspector</p>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close inspector"
+            className="inline-flex min-h-9 min-w-9 shrink-0 items-center justify-center rounded-md hover:bg-bg-surface/60 text-text-primary focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none"
+          >
+            <X className="size-4" />
+          </button>
+        </header>
+        <div className="flex-1 overflow-y-auto">
           <InspectorStatePlaceholder
             state={inspectorState}
             errorMessage={errorMessage}
             onRetry={onRetry}
           />
-        </aside>
-      </div>
+        </div>
+      </HeroDrawer>
     );
   }
 
@@ -272,25 +267,19 @@ export function EntityInspector({
   })();
 
   return (
-    <div className="fixed inset-0 z-[80] flex justify-end" role="dialog" aria-modal="true" aria-label={`Inspect ${kind}: ${title}`}>
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Drawer */}
+    <HeroDrawer
+      isOpen
+      onClose={onClose}
+      placement={drawerPlacement}
+      className={cn("w-full sm:max-w-lg md:max-w-xl h-full overflow-y-auto p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-bg-surface", className)}
+    >
       <aside
         ref={panelRef}
         data-testid="inspector-drawer"
         data-inspector-open="true"
         data-role-tier={dataRoleTier}
         data-event-mode={dataEventMode}
-        className={cn(
-          "surface-card relative w-full sm:max-w-lg md:max-w-xl h-full overflow-y-auto bg-bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]",
-          className,
-        )}
+        className="relative h-full w-full overflow-y-auto"
       >
         <header className="flex items-start justify-between gap-3 mb-4">
           <div className="min-w-0">
@@ -380,7 +369,7 @@ export function EntityInspector({
           </div>
         ) : null}
       </aside>
-    </div>
+    </HeroDrawer>
   );
 }
 

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleResponsiveShell } from "@/components/shell/RoleResponsiveShell";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { CARETAKER_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
 import type { Role } from "@/lib/types";
 
@@ -21,6 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <AuthGuard allowedRoles={["caretaker", "admin", "sysadmin"] as Role[]}>
       <Suspense fallback={<PageLoading />}>
         <RoleResponsiveShell manifest={MANIFEST}>{children}</RoleResponsiveShell>
+        <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>
   );

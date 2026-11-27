@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { usePolling } from "@/hooks/usePolling";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
 import { SlaBadge } from "@/components/approver/SlaBadge";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { ListSkeleton } from "./ListSkeleton";
-import { ApprovalDetailSheet } from "./ApprovalDetailSheet";
 import { WeekBar } from "./WeekBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { ticketRowInspection } from "@/components/approver/wardenConsoleModels";
@@ -26,7 +25,6 @@ export function ApprovalsView({
   status: "PENDING" | "ESCALATED" | "ALL";
   title: string;
 }) {
-  const [selected, setSelected] = useState<PermissionItem | null>(null);
   const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const inspectRow = (item: PermissionItem) => {
@@ -57,6 +55,7 @@ export function ApprovalsView({
   const { data, loading, refresh } = useApiResource<PermissionsResponse>(url, {
     ttlMs: 15_000,
   });
+  usePolling(refresh, { intervalMs: 15_000 });
 
   const rows = data?.data ?? [];
 
@@ -98,15 +97,6 @@ export function ApprovalsView({
           />
         )}
       </section>
-
-      <ApprovalDetailSheet
-        item={selected}
-        onClose={() => setSelected(null)}
-        onActionComplete={() => {
-          setSelected(null);
-          refresh();
-        }}
-      />
 
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>

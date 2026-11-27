@@ -425,13 +425,6 @@ function SidebarInner() {
     } else if (pathname?.startsWith("/student")) activeRole = "student";
     else if (pathname?.startsWith("/guardian")) activeRole = "parent";
     else if (storeRole) activeRole = storeRole;
-    else {
-      if (typeof window !== "undefined") {
-        const storedRole = (localStorage.getItem("gate-monitor-role") ||
-          localStorage.getItem("gate-monitor-role")) as Role;
-        if (storedRole) activeRole = storedRole;
-      }
-    }
     setRole(activeRole);
   }, [storeRole, pathname]);
 

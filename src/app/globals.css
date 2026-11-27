@@ -1,5 +1,10 @@
 /* src/app/globals.css — SINGLE THEME · Graphite Canvas · Performance Edition */
 @import "tailwindcss";
+/* HeroUI v3 component styles (button--*, modal--*, drawer--*, select--*, etc.)
+   must be imported BEFORE our @theme inline block so that our token mappings
+   in @theme inline and [data-theme] override blocks cascade ON TOP of the
+   HeroUI defaults (later declarations win at the same specificity). */
+@import "@heroui/styles";
 
 /* Stop the Tailwind v4 CSS scanner from walking non-source directories. */
 @source not "../../tests";
@@ -121,6 +126,32 @@
   --unit-c:              var(--color-action-warning);
   --canvas:              var(--color-canvas);
   --focus-ring:          var(--color-action-primary);
+
+  /* HeroUI v3 semantic token bridge.
+     These must come AFTER @heroui/styles (which is imported by @heroui/react
+     via component-level CSS-in-JS) so our graphite palette overrides the
+     HeroUI defaults. If a hero variable is missing, our value wins. */
+  --background:          var(--color-canvas);
+  --foreground:          var(--color-text-primary);
+  --surface:             var(--color-surface);
+  --surface-foreground:  var(--color-text-primary);
+  --overlay:             var(--color-surface);
+  --overlay-foreground:  var(--color-text-primary);
+  --muted:               var(--color-text-muted);
+  --accent:              var(--color-action-primary);
+  --accent-foreground:   #FFFFFF;
+  --default:             var(--color-surface-muted);
+  --default-foreground:  var(--color-text-primary);
+  --danger:              var(--color-action-danger);
+  --danger-foreground:   #FFFFFF;
+  --warning:             var(--color-action-warning);
+  --warning-foreground:  #FFFFFF;
+  --success:             var(--color-action-success);
+  --success-foreground:  #FFFFFF;
+  --field-background:    var(--color-surface);
+  --field-foreground:    var(--color-text-primary);
+  --field-placeholder:   var(--color-text-muted);
+  --field-border:        var(--color-border);
 
   /* ── MISSING-TOKEN BRIDGE ─────────────────────────────────────
      21 legacy token names referenced in components but never
@@ -589,6 +620,23 @@ p, li, .text-body { color: var(--color-text-secondary); }
   --color-text-muted: #94a3b8;
   --color-border: #1e293b;
   --color-action-primary: #38bdf8;
+
+  /* HeroUI v3 semantic override for dark mode */
+  --background: #090d16;
+  --foreground: #f8fafc;
+  --surface: #111827;
+  --surface-foreground: #f8fafc;
+  --overlay: #111827;
+  --overlay-foreground: #f8fafc;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-foreground: #090d16;
+  --default: #1e293b;
+  --default-foreground: #f8fafc;
+  --field-background: #111827;
+  --field-foreground: #f8fafc;
+  --field-placeholder: #94a3b8;
+  --field-border: #1e293b;
 }
 
 [data-theme="sakura"][data-mode="light"] {
@@ -603,6 +651,23 @@ p, li, .text-body { color: var(--color-text-secondary); }
   --color-text-muted: #6b3b4e;
   --color-border: #f5d0dc;
   --color-action-primary: #db2777;
+
+  /* HeroUI v3 semantic override for sakura light */
+  --background: #fff8fa;
+  --foreground: #2a131d;
+  --surface: #ffffff;
+  --surface-foreground: #2a131d;
+  --overlay: #ffffff;
+  --overlay-foreground: #2a131d;
+  --muted: #6b3b4e;
+  --accent: #db2777;
+  --accent-foreground: #ffffff;
+  --default: #fdeef2;
+  --default-foreground: #2a131d;
+  --field-background: #ffffff;
+  --field-foreground: #2a131d;
+  --field-placeholder: #6b3b4e;
+  --field-border: #f5d0dc;
   /* sakuga-vfx Light tokens */
   --sk-card: #ffffff;
   --sk-ink: #1d1a4a;
@@ -633,6 +698,23 @@ p, li, .text-body { color: var(--color-text-secondary); }
   --color-text-muted: #d8a7b8;
   --color-border: #472436;
   --color-action-primary: #f472b6;
+
+  /* HeroUI v3 semantic override for sakura dark */
+  --background: #140b10;
+  --foreground: #fdf2f6;
+  --surface: #21121a;
+  --surface-foreground: #fdf2f6;
+  --overlay: #21121a;
+  --overlay-foreground: #fdf2f6;
+  --muted: #d8a7b8;
+  --accent: #f472b6;
+  --accent-foreground: #140b10;
+  --default: #2e1824;
+  --default-foreground: #fdf2f6;
+  --field-background: #21121a;
+  --field-foreground: #fdf2f6;
+  --field-placeholder: #d8a7b8;
+  --field-border: #472436;
 }
 
 [data-theme="sakuga"][data-mode="dark"],

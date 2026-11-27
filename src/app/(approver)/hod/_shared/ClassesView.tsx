@@ -21,6 +21,8 @@ interface ScheduleItem {
   roomNumber?: string;
   startTime?: string;
   endTime?: string;
+  facultyId?: string;
+  facultyName?: string;
   attendanceMarked?: boolean;
   className?: string;
   year?: number;
@@ -122,16 +124,16 @@ export function ClassesView() {
                     id: item.id ?? `slot-${idx}`,
                     date: today,
                     periodNumber: item.periodNumber ?? idx + 1,
-                    startTime: item.startTime ?? "09:00",
-                    endTime: item.endTime ?? "09:50",
+                    startTime: item.startTime ?? "—",
+                    endTime: item.endTime ?? "—",
                     classId: item.id ?? `class-${idx}`,
                     classLabel:
                       item.className ??
                       (item.year ? `Y${item.year} - Sec ${item.section ?? "A"}` : "Class"),
                     subjectCode: item.subjectCode ?? "SUB",
                     subjectLabel: item.subjectName ?? item.subjectCode ?? `Period ${item.periodNumber ?? idx + 1}`,
-                    facultyId: "hod",
-                    facultyName: "Department Faculty",
+                    facultyId: item.facultyId ?? "—",
+                    facultyName: item.facultyName ?? "—",
                     roomNumber: item.roomNumber ?? null,
                     status: item.attendanceMarked ? "confirmed" : "scheduled",
                     attendanceMarked: Boolean(item.attendanceMarked),

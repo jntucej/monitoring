@@ -32,6 +32,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
+import { Drawer as HeroDrawer } from "@/components/ui/HeroDrawerPrimitive";
 import {
   EntityInspector,
   type EntityInspection,
@@ -71,6 +72,7 @@ export function GlobalEntityInspector() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const role = useAuthStore((s) => s.role);
+  const authUser = useAuthStore((s) => s.user);
 
   const inspectRaw = searchParams.get("inspect");
   const parsed = useMemo(() => parseInspectParam(inspectRaw), [inspectRaw]);
@@ -212,7 +214,7 @@ export function GlobalEntityInspector() {
   const model: EntityInspection | null = resolver.inspection;
 
   if (model) {
-    const user = useAuthStore.getState().user;
+    const user = authUser;
     const capView = resolveRecordView(
       (kind as RecordKind) ?? "ticket",
       { id, status: typeof model.status === "string" ? model.status : undefined },
@@ -296,34 +298,23 @@ function DrawerShell({
   }, [onClose]);
 
   return (
-    <div
-      className="fixed inset-0 z-[80] flex justify-end"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Entity inspector"
+    <HeroDrawer
+      isOpen
+      onClose={onClose}
+      placement="right"
+      className="w-full sm:max-w-lg md:max-w-xl h-full overflow-y-auto p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-bg-surface"
     >
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
       <aside
         data-testid="inspector-drawer"
         data-inspector-open="true"
-        className={cn(
-          "surface-card relative w-full sm:max-w-lg md:max-w-xl h-full overflow-y-auto bg-bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]",
-        )}
+        className="relative h-full w-full overflow-y-auto"
       >
         {children}
       </aside>
-    </div>
+    </HeroDrawer>
   );
 }
 
-/**
- * Small "peek" affordance header: shows the kind + id so the user knows
- * which entity is being inspected.
- */
 function DrawerHeader({ kind, id }: { kind: string; id: string }) {
   return (
     <header className="flex items-center justify-between mb-4">

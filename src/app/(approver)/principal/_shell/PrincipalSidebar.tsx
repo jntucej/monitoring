@@ -24,6 +24,7 @@ export function PrincipalSidebar({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const authorityStreak = usePrincipalRetention((s) => s.authorityStreak);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   // Hydrate persisted expansion state
@@ -72,7 +73,7 @@ export function PrincipalSidebar({
 
   return (
     <div className="flex h-full w-full flex-col bg-bg-surface">
-      <header className="surface-card shrink-0 px-4 py-3">
+      <header className="shrink-0 border-b border-border px-4 py-3">
         <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
           Principal
         </p>
@@ -104,13 +105,13 @@ export function PrincipalSidebar({
         )}
       </nav>
 
-      <footer className="surface-card shrink-0 p-2 space-y-1">
+      <footer className="shrink-0 border-t border-border p-2 space-y-1">
         {/* Streak pill */}
-        <div className="surface-card flex items-center gap-2 px-3 py-1.5 text-xs">
+        <div className="flex items-center rounded-lg bg-bg-elevated/60 gap-2 px-3 py-1.5 text-xs">
           <Flame className="size-3.5 text-action-warning" />
           <span className="text-text-muted">Authority streak</span>
           <span className="ml-auto font-semibold tabular-nums text-text-primary">
-            {usePrincipalRetention.getState().authorityStreak}d
+            {authorityStreak}d
           </span>
         </div>
 
@@ -122,7 +123,7 @@ export function PrincipalSidebar({
             window.dispatchEvent(new CustomEvent("principal:open-focus-mode"));
             onNavigate?.();
           }}
-          className="surface-card flex w-full items-center gap-2 px-3 py-1.5 text-xs text-action-primary hover:bg-action-primary/10"
+          className="flex w-full items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-action-primary hover:bg-action-primary/10"
         >
           <Target className="size-3.5" />
           Focus mode
@@ -131,7 +132,7 @@ export function PrincipalSidebar({
         <Link
           href="/principal/profile"
           onClick={close}
-          className="surface-card flex items-center gap-2 px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
+          className="flex items-center rounded-lg bg-bg-elevated/60 gap-2 px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
         >
           Account settings
         </Link>

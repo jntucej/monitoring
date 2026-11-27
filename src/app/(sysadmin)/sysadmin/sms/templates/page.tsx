@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { SmsTemplates } from "@/components/admin/sms/SmsTemplates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Menu, X } from "lucide-react";
 import { RoleSidebar } from "./RoleSidebar";
 import { RoleNotificationBell } from "./RoleNotificationBell";
-import { RoleChrome } from "@/components/shared/RoleChrome";
+import { RoleSearchBar } from "@/components/shared/RoleSearchBar";
 import type { RoleManifest } from "./types";
 
 const AgentConsoleDrawer = dynamic(
@@ -33,6 +33,8 @@ export function RoleResponsiveShell({
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
@@ -45,7 +47,7 @@ export function RoleResponsiveShell({
   return (
     <div className="flex h-dvh flex-col lg:flex-row overflow-hidden bg-bg-base">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:block w-64 shrink-0 border">
+      <aside className="hidden lg:block w-64 shrink-0 border-r border-border">
         <RoleSidebar manifest={manifest} />
       </aside>
 
@@ -68,23 +70,20 @@ export function RoleResponsiveShell({
 
       {/* Single-mounted main content */}
       <div className="relative flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 pt-3 lg:px-6">
+          <div className="min-w-0 flex-1">
+            <RoleSearchBar role={manifest.role} />
+          </div>
+          <RoleNotificationBell className="shrink-0" />
+        </div>
         <main
           id="main-content"
           tabIndex={-1}
-          className="mx-auto w-full max-w-7xl px-4 py-4 pb-[max(4rem,env(safe-area-inset-bottom))] lg:px-6 lg:py-6 lg:pb-24"
+          className="mx-auto w-full max-w-7xl px-4 py-4 pb-[env(safe-area-inset-bottom)] lg:px-6 lg:py-6"
         >
           {children}
         </main>
-        {/* One bell instance; CSS places it per breakpoint (UX-010: was
-            dual-mounted, doubling polling + badge state). */}
-        <RoleNotificationBell className="fixed right-6 top-6 z-20 lg:right-6 lg:top-6" />
         <AgentConsoleDrawer role={manifest.role} />
-        <div className="hidden lg:block">
-          <RoleChrome role={manifest.role} variant="footer" />
-        </div>
-        <div className="lg:hidden">
-          <RoleChrome role={manifest.role} variant="mobile" />
-        </div>
       </div>
 
       {/* Mobile navigation drawer */}

@@ -9,6 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { IconRailGroup } from "@/components/shared/IconRail";
+import { Drawer as HeroDrawer } from "@/components/ui/HeroDrawerPrimitive";
 
 interface MobileGroupsDrawerProps {
   groups: IconRailGroup[];
@@ -59,16 +60,14 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
         />
       )}
 
-      {/* Drawer */}
-      <nav
-        aria-label="Mobile navigation drawer"
-        role="dialog"
-        aria-modal="true"
-        className={`md:hidden fixed inset-y-0 left-0 z-50 w70 max-w-[85vw] bg-bg-elevated border-r border-border shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
+      <HeroDrawer
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        placement="left"
+        className="w-[70%] max-w-[85vw] h-full bg-bg-elevated border-r border-border"
       >
-        {/* Drawer header */}
+        <div className="flex h-full flex-col">
+          {/* Drawer header */}
         <div className="surface-card flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <LayoutDashboard className="w-4 h-4 text-action-primary" />
@@ -135,8 +134,9 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
               </div>
             );
           })}
+          </div>
         </div>
-      </nav>
+      </HeroDrawer>
     </>
   );
 }

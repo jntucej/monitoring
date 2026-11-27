@@ -72,7 +72,7 @@ export function HodSidebar({
 
   return (
     <div className="flex h-full w-full flex-col bg-bg-surface">
-      <header className="surface-card shrink-0 px-4 py-3">
+      <header className="shrink-0 border-b border-border px-4 py-3">
         <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
           HOD
         </p>
@@ -104,9 +104,9 @@ export function HodSidebar({
         )}
       </nav>
 
-      <footer className="surface-card shrink-0 p-2 space-y-1">
+      <footer className="shrink-0 border-t border-border p-2 space-y-1">
         {/* Dual streak footer */}
-        <div className="surface-card flex items-center justify-between px-3 py-1.5 text-xs">
+        <div className="flex items-center rounded-lg bg-bg-elevated/60 justify-between px-3 py-1.5 text-xs">
           <span className="text-text-muted">Streaks</span>
           <StreakBadge compact />
         </div>
@@ -119,7 +119,7 @@ export function HodSidebar({
             window.dispatchEvent(new CustomEvent("hod:open-focus-mode"));
             onNavigate?.();
           }}
-          className="surface-card flex w-full items-center gap-2 px-3 py-1.5 text-xs text-action-primary hover:bg-action-primary/10"
+          className="flex w-full items-center rounded-lg gap-2 px-3 py-1.5 text-xs text-action-primary hover:bg-action-primary/10"
         >
           <Target className="size-3.5" />
           Focus mode
@@ -128,7 +128,7 @@ export function HodSidebar({
         <Link
           href="/hod/profile"
           onClick={close}
-          className="surface-card flex items-center gap-2 px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
+          className="flex items-center rounded-lg bg-bg-elevated/60 gap-2 px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
         >
           Account settings
         </Link>

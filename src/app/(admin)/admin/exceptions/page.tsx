@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo, useState, useCallback } from "react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { useApiResource } from "@/hooks/useApiResource";
 import {

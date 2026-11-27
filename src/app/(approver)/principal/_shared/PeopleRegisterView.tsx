@@ -121,8 +121,7 @@ export function PeopleRegisterView({ personParam }: { personParam: string | null
         </ul>
       )}
 
-      <EntityInspector inspection={inspection} onClose={() => { setActive(null); setPivot(null); }} />
-      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
+      <EntityInspector inspection={inspection} onClose={() => setActive(null)} />
     </div>
   );
 }

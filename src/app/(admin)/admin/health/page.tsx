@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Activity } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { WidgetLoading } from "@/components/admin/shared/LoadingStates";
+import { WidgetLoading } from "@/components/shared/LoadingStates";
 import { HealthDashboard } from "@/components/admin/HealthDashboard";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";

@@ -74,53 +74,25 @@ export function DepartmentsView() {
       ) : !d || (d.departments ?? []).length === 0 ? (
         <EmptyState title="No departments found" description="Department details are currently unavailable." />
       ) : (
-        <>
-          <ul className="space-y-2 md:hidden">
-            {(d?.departments ?? []).map((dept: VPAcademics["departments"][0]) => (
-              <li
-                key={dept.code}
-                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
-                onClick={() => inspectDept(dept)}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium">{dept.name}</p>
-                    <p className="text-xs text-text-muted">
-                      HOD: {dept.hodName ?? "—"}
-                    </p>
-                  </div>
-                  <AttendancePill pct={dept.attendancePct} />
-                </div>
-                <div className="mt-2 flex gap-3 text-xs text-text-secondary">
-                  <span>{dept.students} students</span>
-                  <span>{dept.faculty} faculty</span>
-                  <span>1:{dept.ratio}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:block">
-            <DataTable
-              columns={[
-                { header: "Department", accessor: (r: VPAcademics["departments"][0]) => r.name },
-                { header: "HOD", accessor: (r: VPAcademics["departments"][0]) => r.hodName ?? "—" },
-                { header: "Students", accessor: (r: VPAcademics["departments"][0]) => r.students },
-                { header: "Faculty", accessor: (r: VPAcademics["departments"][0]) => r.faculty },
-                { header: "Ratio", accessor: (r: VPAcademics["departments"][0]) => `1:${r.ratio}` },
-                {
-                  header: "Attendance",
-                  accessor: (r: VPAcademics["departments"][0]) => (
-                    <AttendancePill pct={r.attendancePct} />
-                  ),
-                },
-              ]}
-              data={d?.departments ?? []}
-              keyExtractor={(r: VPAcademics["departments"][0]) => r.code}
-              onRowClick={(r: VPAcademics["departments"][0]) => inspectDept(r)}
-            />
-          </div>
-        </>
+        <DataTable
+          mobileLayout="cards"
+          columns={[
+            { header: "Department", accessor: (r: VPAcademics["departments"][0]) => r.name },
+            { header: "HOD", accessor: (r: VPAcademics["departments"][0]) => r.hodName ?? "—" },
+            { header: "Students", accessor: (r: VPAcademics["departments"][0]) => r.students },
+            { header: "Faculty", accessor: (r: VPAcademics["departments"][0]) => r.faculty },
+            { header: "Ratio", accessor: (r: VPAcademics["departments"][0]) => `1:${r.ratio}` },
+            {
+              header: "Attendance",
+              accessor: (r: VPAcademics["departments"][0]) => (
+                <AttendancePill pct={r.attendancePct} />
+              ),
+            },
+          ]}
+          data={d?.departments ?? []}
+          keyExtractor={(r: VPAcademics["departments"][0]) => r.code}
+          onRowClick={(r: VPAcademics["departments"][0]) => inspectDept(r)}
+        />
       )}
 
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />

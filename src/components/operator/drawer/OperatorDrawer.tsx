@@ -127,7 +127,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
               onClick={onClose}
               aria-hidden="true"
             />
@@ -201,7 +201,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
     <aside
       className={cn(
         "hidden md:flex flex-col w-56 lg:w-64 h-full bg-bg-surface border-r border-border",
-        "fixed left-0 top-0 z-40"
+        "fixed left-0 top-0 z-20"
       )}
       role="navigation"
       aria-label="Operator navigation"

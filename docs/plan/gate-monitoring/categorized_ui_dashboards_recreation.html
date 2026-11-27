@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3 Categorized UI Dashboards — Interactive Recreation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .font-display {
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    }
+    /* Custom subtle scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(107, 114, 128, 0.6);
+    }
+    /* Smooth view transitions */
+    .fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-neutral-900 text-neutral-900 antialiased selection:bg-neutral-900 selection:text-white">
+
+  <!-- GLOBAL DESIGN SYSTEM SWITCHER BAR -->
+  <div class="sticky top-0 z-50 bg-neutral-950/95 backdrop-blur-md border-b border-neutral-800 px-3 sm:px-6 py-2.5 shadow-lg">
+    <div class="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white text-neutral-950 font-bold text-xs tracking-tight">UI</span>
+        <div>
+          <h1 class="text-white text-xs sm:text-sm font-semibold tracking-tight leading-none">Dashboard Systems Recreation</h1>
+          <p class="text-neutral-400 text-[11px] mt-0.5 hidden sm:block">Switch between the 3 categorized design systems</p>
+        </div>
+      </div>
+
+      <!-- 3 System Tabs -->
+      <div class="flex items-center bg-neutral-900 p-1 rounded-xl border border-neutral-800 w-full md:w-auto overflow-x-auto">
+        <button onclick="switchSystem(1)" id="sys-btn-1"
+          class="sys-tab flex-1 md:flex-none whitespace-nowrap px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all bg-white text-neutral-950 shadow-sm">
+          1. Teacher Ops (Minimalist B&W)
+        </button>
+        <button onclick="switchSystem(2)" id="sys-btn-2"
+          class="sys-tab flex-1 md:flex-none whitespace-nowrap px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-neutral-400 hover:text-white">
+          2. School Admin ERP (Pastel)
+        </button>
+        <button onclick="switchSystem(3)" id="sys-btn-3"
+          class="sys-tab flex-1 md:flex-none whitespace-nowrap px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-neutral-400 hover:text-white">
+          3. AI Command Center (DevOps)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- DASHBOARD 1: TEACHER / CLASSROOM OPERATIONS (MAHAM / TEACHERLY B&W)   -->
+  <!-- ===================================================================== -->
+  <section id="dashboard-1" class="min-h-[calc(100vh-56px)] bg-[#F5F6F7] p-2 sm:p-4 lg:p-6 fade-in">
+    <div class="max-w-[1540px] mx-auto bg-white rounded-3xl shadow-sm border border-neutral-200/80 overflow-hidden flex flex-col lg:flex-row min-h-[840px]">
+      
+      <!-- Left Sidebar -->
+      <aside class="w-full lg:w-64 bg-[#FAFAFB] border-b lg:border-b-0 lg:border-r border-neutral-200/80 p-4 flex flex-col justify-between shrink-0">
+        <div>
+          <!-- Brand Header -->
+          <div class="flex items-center justify-between px-2 mb-6">
+            <div class="flex items-center gap-2.5">
+              <!-- Hexagon Logo -->
+              <div class="w-8 h-8 rounded-xl bg-[#111111] flex items-center justify-center text-white shadow-sm">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" />
+                </svg>
+              </div>
+              <span class="font-display font-bold text-sm tracking-tight text-neutral-900">MAHAM</span>
+            </div>
+            <button class="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18"/></svg>
+            </button>
+          </div>
+
+          <!-- Main Menu -->
+          <div class="text-[11px] font-medium text-neutral-400 px-3 mb-2">Main menu</div>
+          <nav class="space-y-1">
+            <button onclick="switchD1Tab('attendance')" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <span class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                Overview
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-neutral-200/70 text-neutral-500">⌘ M</span>
+            </button>
+
+            <button onclick="switchD1Tab('attendance')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+              Class Preparation
+            </button>
+
+            <button onclick="switchD1Tab('attendance')" id="d1-nav-attendance" class="d1-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold bg-white text-neutral-900 shadow-sm border border-neutral-200/80 transition">
+              <svg class="w-4 h-4 text-neutral-900" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              Attendance
+            </button>
+
+            <button onclick="switchD1Tab('schedule')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              Exams
+            </button>
+
+            <button onclick="switchD1Tab('students')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+              Assignment management
+            </button>
+
+            <button onclick="switchD1Tab('schedule')" id="d1-nav-schedule" class="d1-nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              Schedule
+            </button>
+
+            <button onclick="switchD1Tab('students')" id="d1-nav-students" class="d1-nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+              Students
+            </button>
+
+            <button class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <span class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+                Messages
+              </span>
+              <span class="w-4 h-4 rounded-full bg-[#111111] text-white text-[10px] font-bold flex items-center justify-center">2</span>
+            </button>
+
+            <button onclick="switchD1Tab('students')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>
+              Analytics
+            </button>
+
+            <button class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+              Reports
+            </button>
+          </nav>
+
+          <!-- Settings and news -->
+          <div class="text-[11px] font-medium text-neutral-400 px-3 mt-6 mb-2">Settings and news</div>
+          <nav class="space-y-1">
+            <button class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/></svg>
+              School News
+            </button>
+            <button class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+              School Activities
+            </button>
+            <button class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              What's New
+            </button>
+          </nav>
+        </div>
+
+        <!-- Bottom Profile & Settings -->
+        <div class="pt-4 mt-4 border-t border-neutral-200/70 space-y-3">
+          <button class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-200/50 transition">
+            <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Settings
+          </button>
+          <div class="px-2">
+            <div class="text-[10px] text-neutral-400 mb-1.5">Account</div>
+            <div class="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-neutral-200/80">
+              <img src="https://placehold.co/64x64/18181b/ffffff?text=AB" alt="Amirbaqian" class="w-8 h-8 rounded-full object-cover">
+              <div class="min-w-0">
+                <div class="text-xs font-semibold text-neutral-900 truncate">Amirbaqian</div>
+                <div class="text-[11px] text-neutral-400">Teacher</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Workspace -->
+      <main class="flex-1 flex flex-col min-w-0 bg-white">
+        <!-- Top Breadcrumb & Sub-View Switcher Bar -->
+        <header class="px-5 py-3.5 border-b border-neutral-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-xs text-neutral-400">
+            <span>Maham</span>
+            <span>›</span>
+            <span id="d1-breadcrumb" class="text-neutral-800 font-medium flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-neutral-900"></span> Attendance
+            </span>
+          </div>
+
+          <!-- Sub-view Pills (recreating the 6 screens in this design system) -->
+          <div class="flex items-center gap-1.5 bg-neutral-100 p-1 rounded-xl">
+            <button onclick="switchD1Tab('attendance')" id="d1-sub-attendance"
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#111111] text-white transition">
+              Attendance Board
+            </button>
+            <button onclick="switchD1Tab('students')" id="d1-sub-students"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 transition">
+              Student Analytics
+            </button>
+            <button onclick="switchD1Tab('schedule')" id="d1-sub-schedule"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 transition">
+              Weekly Schedule
+            </button>
+          </div>
+        </header>
+
+        <!-- =============================================================== -->
+        <!-- SUB-VIEW 1A: ATTENDANCE KANBAN & BARCODE RATIO VIEW             -->
+        <!-- =============================================================== -->
+        <div id="d1-view-attendance" class="p-5 sm:p-6 flex-1 grid grid-cols-1 xl:grid-cols-12 gap-6 fade-in">
+          <!-- Left Column: Calendar & Barcode Progress -->
+          <div class="xl:col-span-5 flex flex-col justify-between space-y-5 border-b xl:border-b-0 xl:border-r border-neutral-100 pb-6 xl:pb-0 xl:pr-6">
+            <div>
+              <h2 class="font-display text-xl font-bold text-neutral-900">Attendance</h2>
+              <p class="text-xs text-neutral-400 mt-1">On the attendance page, you can easily track student attendance and monitor absences.</p>
+
+              <!-- Calendar Header -->
+              <div class="flex items-center justify-between mt-6 mb-4">
+                <div class="flex items-center gap-2">
+                  <button class="w-7 h-7 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-500 hover:bg-neutral-50">‹</button>
+                  <span class="text-xs font-semibold text-neutral-900 px-2">February</span>
+                  <button class="w-7 h-7 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-500 hover:bg-neutral-50">›</button>
+                </div>
+                <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-700 hover:bg-neutral-50">
+                  <span>Filter</span>
+                  <span class="w-4 h-4 rounded-full bg-neutral-900 text-white text-[10px] flex items-center justify-center">1</span>
+                </button>
+              </div>
+
+              <!-- Interactive February Calendar Grid -->
+              <div class="bg-[#FAFAFB] rounded-2xl p-4 border border-neutral-100">
+                <div class="grid grid-cols-7 text-center text-[11px] font-medium text-neutral-400 mb-3">
+                  <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+                </div>
+                <div id="d1-calendar-grid" class="grid grid-cols-7 gap-y-2 text-center text-xs">
+                  <!-- Populated via JS for interactive day clicking -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Barcode Ratio Progress Cards -->
+            <div class="space-y-3">
+              <!-- Green Attendance Barcode Card -->
+              <div class="p-3.5 rounded-2xl bg-[#F4FBF7] border border-emerald-100 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <span class="w-8 h-8 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm font-bold text-xs">✓</span>
+                  <div>
+                    <div id="d1-att-count" class="text-sm font-bold text-neutral-900">23/24</div>
+                    <div class="text-[11px] text-neutral-500">Attendance</div>
+                  </div>
+                </div>
+                <!-- Barcode visualization -->
+                <div class="flex items-center gap-[2px] h-7" id="barcode-green"></div>
+              </div>
+
+              <!-- Orange Absences Barcode Card -->
+              <div class="p-3.5 rounded-2xl bg-[#FDF6F3] border border-orange-100 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <span class="w-8 h-8 rounded-full bg-white text-orange-600 flex items-center justify-center shadow-sm font-bold text-xs">✕</span>
+                  <div>
+                    <div id="d1-abs-count" class="text-sm font-bold text-neutral-900">1/24</div>
+                    <div class="text-[11px] text-neutral-500">Absences</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-[2px] h-7" id="barcode-orange"></div>
+              </div>
+
+              <!-- Purple Delayed Barcode Card -->
+              <div class="p-3.5 rounded-2xl bg-[#F6F5FD] border border-indigo-100 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <span class="w-8 h-8 rounded-full bg-white text-indigo-600 flex items-center justify-center shadow-sm font-bold text-xs">◔</span>
+                  <div>
+                    <div id="d1-del-count" class="text-sm font-bold text-neutral-900">1/24</div>
+                    <div class="text-[11px] text-neutral-500">Delayed</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-[2px] h-7" id="barcode-purple"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Class Filter & 3-Column Student Kanban -->
+          <div class="xl:col-span-7 flex flex-col">
+            <!-- Class Filter Pills -->
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <span class="text-xs font-medium text-neutral-400">Click any student card to cycle status</span>
+              <div class="flex items-center gap-1.5">
+                <button onclick="setD1Class('Class 302')" id="btn-class-302" class="d1-class-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#111111] text-white transition">
+                  ● Class 302
+                </button>
+                <button onclick="setD1Class('Class 303')" id="btn-class-303" class="d1-class-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition">
+                  Class 303
+                </button>
+                <button onclick="setD1Class('Class 304')" id="btn-class-304" class="d1-class-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition">
+                  Class 304
+                </button>
+              </div>
+            </div>
+
+            <!-- 3-Column Kanban Board -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 flex-1">
+              <!-- Column 1: Attendance -->
+              <div class="bg-[#FAFAFB] rounded-2xl p-3 border border-neutral-100 flex flex-col">
+                <div class="flex items-center justify-between mb-3 px-1">
+                  <span class="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+                    <span>✓</span> Attendance
+                  </span>
+                  <span id="col-count-present" class="w-5 h-5 rounded-full bg-neutral-900 text-white text-[10px] font-bold flex items-center justify-center">12</span>
+                </div>
+                <div id="kanban-present" class="space-y-2 overflow-y-auto max-h-[540px] pr-0.5"></div>
+              </div>
+
+              <!-- Column 2: Absences -->
+              <div class="bg-[#FAFAFB] rounded-2xl p-3 border border-neutral-100 flex flex-col">
+                <div class="flex items-center justify-between mb-3 px-1">
+                  <span class="text-xs font-semibold text-orange-700 flex items-center gap-1.5">
+                    <span>✕</span> Absences
+                  </span>
+                  <span id="col-count-absent" class="w-5 h-5 rounded-full bg-neutral-900 text-white text-[10px] font-bold flex items-center justify-center">4</span>
+                </div>
+                <div id="kanban-absent" class="space-y-2 overflow-y-auto max-h-[540px] pr-0.5"></div>
+              </div>
+
+              <!-- Column 3: Delayed -->
+              <div class="bg-[#FAFAFB] rounded-2xl p-3 border border-neutral-100 flex flex-col">
+                <div class="flex items-center justify-between mb-3 px-1">
+                  <span class="text-xs font-semibold text-indigo-700 flex items-center gap-1.5">
+                    <span>◔</span> Delayed
+                  </span>
+                  <span id="col-count-delayed" class="w-5 h-5 rounded-full bg-neutral-900 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+                </div>
+                <div id="kanban-delayed" class="space-y-2 overflow-y-auto max-h-[540px] pr-0.5"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =============================================================== -->
+        <!-- SUB-VIEW 1B: STUDENT PROFILE, ANALYTICS & PICKER MODAL          -->
+        <!-- =============================================================== -->
+        <div id="d1-view-students" class="hidden p-5 sm:p-6 flex-1 space-y-6 fade-in">
+          <!-- Student Header + Select Student Modal Trigger -->
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <img src="https://placehold.co/80x80/111111/ffffff?text=AJ" alt="Student" class="w-11 h-11 rounded-full object-cover border border-neutral-200">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 id="selected-student-name" class="font-display text-lg font-bold text-neutral-900">Amirhossein Jahangir</h2>
+                  <button onclick="toggleStudentModal(true)" class="px-2.5 py-1 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-xs font-medium text-neutral-700 transition">
+                    Switch Student ▾
+                  </button>
+                </div>
+                <p class="text-xs text-neutral-400">Here's a look at your student performance and analytics.</p>
+              </div>
+            </div>
+
+            <button onclick="toggleStudentModal(true)" class="px-4 py-2 rounded-xl bg-[#111111] text-white text-xs font-semibold hover:bg-neutral-800 transition shadow-sm">
+              Select Student Modal
+            </button>
+          </div>
+
+          <!-- 3 Top Metric Cards (Growth, Exams, Activity) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Growth -->
+            <div class="p-4 rounded-2xl border border-neutral-200/80 bg-[#FAFAFB] flex items-center justify-between">
+              <div>
+                <div class="text-xs font-medium text-indigo-600 mb-2">↗ Growth</div>
+                <div class="text-2xl font-bold text-neutral-900">+10%</div>
+                <div class="text-[11px] text-neutral-400 mt-0.5">Students in total</div>
+              </div>
+              <svg class="w-24 h-12" viewBox="0 0 100 45">
+                <defs>
+                  <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#818cf8" stop-opacity="0.45"/>
+                    <stop offset="100%" stop-color="#818cf8" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,38 Q25,35 45,25 T100,8 L100,45 L0,45 Z" fill="url(#purpleGrad)"/>
+                <path d="M0,38 Q25,35 45,25 T100,8" fill="none" stroke="#6366f1" stroke-width="2.5"/>
+              </svg>
+            </div>
+
+            <!-- Exams -->
+            <div class="p-4 rounded-2xl border border-neutral-200/80 bg-[#FAFAFB] flex items-center justify-between">
+              <div>
+                <div class="text-xs font-medium text-sky-600 mb-2">▣ Exams</div>
+                <div class="text-2xl font-bold text-neutral-900">19.32</div>
+                <div class="text-[11px] text-neutral-400 mt-0.5">Average score</div>
+              </div>
+              <div class="flex items-end gap-1.5 h-12">
+                <span class="w-2 h-6 rounded-full bg-sky-200"></span>
+                <span class="w-2 h-9 rounded-full bg-sky-400"></span>
+                <span class="w-2 h-5 rounded-full bg-sky-200"></span>
+                <span class="w-2 h-11 rounded-full bg-sky-500"></span>
+                <span class="w-2 h-8 rounded-full bg-sky-300"></span>
+              </div>
+            </div>
+
+            <!-- Activity -->
+            <div class="p-4 rounded-2xl border border-neutral-200/80 bg-[#FAFAFB]">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-medium text-emerald-600">⚡ Activity</span>
+                <span class="text-[11px] text-neutral-400">Check Status</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-white p-2 rounded-xl border border-neutral-100">
+                  <div class="text-base font-bold text-neutral-900">8</div>
+                  <div class="text-[10px] text-emerald-600 font-medium">● Present</div>
+                </div>
+                <div class="bg-white p-2 rounded-xl border border-neutral-100">
+                  <div class="text-base font-bold text-neutral-900">3</div>
+                  <div class="text-[10px] text-orange-600 font-medium">● Absent</div>
+                </div>
+                <div class="bg-white p-2 rounded-xl border border-neutral-100">
+                  <div class="text-base font-bold text-neutral-900">12</div>
+                  <div class="text-[10px] text-indigo-600 font-medium">● Events</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Assignment Status Pills -->
+          <div>
+            <div class="text-xs font-semibold text-neutral-800 mb-2.5">Assignments</div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="p-3 rounded-2xl bg-[#F6F5FD] border border-indigo-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">◔</span>
+                  <div>
+                    <div class="text-xs font-bold text-neutral-900">23/32</div>
+                    <div class="text-[10px] text-neutral-500">Not checked</div>
+                  </div>
+                </div>
+                <span class="text-neutral-400 text-xs">›</span>
+              </div>
+              <div class="p-3 rounded-2xl bg-[#FDF6F3] border border-orange-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-full bg-white text-orange-600 flex items-center justify-center text-xs font-bold">↻</span>
+                  <div>
+                    <div class="text-xs font-bold text-neutral-900">23/32</div>
+                    <div class="text-[10px] text-neutral-500">Not delivered</div>
+                  </div>
+                </div>
+                <span class="text-neutral-400 text-xs">›</span>
+              </div>
+              <div class="p-3 rounded-2xl bg-[#FEF9EC] border border-amber-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-full bg-white text-amber-600 flex items-center justify-center text-xs font-bold">✕</span>
+                  <div>
+                    <div class="text-xs font-bold text-neutral-900">23/32</div>
+                    <div class="text-[10px] text-neutral-500">Not completed</div>
+                  </div>
+                </div>
+                <span class="text-neutral-400 text-xs">›</span>
+              </div>
+              <div class="p-3 rounded-2xl bg-[#F4FBF7] border border-emerald-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xs font-bold">✓</span>
+                  <div>
+                    <div class="text-xs font-bold text-neutral-900">23/32</div>
+                    <div class="text-[10px] text-neutral-500">Completed</div>
+                  </div>
+                </div>
+                <span class="text-neutral-400 text-xs">›</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Last Assignments Table -->
+          <div class="border border-neutral-200/80 rounded-2xl overflow-hidden">
+            <div class="px-4 py-3 bg-[#FAFAFB] border-b border-neutral-200/80 flex items-center justify-between">
+              <span class="text-xs font-semibold text-neutral-900">Last assignments</span>
+              <span class="text-[11px] text-neutral-400">Updated live</span>
+            </div>
+            <div class="divide-y divide-neutral-100 text-xs">
+              <div class="px-4 py-3 flex items-center justify-between hover:bg-neutral-50">
+                <span class="font-medium text-neutral-800">Equations & Expressions — Page 32</span>
+                <span class="text-neutral-400 hidden sm:inline">12 hours ago</span>
+                <span class="px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 font-medium text-[11px]">● Not delivered</span>
+              </div>
+              <div class="px-4 py-3 flex items-center justify-between hover:bg-neutral-50">
+                <span class="font-medium text-neutral-800">Algebra Practice — Page 40</span>
+                <span class="text-neutral-400 hidden sm:inline">23 hours ago</span>
+                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 font-medium text-[11px]">● Complete</span>
+              </div>
+              <div class="px-4 py-3 flex items-center justify-between hover:bg-neutral-50">
+                <span class="font-medium text-neutral-800">Geometry Exercises — Page 21</span>
+                <span class="text-neutral-400 hidden sm:inline">2 days ago</span>
+                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 font-medium text-[11px]">● Complete</span>
+              </div>
+              <div class="px-4 py-3 flex items-center justify-between hover:bg-neutral-50">
+                <span class="font-medium text-neutral-800">Problem Solving — Page 62</span>
+                <span class="text-neutral-400 hidden sm:inline">5 days ago</span>
+                <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 font-medium text-[11px]">● Not Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =============================================================== -->
+        <!-- SUB-VIEW 1C: WEEKLY SCHEDULE TIMETABLE                          -->
+        <!-- =============================================================== -->
+        <div id="d1-view-schedule" class="hidden p-5 sm:p-6 flex-1 space-y-5 fade-in">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <h2 class="font-display text-lg font-bold text-neutral-900">01–07 January 2025</h2>
+              <div class="hidden sm:flex items-center gap-1.5">
+                <span class="px-2.5 py-1 rounded-full bg-neutral-900 text-white text-[11px] font-medium">● All</span>
+                <span class="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-[11px] font-medium">Math</span>
+                <span class="px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 text-[11px] font-medium">Art</span>
+                <span class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-medium">Physics</span>
+                <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-medium">Sport</span>
+              </div>
+            </div>
+            <button class="px-3.5 py-1.5 rounded-xl bg-[#111111] text-white text-xs font-semibold hover:bg-neutral-800 transition">
+              + Add Event
+            </button>
+          </div>
+
+          <!-- Responsive Timetable Grid -->
+          <div class="overflow-x-auto border border-neutral-200/80 rounded-2xl">
+            <div class="min-w-[760px] grid grid-cols-8 bg-[#FAFAFB] border-b border-neutral-200/80 text-xs font-medium text-neutral-500">
+              <div class="p-3 text-center">Time</div>
+              <div class="p-3 text-center border-l border-neutral-100">1 · Mon</div>
+              <div class="p-3 text-center border-l border-neutral-100 bg-neutral-900 text-white font-semibold">2 · Tue</div>
+              <div class="p-3 text-center border-l border-neutral-100">3 · Wed</div>
+              <div class="p-3 text-center border-l border-neutral-100">4 · Thu</div>
+              <div class="p-3 text-center border-l border-neutral-100">5 · Fri</div>
+              <div class="p-3 text-center border-l border-neutral-100">6 · Sat</div>
+              <div class="p-3 text-center border-l border-neutral-100">7 · Sun</div>
+            </div>
+
+            <!-- Timetable Rows -->
+            <div class="min-w-[760px] divide-y divide-neutral-100 text-xs bg-white">
+              <!-- 07:00 -->
+              <div class="grid grid-cols-8 min-h-[76px]">
+                <div class="p-3 text-neutral-400 text-center">07:00</div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5">
+                  <div class="p-2 rounded-xl bg-purple-100/80 border border-purple-200 text-purple-900">
+                    <div class="font-semibold">Math Exam</div>
+                    <div class="text-[10px] opacity-75">7:00am - 7:45am</div>
+                  </div>
+                </div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+              </div>
+
+              <!-- 08:00 -->
+              <div class="grid grid-cols-8 min-h-[76px]">
+                <div class="p-3 text-neutral-400 text-center">08:00</div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5">
+                  <div class="p-2 rounded-xl bg-sky-100/80 border border-sky-200 text-sky-900">
+                    <div class="font-semibold">Art Exam</div>
+                    <div class="text-[10px] opacity-75">7:30am - 9:00am</div>
+                  </div>
+                </div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5">
+                  <div class="p-2 rounded-xl bg-indigo-100/80 border border-indigo-200 text-indigo-900">
+                    <div class="font-semibold">Physics Exam</div>
+                    <div class="text-[10px] opacity-75">10:00am - 10:45am</div>
+                  </div>
+                </div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+              </div>
+
+              <!-- 09:00 -->
+              <div class="grid grid-cols-8 min-h-[76px]">
+                <div class="p-3 text-neutral-400 text-center">09:00</div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5">
+                  <div class="p-2 rounded-xl bg-purple-100/80 border border-purple-200 text-purple-900">
+                    <div class="font-semibold">Math Exam</div>
+                    <div class="text-[10px] opacity-75">9:00am - 9:45am</div>
+                  </div>
+                </div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5">
+                  <div class="p-2 rounded-xl bg-rose-100/80 border border-rose-200 text-rose-900">
+                    <div class="font-semibold">Sport Exam</div>
+                    <div class="text-[10px] opacity-75">Confirmed</div>
+                  </div>
+                </div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+              </div>
+
+              <!-- 10:00 -->
+              <div class="grid grid-cols-8 min-h-[76px]">
+                <div class="p-3 text-neutral-400 text-center">10:00</div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5">
+                  <div class="p-2 rounded-xl bg-amber-100/80 border border-amber-200 text-amber-900">
+                    <div class="font-semibold">Sport Exam</div>
+                    <div class="text-[10px] opacity-75">Confirmed</div>
+                  </div>
+                </div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5">
+                  <div class="p-2 rounded-xl bg-emerald-100/80 border border-emerald-200 text-emerald-900">
+                    <div class="font-semibold">Computer Exam</div>
+                    <div class="text-[10px] opacity-75">Confirmed</div>
+                  </div>
+                </div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+                <div class="border-l border-neutral-100 p-1.5"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- SELECT STUDENT POPUP MODAL (Image 8 recreation) -->
+    <div id="student-picker-modal" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-neutral-200 fade-in">
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="font-display font-bold text-base text-neutral-900">Select Student</h3>
+          <button onclick="toggleStudentModal(false)" class="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-xs">✕</button>
+        </div>
+        <p class="text-xs text-neutral-400 mb-4">You can select another student here</p>
+
+        <div class="space-y-2 max-h-64 overflow-y-auto pr-1 mb-4">
+          <button onclick="selectStudent('Amir Baghian')" class="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-50 border border-neutral-100 text-left">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center">AB</span>
+              <div>
+                <div class="text-xs font-semibold text-neutral-900">Amir Baghian</div>
+                <div class="text-[10px] text-neutral-400">Class 302 · Weak student</div>
+              </div>
+            </div>
+          </button>
+          <button onclick="selectStudent('Amirhossein Jahangir')" class="w-full flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-900 text-left">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center">AJ</span>
+              <div>
+                <div class="text-xs font-semibold text-neutral-900">Amirhossein Jahangir</div>
+                <div class="text-[10px] text-neutral-400">Class 302 · Active</div>
+              </div>
+            </div>
+            <span class="w-5 h-5 rounded-full bg-neutral-900 text-white text-[10px] flex items-center justify-center">✓</span>
+          </button>
+          <button onclick="selectStudent('Mojtaba Roohparvar')" class="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-50 border border-neutral-100 text-left">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 font-bold text-xs flex items-center justify-center">MR</span>
+              <div>
+                <div class="text-xs font-semibold text-neutral-900">Mojtaba Roohparvar</div>
+                <div class="text-[10px] text-neutral-400">Class 302 · Weak student</div>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <button onclick="toggleStudentModal(false)" class="w-full py-2.5 rounded-xl bg-[#111111] text-white text-xs font-semibold hover:bg-neutral-800 transition">
+          Select
+        </button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===================================================================== -->
+  <!-- DASHBOARD 2: SCHOOL ADMIN ERP ANALYTICS (SCHOLA / IS ACADEMY PASTEL)  -->
+  <!-- ===================================================================== -->
+  <section id="dashboard-2" class="hidden min-h-[calc(100vh-56px)] bg-[#F8F7FC] p-2 sm:p-4 lg:p-6 fade-in">
+    <div class="max-w-[1540px] mx-auto bg-white rounded-3xl shadow-sm border border-purple-100 overflow-hidden flex flex-col lg:flex-row min-h-[840px]">
+
+      <!-- Left Sidebar (Schola) -->
+      <aside class="w-full lg:w-60 bg-white border-b lg:border-b-0 lg:border-r border-purple-100/80 p-4 flex flex-col justify-between shrink-0">
+        <div>
+          <!-- Schola Logo -->
+          <div class="flex items-center gap-2.5 px-2 mb-6">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-pink-400 to-indigo-900 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+              S
+            </div>
+            <span class="font-display font-bold text-base text-[#1E1B4B]">Schola</span>
+          </div>
+
+          <!-- Nav Links -->
+          <nav class="space-y-1">
+            <button class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-pink-100/80 text-[#1E1B4B] transition">
+              <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+              Dashboard
+            </button>
+            <button class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:bg-purple-50/70 transition">
+              <span>✉</span> Inbox
+            </button>
+            <button class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:bg-purple-50/70 transition">
+              <span>📅</span> Calendar
+            </button>
+            <button class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:bg-purple-50/70 transition">
+              <span>👩‍🏫</span> Teachers
+            </button>
+            <button class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:bg-purple-50/70 transition">
+              <span>🎓</span> Students
+            </button>
+            <button class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:bg-purple-50/70 transition">
+              <span>🕒</span> Attendance
+            </button>
+            <button class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:bg-purple-50/70 transition">
+              <span>💳</span> Finance
+            </button>
+            <button class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:bg-purple-50/70 transition">
+              <span>📌</span> Notice Board
+            </button>
+          </nav>
+        </div>
+
+        <!-- Megaphone Promo Card & Logout -->
+        <div class="mt-6 space-y-3">
+          <div class="p-4 rounded-2xl bg-gradient-to-b from-sky-50 to-purple-50 border border-purple-100 text-center">
+            <div class="w-10 h-10 mx-auto mb-2 rounded-2xl bg-white shadow-sm flex items-center justify-center text-lg">
+              📣
+            </div>
+            <div class="text-xs font-bold text-[#1E1B4B]">New Tools Available</div>
+            <p class="text-[10px] text-slate-500 mt-1 mb-3">Enhanced analytics for school management.</p>
+            <button class="w-full py-1.5 rounded-xl bg-pink-200/80 hover:bg-pink-300/80 text-[#1E1B4B] font-semibold text-[11px] transition">
+              See Updates
+            </button>
+          </div>
+          <button class="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-400 hover:text-slate-700">
+            <span>↪</span> Logout
+          </button>
+        </div>
+      </aside>
+
+      <!-- Center & Right 3-Column ERP Workspace -->
+      <div class="flex-1 flex flex-col xl:flex-row min-w-0 bg-[#F8F7FC]">
+        
+        <!-- Center Main Content (2 Columns wide) -->
+        <div class="flex-1 p-5 sm:p-6 space-y-5 min-w-0">
+          <!-- Top Search & Admin Header -->
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="font-display text-lg font-bold text-[#1E1B4B]">Admin Dashboard</h2>
+              <p class="text-xs text-slate-400">Data-Driven Institutional Insights</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <input type="text" placeholder="Search anything..." class="px-3.5 py-1.5 rounded-full bg-white border border-purple-100 text-xs focus:outline-none focus:border-purple-300 w-44 sm:w-56">
+              <div class="flex items-center gap-2 bg-white px-2.5 py-1 rounded-full border border-purple-100">
+                <img src="https://placehold.co/64x64/1e1b4b/ffffff?text=OH" alt="Admin" class="w-6 h-6 rounded-full">
+                <span class="text-xs font-semibold text-[#1E1B4B] hidden sm:inline">Oscar Hanson</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top 4 Pastel KPI Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div class="bg-white p-4 rounded-2xl border border-purple-100/70 shadow-sm flex items-center justify-between">
+              <div>
+                <div class="text-[11px] text-slate-400 font-medium">Enrolled Students</div>
+                <div class="text-lg font-bold text-[#1E1B4B] mt-0.5">15,000</div>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-sm">🎓</div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-purple-100/70 shadow-sm flex items-center justify-between">
+              <div>
+                <div class="text-[11px] text-slate-400 font-medium">Active Teachers</div>
+                <div class="text-lg font-bold text-[#1E1B4B] mt-0.5">2,000</div>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center text-sm">👩‍🏫</div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-purple-100/70 shadow-sm flex items-center justify-between">
+              <div>
+                <div class="text-[11px] text-slate-400 font-medium">Parents & Staff</div>
+                <div class="text-lg font-bold text-[#1E1B4B] mt-0.5">5.6K</div>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-sm">👪</div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-purple-100/70 shadow-sm flex items-center justify-between">
+              <div>
+                <div class="text-[11px] text-slate-400 font-medium">Total Earnings</div>
+                <div class="text-lg font-bold text-[#1E1B4B] mt-0.5">$19.3K</div>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm">💰</div>
+            </div>
+          </div>
+
+          <!-- Charts Row 1: Dual-Tone Vertical Bar Chart + Earnings Area Chart -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Dual-Tone Bar Chart -->
+            <div class="bg-white p-4 rounded-2xl border border-purple-100/70 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="text-xs font-bold text-[#1E1B4B]">All Exam Result & Performance</h3>
+                  <div class="flex items-center gap-3 mt-1 text-[10px] text-slate-400">
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#1E1B4B]"></span> Grade 8</span>
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-300"></span> Grade 9</span>
+                  </div>
+                </div>
+                <select onchange="updateD2BarChart(this.value)" class="text-[11px] bg-purple-50 text-[#1E1B4B] font-medium px-2.5 py-1 rounded-lg border border-purple-100 focus:outline-none">
+                  <option value="sem1">Last Semester</option>
+                  <option value="sem2">Current Term</option>
+                </select>
+              </div>
+              <div id="d2-bar-chart" class="h-40 flex items-end justify-between gap-2 pt-4 px-1">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <!-- Earnings vs Expenses Smooth Area Chart -->
+            <div class="bg-white p-4 rounded-2xl border border-purple-100/70 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="text-xs font-bold text-[#1E1B4B]">Earnings vs Expenses</h3>
+                  <div class="flex items-center gap-3 mt-1 text-[10px] text-slate-400">
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span> Earnings ($30K)</span>
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-400"></span> Expenses ($16K)</span>
+                  </div>
+                </div>
+                <span class="text-[11px] bg-purple-50 text-[#1E1B4B] font-medium px-2.5 py-1 rounded-lg">Last Year</span>
+              </div>
+              <svg class="w-full h-40" viewBox="0 0 320 120" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="earnGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+                  </linearGradient>
+                  <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f472b6" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#f472b6" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <!-- Grid lines -->
+                <line x1="0" y1="30" x2="320" y2="30" stroke="#f1f5f9" stroke-width="1"/>
+                <line x1="0" y1="60" x2="320" y2="60" stroke="#f1f5f9" stroke-width="1"/>
+                <line x1="0" y1="90" x2="320" y2="90" stroke="#f1f5f9" stroke-width="1"/>
+                <!-- Earnings Path -->
+                <path d="M0,85 C40,70 70,35 110,45 C150,55 180,20 220,30 C260,40 290,15 320,22 L320,120 L0,120 Z" fill="url(#earnGrad)"/>
+                <path d="M0,85 C40,70 70,35 110,45 C150,55 180,20 220,30 C260,40 290,15 320,22" fill="none" stroke="#0284c7" stroke-width="2.5"/>
+                <!-- Expenses Path -->
+                <path d="M0,98 C50,90 80,75 120,80 C160,85 200,55 240,68 C280,78 300,60 320,65 L320,120 L0,120 Z" fill="url(#expGrad)"/>
+                <path d="M0,98 C50,90 80,75 120,80 C160,85 200,55 240,68 C280,78 300,60 320,65" fill="none" stroke="#ec4899" stroke-width="2.5"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bottom Row: Donut Chart + Star Students / Notice Board Table -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <!-- Students by Gender Donut Chart -->
+            <div class="lg:col-span-4 bg-white p-4 rounded-2xl border border-purple-100/70 shadow-sm flex flex-col items-center justify-between">
+              <div class="w-full flex items-center justify-between">
+                <h3 class="text-xs font-bold text-[#1E1B4B]">Students by Gender</h3>
+                <span class="text-[10px] px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-medium">2025</span>
+              </div>
+              <div class="relative w-32 h-32 my-2 flex items-center justify-center">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#f9a8d4" stroke-width="4.2"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#1E1B4B" stroke-width="4.2" stroke-dasharray="52 100" stroke-linecap="round"/>
+                </svg>
+                <div class="absolute text-center">
+                  <div class="text-sm font-bold text-[#1E1B4B]">15,000</div>
+                  <div class="text-[9px] text-slate-400">Total</div>
+                </div>
+              </div>
+              <div class="w-full flex justify-around text-[11px] pt-1 border-t border-slate-100">
+                <span class="flex items-center gap-1.5 font-medium text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-[#1E1B4B]"></span> Boys (52%)</span>
+                <span class="flex items-center gap-1.5 font-medium text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-pink-300"></span> Girls (48%)</span>
+              </div>
+            </div>
+
+            <!-- Star Students & Notice Board Table -->
+            <div class="lg:col-span-8 bg-white p-4 rounded-2xl border border-purple-100/70 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-bold text-[#1E1B4B]">Star Students & Notice Board</h3>
+                <span class="text-[11px] text-purple-600 font-semibold cursor-pointer hover:underline">View All</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                  <thead>
+                    <tr class="text-[11px] text-slate-400 border-b border-slate-100">
+                      <th class="pb-2 font-medium">Student Name</th>
+                      <th class="pb-2 font-medium">ID</th>
+                      <th class="pb-2 font-medium">Marks</th>
+                      <th class="pb-2 font-medium">Percent</th>
+                      <th class="pb-2 font-medium">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    <tr class="hover:bg-purple-50/40">
+                      <td class="py-2.5 font-semibold text-[#1E1B4B] flex items-center gap-2">
+                        <img src="https://placehold.co/48x48/7c3aed/ffffff?text=EH" class="w-6 h-6 rounded-full" alt="">
+                        Evelyn Harper
+                      </td>
+                      <td class="py-2.5 text-slate-500">PRE43178</td>
+                      <td class="py-2.5 font-medium text-slate-700">1185</td>
+                      <td class="py-2.5 font-bold text-purple-700">98%</td>
+                      <td class="py-2.5"><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-semibold">Honor Roll</span></td>
+                    </tr>
+                    <tr class="hover:bg-purple-50/40">
+                      <td class="py-2.5 font-semibold text-[#1E1B4B] flex items-center gap-2">
+                        <img src="https://placehold.co/48x48/ec4899/ffffff?text=DP" class="w-6 h-6 rounded-full" alt="">
+                        Diana Plenty
+                      </td>
+                      <td class="py-2.5 text-slate-500">PRE43174</td>
+                      <td class="py-2.5 font-medium text-slate-700">1165</td>
+                      <td class="py-2.5 font-bold text-purple-700">91%</td>
+                      <td class="py-2.5"><span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[10px] font-semibold">Academic</span></td>
+                    </tr>
+                    <tr class="hover:bg-purple-50/40">
+                      <td class="py-2.5 font-semibold text-[#1E1B4B] flex items-center gap-2">
+                        <img src="https://placehold.co/48x48/0284c7/ffffff?text=JM" class="w-6 h-6 rounded-full" alt="">
+                        John Millar
+                      </td>
+                      <td class="py-2.5 text-slate-500">PRE43187</td>
+                      <td class="py-2.5 font-medium text-slate-700">1175</td>
+                      <td class="py-2.5 font-bold text-purple-700">92%</td>
+                      <td class="py-2.5"><span class="px-2 py-0.5 rounded-full bg-pink-50 text-pink-600 text-[10px] font-semibold">Top 5%</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Sidebar: March Calendar, Upcoming Events, Recent Activity -->
+        <aside class="w-full xl:w-72 bg-white border-t xl:border-t-0 xl:border-l border-purple-100/80 p-5 space-y-5 shrink-0">
+          <!-- March 2025 Mini Calendar -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-[#1E1B4B]">March 2025</span>
+              <div class="flex gap-1 text-slate-400 text-xs">
+                <button class="px-1.5 py-0.5 rounded hover:bg-purple-50">‹</button>
+                <button class="px-1.5 py-0.5 rounded hover:bg-purple-50">›</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-7 text-center text-[10px] text-slate-400 mb-1.5">
+              <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center text-[11px] text-slate-600">
+              <span class="text-slate-300">26</span><span class="text-slate-300">27</span><span class="text-slate-300">28</span>
+              <span class="py-1">1</span><span class="py-1">2</span><span class="py-1 rounded-full bg-pink-200 text-[#1E1B4B] font-bold">3</span><span class="py-1">4</span>
+              <span class="py-1">5</span><span class="py-1">6</span><span class="py-1">7</span><span class="py-1 rounded-full bg-[#1E1B4B] text-white font-bold">8</span><span class="py-1">9</span><span class="py-1">10</span><span class="py-1">11</span>
+              <span class="py-1">12</span><span class="py-1">13</span><span class="py-1">14</span><span class="py-1 rounded-full bg-purple-100 text-purple-800 font-bold">15</span><span class="py-1">16</span><span class="py-1">17</span><span class="py-1">18</span>
+            </div>
+          </div>
+
+          <!-- Upcoming Events -->
+          <div>
+            <h4 class="text-xs font-bold text-[#1E1B4B] mb-2.5">Upcoming Events</h4>
+            <div class="space-y-2.5">
+              <div class="p-3 rounded-xl bg-sky-50/80 border border-sky-100">
+                <div class="text-[10px] font-semibold text-sky-700">March 8 · 09:00 AM</div>
+                <div class="text-xs font-bold text-[#1E1B4B] mt-0.5">Annual Sport Competition</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">All Classes · Main Stadium</div>
+              </div>
+              <div class="p-3 rounded-xl bg-pink-50/80 border border-pink-100">
+                <div class="text-[10px] font-semibold text-pink-700">March 15 · 02:00 PM</div>
+                <div class="text-xs font-bold text-[#1E1B4B] mt-0.5">Parent-Teacher Meeting</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Auditorium Hall B</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div>
+            <h4 class="text-xs font-bold text-[#1E1B4B] mb-2.5">Recent Activity</h4>
+            <div class="space-y-3 text-xs">
+              <div class="flex items-start gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-purple-500 mt-1.5 shrink-0"></span>
+                <div>
+                  <p class="text-slate-700 font-medium leading-snug">New student Alicia Gomez enrolled in Class 8B</p>
+                  <span class="text-[10px] text-slate-400">12 mins ago</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-pink-500 mt-1.5 shrink-0"></span>
+                <div>
+                  <p class="text-slate-700 font-medium leading-snug">Attendance for Class 7A marked by Teacher John Smith</p>
+                  <span class="text-[10px] text-slate-400">45 mins ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===================================================================== -->
+  <!-- DASHBOARD 3: AI COMMAND CENTER & DEVOPS (BOTRIX — ORBIX STUDIO)       -->
+  <!-- ===================================================================== -->
+  <section id="dashboard-3" class="hidden min-h-[calc(100vh-56px)] bg-[#F4F4F5] p-2 sm:p-4 lg:p-6 fade-in">
+    <div class="max-w-[1480px] mx-auto bg-[#FAFAFA] rounded-3xl shadow-sm border border-zinc-200/90 p-4 sm:p-6 lg:p-7 space-y-6">
+
+      <!-- Top Horizontal Pill Navigation (NO left sidebar) -->
+      <header class="flex flex-wrap items-center justify-between gap-4">
+        <!-- Botrix Logo -->
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+            B
+          </div>
+          <span class="font-display font-bold text-base tracking-tight text-zinc-900">Botrix</span>
+        </div>
+
+        <!-- Centered Pill Tabs -->
+        <nav class="flex items-center gap-1 bg-white p-1.5 rounded-full border border-zinc-200/80 shadow-sm overflow-x-auto max-w-full">
+          <button onclick="switchD3Nav(this)" class="d3-pill px-4 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-white transition">
+            ⊞ Dashboard
+          </button>
+          <button onclick="switchD3Nav(this)" class="d3-pill px-4 py-1.5 rounded-full text-xs font-medium text-zinc-500 hover:text-zinc-900 transition">
+            ✦ Agent
+          </button>
+          <button onclick="switchD3Nav(this)" class="d3-pill px-4 py-1.5 rounded-full text-xs font-medium text-zinc-500 hover:text-zinc-900 transition">
+            ⌘ APIs
+          </button>
+          <button onclick="switchD3Nav(this)" class="d3-pill px-4 py-1.5 rounded-full text-xs font-medium text-zinc-500 hover:text-zinc-900 transition">
+            ▤ Servers
+          </button>
+          <button onclick="switchD3Nav(this)" class="d3-pill px-4 py-1.5 rounded-full text-xs font-medium text-zinc-500 hover:text-zinc-900 transition">
+            ⚡ Activity
+          </button>
+        </nav>
+
+        <!-- Right User & Settings -->
+        <div class="flex items-center gap-2.5">
+          <button class="w-8 h-8 rounded-full bg-white border border-zinc-200 flex items-center justify-center text-zinc-600 hover:bg-zinc-100 text-xs">⚙</button>
+          <img src="https://placehold.co/64x64/18181b/ffffff?text=DV" alt="DevOps" class="w-8 h-8 rounded-full border border-zinc-300">
+        </div>
+      </header>
+
+      <!-- Page Header & Create Agent CTA -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+        <h2 class="font-display text-xl sm:text-2xl font-bold tracking-tight text-zinc-900">AI Command Center</h2>
+        <div class="flex items-center gap-2">
+          <button onclick="simulateAgentPulse()" class="px-3 py-2 rounded-xl bg-white border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition">
+            ↻ Refresh
+          </button>
+          <button onclick="createNewAgent()" class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition shadow-sm">
+            + Create Agent
+          </button>
+        </div>
+      </div>
+
+      <!-- Top 4 KPI Telemetry Strip with Segmented Progress Bars -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-zinc-200/80 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span id="d3-kpi-agents" class="text-2xl font-bold text-zinc-900">12</span>
+            <span class="w-5 h-5 rounded-full bg-zinc-100 text-zinc-500 text-[10px] flex items-center justify-center">✦</span>
+          </div>
+          <div class="text-xs text-zinc-400 mt-0.5 mb-3">Automations Running</div>
+          <div class="h-2.5 w-full bg-zinc-100 rounded-md overflow-hidden flex gap-[2px] p-0.5">
+            <span class="flex-1 bg-zinc-700 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-700 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-700 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-300 rounded-sm"></span>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-zinc-200/80 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl font-bold text-zinc-900">08</span>
+            <span class="w-5 h-5 rounded-full bg-zinc-100 text-zinc-500 text-[10px] flex items-center justify-center">⌘</span>
+          </div>
+          <div class="text-xs text-zinc-400 mt-0.5 mb-3">Apps Connected</div>
+          <div class="h-2.5 w-full bg-zinc-100 rounded-md overflow-hidden flex gap-[2px] p-0.5">
+            <span class="flex-1 bg-zinc-700 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-700 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-300 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-300 rounded-sm"></span>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-zinc-200/80 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl font-bold text-zinc-900">02</span>
+            <span class="w-5 h-5 rounded-full bg-zinc-100 text-zinc-500 text-[10px] flex items-center justify-center">▤</span>
+          </div>
+          <div class="text-xs text-zinc-400 mt-0.5 mb-3">Active Servers</div>
+          <div class="h-2.5 w-full bg-zinc-100 rounded-md overflow-hidden flex gap-[2px] p-0.5">
+            <span class="flex-1 bg-zinc-700 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-700 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-300 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-300 rounded-sm"></span>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-zinc-200/80 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl font-bold text-zinc-900">98%</span>
+            <span class="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] flex items-center justify-center">✓</span>
+          </div>
+          <div class="text-xs text-zinc-400 mt-0.5 mb-3">Success Rate</div>
+          <div class="h-2.5 w-full bg-zinc-100 rounded-md overflow-hidden flex gap-[2px] p-0.5">
+            <span class="flex-1 bg-zinc-800 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-800 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-800 rounded-sm"></span>
+            <span class="flex-1 bg-zinc-800 rounded-sm"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle Grid: 2/3 Agent Activity Dual Curve + 1/3 Server Status Gauges -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Left (8 cols): Agent Activity Chart -->
+        <div class="lg:col-span-8 bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-sm flex flex-col justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-zinc-900">Agent Activity</h3>
+              <p class="text-[11px] text-zinc-400">Token throughput & inference latency</p>
+            </div>
+            <div class="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg text-[11px]">
+              <button onclick="setD3Timeframe(this, 'daily')" class="d3-tf px-2.5 py-1 rounded-md bg-zinc-900 text-white font-semibold">Daily</button>
+              <button onclick="setD3Timeframe(this, 'weekly')" class="d3-tf px-2.5 py-1 rounded-md text-zinc-500 hover:text-zinc-900">Weekly</button>
+              <button onclick="setD3Timeframe(this, 'monthly')" class="d3-tf px-2.5 py-1 rounded-md text-zinc-500 hover:text-zinc-900">Monthly</button>
+            </div>
+          </div>
+
+          <!-- Dual Smooth Curve SVG with Hover Indicator -->
+          <div class="relative w-full h-52">
+            <svg id="d3-activity-svg" class="w-full h-full" viewBox="0 0 600 180" preserveAspectRatio="none">
+              <!-- Horizontal Grid -->
+              <line x1="0" y1="30" x2="600" y2="30" stroke="#f4f4f5" stroke-width="1"/>
+              <line x1="0" y1="75" x2="600" y2="75" stroke="#f4f4f5" stroke-width="1"/>
+              <line x1="0" y1="120" x2="600" y2="120" stroke="#f4f4f5" stroke-width="1"/>
+              <line x1="0" y1="160" x2="600" y2="160" stroke="#f4f4f5" stroke-width="1"/>
+
+              <!-- Purple Curve -->
+              <path id="d3-curve-purple" d="M0,155 C90,155 140,115 240,95 C340,75 430,55 510,75 C555,85 580,105 600,115" fill="none" stroke="#7c3aed" stroke-width="2.5"/>
+              <!-- Orange Curve -->
+              <path id="d3-curve-orange" d="M0,155 C85,150 130,75 230,72 C330,70 410,60 470,40 C520,25 565,20 600,18" fill="none" stroke="#f97316" stroke-width="2.5"/>
+
+              <!-- Vertical Marker Line & Active Node -->
+              <line x1="420" y1="20" x2="420" y2="160" stroke="#f97316" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <circle cx="420" cy="54" r="5" fill="#f97316" stroke="#ffffff" stroke-width="2"/>
+            </svg>
+
+            <!-- Floating Telemetry Tooltip -->
+            <div class="absolute top-3 right-12 sm:right-28 bg-zinc-900 text-white px-3 py-1.5 rounded-xl text-[11px] shadow-md">
+              <div class="text-zinc-400 text-[10px]">16:00 Peak</div>
+              <div class="font-semibold">142 req/s · 99.4% OK</div>
+            </div>
+          </div>
+
+          <div class="flex justify-between text-[10px] text-zinc-400 pt-2 border-t border-zinc-100">
+            <span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>23:59</span>
+          </div>
+        </div>
+
+        <!-- Right (4 cols): Server Status with Semi-Circular Radial Gauges -->
+        <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-zinc-900">Server Status</h3>
+            <span class="text-[11px] text-zinc-400">2 Nodes</span>
+          </div>
+
+          <!-- Node 1: App Server - Singapore -->
+          <div class="p-3.5 rounded-2xl bg-[#FAFAFA] border border-zinc-200/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-zinc-900">App Server - Singapore 🇸🇬</div>
+                <div class="text-[10px] text-zinc-400">Ubuntu 24.04 · 4GB / 2 vCPU</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-semibold text-[10px]">● Running</span>
+            </div>
+
+            <!-- 3 Semi-Circular Radial Gauges -->
+            <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+              <div>
+                <svg class="w-16 h-9 mx-auto" viewBox="0 0 64 36">
+                  <path d="M 6 32 A 26 26 0 0 1 58 32" fill="none" stroke="#e4e4e7" stroke-width="5" stroke-linecap="round"/>
+                  <path id="gauge-cpu" d="M 6 32 A 26 26 0 0 1 46 11" fill="none" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
+                </svg>
+                <div id="val-cpu" class="text-[11px] font-bold text-zinc-800 -mt-1">68%</div>
+                <div class="text-[9px] text-zinc-400">CPU</div>
+              </div>
+              <div>
+                <svg class="w-16 h-9 mx-auto" viewBox="0 0 64 36">
+                  <path d="M 6 32 A 26 26 0 0 1 58 32" fill="none" stroke="#e4e4e7" stroke-width="5" stroke-linecap="round"/>
+                  <path id="gauge-ram" d="M 6 32 A 26 26 0 0 1 38 7" fill="none" stroke="#f97316" stroke-width="5" stroke-linecap="round"/>
+                </svg>
+                <div id="val-ram" class="text-[11px] font-bold text-zinc-800 -mt-1">54%</div>
+                <div class="text-[9px] text-zinc-400">RAM</div>
+              </div>
+              <div>
+                <svg class="w-16 h-9 mx-auto" viewBox="0 0 64 36">
+                  <path d="M 6 32 A 26 26 0 0 1 58 32" fill="none" stroke="#e4e4e7" stroke-width="5" stroke-linecap="round"/>
+                  <path d="M 6 32 A 26 26 0 0 1 28 7" fill="none" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round"/>
+                </svg>
+                <div class="text-[11px] font-bold text-zinc-800 -mt-1">36%</div>
+                <div class="text-[9px] text-zinc-400">Bandwidth</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+              <button onclick="restartServerNode()" class="flex-1 py-1.5 rounded-lg bg-white border border-zinc-200 hover:bg-zinc-100 text-[11px] font-medium text-zinc-700 transition">
+                ↻ Restart
+              </button>
+              <button class="flex-1 py-1.5 rounded-lg bg-white border border-zinc-200 hover:bg-zinc-100 text-[11px] font-medium text-zinc-700 transition">
+                ⚙ Configure
+              </button>
+            </div>
+          </div>
+
+          <!-- Node 2: Backup Node - New York -->
+          <div class="p-3.5 rounded-2xl bg-[#FAFAFA] border border-zinc-200/80 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-zinc-900">Backup Node - New York 🇺🇸</div>
+                <div class="text-[10px] text-zinc-400">Ubuntu 22.04 · 2GB / 1 vCPU</div>
+              </div>
+              <span id="ny-node-badge" class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 font-semibold text-[10px]">● Stopped</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="toggleNyNode()" id="ny-node-btn" class="px-3 py-1 rounded-lg bg-zinc-900 text-white text-[11px] font-semibold hover:bg-zinc-800 transition">
+                ▶ Start
+              </button>
+              <button class="px-3 py-1 rounded-lg bg-white border border-zinc-200 text-[11px] font-medium text-zinc-600">
+                Configure
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Grid: Live Activity Feed + Connected Tools & Services -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Live Activity Feed (7 cols) -->
+        <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h3 class="text-sm font-bold text-zinc-900">Live Activity Feed</h3>
+            <div class="flex items-center gap-1 text-[11px]">
+              <button onclick="filterD3Logs('all', this)" class="d3-log-filter px-2.5 py-1 rounded-lg bg-zinc-900 text-white font-semibold">All</button>
+              <button onclick="filterD3Logs('running', this)" class="d3-log-filter px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-600 hover:bg-zinc-200">Running</button>
+              <button onclick="filterD3Logs('completed', this)" class="d3-log-filter px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-600 hover:bg-zinc-200">Completed</button>
+              <button onclick="filterD3Logs('failed', this)" class="d3-log-filter px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-600 hover:bg-zinc-200">Failed</button>
+            </div>
+          </div>
+
+          <div id="d3-logs-list" class="space-y-2.5 text-xs">
+            <div data-status="running" class="p-3 rounded-xl bg-[#FAFAFA] border border-zinc-200/70 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs">LQ</span>
+                <div>
+                  <div class="font-semibold text-zinc-900">Lead Qualification Agent</div>
+                  <div class="text-[10px] text-zinc-400">3 steps · OpenAI → HubSpot · 09:42 PM</div>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 font-semibold text-[10px]">● Running</span>
+            </div>
+
+            <div data-status="completed" class="p-3 rounded-xl bg-[#FAFAFA] border border-zinc-200/70 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">IS</span>
+                <div>
+                  <div class="font-semibold text-zinc-900">Invoice Sync & Stripe Webhook</div>
+                  <div class="text-[10px] text-zinc-400">2 steps · Stripe → Postgres · 09:18 PM</div>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-zinc-200/80 text-zinc-700 font-semibold text-[10px]">✓ Completed</span>
+            </div>
+
+            <div data-status="failed" class="p-3 rounded-xl bg-[#FAFAFA] border border-zinc-200/70 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-xs">DB</span>
+                <div>
+                  <div class="font-semibold text-zinc-900">Vector Embedding Indexer</div>
+                  <div class="text-[10px] text-zinc-400">Rate limit exceeded (429) · 08:55 PM</div>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-600 font-semibold text-[10px]">✕ Failed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connected Tools and Services (5 cols) -->
+        <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-zinc-900">Connected tools and services</h3>
+              <span class="text-[11px] text-zinc-400">Live APIs</span>
+            </div>
+
+            <div class="space-y-3">
+              <!-- OpenAI Toggle -->
+              <div class="p-3 rounded-xl bg-[#FAFAFA] border border-zinc-200/70 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center text-xs font-bold">AI</div>
+                  <div>
+                    <div class="text-xs font-bold text-zinc-900">OpenAI</div>
+                    <div class="text-[10px] text-zinc-400">Large language models & AI assistants</div>
+                  </div>
+                </div>
+                <button onclick="toggleServiceSwitch(this)" data-on="true" class="w-10 h-5 rounded-full bg-zinc-900 p-0.5 transition flex items-center justify-end">
+                  <span class="w-4 h-4 rounded-full bg-white shadow-sm"></span>
+                </button>
+              </div>
+
+              <!-- Stripe Toggle -->
+              <div class="p-3 rounded-xl bg-[#FAFAFA] border border-zinc-200/70 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">S</div>
+                  <div>
+                    <div class="text-xs font-bold text-zinc-900">Stripe</div>
+                    <div class="text-[10px] text-zinc-400">Payment processing & subscriptions</div>
+                  </div>
+                </div>
+                <button onclick="toggleServiceSwitch(this)" data-on="false" class="w-10 h-5 rounded-full bg-zinc-300 p-0.5 transition flex items-center justify-start">
+                  <span class="w-4 h-4 rounded-full bg-white shadow-sm"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400">
+            <span>API Gateway Healthy</span>
+            <span class="text-emerald-600 font-semibold">● 18ms latency</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toast Notification Box (No alert() used) -->
+  <div id="toast-box" class="fixed bottom-4 right-4 z-50 hidden bg-neutral-900 text-white px-4 py-2.5 rounded-xl text-xs font-medium shadow-xl border border-neutral-700">
+    Action completed
+  </div>
+
+  <script>
+    // =========================================================================
+    // GLOBAL TOP SYSTEM SWITCHER
+    // =========================================================================
+    function switchSystem(num) {
+      [1, 2, 3].forEach(id => {
+        const sec = document.getElementById(`dashboard-${id}`);
+        const btn = document.getElementById(`sys-btn-${id}`);
+        if (id === num) {
+          sec.classList.remove('hidden');
+          btn.className = 'sys-tab flex-1 md:flex-none whitespace-nowrap px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all bg-white text-neutral-950 shadow-sm';
+        } else {
+          sec.classList.add('hidden');
+          btn.className = 'sys-tab flex-1 md:flex-none whitespace-nowrap px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-neutral-400 hover:text-white';
+        }
+      });
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      box.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => box.classList.add('hidden'), 2400);
+    }
+
+    // =========================================================================
+    // DASHBOARD 1 LOGIC (MAHAM / TEACHERLY)
+    // =========================================================================
+    function switchD1Tab(tab) {
+      const views = ['attendance', 'students', 'schedule'];
+      const labels = {
+        attendance: 'Attendance',
+        students: 'Students › Amirbaqian',
+        schedule: 'Schedule'
+      };
+      document.getElementById('d1-breadcrumb').innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-neutral-900"></span> ${labels[tab]}`;
+
+      views.forEach(v => {
+        const el = document.getElementById(`d1-view-${v}`);
+        const subBtn = document.getElementById(`d1-sub-${v}`);
+        if (v === tab) {
+          el.classList.remove('hidden');
+          subBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#111111] text-white transition';
+        } else {
+          el.classList.add('hidden');
+          subBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 transition';
+        }
+      });
+    }
+
+    // Render February Calendar with Day 9 highlighted in black circle
+    let selectedDay = 9;
+    function renderD1Calendar() {
+      const grid = document.getElementById('d1-calendar-grid');
+      grid.innerHTML = '';
+      // Offset for Feb starting on Friday (4 empty/prev slots)
+      const prevDays = [28, 29, 30, 31];
+      prevDays.forEach(d => {
+        grid.innerHTML += `<span class="py-1.5 text-neutral-300">${d}</span>`;
+      });
+      for (let d = 1; d <= 28; d++) {
+        const isSelected = d === selectedDay;
+        const hasDot = [5, 6, 8, 15, 22].includes(d);
+        grid.innerHTML += `
+          <button onclick="selectD1Day(${d})"
+            class="w-7 h-7 mx-auto rounded-full flex items-center justify-center text-xs transition ${
+              isSelected
+                ? 'bg-[#111111] text-white font-bold shadow-sm'
+                : hasDot
+                ? 'bg-neutral-200/70 text-neutral-800 font-medium hover:bg-neutral-300'
+                : 'text-neutral-600 hover:bg-neutral-200/50'
+            }">
+            ${d}
+          </button>
+        `;
+      }
+    }
+
+    function selectD1Day(d) {
+      selectedDay = d;
+      renderD1Calendar();
+      showToast(`Viewing attendance for February ${d}`);
+    }
+
+    // Render Barcode Progress Bars
+    function renderBarcodes() {
+      const configs = [
+        { id: 'barcode-green', active: 22, color: 'bg-emerald-500' },
+        { id: 'barcode-orange', active: 4, color: 'bg-orange-500' },
+        { id: 'barcode-purple', active: 4, color: 'bg-indigo-500' }
+      ];
+      configs.forEach(cfg => {
+        const container = document.getElementById(cfg.id);
+        container.innerHTML = '';
+        for (let i = 0; i < 24; i++) {
+          const isFilled = i < cfg.active;
+          container.innerHTML += `<span class="w-[2.5px] h-6 rounded-full ${isFilled ? cfg.color : 'bg-neutral-300/60'}"></span>`;
+        }
+      });
+    }
+
+    // Student Kanban Data & Interactivity
+    let activeClass = 'Class 302';
+    const classStudents = {
+      'Class 302': [
+        { name: 'James Wilson', initials: 'JW', color: 'bg-emerald-100 text-emerald-700', status: 'present' },
+        { name: 'Emily Carter', initials: 'EC', color: 'bg-sky-100 text-sky-700', status: 'present' },
+        { name: 'Sarah Anderson', initials: 'SA', color: 'bg-purple-100 text-purple-700', status: 'present' },
+        { name: 'Daniel Roberts', initials: 'DR', color: 'bg-amber-100 text-amber-700', status: 'present' },
+        { name: 'Olivia Brown', initials: 'OB', color: 'bg-rose-100 text-rose-700', status: 'present' },
+        { name: 'Matthew Johnson', initials: 'MJ', color: 'bg-indigo-100 text-indigo-700', status: 'present' },
+        { name: 'Hannah Turner', initials: 'HT', color: 'bg-orange-100 text-orange-700', status: 'absent' },
+        { name: 'Nicholas White', initials: 'NW', color: 'bg-rose-100 text-rose-700', status: 'absent' },
+        { name: 'Laura Miller', initials: 'LM', color: 'bg-indigo-100 text-indigo-700', status: 'delayed' },
+        { name: 'Emma Lewis', initials: 'EL', color: 'bg-purple-100 text-purple-700', status: 'delayed' }
+      ],
+      'Class 303': [
+        { name: 'Sophia Harris', initials: 'SH', color: 'bg-emerald-100 text-emerald-700', status: 'present' },
+        { name: 'Jessica Moore', initials: 'JM', color: 'bg-sky-100 text-sky-700', status: 'present' },
+        { name: 'Ryan Clark', initials: 'RC', color: 'bg-purple-100 text-purple-700', status: 'present' },
+        { name: 'Victoria Hall', initials: 'VH', color: 'bg-orange-100 text-orange-700', status: 'absent' },
+        { name: 'Kevin Adams', initials: 'KA', color: 'bg-indigo-100 text-indigo-700', status: 'delayed' }
+      ],
+      'Class 304': [
+        { name: 'Andrew Taylor', initials: 'AT', color: 'bg-emerald-100 text-emerald-700', status: 'present' },
+        { name: 'Alex Rodrigo', initials: 'AR', color: 'bg-sky-100 text-sky-700', status: 'present' },
+        { name: 'Ali Malek', initials: 'AM', color: 'bg-orange-100 text-orange-700', status: 'absent' }
+      ]
+    };
+
+    function setD1Class(cls) {
+      activeClass = cls;
+      ['Class 302', 'Class 303', 'Class 304'].forEach(c => {
+        const num = c.split(' ')[1];
+        const btn = document.getElementById(`btn-class-${num}`);
+        if (c === cls) {
+          btn.className = 'd1-class-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#111111] text-white transition';
+          btn.textContent = `● ${c}`;
+        } else {
+          btn.className = 'd1-class-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition';
+          btn.textContent = c;
+        }
+      });
+      renderKanban();
+    }
+
+    function cycleStudentStatus(idx) {
+      const list = classStudents[activeClass];
+      const order = ['present', 'absent', 'delayed'];
+      const next = order[(order.indexOf(list[idx].status) + 1) % order.length];
+      list[idx].status = next;
+      renderKanban();
+      showToast(`${list[idx].name} marked as ${next}`);
+    }
+
+    function renderKanban() {
+      const list = classStudents[activeClass];
+      const cols = {
+        present: document.getElementById('kanban-present'),
+        absent: document.getElementById('kanban-absent'),
+        delayed: document.getElementById('kanban-delayed')
+      };
+      cols.present.innerHTML = '';
+      cols.absent.innerHTML = '';
+      cols.delayed.innerHTML = '';
+
+      let counts = { present: 0, absent: 0, delayed: 0 };
+      list.forEach((st, idx) => {
+        counts[st.status]++;
+        cols[st.status].innerHTML += `
+          <button onclick="cycleStudentStatus(${idx})"
+            class="w-full p-2.5 rounded-xl bg-white border border-neutral-200/70 hover:border-neutral-400 flex items-center justify-between text-left transition shadow-sm">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-6 h-6 rounded-full ${st.color} font-bold text-[10px] flex items-center justify-center shrink-0">${st.initials}</span>
+              <span class="text-xs font-medium text-neutral-800 truncate">${st.name}</span>
+            </div>
+            <span class="text-neutral-300 text-xs">›</span>
+          </button>
+        `;
+      });
+
+      document.getElementById('col-count-present').textContent = counts.present;
+      document.getElementById('col-count-absent').textContent = counts.absent;
+      document.getElementById('col-count-delayed').textContent = counts.delayed;
+
+      const total = list.length;
+      document.getElementById('d1-att-count').textContent = `${counts.present}/${total}`;
+      document.getElementById('d1-abs-count').textContent = `${counts.absent}/${total}`;
+      document.getElementById('d1-del-count').textContent = `${counts.delayed}/${total}`;
+    }
+
+    function toggleStudentModal(show) {
+      const modal = document.getElementById('student-picker-modal');
+      modal.classList.toggle('hidden', !show);
+    }
+
+    function selectStudent(name) {
+      document.getElementById('selected-student-name').textContent = name;
+      toggleStudentModal(false);
+      showToast(`Loaded analytics for ${name}`);
+    }
+
+    // =========================================================================
+    // DASHBOARD 2 LOGIC (SCHOLA / IS ACADEMY PASTEL BAR CHART)
+    // =========================================================================
+    function updateD2BarChart(term) {
+      const container = document.getElementById('d2-bar-chart');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+      const data = term === 'sem1'
+        ? [[65, 45], [80, 60], [55, 75], [90, 68], [72, 85], [60, 50], [88, 70], [95, 78]]
+        : [[75, 62], [68, 74], [85, 60], [78, 82], [92, 70], [80, 65], [70, 88], [90, 84]];
+
+      container.innerHTML = '';
+      months.forEach((m, i) => {
+        const [v1, v2] = data[i];
+        container.innerHTML += `
+          <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+            <div class="flex items-end gap-1 h-28 w-full justify-center">
+              <div style="height: ${v1}%" class="w-2.5 rounded-t-md bg-[#1E1B4B] transition-all duration-300"></div>
+              <div style="height: ${v2}%" class="w-2.5 rounded-t-md bg-pink-300 transition-all duration-300"></div>
+            </div>
+            <span class="text-[10px] text-slate-400 font-medium">${m}</span>
+          </div>
+        `;
+      });
+    }
+
+    // =========================================================================
+    // DASHBOARD 3 LOGIC (BOTRIX AI COMMAND CENTER)
+    // =========================================================================
+    function switchD3Nav(btn) {
+      document.querySelectorAll('.d3-pill').forEach(el => {
+        el.className = 'd3-pill px-4 py-1.5 rounded-full text-xs font-medium text-zinc-500 hover:text-zinc-900 transition';
+      });
+      btn.className = 'd3-pill px-4 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-white transition';
+    }
+
+    function setD3Timeframe(btn, tf) {
+      document.querySelectorAll('.d3-tf').forEach(el => {
+        el.className = 'd3-tf px-2.5 py-1 rounded-md text-zinc-500 hover:text-zinc-900';
+      });
+      btn.className = 'd3-tf px-2.5 py-1 rounded-md bg-zinc-900 text-white font-semibold';
+
+      const orange = document.getElementById('d3-curve-orange');
+      const purple = document.getElementById('d3-curve-purple');
+      if (tf === 'daily') {
+        orange.setAttribute('d', 'M0,155 C85,150 130,75 230,72 C330,70 410,60 470,40 C520,25 565,20 600,18');
+        purple.setAttribute('d', 'M0,155 C90,155 140,115 240,95 C340,75 430,55 510,75 C555,85 580,105 600,115');
+      } else if (tf === 'weekly') {
+        orange.setAttribute('d', 'M0,140 C100,110 180,125 260,65 C350,20 440,50 600,30');
+        purple.setAttribute('d', 'M0,150 C110,130 200,90 300,105 C400,120 480,60 600,70');
+      } else {
+        orange.setAttribute('d', 'M0,160 C120,130 220,95 340,55 C450,25 520,35 600,15');
+        purple.setAttribute('d', 'M0,160 C130,145 250,120 360,85 C470,65 540,75 600,50');
+      }
+    }
+
+    let agentCount = 12;
+    function createNewAgent() {
+      agentCount++;
+      document.getElementById('d3-kpi-agents').textContent = String(agentCount).padStart(2, '0');
+      const logs = document.getElementById('d3-logs-list');
+      const item = document.createElement('div');
+      item.setAttribute('data-status', 'running');
+      item.className = 'p-3 rounded-xl bg-[#FAFAFA] border border-zinc-200/70 flex items-center justify-between fade-in';
+      item.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">AG</span>
+          <div>
+            <div class="font-semibold text-zinc-900">Autonomous Support Agent #${agentCount}</div>
+            <div class="text-[10px] text-zinc-400">Initialized just now · OpenAI GPT-4o</div>
+          </div>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 font-semibold text-[10px]">● Running</span>
+      `;
+      logs.prepend(item);
+      showToast(`Deployed Agent #${agentCount}`);
+    }
+
+    function simulateAgentPulse() {
+      const cpu = Math.floor(55 + Math.random() * 25);
+      const ram = Math.floor(45 + Math.random() * 25);
+      document.getElementById('val-cpu').textContent = `${cpu}%`;
+      document.getElementById('val-ram').textContent = `${ram}%`;
+      showToast('Telemetry refreshed from Singapore & NY nodes');
+    }
+
+    function restartServerNode() {
+      document.getElementById('val-cpu').textContent = '18%';
+      document.getElementById('val-ram').textContent = '24%';
+      showToast('App Server - Singapore restarted cleanly');
+    }
+
+    let nyRunning = false;
+    function toggleNyNode() {
+      nyRunning = !nyRunning;
+      const badge = document.getElementById('ny-node-badge');
+      const btn = document.getElementById('ny-node-btn');
+      if (nyRunning) {
+        badge.className = 'px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-semibold text-[10px]';
+        badge.textContent = '● Running';
+        btn.textContent = '■ Stop';
+        showToast('Backup Node - New York started');
+      } else {
+        badge.className = 'px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 font-semibold text-[10px]';
+        badge.textContent = '● Stopped';
+        btn.textContent = '▶ Start';
+        showToast('Backup Node - New York stopped');
+      }
+    }
+
+    function filterD3Logs(status, btn) {
+      document.querySelectorAll('.d3-log-filter').forEach(el => {
+        el.className = 'd3-log-filter px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-600 hover:bg-zinc-200';
+      });
+      btn.className = 'd3-log-filter px-2.5 py-1 rounded-lg bg-zinc-900 text-white font-semibold';
+
+      document.querySelectorAll('#d3-logs-list > div').forEach(row => {
+        if (status === 'all' || row.getAttribute('data-status') === status) {
+          row.classList.remove('hidden');
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+    }
+
+    function toggleServiceSwitch(btn) {
+      const isOn = btn.getAttribute('data-on') === 'true';
+      const next = !isOn;
+      btn.setAttribute('data-on', String(next));
+      if (next) {
+        btn.className = 'w-10 h-5 rounded-full bg-zinc-900 p-0.5 transition flex items-center justify-end';
+      } else {
+        btn.className = 'w-10 h-5 rounded-full bg-zinc-300 p-0.5 transition flex items-center justify-start';
+      }
+    }
+
+    // Initialize all dynamic charts and boards on load
+    window.onload = function () {
+      renderD1Calendar();
+      renderBarcodes();
+      renderKanban();
+      updateD2BarChart('sem1');
+    };
+  </script>
+</body>
+</html>

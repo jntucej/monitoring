@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, ArrowUpRight, Keyboard, Loader2 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -8,6 +8,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import { useVPRetention } from "@/stores/vpRetentionStore";
 import { SlaBadge } from "@/components/approver/SlaBadge";
 import { useUIStore } from "@/stores/uiStore";
+import { invalidateApiCache } from "@/hooks/useApiResource";
 
 interface PermissionItem {
   id: string;
@@ -49,8 +50,11 @@ export function FocusMode({
   const [busy, setBusy] = useState(false);
 
   const items = data?.data ?? [];
-  const current = items[index] ?? null;
-  const total = items.length;
+  const [localItems, setLocalItems] = useState<PermissionItem[] | null>(null);
+  const prevItemsRef = useRef<PermissionItem[] | null>(null);
+  const effectiveItems: PermissionItem[] = localItems ?? items;
+  const current = effectiveItems[index] ?? null;
+  const total = effectiveItems.length;
   const remaining = Math.max(0, total - index);
 
   // Clamp index when items shrink
@@ -68,7 +72,8 @@ export function FocusMode({
     async (action: "APPROVE" | "REJECT" | "ESCALATE") => {
       if (!current || busy) return;
       setBusy(true);
-
+      prevItemsRef.current = effectiveItems;
+      setLocalItems(effectiveItems.filter((i) => i.id !== current.id));
 
       try {
         const res = await fetch(`/api/permissions/${current.ticket_number}`, {
@@ -81,8 +86,10 @@ export function FocusMode({
         });
         if (!res.ok) {
           const j = await res.json().catch(() => ({}));
+          setLocalItems(prevItemsRef.current);
           throw new Error(j?.error?.message ?? `HTTP ${res.status}`);
         }
+        invalidateApiCache(["/api/permissions", "/api/principal/dashboard", "/api/admin/overview"]);
         recordWin({
           ticket: current.ticket_number,
           outcome:
@@ -98,6 +105,7 @@ export function FocusMode({
         addToast(
           `${action === "APPROVE" ? "Approved" : action === "REJECT" ? "Rejected" : "Escalated"} ${current.ticket_number}`
         );
+        setLocalItems(null);
         await refresh();
       } catch (err: unknown) {
         errorToast(err instanceof Error ? err.message : "Action failed");
@@ -105,13 +113,17 @@ export function FocusMode({
         setBusy(false);
       }
     },
-    [current, busy, refresh, recordWin, addToast, errorToast]
+    [current, busy, refresh, recordWin, addToast, errorToast, effectiveItems]
   );
 
   // Keyboard shortcuts
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const tag = target?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || target?.isContentEditable) return;
+
       if (e.key === "Escape") {
         onClose();
         return;
@@ -149,7 +161,7 @@ export function FocusMode({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex size-4 min-h-11 min-w-11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
               aria-label="Exit focus mode"
             >
               <X className="size-4" />

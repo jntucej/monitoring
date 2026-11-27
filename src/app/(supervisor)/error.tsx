@@ -18,7 +18,7 @@ export default function SupervisorError({
   return (
     <div className="flex min-h-[60vh] items-center justify-center p-6">
       <div className="surface-card max-w-md w-full p-6 text-center space-y-4">
-        <div className="mx-auto size-6 rounded-full bg-action-danger/10 flex items-center justify-center">
+        <div className="mx-auto size-12 rounded-full bg-action-danger/10 flex items-center justify-center">
           <AlertTriangle className="w-6 h-6 text-action-danger" />
         </div>
         <h2 className="text-lg font-semibold text-text-primary">Something went wrong</h2>

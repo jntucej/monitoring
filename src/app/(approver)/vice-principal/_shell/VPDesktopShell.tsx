@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
+import { RoleSearchBar } from "@/components/shared/RoleSearchBar";
+import { RoleNotificationBell } from "@/components/shell/RoleNotificationBell";
 import { VPSidebar } from "./VPSidebar";
-import { VPNotificationBell } from "./VPNotificationBell";
 import { FocusMode } from "../_retention/FocusMode";
 
 export function VPDesktopShell({ children }: { children: React.ReactNode }) {
@@ -19,7 +20,7 @@ export function VPDesktopShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-dvh flex-col lg:flex-row overflow-hidden bg-bg-base">
-      <aside className="hidden lg:block w-64 shrink-0 border">
+      <aside className="hidden lg:block w-64 shrink-0 border-r border-border">
         <VPSidebar mode="expanded" />
       </aside>
 
@@ -35,18 +36,23 @@ export function VPDesktopShell({ children }: { children: React.ReactNode }) {
           </button>
           <span className="text-sm font-semibold text-text-primary">Vice Principal</span>
         </div>
-        <VPNotificationBell />
+        <RoleNotificationBell />
       </header>
 
       <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto overflow-x-hidden">
         <ScrollEdgeBlue className="h-full">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 lg:py-6 pb-[max(4rem,env(safe-area-inset-bottom))] lg:pb-24">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 pt-3 sm:px-6 lg:px-8">
+            <div className="min-w-0 flex-1">
+              <RoleSearchBar role="vice_principal" />
+            </div>
+            <RoleNotificationBell className="hidden lg:inline-flex shrink-0" />
+          </div>
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 lg:py-6 pb-[env(safe-area-inset-bottom)]">
             {children}
           </div>
         </ScrollEdgeBlue>
       </main>
 
-      <VPNotificationBell className="hidden lg:block fixed right-6 top-6 z-20" />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
       {open && (

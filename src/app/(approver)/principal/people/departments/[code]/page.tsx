@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Users, GraduationCap, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
-import { PageLoading as Loading } from "@/components/principal/shared/PrincipalLoadingStates";
+import { PageLoading as Loading } from "@/components/shared/LoadingStates";
 import { KpiCard } from "../../../_shared/KpiCard";
 import { DataTable } from "@/components/ui/DataTable";
 import { SmartTextRef } from "@/components/nav/SmartTextRef";

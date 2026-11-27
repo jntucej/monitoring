@@ -3,7 +3,7 @@
 import { Suspense, lazy } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { AnalyticsTab } from "@/components/mess/MessOperations";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";

@@ -16,7 +16,7 @@ import {
 import { getAuthHeaders } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import type { User, AccountStatus, Role } from "@/lib/types";
 
 export interface UserManagementPanelProps {

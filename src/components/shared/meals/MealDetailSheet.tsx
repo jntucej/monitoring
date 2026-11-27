@@ -8,6 +8,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { X, Star, AlertTriangle, Utensils, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAuthHeaders } from "@/lib/utils";
@@ -28,7 +29,8 @@ export interface MealDetailSheetProps {
 }
 
 export function MealDetailSheet({ meal, onClose, className }: MealDetailSheetProps) {
-  const [rating, setRating] = useState<number | null>(null);
+  const router = useRouter();
+  const [rating, setRating] = useState<number | null>(meal?.rating ?? null);
 
   useEffect(() => {
     setRating(meal?.rating ?? null);
@@ -132,7 +134,7 @@ export function MealDetailSheet({ meal, onClose, className }: MealDetailSheetPro
           <button
             type="button"
             onClick={() => {
-              window.location.href = `/student/complaints/new?category=meal&record_id=${meal.id}`;
+              router.push(`/student/complaints/new?category=meal&record_id=${meal.id}`);
             }}
             className="mt-4 flex items-center gap-1.5 text-xs text-text-muted underline hover:text-text"
           >

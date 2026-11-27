@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useRoleContext } from "@/hooks/useRoleContext";
-import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
@@ -101,9 +101,7 @@ export function ExceptionsView() {
               ? { label: "Showing absent", onClick: () => setSection(null) }
               : { label: "Show absent", onClick: () => setSection("absent") }
           }
-          onClick={() => {
-            if (absent.length) inspect(toPersonException(absent[0].id, absent[0].name, absent[0].role, absent[0].designation ?? null, absent[0].department ?? null, "absent"));
-          }}
+          onClick={() => setSection(section === "absent" ? null : "absent")}
         />
         <KpiCard
           label="Late"
@@ -114,9 +112,7 @@ export function ExceptionsView() {
               ? { label: "Showing late", onClick: () => setSection(null) }
               : { label: "Show late", onClick: () => setSection("late") }
           }
-          onClick={() => {
-            if (late.length) inspect(toPersonException(late[0].id, late[0].name, late[0].role, late[0].designation ?? null, late[0].department ?? null, "late", late[0].minutesLate));
-          }}
+          onClick={() => setSection(section === "late" ? null : "late")}
         />
         <KpiCard
           label="Flagged"
@@ -127,9 +123,7 @@ export function ExceptionsView() {
               ? { label: "Showing flagged", onClick: () => setSection(null) }
               : { label: "Show flagged", onClick: () => setSection("flagged") }
           }
-          onClick={() => {
-            if (flagged.length) inspect(toPersonException(flagged[0].id, flagged[0].name, "", null, flagged[0].department ?? null, "flagged", flagged[0].reason));
-          }}
+          onClick={() => setSection(section === "flagged" ? null : "flagged")}
         />
       </div>
       {section && (

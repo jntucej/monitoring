@@ -67,7 +67,7 @@ export function ScheduleStrip({ items, maxVisible = 4, className }: ScheduleStri
       </div>
 
       {/* Strip */}
-      <div className="flex gap-2 overflow-x-auto">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {visible.map((item) => {
           const past = new Date(item.end).getTime() < now;
           const current =
@@ -76,7 +76,7 @@ export function ScheduleStrip({ items, maxVisible = 4, className }: ScheduleStri
             <div
               key={item.id}
               className={cn(
-                "shrink-0 rounded-lg border px-2.5 py-1.5 text-xs min-w-[110px]",
+                "shrink-0 rounded-lg border px-2.5 py-1.5 text-xs min-w-28 max-w-44",
                 current
                   ? "border-action-primary bg-action-primary/10 text-action-primary"
                   : past

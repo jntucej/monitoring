@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { Select as HeroSelect, ListBox, ListBoxItem } from "@heroui/react";
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
 
 export interface SelectOption {
   value: string;
@@ -17,53 +17,64 @@ export interface SelectProps {
   error?: string;
   className?: string;
   disabled?: boolean;
+  "aria-label"?: string;
 }
 
 const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
-  ({ options, value, onChange, placeholder = "Select...", error, className, disabled }, ref) => {
-    const [open, setOpen] = React.useState(false);
-    const selectedLabel = options.find((o) => o.value === value)?.label || placeholder;
-
+  (
+    {
+      options,
+      value,
+      onChange,
+      placeholder = "Select...",
+      error,
+      className,
+      disabled,
+      "aria-label": ariaLabel,
+    },
+    ref
+  ) => {
     return (
-      <div className="relative w-full">
-        <button
-          ref={ref}
-          type="button"
-          disabled={disabled}
-          onClick={() => !disabled && setOpen(!open)}
-          className={cn(
-            "w-full h-11 px-4 rounded-md bg-bg-surface border border-border text-text-primary flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ringfocus-ring",
-            error && "border-action-danger focus:ring-action-danger",
-            disabled && "opacity-40 cursor-not-allowed",
-            className
-          )}
+      <div className="w-full">
+        <HeroSelect
+          aria-label={ariaLabel ?? placeholder}
+          placeholder={placeholder}
+          isDisabled={disabled}
+          fullWidth
+          value={value ?? null}
+          onChange={(key) => {
+            if (key !== null && key !== undefined) {
+              onChange?.(String(key));
+            }
+          }}
         >
-          <span className={value ? "text-text-primary" : "text-text-muted"}>
-            {selectedLabel}
-          </span>
-          <ChevronDown className="w-4 h-4 text-text-muted" />
-        </button>
-        {open && (
-          <div className="absolute top-12 z-20 w-full bg-bg-surface border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
-            {options.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  onChange?.(opt.value);
-                  setOpen(false);
-                }}
-                className={cn(
-                  "w-full px-4 py-2 text-left text-sm hover:bg-bg-elevated transition-colors",
-                  value === opt.value && "bg-action-primary/10 text-action-primary"
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          <HeroSelect.Trigger
+            ref={ref}
+            className={cn(
+              "w-full h-11 px-4 rounded-md bg-bg-surface border border-border text-text-primary flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ringfocus-ring",
+              error && "border-action-danger focus:ring-action-danger",
+              disabled && "opacity-40 cursor-not-allowed",
+              className
+            )}
+          >
+            <HeroSelect.Value />
+            <HeroSelect.Indicator />
+          </HeroSelect.Trigger>
+          <HeroSelect.Popover className="z-50 bg-bg-surface border border-border rounded-md shadow-lg">
+            <ListBox>
+              {options.map((opt) => (
+                <ListBoxItem key={opt.value} id={opt.value} textValue={opt.label}>
+                  {opt.label}
+                </ListBoxItem>
+              ))}
+            </ListBox>
+          </HeroSelect.Popover>
+        </HeroSelect>
+        {error && (
+          <p role="alert" className="mt-1 text-sm text-action-danger">
+            {typeof error === "string" ? error : (error as { message?: string })?.message || String(error)}
+          </p>
         )}
-        {error && <p className="mt-1 text-sm text-action-danger">⚠️ {typeof error === "string" ? error : (error as any)?.message || String(error)}</p>}
       </div>
     );
   }

@@ -62,10 +62,10 @@ export function ProfileView() {
               <img
                 src={profile.photoUrl}
                 alt={profile.name}
-                className="size-6 rounded-full object-cover"
+                className="size-14 rounded-full object-cover"
               />
             ) : (
-              <div className="size-6 rounded-full bg-bg-elevated flex items-center justify-center">
+              <div className="size-14 rounded-full bg-bg-elevated flex items-center justify-center">
                 <User className="w-6 h-6 text-text-muted" />
               </div>
             )}

@@ -8,6 +8,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { FileCheck, FileQuestion, Clock, RotateCw, GitBranch, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAuthHeaders } from "@/lib/utils";
@@ -82,10 +83,11 @@ export function DocumentStatusCard({
 
   const Icon = meta.Icon;
 
+  const router = useRouter();
   const reupload = async () => {
     setShowReupload(false);
     // Trigger the re-upload via the existing document endpoint.
-    window.location.href = `/student/passes?ticket=${ticketId}&reupload=1`;
+    router.push(`/student/passes?ticket=${ticketId}&reupload=1`);
   };
 
   const dispute = async () => {

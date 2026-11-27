@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useApiResource } from "@/hooks/useApiResource";
-import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { useRoleContext } from "@/hooks/useRoleContext";
@@ -29,6 +30,7 @@ interface WeekDigestResponse {
 }
 
 export function ReportsView() {
+  const router = useRouter();
   const { data, loading } = useApiResource<WeekDigestResponse>("/api/principal/week-digest", {
     ttlMs: 60_000,
   });
@@ -107,59 +109,37 @@ export function ReportsView() {
       ) : breakdown.length === 0 ? (
         <EmptyState title="No report data" description="Weekly records will populate after decisions occur." />
       ) : (
-        <>
-          <ul className="space-y-2 md:hidden">
-            {breakdown.map((item) => (
-              <li
-                key={item.workflow_type}
-                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-surface/60 transition-colors"
-                role="button"
-                tabIndex={0}
-                onClick={() => inspect(item)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") inspect(item);
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <a
-                    href={wfHref(item.workflow_type)}
-                    aria-label={`Open pending approvals for ${item.workflow_type}`}
-                    className="text-sm font-medium"
-                  >
-                    {item.workflow_type}
-                  </a>
-                  <span className="font-semibold tabular-nums text-action-primary">
-                    {item.count}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:block">
-            <DataTable<{ workflow_type: string; count: number }>
-              onRowClick={(r) => {
-                // Row → register: the workflow type is a drilldown into the
-                // pending approvals filtered to that category, and also opens
-                // the in-page inspector (main's entity deep-link path).
-                inspect(r);
-                window.location.href = wfHref(r.workflow_type);
-              }}
-              columns={[
-                {
-                  header: "Workflow Category",
-                  accessor: (r) => r.workflow_type,
-                },
-                {
-                  header: "Volume This Week",
-                  accessor: (r) => r.count,
-                },
-              ]}
-              data={breakdown}
-              keyExtractor={(r) => r.workflow_type}
-            />
-          </div>
-        </>
+        <DataTable<{ workflow_type: string; count: number }>
+          mobileLayout="cards"
+          onRowClick={(r) => inspect(r)}
+          columns={[
+            {
+              header: "Workflow Category",
+              accessor: (r) => r.workflow_type,
+            },
+            {
+              header: "Volume This Week",
+              accessor: (r) => r.count,
+            },
+            {
+              header: "Queue",
+              accessor: (r) => (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(wfHref(r.workflow_type));
+                  }}
+                  className="text-xs font-semibold text-action-primary hover:underline"
+                >
+                  View Queue &rarr;
+                </button>
+              ),
+            },
+          ]}
+          data={breakdown}
+          keyExtractor={(r) => r.workflow_type}
+        />
       )}
 
       <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />

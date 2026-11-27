@@ -34,12 +34,16 @@ export function ShiftLiveView() {
         <h1 className="text-xl font-bold text-primary">Live Shift</h1>
         <p className="text-xs text-muted">Active shift progress, gate health, and unresolved items</p>
       </header>
-      <div className="cursor-pointer" onClick={() => inspect(shiftInspection({
-        shiftId: null,
-        startedAt: d?.shift?.startedAt ?? null,
-        endsAt: d?.shift?.endsAt ?? null,
-        unresolvedIncidents: d?.counts?.incidentsOpen ?? 0,
-      }, role))}>
+      <button
+        type="button"
+        className="w-full text-left cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+        onClick={() => inspect(shiftInspection({
+          shiftId: null,
+          startedAt: d?.shift?.startedAt ?? null,
+          endsAt: d?.shift?.endsAt ?? null,
+          unresolvedIncidents: d?.counts?.incidentsOpen ?? 0,
+        }, role))}
+      >
         <div className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-text-muted">
           <ChevronDown className="size-3" /> tap to inspect the shift record
         </div>
@@ -49,7 +53,7 @@ export function ShiftLiveView() {
           escalationsOpen={d?.counts?.escalationsOpen ?? 0}
           incidentsOpen={d?.counts?.incidentsOpen ?? 0}
         />
-      </div>
+      </button>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <HandoverStreak />
         <GateWall gates={d?.gates ?? []} />

@@ -110,6 +110,8 @@ export function InspectOverlay() {
         pinnedElRef.current = null;
       }
       // Esc closes the pinned panel.
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       if (e.key === "Escape") {
         setIsPinned(false);
         pinnedElRef.current = null;

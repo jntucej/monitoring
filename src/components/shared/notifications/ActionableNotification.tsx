@@ -8,6 +8,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNotificationActions } from "@/hooks/useNotificationActions";
@@ -36,6 +37,7 @@ export function ActionableNotification({
   timeAgo,
   className,
 }: ActionableNotificationProps) {
+  const router = useRouter();
   const { actions, deepLink, label, dispatch } = useNotificationActions(type);
   const [acting, setActing] = useState<string | null>(null);
   const [acted, setActed] = useState<string | null>(null);
@@ -108,7 +110,7 @@ export function ActionableNotification({
       {deepLink && (
         <button
           type="button"
-          onClick={() => (window.location.href = deepLink)}
+          onClick={() => router.push(deepLink)}
           className="flex items-center gap-1 text-[11px] text-text-muted hover:text-text"
         >
           Open full record

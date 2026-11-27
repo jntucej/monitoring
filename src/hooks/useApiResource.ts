@@ -1,7 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
-
 import { singleFlightRefresh } from "@/lib/auth-refresh";
 
 interface CachedEntry<T> {
@@ -10,13 +9,48 @@ interface CachedEntry<T> {
 }
 
 const cache = new Map<string, CachedEntry<unknown>>();
+const listeners = new Map<string, Set<() => void>>();
+
+function subscribeUrl(url: string, cb: () => void): () => void {
+  let set = listeners.get(url);
+  if (!set) {
+    set = new Set();
+    listeners.set(url, set);
+  }
+  set.add(cb);
+  return () => {
+    set?.delete(cb);
+    if (set && set.size === 0) listeners.delete(url);
+  };
+}
 
 /**
- * Structural equality for JSON-shaped API payloads (plain objects, arrays,
- * strings, numbers, booleans, null). Used to gate setData so a poll that
- * returns *identical* data does not mint a new object reference and force a
- * re-render of every consuming panel. Fast path: same reference => equal.
+ * Invalidate cached API entries matching one or more URL prefixes (or exact URLs)
+ * and immediately trigger background revalidation on all mounted `useApiResource`
+ * hooks subscribed to matching URLs.
  */
+export function invalidateApiCache(prefixOrKeys?: string | string[]) {
+  if (!prefixOrKeys) {
+    cache.clear();
+    for (const set of listeners.values()) {
+      for (const cb of set) cb();
+    }
+    return;
+  }
+  const prefixes = Array.isArray(prefixOrKeys) ? prefixOrKeys : [prefixOrKeys];
+  for (const k of Array.from(cache.keys())) {
+    const urlPart = k.includes("|") ? k.slice(k.indexOf("|") + 1) : k;
+    if (prefixes.some((p) => urlPart.startsWith(p))) {
+      cache.delete(k);
+    }
+  }
+  for (const [url, set] of listeners.entries()) {
+    if (prefixes.some((p) => url.startsWith(p))) {
+      for (const cb of set) cb();
+    }
+  }
+}
+
 function deepEqual(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true;
   if (a === null || b === null) return false;
@@ -33,14 +67,14 @@ function deepEqual(a: unknown, b: unknown): boolean {
 
 export async function cachedFetch<T>(
   url: string,
-  options: { ttlMs?: number; headers?: Record<string, string>; auth?: boolean } = {}
+  options: { ttlMs?: number; headers?: Record<string, string>; auth?: boolean; bypassCache?: boolean } = {}
 ): Promise<T> {
-  const { ttlMs = 15_000, headers, auth = true } = options;
+  const { ttlMs = 15_000, headers, auth = true, bypassCache = false } = options;
   const now = Date.now();
-  const userId = typeof window !== "undefined" ? (window as any).__currentUserId ?? "anon" : "anon";
+  const userId = typeof window !== "undefined" ? (window as { __currentUserId?: string }).__currentUserId ?? "anon" : "anon";
   const key = `${userId}|${url}`;
   const hit = cache.get(key) as CachedEntry<T> | undefined;
-  if (hit && hit.expiresAt > now) return hit.data;
+  if (!bypassCache && hit && hit.expiresAt > now) return hit.data;
 
   let res = await fetch(url, {
     headers: {
@@ -51,14 +85,10 @@ export async function cachedFetch<T>(
     credentials: "include",
   });
 
-  // A 401 means the stored token went stale (e.g. session rotated/revoked
-  // after a deploy, or a refreshed access token). Attempt one single-flight
-  // refresh and retry once so dashboards self-heal instead of surfacing a
-  // hard "HTTP 401" that only a full reload would clear.
   if (res.status === 401 && auth) {
     try { await singleFlightRefresh(); } catch { /* fall through */ }
     const fresh = getAuthHeaders();
-    if (fresh["Authorization"] && fresh["Authorization"] !== (headers as Record<string,string>)["Authorization"]) {
+    if (fresh["Authorization"] && fresh["Authorization"] !== (headers as Record<string, string> | undefined)?.["Authorization"]) {
       res = await fetch(url, {
         headers: {
           "Content-Type": "application/json",
@@ -76,17 +106,21 @@ export async function cachedFetch<T>(
     throw e;
   }
   const data = (await res.json()) as T;
-  cache.set(url, { data, expiresAt: now + ttlMs });
+  cache.set(key, { data, expiresAt: now + ttlMs });
   return data;
 }
 
 export function clearCache(url?: string) {
-  if (url) cache.delete(url);
-  else cache.clear();
+  if (url) {
+    for (const k of Array.from(cache.keys())) {
+      const urlPart = k.includes("|") ? k.slice(k.indexOf("|") + 1) : k;
+      if (urlPart === url) cache.delete(k);
+    }
+  } else {
+    cache.clear();
+  }
 }
 
-/** Scope cache keys to a specific user ID. Call on logout to evict a user's
- *  cached entries so the next operator on a shared kiosk never reads them. */
 export function clearCacheForUser(userId: string | null) {
   if (!userId) return;
   const prefix = `${userId}|`;
@@ -107,38 +141,60 @@ export function useApiResource<T>(
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const {enabled, ttlMs} = options;
+  const { enabled, ttlMs } = options;
   const hasLoadedRef = useRef(false);
+  const lastRevalidateRef = useRef(0);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (bypassCache = false) => {
     if (!url || enabled === false) {
-      // Guard: without this, an early-return in the hook would change
-      // the hook-call count on the next render when url/enabled flip,
-      // throwing React issue-310 in every consuming component.
       setLoading(false);
       return;
     }
-    // Only the FIRST fetch shows a skeleton. Subsequent polls keep the
-    // previous payload visible — no flicker, no layout shift.
     if (!hasLoadedRef.current) setLoading(true);
     setError(null);
     try {
-      const next = await cachedFetch<T>(url, { ttlMs });
-      // Only re-render when the payload actually changed. A poll that returns
-      // identical data keeps the previous object reference, so downstream
-      // memoized panels (useMemo / React.memo) do not re-run.
+      const next = await cachedFetch<T>(url, { ttlMs, bypassCache });
+      hasLoadedRef.current = true;
       setData((prev) => (prev !== null && deepEqual(prev, next) ? prev : next));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Request failed");
     } finally {
       setLoading(false);
     }
-     
   }, [url, enabled, ttlMs]);
 
   useEffect(() => {
-    void refresh();
+    void refresh(false);
   }, [refresh]);
 
-  return { data, loading, error, refresh };
+  useEffect(() => {
+    if (!url || enabled === false) return;
+    const unsub = subscribeUrl(url, () => {
+      void refresh(true);
+    });
+
+    const throttledRevalidate = () => {
+      const now = Date.now();
+      if (now - lastRevalidateRef.current < 5_000) return;
+      lastRevalidateRef.current = now;
+      void refresh(true);
+    };
+
+    const onVis = () => {
+      if (document.visibilityState === "visible") throttledRevalidate();
+    };
+    const onOnline = () => throttledRevalidate();
+
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("online", onOnline);
+    return () => {
+      unsub();
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("online", onOnline);
+    };
+  }, [url, enabled, refresh]);
+
+  const publicRefresh = useCallback(() => refresh(true), [refresh]);
+
+  return { data, loading, error, refresh: publicRefresh };
 }
