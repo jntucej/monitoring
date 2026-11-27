@@ -7,11 +7,13 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 export default function GlobalNotFound() {
   return (
     <section className="min-h-[70vh] bg-white">
       <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center sm:px-6">
+        <BrandLogo variant="lockup" size="lg" motion="cinematic" className="mb-6" />
         <span className="text-6xl font-semibold text-text-secondary">404</span>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight text-text-primary">
           Page not found

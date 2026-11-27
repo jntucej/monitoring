@@ -11,6 +11,7 @@ import {
 import { useNoMotion } from "../hooks/useNoMotion";
 import { LogIn, ArrowRight } from "lucide-react";
 import { COLLEGE } from "@/lib/college-config";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { MagneticButton } from "../ui/MagneticButton";
 import { useGradientHeadline } from "../../motion/useGradientHeadline";
 
@@ -73,6 +74,13 @@ export function Hero() {
       animate={reduced ? undefined : { scale: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 120, damping: 20 }}
     >
+      {/* Brand crest + wordmark. Above the LCP h1 but painted at full
+          opacity on frame 1 (no opacity gate on the crest image itself) so
+          it never stalls first paint. Cinematic reveal only when motion is
+          allowed. No backdrop-filter in this section (see LCP rule). */}
+      <div className="mb-6 flex items-center justify-center" style={{ opacity: 1 }}>
+        <BrandLogo variant="lockup" size="hero" motion={reduced ? "static" : "cinematic"} />
+      </div>
       {/* Eyebrow. This is NOT the LCP element; a small blur-reveal is
           allowed here. The h1 below is the LCP and stays clean. */}
       <motion.p

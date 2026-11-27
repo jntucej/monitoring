@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 import { COLLEGE } from "@/lib/college-config";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 export const runtime = "nodejs";
 
@@ -7,7 +9,20 @@ export const alt = `${COLLEGE.officialName} Campus Access Portal`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+// Embed the real UCEJ crest (transparent PNG) into the share card so the
+// social preview shows the actual mark, not a letterbox.
+function crestDataUri(): string {
+  try {
+    const p = path.join(process.cwd(), "public", "brand", "logo.png");
+    const b64 = readFileSync(p).toString("base64");
+    return `data:image/png;base64,${b64}`;
+  } catch {
+    return "";
+  }
+}
+
 export default async function Image() {
+  const crest = crestDataUri();
   return new ImageResponse(
     (
       <div
@@ -24,21 +39,25 @@ export default async function Image() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <div
-            style={{
-              width: "56px",
-              height: "56px",
-              borderRadius: "12px",
-              background: "#10b981",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "30px",
-              fontWeight: 700,
-            }}
-          >
-            J
-          </div>
+          {crest ? (
+            <img src={crest} style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "12px" }} />
+          ) : (
+            <div
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "12px",
+                background: "#10b981",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "30px",
+                fontWeight: 700,
+              }}
+            >
+              J
+            </div>
+          )}
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: "22px", fontWeight: 600 }}>JNTUH UCEJ</div>
             <div style={{ fontSize: "14px", color: "#94a3b8" }}>

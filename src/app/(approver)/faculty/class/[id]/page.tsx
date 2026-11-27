@@ -270,6 +270,7 @@ function ClassRosterInner() {
         loading={attRosterLoading}
         error={attRosterError}
         canMark
+        classId={classId}
         onInspect={inspectStudent}
         onMutated={() => {
           refreshRoster();

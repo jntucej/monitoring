@@ -4,6 +4,7 @@ import { Volume2, VolumeX, Trash2, X } from "lucide-react";
 import { BotBoat } from "./BotBoat";
 import { VoiceWave } from "./VoiceWave";
 import { LanguageToggle } from "./LanguageToggle";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import type { BotStrings } from "@/lib/i18n/bot-strings";
 import type { BotLang } from "@/lib/rag/config";
 
@@ -37,6 +38,7 @@ export const BotHeader = memo(function BotHeader({
 
   return (
     <header className="surface-card relative z-10 flex items-center gap-2 p-3 bg-bg-elevated/95 backdrop-blur-sm">
+      <BrandLogo variant="mark" size="xs" motion="static" status="idle" className="shrink-0 opacity-85" alt="JNTUH UCEJ campus assistant" />
       <div className="size-6 rounded-full bg-action-info
                       flex items-center justify-center shrink-0">
         <BotBoat phase={phase} size={26} />

@@ -152,7 +152,7 @@ export function FacultyRosterPanel({ classId }: { classId: string }) {
     await fetch(`/api/faculty/attendance/roster/${studentId}`, {
       method: "PATCH",
       headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-      body: JSON.stringify({ field: "present", value: val, reason }),
+      body: JSON.stringify({ field: "present", value: val, reason, classId }),
     });
     setEditingStudent(null);
     void load();

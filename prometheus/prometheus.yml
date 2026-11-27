@@ -25,3 +25,12 @@ scrape_configs:
   - job_name: 'node'
     static_configs:
       - targets: ['node_exporter:9100']
+
+  # The Next.js web app's Prometheus text exposition (api_metrics table):
+  # api_requests_total / api_errors_total / api_response_time_p95_ms.
+  # Backs the DevOps fleet.http_* named queries (throughput + p95 latency).
+  - job_name: 'gate_web'
+    static_configs:
+      - targets: ['gate_web:3000']
+    metrics_path: '/api/metrics'
+    scrape_interval: 30s

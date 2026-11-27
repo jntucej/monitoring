@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/shared/LoginForm";
 import { Suspense } from "react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 export default function CinematicLoginPage() {
   return (
@@ -17,9 +18,7 @@ export default function CinematicLoginPage() {
 
         <div className="surface-card hidden lg:flex lg:col-span-7 flex-col justify-between p-12 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="size-6 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center font-bold text-action-primary">
-              GM
-            </div>
+            <BrandLogo variant="mark" size="sm" motion="cinematic" status="idle" className="shrink-0" />
             <span className="font-semibold tracking-wide text-text-muted">JNTUH UCEJ Gate Monitor</span>
           </div>
           <div className="max-w-md space-y-4 my-auto">
@@ -44,8 +43,8 @@ export default function CinematicLoginPage() {
         <div className="col-span-1 lg:col-span-5 flex flex-col items-center justify-center p-6 sm:p-12 relative z-10">
           <div className="w-full max-w-md">
             <div className="lg:hidden mb-8 text-center">
-              <div className="inline-flex size-6 items-center justify-center rounded-xl bg-indigo-600/20 border border-indigo-500/30 font-bold text-action-primary mb-2">
-                GM
+              <div className="flex justify-center mb-2">
+                <BrandLogo variant="lockup" size="lg" motion="cinematic" status="idle" />
               </div>
               <h2 className="text-lg font-semibold text-white">JNTUH UCEJ Gate Monitor</h2>
               <p className="text-xs text-text-muted">Sign in to your dashboard</p>

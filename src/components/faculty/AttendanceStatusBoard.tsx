@@ -57,6 +57,8 @@ interface Props {
   error?: string | null;
   /** When true, rows expose real PATCH mutations; when false, read-only. */
   canMark?: boolean;
+  /** Target class the roster belongs to — required for the per-student PATCH. */
+  classId?: string;
   onInspect?: (s: RosterStudent) => void;
   /** Fired after a mutation succeeds so the parent can refresh its cache. */
   onMutated?: () => void;
@@ -86,6 +88,7 @@ export function AttendanceStatusBoard({
   loading,
   error,
   canMark = false,
+  classId,
   onInspect,
   onMutated,
   onMutationError,
@@ -102,7 +105,7 @@ export function AttendanceStatusBoard({
         const res = await fetch(`/api/faculty/attendance/roster/${encodeURIComponent(studentId)}`, {
           method: "PATCH",
           headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-          body: JSON.stringify({ field, value: "1", reason }),
+          body: JSON.stringify({ field, value: "1", reason, classId }),
         });
         if (res.ok) {
           onMutated?.();
@@ -116,7 +119,7 @@ export function AttendanceStatusBoard({
         setActing(null);
       }
     },
-    [onMutated, onMutationError],
+    [onMutated, onMutationError, classId],
   );
 
   const byCol: Record<ColKey, RosterStudent[]> = { present: [], absent: [], unmarked: [] };

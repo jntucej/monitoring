@@ -10,9 +10,9 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  ShieldCheck,
 } from "lucide-react";
 import { getNavIcon } from "@/lib/lucide-icon-resolver";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useNavigation, NavGroup, NavItem } from "@/hooks/useNavigation";
@@ -92,10 +92,14 @@ function DesktopSidebar({
     >
       {/* Brand Header */}
       <div className="surface-card px-3 py-3 flex items-center justify-between min-h16">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="size-5 bg-action-primary/20 text-action-primary flex items-center justify-center shrink-0 font-bold border border-action-primary/30">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <BrandLogo
+            variant={isSidebarCollapsed ? "mark" : "lockup"}
+            size="xs"
+            motion="reactive"
+            className="shrink-0"
+            alt="JNTUH UCEJ — Gate Monitor"
+          />
           {!isSidebarCollapsed && (
             <div className="min-w-4 transition-opacity duration-200">
               <p className="text-sm font-bold tracking-tight text-text-primary truncate">
@@ -247,10 +251,8 @@ function MobileDrawer({
           >
             {/* Drawer Header */}
             <div className="surface-card p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="size-5 bg-action-primary/20 text-action-primary flex items-center justify-center font-bold border border-action-primary/30">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
+              <div className="flex items-center gap-2.5">
+                <BrandLogo variant="lockup" size="xs" motion="static" className="shrink-0" alt="JNTUH UCEJ — Gate Monitor" />
                 <div>
                   <h2 className="text-sm font-bold text-text-primary">Gate Monitor</h2>
                   <p className="text-xs font-mono uppercase text-text-muted">{currentRole}</p>

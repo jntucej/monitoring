@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { QrCode, Loader2, AlertCircle, Download, RotateCw, ShieldAlert, Phone } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { parseRollNumber } from "@/lib/rollNumber";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
@@ -170,6 +171,10 @@ const api = useApi();
 
   return (
     <div className="surface-card bg-bg-surface p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
+      {/* Brand crest seal (monochrome, decorative — never obstructs the QR below) */}
+      <div className="pointer-events-none mb-3 opacity-80">
+        <BrandLogo variant="monochrome" size="xs" motion="static" />
+      </div>
       {/* Student Photo */}
       <div className="relative w-[112px] h-[112px] rounded-full mb-3 sm:mb-4 border-4 border-action-info overflow-hidden">
         <img src={photoSrc} alt={student.name} className="rounded-full w-full h-full object-cover" />

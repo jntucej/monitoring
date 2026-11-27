@@ -3,7 +3,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
-import { Shield, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 /**
  * Full-page loading screen shown while:
@@ -49,7 +50,6 @@ export function AppLoadingScreen() {
   if (hideRef.current) return null;
 
   const bg = "bg-bg-base";
-  const cardBg = "bg-bg-surface border-border";
   const textMuted = "text-text-muted";
 
   return (
@@ -67,14 +67,14 @@ export function AppLoadingScreen() {
         />
       </div>
 
-      {/* Brand logo */}
-      <div className={`flex items-center justify-center size-6 rounded-2xl ${cardBg} shadow-2xl`}>
-        <Shield className="size-6 text-action-primary animate-pulse" />
+      {/* Brand crest + wordmark (canonical BrandLogo, loading motion = orbit + breathe) */}
+      <div className="flex items-center justify-center">
+        <BrandLogo variant="lockup" size="lg" motion="loading" status="live" />
       </div>
 
       {/* App name */}
-      <p className="mt-5 text-lg font-semibold text-text-primary tracking-tight">
-        Gate Monitor
+      <p className="mt-4 text-base font-semibold text-text-primary tracking-tight">
+        Campus Portal
       </p>
       <p className={`mt-1 text-xs ${textMuted} flex items-center gap-1.5`}>
         <Loader2 className="size-3.5 animate-spin" />

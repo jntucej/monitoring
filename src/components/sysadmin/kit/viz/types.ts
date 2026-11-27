@@ -179,3 +179,29 @@ export interface ChainDotsProps {
   onStageClick?: (id: string) => void;
   className?: string;
 }
+
+// ── DualThroughputCurve ────────────────────────────────────
+// One time-series point for each of the two overlaid series.
+export interface TcPoint {
+  /** unix seconds (epoch) */
+  t: number;
+  value: number;
+}
+
+export interface DualThroughputCurveProps {
+  /** Primary series (e.g. API requests/sec). When omitted/empty, the component
+   *  fetches its own range queries from the Prometheus proxy. */
+  primary?: TcPoint[];
+  /** Secondary series (e.g. p95 latency, ms). */
+  secondary?: TcPoint[];
+  primaryLabel?: string;
+  secondaryLabel?: string;
+  /** height in px (default 180) */
+  height?: number;
+  /** window label, e.g. "last 1h" */
+  windowLabel?: string;
+  loading?: boolean;
+  /** explicit empty-state message (rendered when both series are empty). */
+  emptyMessage?: string;
+  className?: string;
+}

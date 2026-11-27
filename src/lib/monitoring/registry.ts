@@ -73,6 +73,36 @@ export const QUERY_REGISTRY: Record<string, NamedQuery> = {
     query: "up",
     type: "instant",
   },
+  // HTTP throughput / latency (from the app's /api/metrics exposition,
+  // scraped into Prometheus). Backs the DevOps DualThroughputCurve:
+  //   fleet.http_rate   — requests/sec over the last 5m (range)
+  //   fleet.http_errors — 5xx rate over the last 5m (range)
+  //   fleet.http_p95    — response-time p95 in ms (range, sampled)
+  //   fleet.http_total  — total requests over a window (instant, gauge-ish)
+  "fleet.http_rate": {
+    id: "fleet.http_rate",
+    description: "API requests/sec over the last 5m",
+    query: "sum(rate(api_requests_total[5m]))",
+    type: "range",
+  },
+  "fleet.http_errors": {
+    id: "fleet.http_errors",
+    description: "API 5xx errors/sec over the last 5m",
+    query: "sum(rate(api_errors_total[5m]))",
+    type: "range",
+  },
+  "fleet.http_p95": {
+    id: "fleet.http_p95",
+    description: "API p95 response time (ms), sampled",
+    query: "avg(api_response_time_p95_ms)",
+    type: "range",
+  },
+  "fleet.http_total": {
+    id: "fleet.http_total",
+    description: "Total API requests (1h window)",
+    query: "sum(api_requests_total)",
+    type: "instant",
+  },
 };
 
 export function getNamedQuery(id: string): NamedQuery | null {

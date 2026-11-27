@@ -1,14 +1,18 @@
 import { COLLEGE } from "@/lib/college-config";
 import { EmailLink, PhoneLink } from "@/components/shared/ContactLink";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import Link from "next/link";
 
 export function HomeFooter() {
   return (
     <footer className="surface-card py-8 text-center text-sm text-[var(--home-text-muted,var(--text-muted))]">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p>
-          © {new Date().getFullYear()} {COLLEGE.officialName ?? "Gate Monitor"}. All rights reserved.
-        </p>
+        <div className="flex items-center gap-3">
+          <BrandLogo variant="mark" size="sm" motion="static" className="shrink-0" />
+          <p>
+            © {new Date().getFullYear()} {COLLEGE.officialName ?? "Gate Monitor"}. All rights reserved.
+          </p>
+        </div>
         <div className="flex items-center gap-6">
           <Link href="/about" className="hover:underline">About</Link>
           <Link href="/help" className="hover:underline">Help</Link>

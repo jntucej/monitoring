@@ -10,6 +10,7 @@ export { Sankey } from "./Sankey";
 export { ChainDots } from "./ChainDots";
 export { HorizontalPillBarList } from "./HorizontalPillBarList";
 export { RadialGaugeCard } from "./RadialGaugeCard";
+export { DualThroughputCurve } from "./DualThroughputCurve";
 
 export type * from "./types";
 export { VIZ_THEME, statusColor, heatColor, clamp01 } from "./theme";

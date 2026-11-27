@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { ShieldAlert, Lock, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import Link from "next/link";
 
 function LockInner() {
@@ -34,6 +35,7 @@ function LockInner() {
   if (done) {
     return (
       <div className="p-6 sm:p-10 max-w-md mx-auto space-y-4">
+        <BrandLogo variant="mark" size="sm" motion="cinematic" status="alert" className="mb-2" />
         <ContextSituationBar
           roleLabel="Account Security"
           purpose="Emergency killswitch to revoke all active web/mobile sessions."
@@ -67,6 +69,7 @@ function LockInner() {
   if (err) {
     return (
       <div className="p-6 sm:p-10 max-w-md mx-auto space-y-4">
+        <BrandLogo variant="mark" size="sm" motion="cinematic" status="alert" className="mb-2" />
         <ContextSituationBar
           roleLabel="Account Security"
           purpose="Emergency killswitch to revoke all active web/mobile sessions."

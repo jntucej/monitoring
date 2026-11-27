@@ -333,6 +333,7 @@ function ClassAttendanceInner() {
         loading={rosterLoading}
         error={rosterError}
         canMark
+        classId={classId}
         onInspect={inspectRosterStudent}
         onMutated={() => {
           refreshRoster();

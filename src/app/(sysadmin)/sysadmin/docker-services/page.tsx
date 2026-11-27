@@ -10,6 +10,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { DockerFleetPanel } from "@/components/sysadmin/monitoring/DockerFleetPanel";
+import { DualThroughputCurve } from "@/components/sysadmin/kit/viz";
 import { ObservabilityStackPanel } from "@/components/sysadmin/monitoring/ObservabilityStackPanel";
 import { AlertTriangle, Container } from "lucide-react";
 import { SysAdminGroupTrace } from "@/components/nav/level4/SysAdminGroupTrace";
@@ -234,6 +235,11 @@ function DockerServicesInner() {
 
       {/* Host-level Prometheus fleet charts (existing panel) */}
       <DockerFleetPanel />
+
+      {/* API throughput + p95 latency (DevOps dual-series, real Prometheus) */}
+      <WidgetBoundary title="Throughput & Latency">
+        <DualThroughputCurve primaryLabel="Throughput (req/s)" secondaryLabel="p95 latency (ms)" windowLabel="last 1h" />
+      </WidgetBoundary>
 
       {/* Full Observability Stack + Live Loki Container Logs */}
       <ObservabilityStackPanel />

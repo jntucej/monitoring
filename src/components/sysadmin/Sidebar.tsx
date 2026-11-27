@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarInfographic } from "./SidebarInfographic";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 import { ProfileMenuButton } from "@/components/shared/ProfileMenuButton";
 import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import manifest from "../../../packages/sysadmin-console-kit/manifest/ia.json";
@@ -390,6 +391,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
         </button>
         {!isCollapsed && (
           <>
+            <BrandLogo variant="mark" size="xs" motion="reactive" status="idle" className="shrink-0" alt="JNTUH UCEJ — Sysadmin" />
             <span className="text-sm font-semibold tracking-tight flex-1 min-w-0 truncate">
               Sysadmin
             </span>

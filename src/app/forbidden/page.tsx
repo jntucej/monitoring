@@ -7,6 +7,7 @@ import { getDefaultRouteForRole } from "@/lib/route-helpers";
 import { ShieldAlert, ArrowLeft, LogIn, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 export default function ForbiddenPage() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function ForbiddenPage() {
   return (
     <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary p-4">
       <div className="surface-card max-w-md w-full text-center space-y-6 bg-bg-surface p-8">
+        <BrandLogo variant="mark" size="sm" motion="static" status="alert" className="mx-auto opacity-90" />
         <ContextSituationBar
           roleLabel={user?.role ? user.role.toUpperCase() : "Unauthenticated"}
           purpose="Enforce role-based access control and prevent unauthorized view transitions."
