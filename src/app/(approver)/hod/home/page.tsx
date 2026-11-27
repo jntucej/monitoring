@@ -5,7 +5,8 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useHodRetention } from "@/stores/hodRetentionStore";
 import { useHodStreak } from "@/hooks/useHodStreak";
-import { MorningBrief } from "../_retention/MorningBrief";
+import { MorningBrief } from "@/components/shared/MorningBrief";
+import { StreakBadge } from "../_retention/StreakBadge";
 import { BetweenClasses, type ScheduleSlot } from "../_retention/BetweenClasses";
 import { FocusZone, type FocusItem } from "../_retention/FocusZone";
 import { FocusMode } from "../_retention/FocusMode";
@@ -200,6 +201,7 @@ const user = useAuthStore((s) => s.user);
             pending={pending}
             cleared={d?.counts.todayDecisions ?? 0}
             target={Math.max(5, pending + (d?.counts.todayDecisions ?? 0))}
+            streak={<StreakBadge />}
           />
         </WidgetBoundary>
 

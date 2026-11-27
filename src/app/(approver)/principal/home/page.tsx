@@ -8,7 +8,8 @@ import { usePrincipalStreak } from "@/hooks/usePrincipalStreak";
 import { AlertTriangle, RotateCw } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataFreshness } from "@/components/shared/DataFreshness";
-import { MorningBrief } from "../_retention/MorningBrief";
+import { MorningBrief } from "@/components/shared/MorningBrief";
+import { StreakBadge } from "../_retention/StreakBadge";
 import { FocusZone, type FocusItem } from "../_retention/FocusZone";
 import { FocusMode } from "../_retention/FocusMode";
 import { ChainImpact } from "../_retention/ChainImpact";
@@ -259,6 +260,8 @@ const user = useAuthStore((s) => s.user);
             pending={pending}
             cleared={d?.counts.todayDecisions ?? 0}
             target={Math.max(5, pending + (d?.counts.todayDecisions ?? 0))}
+            streak={<StreakBadge />}
+            pendingHref="/principal/approvals/pending"
           />
         </WidgetBoundary>
 

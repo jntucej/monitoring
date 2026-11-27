@@ -5,7 +5,8 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useVPRetention } from "@/stores/vpRetentionStore";
 import { useVPStreak } from "@/hooks/useVPStreak";
-import { MorningBrief } from "../_retention/MorningBrief";
+import { MorningBrief } from "@/components/shared/MorningBrief";
+import { StreakBadge } from "../_retention/StreakBadge";
 import { FocusZone, type FocusItem } from "../_retention/FocusZone";
 import { FocusMode } from "../_retention/FocusMode";
 import { Scorecard } from "../_retention/Scorecard";
@@ -218,6 +219,7 @@ const user = useAuthStore((s) => s.user);
             pending={pending}
             cleared={todayCleared}
             target={dailyTarget}
+            streak={<StreakBadge />}
           />
         </WidgetBoundary>
 
