@@ -6,7 +6,7 @@
 
 ## Pages & workflows
 
-All routes are gated `allowedRoles=["staff"]` and live under `/staff/...`:
+All 11 routes are gated `allowedRoles=["staff"]` and live under `/staff/...`:
 
 - **`/staff`** — the personal dashboard (`RoleDashboardPanel` at `endpoint="/api/staff/my-day"`). Surfaces: movements today, assigned tasks, open requests, duty roster, recent activity.
 - **`/staff/my-day`** — the day view: today's duty, expected in/out times, movements logged so far.
@@ -17,6 +17,7 @@ All routes are gated `allowedRoles=["staff"]` and live under `/staff/...`:
 - **`/staff/history`** — past attendance, past movements, past requests.
 - **`/staff/my-profile`** — the profile card (with the human identifier, not the UUID, per the role-scoped ID rule).
 - **`/staff/notifications`** — in-app notices targeted at this staff.
+- **`/staff/circulars`** — inbox for official administrative and institutional circulars (`/api/circulars/my-inbox`), receipt noting, and forwarding/relay.
 
 Typical flows:
 

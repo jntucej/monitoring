@@ -10,10 +10,10 @@ API endpoints back them, and how user-level customization works.
 
 ## Start here
 
-- **[`roles/_overview.md`](roles/_overview.md)** — the map: all roles grouped by
+- **[`_overview.md`](_overview.md)** — the map: all roles grouped by
   tier, the shared auth model, the RBAC enforcement points, and links to every
   role doc. **Read this first.**
-- **[`roles/customization.md`](roles/customization.md)** — the user-level
+- **[`customization.md`](customization.md)** — the user-level
   layer: the preference cascade (policy > user > trait > persona > role >
   system), the 91-key registry, traits, explicit settings, and the
   `/api/preferences` + `/api/traits/context` endpoints.
@@ -27,10 +27,11 @@ API endpoints back them, and how user-level customization works.
 | Faculty & staff | `faculty` · `staff` · `worker` · `operator` |
 | Campus / hostel / mess / security | `caretaker` · `hostel_manager` · `deputy_warden` · `mess_incharge` · `supervisor` · `emo` |
 | Approvers | `hod` · `oie` · `exam_branch` · `exam_superintendent` |
-| Senior / institutional | `principal` · `vice_principal` · `chief_warden` (role context) · `dean` |
+| Senior / institutional | `principal` · `vice_principal` · `chief_warden` (role context on Principal) · `dean` |
 
-DB-only roles (`controller_examinations`, `addl_controller_*`) have no
-dedicated console and are documented inline in the senior-role docs.
+*Note on DB-only and legacy roles:*
+- **DB-only roles:** `controller_examinations`, `addl_controller_academic`, `addl_controller_results`, `addl_controller_automation` have no dedicated UI consoles; their backend permissions and workflows are documented inline in the examination and senior-role docs (`exam_superintendent.md`, `oie.md`, `exam_branch.md`, `principal.md`).
+- **Legacy compatibility keys:** `hostel` (legacy folded role for permissions workflow) and `warden` (removed in migration 20261125000001, responsibilities folded into `principal` with redirect page at `/warden`).
 
 ## How to read a role file
 

@@ -4,27 +4,29 @@
 The HOD (Head of Department) role represents academic department heads (e.g. CSE, ECE, EEE, MECH, CIVIL) at JNTUH CEJ. HODs oversee department-wide academic operations, faculty teaching compliance, student attendance retention trends, curriculum schedules, and escalated academic disciplinary or status changes.
 
 ## Pages & workflows
-The HOD role utilizes the faculty academic suite along with elevated departmental oversight and academic status routes (16 pages):
+The HOD role operates across 12 dedicated routes in the approver console, providing departmental academic governance, faculty administration, and approval queues:
 
-### 1. Departmental Oversight & Academic Status
-- `/faculty`: Primary operational console, extended for HODs with department health metrics, attendance deficit warnings across batches, and unverified lecture alerts.
-- `/sysadmin/academic-status`: Departmental review and flagging of student academic standing (e.g., flagging students for SUSPENDED, DEBARRED, or LATERAL_JOIN). Flags submitted by the HOD land in `pending_approvals` for Dean, Principal, or Vice Principal executive sign-off.
-- `/faculty/reports`: Comprehensive departmental reports on student detention risks (<75% attendance threshold), faculty syllabus coverage, and midterm marks distributions.
+### 1. Leadership Console & Department Status
+- `/hod/home`: Primary departmental leadership console displaying high-level operational KPIs, attendance rates, faculty on duty, and system pulse metrics.
+- `/hod/profile`: HOD administrative profile, department binding details, and contact info.
+- `/hod/reports`: Department analytics and reporting view covering student attendance trends, risk thresholds (<75%), and performance distributions.
 
-### 2. Department Faculty & Class Timetable Governance
-- `/faculty/my-classes`, `/faculty/class`, `/faculty/class/[id]`: Department course offerings, batch structures, and assigned faculty allocations.
-- `/faculty/subject`, `/faculty/subject/classes`, `/faculty/subject/attendance`: Department syllabus progression, lecture delivery adherence, and section-by-section attendance parity.
-  - *Timetable Adjustment Workflow*: HOD reviews departmental timetable conflicts or faculty absence -> accesses flexible class management -> invokes `PATCH /hod/flexible-class/[id]` to reassign classroom lecture slots or designate substitute faculty -> changes propagate to faculty schedules and student timetables.
+### 2. Department Approvals & Escalations
+- `/hod`: Default landing view for departmental pending approvals and student permission reviews.
+- `/hod/approvals`: Dedicated approvals workspace for reviewing student gate pass, leave, and academic exemption requests.
+- `/hod/approvals/pending`: Filtered queue of pending student leave and permission requests awaiting HOD adjudication.
+- `/hod/approvals/escalated`: High-priority queue of escalated permission requests and complex leave applications requiring HOD sign-off.
 
-### 3. Escalated Requests & Attendance Dispute Arbitration
-- `/faculty/class-requests`, `/faculty/request-history`: Escalated student leave requests, on-duty (OD) event delegations involving inter-college competitions, and long-term medical absence clearances.
-- `/faculty/correction-requests`: Second-tier approval for disputed attendance marks that exceed the faculty member's standard editing window.
-  - *Dispute Arbitration Workflow*: Class teacher refers unresolved attendance dispute -> HOD reviews student audit log and class logs -> confirms rectification via departmental override or upholds faculty mark -> records audit entry.
+### 3. Faculty & Class Governance
+- `/hod/classes`: Comprehensive departmental class master view, lecture timetables, room assignments, and flexible scheduling.
+- `/hod/faculty`: Department faculty overview and teaching assignment distribution.
+- `/hod/faculty/directory`: Directory of all department faculty members, designations, workload allocations, and contact credentials.
+- `/hod/faculty/attendance`: Faculty lecture attendance tracking, session confirmation monitoring, and daily presence logs.
 
-### 4. Examinations, Student Directory & Institutional Comms
-- Examination reviews: HOD reviews internal midterm question proposals, student eligibility lists, and marks submissions via `/api/hod/exam-review`.
-- `/faculty/student-directory`: Department-wide student directory with complete academic, hostel, and contact histories.
-- `/faculty/notifications`, `/faculty/permissions`: Official department-wide notifications, administrative circulars, and permissions for departmental technical symposiums.
+### 4. Students & Academic Standing
+- `/hod/students`: Department-wide student directory and roster management with attendance statistics and academic standing.
+- *Timetable Adjustment Workflow*: HOD reviews departmental timetable conflicts or faculty absence -> accesses `/hod/classes` -> invokes `PATCH /api/hod/flexible-class/[id]` to reassign classroom lecture slots or designate substitute faculty -> changes propagate to faculty schedules and student timetables.
+- *Dispute Arbitration Workflow*: Class teacher refers unresolved attendance dispute -> HOD reviews student audit log and class logs -> confirms rectification via departmental override or upholds faculty mark -> records audit entry.
 
 ## Key API endpoints
 
@@ -37,6 +39,7 @@ The HOD role utilizes the faculty academic suite along with elevated departmenta
 | `/hod/schedule` | GET | Fetches comprehensive department lecture and laboratory master timetable. |
 | `/hod/exam-review` | GET, POST | Inspects, endorses, or returns internal examination marks submitted by department faculty. |
 | `/hod/flexible-class/[id]` | PATCH | Modifies class session parameters, reallocates lecture rooms, or assigns substitute faculty. |
+| `/hod/class/[id]/set-cr` | POST | Designates class representative (CR) student bindings for a department section. |
 | `/complaints` | GET, POST | Reviews or manages academic grievances directed to the department head. |
 | `/complaints/[id]/timeline` | GET | Inspects full audit history and action trail of department-related complaints. |
 | `/complaints/analytics/summary` | GET | Delivers domain-level resolution metrics and SLA statistics for department complaints. |

@@ -8,15 +8,16 @@ While the Exam Branch handles pre-examination administrative setup and the OIE r
 The Exam Superintendent workspace uses a red-orange theme (`#fff7ed` surface tint) with composed motion, built around the `ExamDayCommand` and `IncidentFeed` widgets.
 
 ## Pages & workflows
+The Exam Superintendent console spans 5 dedicated routes in the public route group:
 
 ### 1. Live Exam Day Command
-* **Exam Day Command Cockpit (`/exam/permissions`, `/exam/permissions/oie`):** Provides live countdown timers for active examination sessions, real-time hall occupancy tallies, and incident telemetry.
-* **Examination Day Access (`/oie/examination-day-access`):** Monitors entry gate desks and hall doorways in real-time, verifying candidate transit times and flagging students arriving after the cutoff time.
+* **Exam Access Desk (`/exam/superintendent`):** Main on-ground operational console for live examination hall access control, biometric verification check-in, and permission monitoring (`/api/exam/access`).
+* **Today Overview (`/exam/superintendent/home`):** Real-time command dashboard showing active exam session progress, total halls, and fast KPI telemetry (`/api/exam/superintendent`).
+* **Exam Incidents (`/exam/superintendent/incidents`):** Incident response center monitoring active exam security alerts, malpractice reports, and hall access exceptions (`/api/alerts`, `/api/exam/access-exceptions`).
 
-### 2. Candidate Attendance & Hall Oversight
-* **Candidate Attendance Verification (`/oie/candidate-attendance`):** Live dashboard tracking invigilator attendance reports, marked absentees, and D-form sign-offs across all examination halls.
-* **Access Exceptions & Spot Clearances (`/oie/access-exceptions`, `/oie/queue`):** Allows reviewing candidate eligibility exceptions issued by the OIE and granting physical hall entry.
-* **Decision History & Reports (`/oie/decision-history`, `/oie/examination-reports`, `/oie/records`):** Archives end-of-session attendance returns, incident logs, and invigilator reports.
+### 2. Hall Oversight, Schedule & Reports
+* **Exam Schedule (`/exam/superintendent/schedule`):** Live timetable of ongoing and upcoming examination shifts, assigned halls, and candidate quotas (`/api/permissions?workflow_type=exam`).
+* **Superintendent Reports (`/exam/superintendent/reports`):** Session reconciliation reports, hall occupancy metrics, and candidate attendance rosters.
 
 ## Key API endpoints
 

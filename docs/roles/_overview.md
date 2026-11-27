@@ -1,12 +1,12 @@
 # JNTUH CEJ Gate Monitor — Role Architecture & Global Reference
 
-This document serves as the comprehensive master reference for the 28 active roles in the JNTUH CEJ Gate Monitor stack. It outlines the role taxonomy across operational tiers, the shared authentication model, server-side RBAC enforcement architecture, and links to role-specific documentation.
+This document serves as the comprehensive master reference for the roles defined in the JNTUH CEJ Gate Monitor stack (`src/lib/roles.ts` defines 29 role keys; 28 active institutional/operational roles plus legacy `hostel` approver compatibility). It outlines the role taxonomy across operational tiers, the shared authentication model, server-side RBAC enforcement architecture, and links to role-specific documentation.
 
 ---
 
-## 1. System Role Taxonomy (28 Roles)
+## 1. System Role Taxonomy (28 Active Roles + Legacy Compatibility)
 
-The platform governs 28 distinct roles across six functional tiers:
+The platform defines 29 role keys in `src/lib/roles.ts` (governing 28 active institutional and operational roles across six functional tiers, plus the legacy `hostel` compatibility key):
 
 ### Tier 1: Students & Primary Constituents
 - [`student`](./student.md): Student persona — gate pass requests, attendance tracking, mess bills, fee dues, library account, marks view, and incident reporting.
@@ -31,6 +31,7 @@ The platform governs 28 distinct roles across six functional tiers:
 - [`exam_superintendent`](./exam_superintendent.md): Chief Superintendent (operational exam-day role) — examination day access, candidate attendance, and spot exceptions.
 - [`oie`](./oie.md): Officer In-Charge of Examinations — exam office queue triage, attendance reconciliation, and candidate exception intake.
 - [`exam_branch`](./exam_branch.md): Legacy exam branch coordination role (maintained for backward compatibility).
+- `hostel`: Legacy folded role recognized for approver surface compatibility (permissions workflow).
 
 ### Tier 5: Campus, Hostel, Mess & Security Operations
 - [`principal`](./principal.md): Administrative head of institution — full campus dashboard, institution-wide approvals, lockdown authorization, and Chief Superintendent of exams.
@@ -112,11 +113,7 @@ Access controls are enforced at both the client shell and API boundary:
 
 ## 4. Documentation Index
 
-Detailed role manuals (one file per role that has a UI surface; roles with no
-dedicated pages — `controller_examinations`, `addl_controller_academic`,
-`addl_controller_results`, `addl_controller_automation` — are DB-only roles
-that act through the shared exam/approval subsystem and have no console of
-their own, so they are not separate files):
+Detailed role manuals (one file per active role that has a dedicated documentation manual; 24 files for 28 active roles where DB-only exam roles `controller_examinations`, `addl_controller_academic`, `addl_controller_results`, `addl_controller_automation` act through the shared exam/approval subsystem without dedicated consoles; and legacy `hostel` is folded):
 
 **Customization & personalization**
 - [`customization.md`](./customization.md) — the user-level layer: preference cascade, traits, explicit settings, and the API that backs it
@@ -147,7 +144,7 @@ their own, so they are not separate files):
 
 **Departmental & academic approvers**
 - [`hod.md`](./hod.md)
-- [`oie`](./oie.md)
+- [`oie.md`](./oie.md)
 - [`exam_branch.md`](./exam_branch.md)
 - [`exam_superintendent.md`](./exam_superintendent.md)
 

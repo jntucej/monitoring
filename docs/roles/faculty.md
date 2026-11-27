@@ -4,7 +4,7 @@
 The faculty role encompasses teaching staff and class teachers across academic departments at JNTUH CEJ. Faculty use the web console to record and verify daily class lecture attendance, resolve student attendance disputes, manage subject assignments and internal marks, review class-level gate pass requests, and mentor assigned student cohorts.
 
 ## Pages & workflows
-The faculty console operates across 16 routes governed by teaching capability bindings (`faculty_assignments`):
+The faculty console operates across 17 routes in the approver route group governed by teaching capability bindings (`faculty_assignments`), plus a shared public attendance route (`/faculty/attendance`):
 
 ### 1. Daily Teaching Dashboard & Class Management
 - `/faculty`: The teaching dashboard landing page, presenting active lecture schedules for the day, quick-action attendance buttons, pending student correction requests, and mentee check-in alerts.
@@ -14,6 +14,7 @@ The faculty console operates across 16 routes governed by teaching capability bi
 ### 2. Live Lecture Attendance & Dispute Resolution
 - `/faculty/attendance/[id]`: Classroom attendance recording and verification view for a specific lecture session.
   - *Attendance Taking Workflow*: Faculty opens `/faculty` -> selects current active lecture under **Today's Classes** -> navigates to `/faculty/attendance/[id]` -> reviews populated roster (`GET /faculty/attendance/roster`) -> marks Present, Absent, or Late -> submits session confirmation (`POST /class-sessions/[sessionId]/confirm` or `POST /class-sessions/confirm-bulk`) -> attendance records lock into `class_attendance` table.
+- `/faculty/attendance`: Shared department attendance monitoring and tracking matrix (accessible across faculty, HOD, and administrators).
 - `/faculty/correction-requests`: Inbound queue of student attendance disputes. Faculty can review evidence and either accept (`POST /faculty/marks/correct`) or reject the dispute.
 
 ### 3. Subject Coursework & Internal Marks
@@ -25,7 +26,7 @@ The faculty console operates across 16 routes governed by teaching capability bi
   - *Resolution Flow*: Faculty reviews request -> checks attendance threshold -> clicks Approve/Reject (`POST /class-requests/[id]/resolve`).
 - `/faculty/permissions`: Review special campus event permissions requiring faculty in-charge sign-off (e.g. hackathons, sports meets, cultural fests).
 - `/faculty/student-directory`, `/faculty/reports`: Departmental directory of students, mentee profiles (`GET /faculty/mentees`), and downloadable periodic attendance reports.
-- `/faculty/notifications`: Inbound notices regarding timetable changes, department circulars, and system alerts.
+- `/faculty/notifications`, `/faculty/circulars`: Inbound notices regarding timetable changes, department circulars (`/api/circulars/my-inbox`), relay actions, and system alerts.
 
 ## Key API endpoints
 

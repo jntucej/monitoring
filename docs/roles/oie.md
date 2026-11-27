@@ -18,6 +18,7 @@ The OIE workspace is styled in an orange theme (`#fff7ed` surface tint) with com
 * **Examination Day Access (`/oie/examination-day-access`):** Real-time monitoring of campus gate desks and exam hall entry points during exam windows. Handles candidate biometric or RFID scan failures.
 * **Candidate Attendance Reconciliation (`/oie/candidate-attendance`):** Reconciles hall seating plans against actual candidate entry scans, highlighting absentees and unallocated candidates.
 * **Access Exceptions (`/oie/access-exceptions`):** Generates spot exceptions for candidates detained by fee or gate issues, granting conditional admission to examination halls.
+* **Examination Reports (`/oie/examination-reports`):** Statistical reports, hall utilization summaries, candidate attendance distributions, and exception metrics.
 * **Exam Branch & VP Coordination (`/oie/exam-branch-coordination`, `/exam/permissions/oie`, `/vice-principal/*`):** Bridges exam-day incident escalation with the Examination Branch desk and Vice-Principal.
 
 ## Key API endpoints

@@ -4,12 +4,14 @@
 The student role represents enrolled students at JNTUH CEJ, partitioned into two operational personas: day scholars and hostel residents. Students use the web application to manage gate movement passes, track attendance and academic milestones, view mess menus and tokens, submit campus complaints, and respond to curfew or security notifications.
 
 ## Pages & workflows
-The student interface spans 45 routes categorized into core functional workflows:
+The student interface spans 49 routes categorized into core functional workflows:
 
 ### 1. Dashboard & Status
 - `/student`: Persona-aware landing dashboard. For day scholars, it prioritizes real-time class attendance percentages, today's schedule (`MyDayStrip`), and action items; for hostellers, it highlights curfew countdowns, active hostel passes (`ActivePassCard`), and resident status.
 - `/student/recap`, `/student/activity`, `/student/calendar`: Academic milestone reviews, personal activity history, and combined academic/campus calendar.
 - `/student/id`: Digital student ID card with live identity tokens for gate and campus verification.
+- `/student/history`: Personal historical gate movement logs and scan timeline.
+- `/student/qr`: Multi-tab digital QR presentation screen for identity badges and mess tokens.
 
 ### 2. Gate Passes & Permission Requests
 - `/student/passes`, `/student/passes/[ticket]`: View active, historical, and pending gate passes, inspection of approval chain status, QR pass display for gate scanner scanning, and feedback submission.
@@ -20,17 +22,20 @@ The student interface spans 45 routes categorized into core functional workflows
 ### 3. Academics & Attendance
 - `/student/attendance`, `/student/attendance-calendar`: Overview of aggregate attendance, subject-by-subject percentage, and date-by-date calendar breakdown.
 - `/student/assignments`, `/student/marks`, `/student/exams`: Assignment submission tracking, internal marks view, and upcoming examination schedules.
+- `/student/class-dashboard`: Class academic standing, batch leaderboards, and attendance benchmarks.
 - `/student/class-requests`: Track requests related to class attendance, leaves, or session conflicts.
 - `/student/library`, `/student/fees`, `/student/scholarships`: Borrowed book tracking/fines, tuition/exam fee ledger, and scholarship entitlement tracking.
 
 ### 4. Hostel & Mess (Hosteller Persona)
 - `/student/mess`, `/student/mess-bill`, `/student/mess/reviews`: Daily dining menu, monthly mess billing and rebate calculations, and mess feedback reviews.
 - `/student/mess/token`, `/student/mess/token/[eventId]`, `/student/mess/special`: Digital dining token redemption and registration for special feasts.
+- `/student/mess/qr`: Dynamic rotating QR token display for meal redemption scans at mess counters.
 - Meal opt-out can be requested through the mess interface, creating rebate records.
 
 ### 5. Campus Community, Complaints & Safety
 - `/student/complaints`, `/student/complaints/new`, `/student/complaints/[id]`: File institutional grievances (hostel maintenance, ragging, academic issues) with attachments, view real-time resolver timelines, and add cosigners.
 - `/student/anti-ragging`: Specialized grievance and emergency reporting channel for campus safety.
+- `/student/sos`: Campus emergency SOS dispatch console triggering immediate alerts to on-duty security.
 - `/student/campus`, `/student/my-events`, `/student/achievements`, `/student/knowledge`: Campus event discovery/registration, community feed, student achievements, and resource knowledge base.
 - `/student/notifications`, `/student/notifications/alerts`, `/student/notifications/announcements`: Emergency broadcast feeds, gate pass alerts, and curfew acknowledgement notices.
 

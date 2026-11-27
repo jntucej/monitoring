@@ -1,16 +1,27 @@
 # Visitor — how it works
 
 ## Overview
-The `visitor` role represents external campus guests, vendors, contractors, and visiting guardians. This is a minimal-surface, limited-lifecycle role in the Gate Monitor platform.
+The `visitor` role represents external campus guests, vendors, contractors, and visiting guardians. Visitors use the web portal to register their identity, request host appointments, present digital passes, and track check-in/out timestamps.
 
-Visitors do not possess an internal administrative dashboard or complex operational workflows (hence 0 dedicated page routes in the application facts). Their interaction is strictly confined to self-service pass requests, digital pass representation, self check-in/out, and viewing personal visitor pass statuses via mobile/web view or kiosk endpoints.
+The visitor interface is hosted under the public route group with 9 dedicated routes, providing a self-service visitor portal for pass requests, digital pass representation, self check-in/out, and viewing personal visitor pass statuses.
 
 ## Pages & workflows
-- **Limited UI Surface**: Visitors have no full dashboard suite (0 internal page routes). They interact with the system through public/guest onboarding links, pre-registration pass links, SMS-delivered QR pass views, or kiosk terminals.
-- **Visitor Pass Lifecycle**:
-  - Pre-registration / on-arrival request submission.
-  - Presentation of generated digital pass (QR code / token) at campus gate kiosks.
-  - Self-service or kiosk-assisted check-in and check-out tracking.
+The visitor interface spans 9 routes within the public route group:
+
+### 1. Visitor Portal & Live Visit
+- `/visitor`: Visitor Portal landing page presenting the live visit status overview, visit summary card, fast check-in/out CTA, and navigation links.
+- `/visitor/visit`: Live visit detail view, active digital visit pass display, and interactive self-service check-in/check-out trigger.
+- `/visitor/visit-details`: Detailed parameters of the scheduled visit, host contact details, permitted campus zones, and vehicle registration.
+
+### 2. Request & Registration
+- `/visitor/request`: Visit request form allowing guests to request an appointment with an institutional host (faculty, department, or administrative office).
+- `/visitor/registration`: Visitor identity profile and registration view to update personal details, identity proof references, and contact phone numbers.
+- `/visitor/approval-status`: Live status tracker for submitted visit requests awaiting host endorsement.
+
+### 3. History & Check-In Operations
+- `/visitor/history`: Chronological historical visit log displaying past campus visits, check-in/out timestamps, and host departments.
+- `/visitor/checkin-out`: Dedicated check-in and check-out terminal view for QR pass presentation at gate kiosks.
+- `/visitor/host-info`: Host profile information, department office location, and arrival instructions.
 
 ## Key API endpoints
 | Endpoint | Method(s) | What it does |

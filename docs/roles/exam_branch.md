@@ -8,16 +8,23 @@ In the institutional hierarchy, the Exam Branch operates under the Controller of
 The Exam Branch workspace features an amber theme (`#fffbeb` surface tint) with swift motion, centered on the `ExamCalendar` and `DiscrepancyRadar` widgets.
 
 ## Pages & workflows
+The Exam Branch console spans 10 dedicated routes in the public route group:
 
-### 1. Examination Planning & Discrepancies
-* **Exam Branch Dashboard & Discrepancy Radar (`/exam/permissions`, `/exam-branch`):** Tracks upcoming sessions, hall capacities, and real-time alerts flagging anomalies between student rosters and hall ticket registrations.
-* **OIE Handoff & Coordination (`/oie/exam-branch-coordination`, `/exam/permissions/oie`):** Surfaces issues that require operational adjudication by the OIE, such as attendance shortage appeals or late registrations.
-* **VP Escalations (`/exam/permissions/vice-principal`, `/vice-principal/examinations`):** Reviews exam policy discrepancies or malpractice cases requiring Vice-Principal authorization.
+### 1. Dashboard, Home & Planning
+* **Exam Branch Pass Queue (`/exam-branch`):** Operational queue monitoring pending exam clearances and forwarded permission tickets (`/api/permissions?workflow_type=exam&status=PENDING&stage=oie`).
+* **Today Overview (`/exam-branch/home`):** Examination operations overview and fast-action pass forwarding desk.
+* **Exam Calendar (`/exam-branch/calendar`):** Monthly examination schedules, session slots, and category-filtered calendar views (`/api/campus-extra/calendar?categories=examination`).
 
-### 2. Candidate Administration & Hall Operations
-* **Candidate Attendance Reconciliation (`/oie/candidate-attendance`):** Consolidates attendance feeds from physical halls into master examination session rosters.
-* **Access Exceptions & Emergency Passes (`/oie/access-exceptions`, `/oie/examination-day-access`):** Configures rules under which students with pending dues or minor biometric faults are granted examination gate passes.
-* **Decision History & Records (`/oie/decision-history`, `/oie/records`):** Maintains permanent archival records of attendance rosters, nominal rolls, and hall ticket issuances.
+### 2. Discrepancies, Verification & Records
+* **Exam Discrepancies (`/exam-branch/discrepancies`):** Anomaly and discrepancy tracking radar consolidating alerts and flagged roster differences.
+* **Exam Verification (`/exam-branch/verification`):** Candidate presence verification against live zone telemetry and Vice-Principal stage clearances.
+* **Exam Records (`/exam-branch/records`):** Historical archive and permanent ledger of examination pass permissions, candidate rosters, and audit trails.
+* **Exam Reports (`/exam-branch/reports`):** Comprehensive campus analytics, hall utilization matrices, and presence distribution reports.
+* **Exam Documentation (`/exam-branch/docs`):** Exam knowledge base, institutional guidelines, and operational documentation search.
+
+### 3. OIE Coordination & Approval Requests
+* **OIE Approval Requests (`/exam-branch/oie-approval-requests`):** Incoming candidate access requests and condonation appeals queued for OIE adjudication.
+* **OIE Handoff Desk (`/exam-branch/oie-handoff`):** Dedicated handoff interface for forwarding candidate tickets from Exam Branch to OIE proctors.
 
 ## Key API endpoints
 
