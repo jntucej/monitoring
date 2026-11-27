@@ -95,6 +95,11 @@ interface SupervisorOverview {
     startedAt: string | null;
     endsAt: string | null;
   };
+  insights: {
+    thisWeek: number;
+    lastWeek: number;
+    avgResponseSec: number;
+  };
 }
 
 export default function SupervisorTodayPage() {
@@ -273,9 +278,9 @@ const user = useAuthStore((s) => s.user);
         {/* 5. Scorecard */}
         <WidgetBoundary name="Scorecard" title="Scorecard">
           <Scorecard
-            thisWeek={d?.counts.resolvedToday ?? 0}
-            lastWeek={0}
-            avgResponseSec={0}
+            thisWeek={d?.insights.thisWeek ?? 0}
+            lastWeek={d?.insights.lastWeek ?? 0}
+            avgResponseSec={d?.insights.avgResponseSec ?? 0}
           />
         </WidgetBoundary>
 

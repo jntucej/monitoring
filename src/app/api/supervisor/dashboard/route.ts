@@ -5,7 +5,7 @@ import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
 
 async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
-  const [countsRes, priorityRes, gatesRes, incidentsRes, shiftRes] = await Promise.all([
+  const [countsRes, priorityRes, gatesRes, incidentsRes, shiftRes, insightsRes] = await Promise.all([
     // Current shift counts
     query<{
       escalations_open: string;
@@ -102,10 +102,39 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
          date_trunc('hour', NOW())::text AS started_at,
          (date_trunc('hour', NOW()) + INTERVAL '8 hours')::text AS ends_at`
     ).catch(() => ({ rows: [{ shift_id: null, started_at: null, ends_at: null }] })),
+
+    // Personal pace vs. previous 7d (insights) — real.
+    //   this_week/last_week: resolution actions this supervisor logged
+    //     (same audit_logs source + action set that backs resolved_today).
+    //   avg_response_sec: median-to-latest decision time on the permission
+    //     records they acted on at the supervisor stage (the same
+    //     updated_at - created_at the HOD/VP insights use).
+    query<{ this_week: string; last_week: string; avg_response_sec: string }>(
+      `WITH buckets AS (
+         SELECT
+           COUNT(*) FILTER (WHERE timestamp >= NOW() - INTERVAL '7 days') AS this_week,
+           COUNT(*) FILTER (
+             WHERE timestamp >= NOW() - INTERVAL '14 days'
+               AND timestamp <  NOW() - INTERVAL '7 days'
+           ) AS last_week
+         FROM audit_logs
+         WHERE user_id = $1
+           AND action IN ('PERMISSION_ESCALATED','PERMISSION_APPROVED','SCAN_CORRECTED')
+       )
+       SELECT this_week, last_week,
+         COALESCE((SELECT AVG(EXTRACT(EPOCH FROM (p.updated_at - p.created_at)))
+                   FROM permissions p
+                   WHERE p.current_stage = 'supervisor'
+                     AND p.status IN ('APPROVED','REJECTED','ESCALATED')
+                     AND p.updated_at >= NOW() - INTERVAL '7 days'), 0)::numeric AS avg_response_sec
+       FROM buckets`,
+      [auth.userId]
+    ).catch(() => ({ rows: [{ this_week: "0", last_week: "0", avg_response_sec: "0" }] })),
   ]);
 
   const c = countsRes.rows[0];
   const shift = shiftRes.rows[0];
+  const ins = insightsRes.rows[0] ?? { this_week: "0", last_week: "0", avg_response_sec: "0" };
   const now = Date.now();
 
   return ok({
@@ -145,6 +174,11 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
       shiftId: shift.shift_id,
       startedAt: shift.started_at,
       endsAt: shift.ends_at,
+    },
+    insights: {
+      thisWeek: Number(ins.this_week),
+      lastWeek: Number(ins.last_week),
+      avgResponseSec: Number(ins.avg_response_sec),
     },
   });
 }

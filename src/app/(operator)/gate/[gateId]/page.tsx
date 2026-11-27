@@ -149,7 +149,13 @@ const shift = useOperatorShiftClock();
   // got a 400 back.
   const recommendation = useMemo(() => {
     if (!currentStudent) return null;
-    const rawCurfew = (currentStudent as { hostel_curfew_time?: string | null }).hostel_curfew_time;
+    // The Person object built by findPersonByUniqueId exposes the curfew as
+    // `hostelCurfewTime` (camelCase). Read that; keep a snake_case fallback in
+    // case a raw DB row is ever passed through, so the curfew recommendation
+    // actually receives live data instead of silently degrading to "unknown".
+    const rawCurfew =
+      (currentStudent as { hostelCurfewTime?: string | null }).hostelCurfewTime ??
+      (currentStudent as { hostel_curfew_time?: string | null }).hostel_curfew_time;
     let curfewMinutes: number | null = null;
     if (typeof rawCurfew === "string" && /^\d{1,2}:\d{2}$/.test(rawCurfew.trim())) {
       const [hh, mm] = rawCurfew.trim().split(":").map(Number);
