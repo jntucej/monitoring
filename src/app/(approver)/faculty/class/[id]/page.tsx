@@ -7,8 +7,16 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
-import { useApiResource } from "@/hooks/useApiResource";
-import { Loader2, GraduationCap, User } from "lucide-react";
+import { useApiResource, clearCache } from "@/hooks/useApiResource";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { useToast } from "@/components/ui/toast";
+import { Loader2, GraduationCap, User, Users } from "lucide-react";
+import {
+  AttendanceStatusBoard,
+  type RosterPayload,
+  type RosterStudent,
+} from "@/components/faculty/AttendanceStatusBoard";
+import { StudentPicker, type PickerStudent } from "@/components/faculty/StudentPicker";
 
 const FacultyRosterPanel = lazy(() => import("@/components/faculty/FacultyRosterPanel"));
 
@@ -68,6 +76,53 @@ function ClassRosterInner() {
 
   const students = roster?.data ?? [];
   const details = cls?.data;
+
+  // Board 1: class attendance roster (real per-student present/absent/unmarked
+  // + period). Drives the StatusBoard + StudentPicker below via a single
+  // page-level inspector (one drawer, never stacked).
+  const {
+    data: rosterRaw,
+    loading: attRosterLoading,
+    error: attRosterError,
+    refresh: attRosterRefresh,
+  } = useApiResource<{ success: boolean; data: RosterPayload }>(
+    `/api/faculty/attendance/roster?classId=${encodeURIComponent(classId)}&period=this-month`,
+    { ttlMs: 15_000 },
+  );
+  const attRoster = rosterRaw?.data ?? null;
+
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const { addToast } = useToast();
+
+  const inspectStudent = (s: RosterStudent) => {
+    inspect({
+      kind: "student",
+      title: s.name,
+      subtitle: `${s.roll} · ${s.pct}% present`,
+      sections: [
+        {
+          title: "Attendance",
+          content: (
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="rounded-lg bg-bg-elev-1 p-2 text-center"><div className="font-mono text-text-primary">{s.present}</div><div className="text-text-muted">present</div></div>
+              <div className="rounded-lg bg-bg-elev-1 p-2 text-center"><div className="font-mono text-text-primary">{s.absent}</div><div className="text-text-muted">absent</div></div>
+              <div className="rounded-lg bg-bg-elev-1 p-2 text-center"><div className="font-mono text-text-primary">{s.unmarked}</div><div className="text-text-muted">unmarked</div></div>
+            </div>
+          ),
+        },
+      ],
+      detailHref: `/person?roll=${encodeURIComponent(s.roll)}`,
+      detailLabel: "Open student record",
+    });
+  };
+  const refreshRoster = () => {
+    clearCache();
+    void attRosterRefresh();
+  };
+  const pickerStudents: PickerStudent[] = (attRoster?.students ?? []).map((s) => ({
+    id: s.id, name: s.name, roll: s.roll, section: details?.section,
+  }));
 
   if (clsError || rosterError) {
     return (
@@ -195,6 +250,47 @@ function ClassRosterInner() {
           </div>
         ))}
       </div>
+
+      {/* Board 1 — attendance status board + student picker (real roster) */}
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+          <Users className="w-3.5 h-3.5" /> Attendance Status
+        </p>
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="surface-card px-3 py-1.5 text-xs font-semibold text-text-secondary hover:bg-bg-elev-2 min-h-8"
+        >
+          Select student
+        </button>
+      </div>
+
+      <AttendanceStatusBoard
+        data={attRoster}
+        loading={attRosterLoading}
+        error={attRosterError}
+        canMark
+        onInspect={inspectStudent}
+        onMutated={() => {
+          refreshRoster();
+          addToast({ message: "Attendance updated.", variant: "success" });
+        }}
+        onMutationError={(msg) => addToast({ message: msg, variant: "error" })}
+      />
+
+      <StudentPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        students={pickerStudents}
+        onSelect={(s) => {
+          setPickerOpen(false);
+          const real = attRoster?.students.find((r) => r.id === s.id);
+          inspectStudent(
+            real ?? { id: s.id, name: s.name, roll: s.roll, present: 0, absent: 0, unmarked: 0, pct: 0 },
+          );
+        }}
+      />
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

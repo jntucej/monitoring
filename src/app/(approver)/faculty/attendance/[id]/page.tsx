@@ -1,13 +1,27 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useParams } from "next/navigation";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
-import { useApiResource } from "@/hooks/useApiResource";
+import { useApiResource, clearCache } from "@/hooks/useApiResource";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { useToast } from "@/components/ui/toast";
 import { Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
+import {
+  AttendanceStatusBoard,
+  type RosterPayload,
+  type RosterStudent,
+} from "@/components/faculty/AttendanceStatusBoard";
+import {
+  AttendanceDateRatioPanel,
+  type PeriodKey,
+  PERIODS,
+} from "@/components/faculty/AttendanceDateRatioPanel";
+import { WeeklyTimetableGrid, type UpcomingSession } from "@/components/faculty/WeeklyTimetableGrid";
+import { StudentPicker, type PickerStudent } from "@/components/faculty/StudentPicker";
 
 /* /api/faculty/attendance response */
 interface HeatmapDay {
@@ -63,8 +77,81 @@ function ClassAttendanceInner() {
     error: attError,
   } = useApiResource<FacultyAttendance>("/api/faculty/attendance", { ttlMs: 30_000 });
 
+  // Class roster (Board 1 data source: per-student present/absent/unmarked +
+  // period + upcoming sessions). Refetched on period change.
+  const [period, setPeriod] = useState<PeriodKey>("this-month");
+  const periodParam = PERIODS.find((p) => p.key === period)?.param ?? "this-month";
+  const {
+    data: rosterRaw,
+    loading: rosterLoading,
+    error: rosterError,
+    refresh: rosterRefresh,
+  } = useApiResource<{ success: boolean; data: RosterPayload }>(
+    `/api/faculty/attendance/roster?classId=${encodeURIComponent(classId)}&period=${periodParam}`,
+    { ttlMs: 15_000 },
+  );
+  const roster = rosterRaw?.data ?? null;
+
+  // Single page-level inspector controller — roster rows, picker selections
+  // and session taps all route through it (one drawer, never stacked).
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const { addToast } = useToast();
+
   const summary = att?.summary;
   const details = cls?.data;
+
+  // Build inspector payloads from real roster rows / sessions.
+  const inspectRosterStudent = (s: RosterStudent) => {
+    inspect({
+      kind: "student",
+      title: s.name,
+      subtitle: `${s.roll} · ${s.pct}% present`,
+      sections: [
+        {
+          title: "Attendance",
+          content: (
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="rounded-lg bg-bg-elev-1 p-2 text-center"><div className="font-mono text-text-primary">{s.present}</div><div className="text-text-muted">present</div></div>
+              <div className="rounded-lg bg-bg-elev-1 p-2 text-center"><div className="font-mono text-text-primary">{s.absent}</div><div className="text-text-muted">absent</div></div>
+              <div className="rounded-lg bg-bg-elev-1 p-2 text-center"><div className="font-mono text-text-primary">{s.unmarked}</div><div className="text-text-muted">unmarked</div></div>
+            </div>
+          ),
+        },
+      ],
+      detailHref: `/person?roll=${encodeURIComponent(s.roll)}`,
+      detailLabel: "Open student record",
+    });
+  };
+  const inspectSession = (sess: UpcomingSession) => {
+    inspect({
+      kind: "session",
+      title: `Session · ${sess.date}`,
+      subtitle: `${sess.timeIn ?? "–"}${sess.timeOut ? `–${sess.timeOut}` : ""}`,
+      sections: [
+        {
+          title: "Details",
+          content: (
+            <div className="text-xs text-text-secondary space-y-1">
+              <p>Date: {sess.date}</p>
+              <p>Window: {sess.timeIn ?? "—"} to {sess.timeOut ?? "—"}</p>
+            </div>
+          ),
+        },
+      ],
+    });
+  };
+
+  const refreshRoster = () => {
+    clearCache();
+    void rosterRefresh();
+  };
+  const pickerStudents: PickerStudent[] = (roster?.students ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+    roll: s.roll,
+    section: details?.section,
+  }));
 
   if (clsError || attError) {
     return (
@@ -217,6 +304,67 @@ function ClassAttendanceInner() {
           </div>
         )}
       </div>
+
+      {/* Board 1 — roster-driven widgets (real /api/faculty/attendance/roster) */}
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-wider text-text-muted">
+          Roster &amp; Schedule
+        </p>
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="surface-card px-3 py-1.5 text-xs font-semibold text-text-secondary hover:bg-bg-elev-2 min-h-8"
+        >
+          Select student
+        </button>
+      </div>
+
+      <AttendanceDateRatioPanel
+        data={roster}
+        loading={rosterLoading}
+        error={rosterError}
+        period={period}
+        onPeriodChange={setPeriod}
+        onInspectStudent={inspectRosterStudent}
+      />
+
+      <AttendanceStatusBoard
+        data={roster}
+        loading={rosterLoading}
+        error={rosterError}
+        canMark
+        onInspect={inspectRosterStudent}
+        onMutated={() => {
+          refreshRoster();
+          addToast({ message: "Attendance updated.", variant: "success" });
+        }}
+        onMutationError={(msg) => addToast({ message: msg, variant: "error" })}
+      />
+
+      <WeeklyTimetableGrid sessions={roster?.upcoming ?? []} onInspectSession={inspectSession} />
+
+      {/* Single inspector + student picker (mutually exclusive overlays) */}
+      <StudentPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        students={pickerStudents}
+        onSelect={(s) => {
+          setPickerOpen(false);
+          // Use the real roster row (has present/absent/unmarked counts) when
+          // available; fall back to the picker's minimal shape otherwise.
+          const real = roster?.students.find((r) => r.id === s.id);
+          inspectRosterStudent(real ?? {
+            id: s.id,
+            name: s.name,
+            roll: s.roll,
+            present: 0,
+            absent: 0,
+            unmarked: 0,
+            pct: 0,
+          });
+        }}
+      />
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }
