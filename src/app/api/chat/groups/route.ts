@@ -60,6 +60,7 @@ async function handleGet(_req: Request, { auth }: { auth: AuthContext }) {
       ORDER BY g.updated_at DESC
       LIMIT 100`,
     [auth.userId],
+    { currentUserId: auth.userId, currentRole: auth.role },
   );
 
   return ok({

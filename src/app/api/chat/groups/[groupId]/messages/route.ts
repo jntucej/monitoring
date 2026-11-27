@@ -30,6 +30,7 @@ async function resolveGroupId(groupIdOrSlug: string, userId: string): Promise<{ 
         AND (m.effective_to IS NULL OR m.effective_to > NOW())
       LIMIT 1`,
     [groupIdOrSlug, userId],
+    { currentUserId: userId },
   );
   return rows[0] ?? null;
 }
@@ -70,6 +71,7 @@ async function handleGet(req: Request, { auth }: { auth: AuthContext }) {
       ORDER BY cm.created_at ASC
       LIMIT 100`,
     [membership.id, auth.userId],
+    { currentUserId: auth.userId, currentRole: auth.role },
   );
 
   await query(
@@ -77,6 +79,7 @@ async function handleGet(req: Request, { auth }: { auth: AuthContext }) {
         SET last_read_at = NOW()
       WHERE group_id = $1::uuid AND user_id = $2::uuid`,
     [membership.id, auth.userId],
+    { currentUserId: auth.userId, currentRole: auth.role },
   );
 
   return ok({
@@ -118,6 +121,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
      VALUES ($1::uuid, $2::uuid, 'user', $3, $4, $5, $6, $7::jsonb)
      RETURNING id, created_at`,
     [membership.id, auth.userId, messageType, text, refKind, refId, JSON.stringify(metadata)],
+    { currentUserId: auth.userId, currentRole: auth.role },
   );
 
   await query(`UPDATE public.chat_groups SET updated_at = NOW() WHERE id = $1::uuid`, [membership.id]);
