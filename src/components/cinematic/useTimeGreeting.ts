@@ -8,10 +8,18 @@ export interface TimeGreeting {
 }
 
 export function useTimeGreeting(): TimeGreeting {
-  const [h, setH] = useState<number>(() => new Date().getHours());
+  const getIstHour = () => {
+    const s = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      hour: "numeric",
+      hour12: false,
+    }).format(new Date());
+    return Number(s) % 24;
+  };
+  const [h, setH] = useState<number>(getIstHour);
 
   useEffect(() => {
-    const id = setInterval(() => setH(new Date().getHours()), 60_000);
+    const id = setInterval(() => setH(getIstHour()), 60_000);
     return () => clearInterval(id);
   }, []);
 

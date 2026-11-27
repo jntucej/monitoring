@@ -6,6 +6,7 @@ import { getAuthHeaders } from "@/lib/utils";
 
 import type { DashboardData } from "@/lib/types";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { useUIStore } from "@/stores/uiStore";
 interface GeneratedReport {
   id: string;
   title: string;
@@ -176,7 +177,10 @@ export default function AdminReportsPage() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Export error:", err);
-      /* FIXME(R5): use useUIStore().warning("Failed to export report from server") */ void "Failed to export report from server";
+      useUIStore.getState().addToast({
+        variant: "warning",
+        message: "Failed to export report from server",
+      });
     }
   };
 

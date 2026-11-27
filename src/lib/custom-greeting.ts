@@ -18,7 +18,12 @@ export interface CustomGreetingResult {
 
 export function buildCustomGreeting(input: GreetingInput): CustomGreetingResult {
   const date = input.now ?? new Date();
-  const hour = date.getHours();
+  const istHourStr = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    hour: "numeric",
+    hour12: false,
+  }).format(date);
+  const hour = Number(istHourStr) % 24;
 
   const timePeriod: CustomGreetingResult["timePeriod"] =
     hour >= 5 && hour < 12

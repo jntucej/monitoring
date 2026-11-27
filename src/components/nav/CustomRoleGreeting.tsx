@@ -1,12 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import { buildCustomGreeting, type GreetingInput } from "@/lib/custom-greeting";
+
+function getIstDateKey(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
 
 export function CustomRoleGreeting(props: GreetingInput) {
   const [dismissedWish, setDismissedWish] = useState(false);
   const greeting = buildCustomGreeting(props);
+  const storageKey = `greeting_wish_dismissed:${(props.role ?? "user").toLowerCase()}:${getIstDateKey()}`;
+
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage.getItem(storageKey) === "1") {
+        setDismissedWish(true);
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  }, [storageKey]);
+
+  const handleDismissWish = () => {
+    setDismissedWish(true);
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(storageKey, "1");
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  };
 
   return (
     <div
@@ -37,7 +68,7 @@ export function CustomRoleGreeting(props: GreetingInput) {
       {greeting.wishBadge && !dismissedWish && (
         <button
           type="button"
-          onClick={() => setDismissedWish(true)}
+          onClick={handleDismissWish}
           aria-label="Dismiss special wish"
           className="self-start sm:self-center rounded-lg border border-border px-2.5 py-1 text-xs text-text-muted hover:bg-bg-elevated inline-flex items-center gap-1"
         >

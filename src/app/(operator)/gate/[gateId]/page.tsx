@@ -149,12 +149,18 @@ const shift = useOperatorShiftClock();
   // got a 400 back.
   const recommendation = useMemo(() => {
     if (!currentStudent) return null;
+    const rawCurfew = (currentStudent as { hostel_curfew_time?: string | null }).hostel_curfew_time;
+    let curfewMinutes: number | null = null;
+    if (typeof rawCurfew === "string" && /^\d{1,2}:\d{2}$/.test(rawCurfew.trim())) {
+      const [hh, mm] = rawCurfew.trim().split(":").map(Number);
+      if (Number.isFinite(hh) && Number.isFinite(mm)) curfewMinutes = hh * 60 + mm;
+    }
     return recommend({
       campusStatus: currentCampusStatus,
       lastReason: lastOutReason,
       currentEntryType: entryType,
       hasApprovedPass: cachedPasses.length > 0,
-      curfewMinutes: null, // TODO: derive from student_details.hostel_curfew_time
+      curfewMinutes,
       biometricReady: !!currentStudent.hasThumbprint,
     });
   }, [currentStudent, currentCampusStatus, lastOutReason, entryType, cachedPasses]);
