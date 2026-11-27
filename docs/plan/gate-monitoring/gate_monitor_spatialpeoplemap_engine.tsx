@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
 /**
@@ -1482,37 +1484,38 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen lg:h-screen flex flex-col lg:flex-row bg-[#F8FAFC] text-slate-900 font-sans antialiased lg:overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-[#F5F6F7] p-2 sm:p-4 lg:p-6 text-neutral-900 font-sans antialiased selection:bg-neutral-900 selection:text-white">
+      <div className="max-w-[1540px] mx-auto bg-white rounded-3xl shadow-sm border border-neutral-200/80 overflow-hidden flex flex-col lg:flex-row min-h-[840px]">
       {/* =================================================================== */}
-      {/* ZONE 1: LEFT NAVIGATION RAIL (5 Area Adapters + Unit Filter Tree)   */}
+      {/* ZONE 1: LEFT NAVIGATION RAIL (Unified Reference Sidebar)            */}
       {/* =================================================================== */}
-      <aside className="w-full lg:w-[272px] bg-white border-b lg:border-b-0 lg:border-r border-[#E2E8F0] flex flex-col justify-between shrink-0 z-20">
+      <aside className="w-full lg:w-64 bg-[#FAFAFB] border-b lg:border-b-0 lg:border-r border-neutral-200/80 p-4 flex flex-col justify-between shrink-0 z-20">
         <div className="overflow-y-auto">
           {/* Brand Header */}
-          <div className="h-14 px-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center justify-between px-2 mb-5">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
-                <Icon name="shield" className="w-4 h-4 text-indigo-400" />
+              <div className="w-8 h-8 rounded-xl bg-[#111111] text-white flex items-center justify-center shadow-sm">
+                <Icon name="shield" className="w-4 h-4 text-white" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-sm tracking-tight text-slate-900">Gate Monitor</span>
-                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200/70">
+                  <span className="font-bold text-sm tracking-tight text-neutral-900">Gate Monitor</span>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-700 border border-neutral-200/80">
                     v4.2
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-500 font-mono">&lt;SpatialPeopleMap /&gt;</p>
+                <p className="text-[10px] text-neutral-500 font-mono">&lt;SpatialPeopleMap /&gt;</p>
               </div>
             </div>
           </div>
 
           {/* 5 Scoped Area Adapters Switcher */}
-          <div className="p-3 border-b border-slate-100">
-            <div className="flex items-center justify-between px-2 mb-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                5 Scoped Data Adapters
+          <div className="pb-3 border-b border-neutral-200/70">
+            <div className="flex items-center justify-between px-2 mb-2">
+              <span className="text-[11px] font-medium text-neutral-400">
+                Scoped Adapters
               </span>
-              <span className="text-[10px] font-mono text-slate-400">28 Roles</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-neutral-200/70 text-neutral-600">28 Roles</span>
             </div>
             <div className="space-y-1">
               {Object.values(AREA_ADAPTERS).map((area) => {
@@ -1521,24 +1524,24 @@ export default function App() {
                   <button
                     key={area.id}
                     onClick={() => handleSelectArea(area.id)}
-                    className={`w-full text-left px-2.5 py-2 rounded-xl transition-all flex items-start gap-2.5 ${
+                    className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-start gap-2.5 ${
                       isActive
-                        ? 'bg-slate-900 text-white shadow-xs'
-                        : 'text-slate-600 hover:bg-slate-100/80'
+                        ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/80 font-semibold'
+                        : 'text-neutral-600 hover:bg-neutral-200/50 font-medium'
                     }`}
                   >
                     <div
                       className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${
-                        isActive ? 'bg-white/10 text-indigo-300' : 'bg-slate-100 text-slate-500'
+                        isActive ? 'bg-[#111111] text-white' : 'bg-neutral-200/60 text-neutral-500'
                       }`}
                     >
                       <Icon name={area.icon} className="w-3.5 h-3.5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-semibold truncate">{area.shortTitle}</div>
+                      <div className="text-xs truncate">{area.shortTitle}</div>
                       <div
                         className={`text-[10px] truncate mt-0.5 ${
-                          isActive ? 'text-slate-300' : 'text-slate-400'
+                          isActive ? 'text-neutral-500' : 'text-neutral-400'
                         }`}
                       >
                         {area.personaBadge}
@@ -1620,7 +1623,7 @@ export default function App() {
         {/* Bottom Governance Controls: Coverage Bar + SuperAdmin UUID Toggle */}
         <div className="p-3 border-t border-slate-100 bg-slate-50/70 space-y-2.5">
           {/* Operational Coverage Progress */}
-          <div className="bg-white p-2.5 rounded-xl border border-[#E2E8F0]">
+          <div className="bg-white p-2.5 rounded-2xl border border-neutral-200/80">
             <div className="flex items-center justify-between text-[11px] mb-1">
               <span className="font-semibold text-slate-700">{adapter.coverageLabel}</span>
               <span className="font-mono font-bold text-emerald-600">{adapter.coveragePct}%</span>
@@ -1634,7 +1637,7 @@ export default function App() {
           </div>
 
           {/* SuperAdmin PII / Internal UUID Visibility Toggle */}
-          <label className="flex items-center justify-between px-2.5 py-2 rounded-xl bg-white border border-[#E2E8F0] cursor-pointer hover:border-slate-300 transition-colors">
+          <label className="flex items-center justify-between px-2.5 py-2 rounded-xl bg-white border border-neutral-200/80 cursor-pointer hover:border-slate-300 transition-colors">
             <div>
               <div className="text-[11px] font-semibold text-slate-800">isSuperAdmin(role)</div>
               <div className="text-[10px] text-slate-400">Reveal internal UUIDs</div>
@@ -1654,7 +1657,7 @@ export default function App() {
       {/* =================================================================== */}
       <div className="flex-1 flex flex-col min-w-0 lg:overflow-hidden">
         {/* Top Context & Role Bar */}
-        <header className="bg-white border-b border-[#E2E8F0] px-4 lg:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <header className="bg-white border-b border-neutral-200/80 px-4 lg:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-base lg:text-lg font-bold tracking-tight text-slate-900">
@@ -1679,7 +1682,7 @@ export default function App() {
                 }}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                   isClassZoomed
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
                     : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
                 }`}
               >
@@ -1694,7 +1697,7 @@ export default function App() {
                 onClick={() => setVpPrivacyMode((prev) => !prev)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                   vpPrivacyMode
-                    ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                    ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
                     : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
                 }`}
               >
@@ -1715,34 +1718,50 @@ export default function App() {
           {/* =============================================================== */}
           {/* ZONE 2: MACRO — TOP KPI SUMMARY STRIP                           */}
           {/* =============================================================== */}
-          <section className="grid grid-cols-2 xl:grid-cols-4 gap-3 shrink-0">
+          <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 shrink-0">
             {adapter.kpis.map((kpi, idx) => {
               const badgeStyles = {
-                emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                amber: 'bg-amber-50 text-amber-700 border-amber-200',
-                indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                rose: 'bg-rose-50 text-rose-700 border-rose-200',
-                navy: 'bg-slate-100 text-slate-700 border-slate-200'
+                emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+                amber: 'bg-amber-50 text-amber-700 border-amber-200/80',
+                indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
+                rose: 'bg-rose-50 text-rose-700 border-rose-200/80',
+                navy: 'bg-neutral-100 text-neutral-700 border-neutral-200/80'
               }[kpi.tone];
+              const barFill = {
+                emerald: 'bg-emerald-600',
+                amber: 'bg-amber-500',
+                indigo: 'bg-indigo-600',
+                rose: 'bg-rose-600',
+                navy: 'bg-neutral-800'
+              }[kpi.tone] || 'bg-neutral-800';
+              const activeSegments = kpi.tone === 'rose' ? 2 : kpi.tone === 'amber' ? 3 : 4;
 
               return (
                 <div
                   key={idx}
-                  className="bg-white rounded-xl border border-[#E2E8F0] p-3.5 shadow-2xs flex flex-col justify-between"
+                  className="bg-white rounded-2xl border border-neutral-200/80 p-4 shadow-sm flex flex-col justify-between"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-slate-500 truncate">{kpi.label}</span>
+                    <span className="text-xs font-medium text-neutral-500 truncate">{kpi.label}</span>
                     <span
-                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0 ${badgeStyles}`}
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${badgeStyles}`}
                     >
                       {kpi.delta}
                     </span>
                   </div>
-                  <div className="flex items-baseline justify-between gap-2 mt-2">
-                    <span className="text-xl lg:text-2xl font-bold tracking-tight text-slate-900">
+                  <div className="flex items-baseline justify-between gap-2 mt-2 mb-3">
+                    <span className="text-xl lg:text-2xl font-bold tracking-tight text-neutral-900">
                       {kpi.value}
                     </span>
-                    <span className="text-[11px] text-slate-400 truncate">{kpi.sub}</span>
+                    <span className="text-[11px] text-neutral-400 truncate">{kpi.sub}</span>
+                  </div>
+                  <div className="h-2 w-full bg-neutral-100 rounded-md overflow-hidden flex gap-[2px] p-0.5">
+                    {[0, 1, 2, 3].map((seg) => (
+                      <span
+                        key={seg}
+                        className={`flex-1 rounded-sm ${seg < activeSegments ? barFill : 'bg-neutral-200/80'}`}
+                      />
+                    ))}
                   </div>
                 </div>
               );
@@ -1772,7 +1791,7 @@ export default function App() {
             {/* MICRO: RIGHT CONTEXTUAL INSPECTOR */}
             <aside className="w-full lg:w-[340px] flex flex-col gap-3.5 shrink-0 lg:overflow-y-auto">
               {/* Inspector Card 1: Entity Identity & Live Status */}
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-4 shadow-2xs">
+              <div className="bg-white rounded-2xl border border-neutral-200/80 p-4 shadow-sm">
                 {vpPrivacyMode && activeAreaId === 'hostel' && selectedNode.tier >= 2 ? (
                   /* Strict VP PII Protection Boundary View */
                   <div className="py-4 text-center space-y-2">
@@ -1932,7 +1951,7 @@ export default function App() {
                           onClick={() => handleTriggerAction(link)}
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                             idx === 0
-                              ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xs'
+                              ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'
                               : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
                           }`}
                         >
@@ -1946,7 +1965,7 @@ export default function App() {
               </div>
 
               {/* Inspector Card 2: Escalation Lineage Chain */}
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-3.5 shadow-2xs">
+              <div className="bg-white rounded-2xl border border-neutral-200/80 p-3.5 shadow-sm">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
                   Active Escalation & Approval Path
                 </div>
@@ -1996,7 +2015,7 @@ export default function App() {
       {/* MODAL: FLEXIBLE-CLASS SUBSTITUTE PICKER (Area 2 Integration)        */}
       {/* =================================================================== */}
       {isSubModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-md overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
               <div>
@@ -2075,6 +2094,7 @@ export default function App() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -2089,7 +2109,7 @@ export default function App() {
  *  - Dashed Delegation Arcs & Search Pulse Rings (FLASH_MS = 1600)
  * ============================================================================
  */
-function SpatialPeopleMap({
+export function SpatialPeopleMap({
   adapter,
   nodes,
   layoutMode,
@@ -2285,7 +2305,7 @@ function SpatialPeopleMap({
   );
 
   return (
-    <section className="flex-1 bg-white rounded-xl border border-[#E2E8F0] shadow-2xs flex flex-col min-h-[480px] lg:min-h-0 overflow-hidden relative">
+    <section className="flex-1 bg-white rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col min-h-[480px] lg:min-h-0 overflow-hidden relative">
       {/* Toolbar Header */}
       <div className="px-4 py-3 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2.5 bg-white z-10">
         <div>
@@ -2342,7 +2362,7 @@ function SpatialPeopleMap({
               onClick={() => setLayoutMode('constellation')}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all ${
                 layoutMode === 'constellation'
-                  ? 'bg-white text-slate-900 font-semibold shadow-2xs'
+                  ? 'bg-white text-slate-900 font-semibold shadow-sm'
                   : 'text-slate-600 font-medium hover:text-slate-900'
               }`}
             >
@@ -2358,7 +2378,7 @@ function SpatialPeopleMap({
               onClick={() => setLayoutMode('tree')}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all ${
                 layoutMode === 'tree'
-                  ? 'bg-white text-slate-900 font-semibold shadow-2xs'
+                  ? 'bg-white text-slate-900 font-semibold shadow-sm'
                   : 'text-slate-600 font-medium hover:text-slate-900'
               }`}
             >
@@ -2380,7 +2400,7 @@ function SpatialPeopleMap({
           onClick={() => setClusterFilter('all')}
           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all shrink-0 ${
             clusterFilter === 'all'
-              ? 'bg-slate-900 text-white shadow-2xs'
+              ? 'bg-slate-900 text-white shadow-sm'
               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -2399,7 +2419,7 @@ function SpatialPeopleMap({
               onClick={() => setClusterFilter(isActive ? 'all' : cluster.id)}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] transition-all shrink-0 ${
                 isActive
-                  ? 'bg-slate-900 text-white font-semibold shadow-2xs'
+                  ? 'bg-slate-900 text-white font-semibold shadow-sm'
                   : 'bg-white border border-slate-200 text-slate-600 font-medium hover:bg-slate-100'
               }`}
             >
@@ -2800,7 +2820,7 @@ function SpatialPeopleMap({
 
         {/* Bottom-Left Telemetry & Focus Legend */}
         <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-2 pointer-events-none">
-          <div className="bg-white/95 backdrop-blur-xs border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-2xs flex items-center gap-3 text-[11px] text-slate-600">
+          <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-sm flex items-center gap-3 text-[11px] text-slate-600">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500" /> On-Duty / Present
             </span>
@@ -2814,7 +2834,7 @@ function SpatialPeopleMap({
         </div>
 
         {/* Bottom-Right Zoom & Fit Controls */}
-        <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-xs border border-slate-200 rounded-lg p-1 shadow-2xs">
+        <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg p-1 shadow-sm">
           <button
             onClick={() =>
               setCamera((c) => ({ ...c, scale: Math.max(0.65, +(c.scale - 0.15).toFixed(2)) }))
