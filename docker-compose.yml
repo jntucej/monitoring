@@ -198,6 +198,11 @@ services:
       - MONITORING_GRAFANA_TOKEN=${MONITORING_GRAFANA_TOKEN:-}
       - MONITORING_GRAFANA_USER=${MONITORING_GRAFANA_USER:-}
       - MONITORING_GRAFANA_PASS=${MONITORING_GRAFANA_PASS:-}
+      # AI model backend (M1/M3): the host's Ollama (bound to the host LAN IP,
+      # reachable from the container via the bridge gateway; ufw allows the
+      # docker bridge → :11434). Models default to qwen3:0.6b / qwen3:1.7b.
+      - AI_M1_URL=${AI_M1_URL:-http://192.168.1.146:11434}
+      - AI_M3_URL=${AI_M3_URL:-http://192.168.1.146:11434}
       # Batch I1: Alertmanager → Telegram bridge. The webhook token is the
       # same value alertmanager.yml sends as the Bearer credential; both
       # resolve from .env.
@@ -308,6 +313,9 @@ services:
     # leaky job or unbounded queue backlog cannot OOM the host.
     mem_limit: 512m
     mem_reservation: 128m
+    # Reach the host's Ollama (M1/M3 model backend) via the bridge gateway.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - path: .env
         required: false
@@ -327,6 +335,10 @@ services:
       - MONITORING_GRAFANA_TOKEN=${MONITORING_GRAFANA_TOKEN:-}
       - MONITORING_GRAFANA_USER=${MONITORING_GRAFANA_USER:-}
       - MONITORING_GRAFANA_PASS=${MONITORING_GRAFANA_PASS:-}
+      # AI model backend (M1/M3): the host's Ollama via the bridge gateway
+      # (worker has extra_hosts above). Models default qwen3:0.6b / qwen3:1.7b.
+      - AI_M1_URL=${AI_M1_URL:-http://192.168.1.146:11434}
+      - AI_M3_URL=${AI_M3_URL:-http://192.168.1.146:11434}
       - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for worker}
       # DR §7: write the last-known-good status snapshot to a named volume
       # shared with Caddy's /status static page. The Caddy container mounts
