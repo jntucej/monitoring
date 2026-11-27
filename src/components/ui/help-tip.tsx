@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
 import { HelpCircle, Info } from "lucide-react";
+import { Tooltip as HeroTooltip } from "@heroui/react";
+import { cn } from "@/lib/utils";
 
 export interface HelpTipProps {
-  /** Short explanation shown in the popover/tooltip */
+  /** Short explanation shown in the tooltip */
   text: string;
   /** Optional accessible label for the trigger button */
   label?: string;
@@ -16,8 +17,10 @@ export interface HelpTipProps {
 }
 
 /**
- * HelpTip — compact, keyboard- and touch-accessible contextual help trigger.
- * Opens on click/tap (mobile-friendly) or focus/hover, closes on Escape or outside click.
+ * HelpTip — compact, keyboard- AND touch-accessible contextual help trigger.
+ * Backed by HeroUI v3 `Tooltip` (React Aria): opens on hover, focus, or tap;
+ * auto-flips to stay in the viewport on narrow screens; closes on Escape or
+ * outside click. The old hand-rolled hover-only popover is gone.
  */
 export function HelpTip({
   text,
@@ -26,66 +29,29 @@ export function HelpTip({
   align = "center",
   className = "",
 }: HelpTipProps) {
-  const [open, setOpen] = useState(false);
-  const tipId = useId();
-  const containerRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    const onPointerDown = (e: PointerEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("pointerdown", onPointerDown);
-    };
-  }, [open]);
-
   const Icon = variant === "info" ? Info : HelpCircle;
-  const alignClass =
-    align === "left"
-      ? "left-0"
-      : align === "right"
-        ? "right-0"
-        : "left-1/2 -translate-x-1/2";
 
   return (
-    <span
-      ref={containerRef}
-      className={`relative inline-flex items-center align-middle ${className}`}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
-      <button
-        type="button"
-        aria-label={label}
-        aria-expanded={open}
-        aria-describedby={open ? tipId : undefined}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setOpen((v) => !v);
-        }}
-        className="inline-flex items-center justify-center rounded-full p-0.5 text-text-muted hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
-      >
-        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-      </button>
-      {open && (
-        <span
-          id={tipId}
-          role="tooltip"
-          className={`absolute bottom-full mb-1.5 z-50 w-60 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-bg-surface px-2.5 py-2 text-[11px] leading-relaxed font-normal text-text-secondary shadow-md ${alignClass}`}
+    <span className={cn("inline-flex items-center align-middle", className)}>
+      <HeroTooltip.Root>
+        <HeroTooltip.Trigger>
+          <button
+            type="button"
+            aria-label={label}
+            className="inline-flex items-center justify-center rounded-full p-0.5 text-text-muted hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+          >
+            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        </HeroTooltip.Trigger>
+        <HeroTooltip.Content
+          className={cn(
+            "z-50 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-bg-surface px-2.5 py-2 text-[11px] font-normal leading-relaxed text-text-secondary shadow-md",
+            className,
+          )}
         >
           {text}
-        </span>
-      )}
+        </HeroTooltip.Content>
+      </HeroTooltip.Root>
     </span>
   );
 }

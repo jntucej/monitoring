@@ -19,7 +19,7 @@ export function UnsavedChangesBar({
   return (
     <div
       data-testid="unsaved-changes-bar"
-      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs"
+      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] text-xs"
     >
       <span className="inline-flex items-center gap-1.5 font-semibold text-action-warning">
         <AlertCircle className="h-3.5 w-3.5 shrink-0" />
