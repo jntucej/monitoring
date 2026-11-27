@@ -1,9 +1,47 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { ok } from "@/server/http/response";
+import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
 import { AREA_ADAPTERS, type AreaId, type AreaAdapter } from "@/lib/org-map-adapters";
+
+const ALL_AREAS: AreaId[] = ["institutional", "department", "security", "hostel", "exam"];
+
+function allowedAreasForRole(role: string): AreaId[] {
+  switch (role) {
+    case "sysadmin":
+    case "super_admin":
+    case "admin":
+    case "principal":
+    case "vice_principal":
+    case "dean":
+      return ALL_AREAS;
+    case "hod":
+    case "faculty":
+    case "class_advisor":
+      return ["department"];
+    case "supervisor":
+    case "operator":
+    case "worker":
+    case "staff":
+    case "security":
+      return ["security"];
+    case "hostel_manager":
+    case "deputy_warden":
+    case "caretaker":
+    case "mess_incharge":
+    case "warden":
+    case "chief_warden":
+      return ["hostel"];
+    case "oie":
+    case "exam_branch":
+    case "exam_superintendent":
+    case "chief_superintendent":
+      return ["exam"];
+    default:
+      return [];
+  }
+}
 
 function defaultAreaForRole(role: string): AreaId {
   switch (role) {
@@ -33,12 +71,28 @@ function defaultAreaForRole(role: string): AreaId {
 async function handleGet(req: NextRequest, context?: { auth: AuthContext }) {
   const auth = context?.auth;
   const role = auth?.role ?? "principal";
+  const allowedAreas = allowedAreasForRole(role);
+  if (allowedAreas.length === 0) {
+    return fail("FORBIDDEN", "Org map is not available for your role.", 403);
+  }
+
   const rawArea = req.nextUrl.searchParams.get("area") as AreaId | null;
+  if (rawArea && (!(rawArea in AREA_ADAPTERS) || !allowedAreas.includes(rawArea))) {
+    return fail("FORBIDDEN", `Area '${rawArea}' is not authorized for role '${role}'.`, 403);
+  }
   const areaId: AreaId = rawArea && rawArea in AREA_ADAPTERS ? rawArea : defaultAreaForRole(role);
 
   const base = AREA_ADAPTERS[areaId];
   const isSuperAdmin = role === "sysadmin" || (role as string) === "super_admin";
   const vpPrivacyEnforced = role === "vice_principal" && areaId === "hostel";
+
+  const scopeRes = auth?.userId
+    ? await query<{ department_id: string | null; assigned_hostel: string | null; gate_id: string | null }>(
+        `SELECT department_id, assigned_hostel, gate_id::text AS gate_id FROM users WHERE id = $1::uuid LIMIT 1`,
+        [auth.userId]
+      ).catch(() => ({ rows: [] as Array<{ department_id: string | null; assigned_hostel: string | null; gate_id: string | null }> }))
+    : { rows: [] as Array<{ department_id: string | null; assigned_hostel: string | null; gate_id: string | null }> };
+  const userScope = scopeRes.rows[0] ?? { department_id: null, assigned_hostel: null, gate_id: null };
 
   // Hydrate live telemetry from PostgreSQL (graceful fallback if any table is empty/absent)
   const [staffRes, pendingRes, delegationRes, gateRes] = await Promise.all([
@@ -110,6 +164,12 @@ async function handleGet(req: NextRequest, context?: { auth: AuthContext }) {
   return ok({
     areaId,
     role,
+    allowedAreas,
+    scope: {
+      departmentId: userScope.department_id,
+      hostelScope: userScope.assigned_hostel,
+      gateId: userScope.gate_id,
+    },
     isSuperAdmin,
     vpPrivacyEnforced,
     adapter,
