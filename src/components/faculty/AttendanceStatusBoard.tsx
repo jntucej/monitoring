@@ -15,7 +15,7 @@
  * board is read-only (no buttons), so a client toggle alone can never
  * enable marking.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 import { User, Check, X, HelpCircle, Loader2, RefreshCw } from "lucide-react";
@@ -93,11 +93,6 @@ export function AttendanceStatusBoard({
 }: Props) {
   const [busy, setBusy] = useState(false);
   const [acting, setActing] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Reset transient action state when the roster reloads.
-    setActing(null);
-  }, [data]);
 
   const markStudent = useCallback(
     async (studentId: string, field: "present" | "absent", reason: string) => {

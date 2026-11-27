@@ -28,10 +28,6 @@ interface Props {
 export function StudentPicker({ open, onClose, students, onSelect, title = "Select a student" }: Props) {
   const [q, setQ] = useState("");
 
-  useEffect(() => {
-    if (!open) setQ("");
-  }, [open]);
-
   // Esc closes; focus the search input on open.
   useEffect(() => {
     if (!open) return;
@@ -86,7 +82,10 @@ export function StudentPicker({ open, onClose, students, onSelect, title = "Sele
               <button
                 key={s.id}
                 type="button"
-                onClick={() => onSelect(s)}
+                onClick={() => {
+                  onSelect(s);
+                  setQ("");
+                }}
                 className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left hover:bg-bg-elev-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
               >
                 <span className="flex items-center gap-2 min-w-0">
