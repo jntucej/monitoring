@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { VALID_TABS, HealthTabContent } from "./HealthTabClient";
+import { HealthTabContent } from "./HealthTabClient";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+
+const VALID_TABS = ["app", "database", "infra", "redis"] as const;
 type Tab = (typeof VALID_TABS)[number];
 
 /**
