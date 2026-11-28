@@ -10,9 +10,13 @@
 --
 -- Dedup: the bridge builds a deterministic idempotency_key per AUTOPILOT
 -- event (autopilot:<mission_id>:<event_id>:<event_type>:<version>). To make
--- a replay a no-op, domain_outbox gains a unique idempotency_key column so
+-- a replay a no-op, domain_outbox gains a unique idempotency_key index so
 -- the bridge's INSERT ... ON CONFLICT (idempotency_key) DO NOTHING is a
 -- true dedup (the table previously had no such column).
+--
+-- Note: a plain (non-partial) unique index on a nullable column — NULLs
+-- are distinct, so legacy rows with idempotency_key IS NULL are unaffected
+-- and no new inserts need one.
 --
 -- No AUTOPILOT object is touched; this only extends gate_monitor.
 
@@ -20,8 +24,7 @@ ALTER TABLE public.domain_outbox
     ADD COLUMN IF NOT EXISTS idempotency_key TEXT;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_domain_outbox_idempotency
-    ON public.domain_outbox (idempotency_key)
-    WHERE idempotency_key IS NOT NULL;
+    ON public.domain_outbox (idempotency_key);
 
 -- Track the AUTOPILOT bridge as a source marker so downstream relays can
 -- distinguish campus-native events from bridged control-plane events.
