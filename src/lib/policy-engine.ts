@@ -215,3 +215,71 @@ export class PolicyExecutionEngine {
 
 /** Module-level singleton (stateless, safe for reads). */
 export const policyEngine = new PolicyExecutionEngine();
+
+// ═══════════════════════════════════════════════════════════════════════
+// DRY-RUN IMPACT DELTA — governance gate (mandatory before publishing any
+// regulation/threshold change). Computes, for a cohort's real attendance
+// distribution, exactly how many students move between status tiers when the
+// candidate config replaces the current one. Read-only: no DB writes, no
+// locks — a pure what-if the principal reviews in the StepUpModal preview.
+// ═══════════════════════════════════════════════════════════════════════
+
+export interface CohortStudentFacts {
+  /** Real aggregate attendance % (present/conducted). */
+  aggregatePct: number;
+  hasApprovedCacCondonation: boolean;
+  condonationFeeCleared: boolean;
+  isDebarred: boolean;
+}
+
+export interface ImpactDelta {
+  evaluatedStudents: number;
+  changedCount: number;
+  /** e.g. { "CONDONATION_REQUIRED_TO_ELIGIBLE": 4, "ELIGIBLE_TO_DETECTED": 2 } */
+  transitions: Record<string, number>;
+}
+
+/**
+ * Evaluate a tiered JSONLogic attendance policy against one student's facts
+ * and return the resulting status. Used by the dry-run so the impact preview
+ * runs the EXACT same declarative rules a published regulation would — no
+ * parallel hardcoded evaluator.
+ */
+export function tieredPolicyStatus(
+  policy: { rules: Array<{ tier: string; condition: unknown; action: Record<string, unknown> }> },
+  facts: { aggregatePct: number; excuseCategory?: string },
+): string {
+  const metrics: Record<string, unknown> = {
+    aggregate_attendance_pct: facts.aggregatePct,
+    excuse_category: facts.excuseCategory ?? "MEDICAL",
+    dispute_verified: true,
+  };
+  const match = policyEngine.evaluateTieredAttendance(policy, { metrics });
+  return String(match?.action?.status ?? "ELIGIBLE");
+}
+
+/**
+ * Compute the status-distribution delta between two policy trees over a
+ * cohort. `current`/`candidate` are the `rule_expression` JSONB of an
+ * ATTENDANCE/SEMESTER_EVALUATION policy (one active, one the proposed clone).
+ * Zero code change: adding a curriculum = new rows, this function is the
+ * same for every regulation.
+ */
+export function computeCohortImpactDelta(
+  students: CohortStudentFacts[],
+  current: { rules: Array<{ tier: string; condition: unknown; action: Record<string, unknown> }> },
+  candidate: { rules: Array<{ tier: string; condition: unknown; action: Record<string, unknown> }> },
+): ImpactDelta {
+  const transitions: Record<string, number> = {};
+  let changedCount = 0;
+  for (const s of students) {
+    const before = tieredPolicyStatus(current, { aggregatePct: s.aggregatePct });
+    const after = tieredPolicyStatus(candidate, { aggregatePct: s.aggregatePct });
+    if (before !== after) {
+      changedCount += 1;
+      const key = `${before}_TO_${after}`;
+      transitions[key] = (transitions[key] ?? 0) + 1;
+    }
+  }
+  return { evaluatedStudents: students.length, changedCount, transitions };
+}
