@@ -42,11 +42,19 @@ export function buildCspHeader({ nonce, isDev, public: isPublic = false }: CspOp
     `style-src 'self' 'unsafe-inline' https:`,
     "img-src 'self' blob: data: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https: wss:",
+    // Development over a private Tailscale HTTP endpoint (e.g.
+    // http://100.122.7.62:3002) needs plain http: resources and the ws:
+    // HMR socket. Production keeps only the https:/wss: forms.
+    isDev
+      ? "connect-src 'self' http: https: ws: wss:"
+      : "connect-src 'self' https: wss:",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
-  ].join("; ");
+    // upgrade-insecure-requests would force the raw-IP HTTP dev endpoint to
+    // HTTPS (which fails → every asset/HMR connection throws a TLS error).
+    // Keep it only in production; drop it in development.
+    ...(isDev ? [] : ["upgrade-insecure-requests"]),
+  ].filter((x): x is string => x !== "").join("; ");
 }
