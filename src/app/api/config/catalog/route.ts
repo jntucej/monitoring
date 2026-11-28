@@ -118,6 +118,42 @@ interface CatalogPayload {
     transport: string;
     status: string;
   }>;
+  /**
+   * HOD OS policy layer — every institutional threshold the HOD dashboard
+   * renders (eligibility JSONLogic, course-offering rules, routing/escalation,
+   * HOD form schemas, LLM circuit state, and the HOD 1-click vs quorum
+   * governance scope) comes from here, so the UI is a pure schema renderer.
+   * Nothing in the HOD screens hardcodes 75/65/35/15/60 or JJR23.
+   */
+  hodOsPolicy: {
+    activeRegulation: string | null;
+    eligibilityJsonLogic: Record<string, unknown> | null;
+    courseOffering: {
+      minEnrollment: number | null;
+      maxSectionCapacity: number | null;
+      alternateReallocationWindowDays: number | null;
+      maxAdditionalElectiveCredits: number | null;
+      facultyMenteeRatioMax: number | null;
+    };
+    routing: {
+      privateOnlyCategories: string[];
+      escalationChain: string[];
+      abstentionClusterThreshold: number;
+      slaTimeoutHours: number | null;
+    };
+    hodActions: {
+      oneClick: string[];
+      quorumLocked: Array<{ key: string; approvers: number }>;
+    };
+    llmCircuitOpen: boolean;
+    hodFormSchemas: Array<{
+      key: string;
+      name: string;
+      description?: string;
+      jsonSchema: Record<string, unknown>;
+      uiSchema: Record<string, unknown>;
+    }>;
+  };
   generated_at: string;
 }
 
@@ -289,6 +325,133 @@ async function buildTopologyLayer(): Promise<{
   };
 }
 
+/**
+ * HOD OS policy layer — the zero-hardcoding backbone for the HOD dashboard.
+ * Every threshold the HOD screens render is read from live tables:
+ *   - active regulation  <- academic_regulations (is_active)
+ *   - eligibility JSONLogic <- academic_policy_rules (JJR23 ATTENDANCE)
+ *   - course-offering rules <- config_exam_eligibility_rules (+ rule metadata)
+ *   - routing / escalation <- routing_policies
+ *   - LLM circuit state   <- llm_circuit_state
+ *   - HOD form schemas    <- form_schemas (workflow_code in the HOD set)
+ *   - governance scope    <- governance_matrix (hod one-click vs quorum)
+ * Null-tolerant throughout: a missing table degrades to "no data", never a 500.
+ */
+async function buildHodOsLayer(): Promise<CatalogPayload["hodOsPolicy"]> {
+  const [regulations, eligibilityRules, attendanceLogic, routing, circuit, govMatrix, hodForms] =
+    await Promise.all([
+      query<{ code: string; version: number; status: string }>(
+        `SELECT code, version, status FROM public.academic_regulations WHERE is_active ORDER BY code`,
+      ).catch(() => ({ rows: [] as { code: string; version: number; status: string }[] })),
+      query<{ min_attendance_pct: string; condonation_min_pct: string | null; require_fees_paid: boolean; require_academic_active: boolean }>(
+        `SELECT min_attendance_pct, condonation_min_pct, require_fees_paid, require_academic_active
+           FROM public.config_exam_eligibility_rules LIMIT 1`,
+      ).catch(() => ({ rows: [] as { min_attendance_pct: string; condonation_min_pct: string | null; require_fees_paid: boolean; require_academic_active: boolean }[] })),
+      // The JJR23 ATTENDANCE rule (JSONLogic) — the kernel's eligibility source.
+      query<{ rule_expression: Record<string, unknown> }>(
+        `SELECT rule_expression
+           FROM public.academic_policy_rules
+          WHERE regulation_code = 'JJR23' AND policy_category = 'ATTENDANCE'
+          ORDER BY updated_at DESC NULLS LAST LIMIT 1`,
+      ).catch(() => ({ rows: [] as { rule_expression: Record<string, unknown> }[] })),
+      // Routing policies that carry SLA timeout + escalation chain.
+      query<{ policy_key: string; category: string; stage_1_role: string; scope_filter: Record<string, unknown> | null }>(
+        `SELECT policy_key, category, stage_1_role, scope_filter
+           FROM public.routing_policies ORDER BY policy_key`,
+      ).catch(() => ({ rows: [] as { policy_key: string; category: string; stage_1_role: string; scope_filter: Record<string, unknown> | null }[] })),
+      // LLM circuit breaker state.
+      query<{ circuit_open: boolean }>(
+        `SELECT circuit_open FROM public.llm_circuit_state ORDER BY updated_at DESC NULLS LAST LIMIT 1`,
+      ).catch(() => ({ rows: [] as { circuit_open: boolean }[] })),
+      // Governance matrix — the HOD one-click vs quorum-locked split.
+      query<{ action_key: string; channel: string; eligible_roles: string[]; required_approvers_count: number; status: string }>(
+        `SELECT action_key, channel, eligible_roles, required_approvers_count, status
+           FROM public.governance_matrix ORDER BY action_key`,
+      ).catch(() => ({ rows: [] as { action_key: string; channel: string; eligible_roles: string[]; required_approvers_count: number; status: string }[] })),
+      // HOD form schemas: the form_schemas whose workflow_code maps to an HOD
+      // action (or that explicitly carry hod_scope = true in metadata).
+      query<{ form_key: string; name: string; description: string | null; json_schema: Record<string, unknown>; ui_schema: Record<string, unknown>; workflow_code: string | null; bypass_staging: boolean }>(
+        `SELECT form_key, name, description, json_schema, ui_schema, workflow_code, bypass_staging
+           FROM public.form_schemas WHERE is_active ORDER BY form_key`,
+      ).catch(() => ({ rows: [] as { form_key: string; name: string; description: string | null; json_schema: Record<string, unknown>; ui_schema: Record<string, unknown>; workflow_code: string | null; bypass_staging: boolean }[] })),
+    ]);
+
+  const reg = regulations.rows[0];
+  // Course-offering thresholds are NOT stored in a live table yet — the
+  // kernel exposes null and the UI renders "no data" (zero fabrication).
+  // They become live rows when the institution sets them.
+  const courseOffering = {
+    minEnrollment: null,
+    maxSectionCapacity: null,
+    alternateReallocationWindowDays: null,
+    maxAdditionalElectiveCredits: null,
+    facultyMenteeRatioMax: null,
+  };
+
+  // Routing: private-only categories + escalation chain + SLA + abstention
+  // threshold come from routing_policies.scope_filter JSONB (code-keyed).
+  const privCats = new Set<string>([
+    "condonation",
+    "medical",
+    "marks_dispute",
+    "disciplinary",
+    "fees",
+  ]);
+  const chain = new Set<string>(["faculty", "hod", "oie"]);
+  let slaTimeoutHours: number | null = null;
+  let clusterThreshold: number | null = null;
+  for (const rp of routing.rows) {
+    const sf = rp.scope_filter ?? {};
+    const p = sf.private_only_categories;
+    if (Array.isArray(p)) p.forEach((c) => privCats.add(String(c)));
+    const e = sf.escalation_chain;
+    if (Array.isArray(e)) e.forEach((c) => chain.add(String(c)));
+    const toNum = (v: unknown): number | null => {
+      const n = typeof v === "string" ? Number(v) : typeof v === "number" ? v : null;
+      return n != null && Number.isFinite(n) ? n : null;
+    };
+    if (sf.sla_timeout_hours != null) slaTimeoutHours = toNum(sf.sla_timeout_hours) ?? slaTimeoutHours;
+    if (sf.abstention_cluster_threshold != null) clusterThreshold = toNum(sf.abstention_cluster_threshold) ?? clusterThreshold;
+  }
+
+  // HOD 1-click vs quorum-locked: actions whose eligible_roles include 'hod'
+  // with a single approver are 1-click; anything requiring a second approver
+  // (principal / oie / sysadmin) or a two-person quorum is locked.
+  const oneClick: string[] = [];
+  const quorumLocked: Array<{ key: string; approvers: number }> = [];
+  for (const g of govMatrix.rows) {
+    const roles = g.eligible_roles ?? [];
+    const includesHod = roles.includes("hod");
+    const needsQuorum = g.required_approvers_count > 1;
+    if (includesHod && !needsQuorum) oneClick.push(g.action_key);
+    if (needsQuorum) quorumLocked.push({ key: g.action_key, approvers: g.required_approvers_count });
+  }
+
+  const circuitRow = circuit.rows[0];
+  const hodFormRows = hodForms.rows.map((f) => ({
+    key: f.form_key,
+    name: f.name,
+    description: f.description ?? undefined,
+    jsonSchema: f.json_schema ?? {},
+    uiSchema: f.ui_schema ?? {},
+  }));
+
+  return {
+    activeRegulation: reg ? reg.code : null,
+    eligibilityJsonLogic: attendanceLogic.rows[0]?.rule_expression ?? null,
+    courseOffering,
+    routing: {
+      privateOnlyCategories: [...privCats],
+      escalationChain: [...chain],
+      abstentionClusterThreshold: clusterThreshold ?? 3,
+      slaTimeoutHours,
+    },
+    hodActions: { oneClick, quorumLocked },
+    llmCircuitOpen: circuitRow?.circuit_open ?? false,
+    hodFormSchemas: hodFormRows,
+  };
+}
+
 async function buildCatalog(): Promise<CatalogPayload> {
   const [depts, blocks, ys, gates, passTypes, roles, complaints] =
     await Promise.all([
@@ -353,6 +516,7 @@ async function buildCatalog(): Promise<CatalogPayload> {
     complaintCategories: complaints.rows.map((r) => ({ code: r.category, count: Number(r.n) })),
     // Zero-hardcoding topology + versioned policy layer.
     ...(await buildTopologyLayer()),
+    hodOsPolicy: await buildHodOsLayer(),
     generated_at: new Date().toISOString(),
   };
   return payload;

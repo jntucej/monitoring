@@ -6,6 +6,7 @@ import {
   BookOpen,
   FileBarChart,
   UserCog,
+  BrainCircuit,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,6 +28,7 @@ export interface HodGroup {
 export type HodEntry = HodLink | HodGroup;
 
 export const HOD_NAV: HodEntry[] = [
+  { kind: "link", href: "/hod/dashboard", label: "HOD OS Dashboard", icon: BrainCircuit },
   { kind: "link", href: "/hod", label: "Approvals", icon: CheckSquare },
   { kind: "link", href: "/hod/home", label: "Today", icon: LayoutDashboard },
   {

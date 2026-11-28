@@ -83,6 +83,41 @@ export interface Catalog {
     transport: string;
     status: string;
   }>;
+  /**
+   * HOD OS policy layer — every threshold the HOD screens render (eligibility
+   * JSONLogic, course-offering rules, routing/escalation, HOD form schemas,
+   * LLM circuit state, HOD 1-click vs quorum governance scope). Zero
+   * hardcoding: the HOD UI is a pure schema renderer on this object.
+   */
+  hodOsPolicy: {
+    activeRegulation: string | null;
+    eligibilityJsonLogic: Record<string, unknown> | null;
+    courseOffering: {
+      minEnrollment: number | null;
+      maxSectionCapacity: number | null;
+      alternateReallocationWindowDays: number | null;
+      maxAdditionalElectiveCredits: number | null;
+      facultyMenteeRatioMax: number | null;
+    };
+    routing: {
+      privateOnlyCategories: string[];
+      escalationChain: string[];
+      abstentionClusterThreshold: number;
+      slaTimeoutHours: number | null;
+    };
+    hodActions: {
+      oneClick: string[];
+      quorumLocked: Array<{ key: string; approvers: number }>;
+    };
+    llmCircuitOpen: boolean;
+    hodFormSchemas: Array<{
+      key: string;
+      name: string;
+      description?: string;
+      jsonSchema: Record<string, unknown>;
+      uiSchema: Record<string, unknown>;
+    }>;
+  };
   generated_at: string;
 }
 

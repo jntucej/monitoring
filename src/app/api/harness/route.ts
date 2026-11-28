@@ -40,6 +40,11 @@ const HarnessBody = z.object({
     "inject_form_field",
     "trigger_knowledge_gap",
     "fast_forward_sla",
+    // HOD-dev harness actions (reversible, live-DB, dev-only).
+    "hod_simulate_sla_breach",
+    "hod_inject_low_enrollment",
+    "hod_simulate_bot_approval",
+    "hod_simulate_circular_recall",
   ]),
   targetId: z.string().optional(),
   value: z.unknown().optional(),
@@ -187,6 +192,92 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
         [targetId ?? auth.userId],
       );
       return ok({ action, escalatedTo: "hod" });
+    }
+
+    // ── HOD-dev harness actions (reversible, live-DB, dev-only) ──────
+    case "hod_simulate_sla_breach": {
+      // Breach an OPEN deadline_watch for a doubt_escalation so it drops
+      // into the HOD's escalated SLA queue with a crimson chip.
+      const id = targetId ?? auth.userId;
+      const upd = await query<{ id: string }>(
+        `UPDATE public.deadline_watches
+            SET status = 'BREACHED', escalation_step = escalation_step + 1, updated_at = NOW()
+          WHERE entity_type = 'doubt_escalation' AND status = 'OPEN'
+          ORDER BY due_at ASC NULLS LAST
+          LIMIT 1
+          RETURNING id`,
+      );
+      if (upd.rows.length === 0) {
+        // No open watch to breach — create one on the oldest escalation.
+        const esc = await query<{ id: string }>(
+          `SELECT id FROM public.class_doubt_escalations
+            WHERE lower(target_role) IN ('hod','oie') AND status NOT IN ('ANSWERED','CLOSED')
+            ORDER BY created_at ASC LIMIT 1`,
+        );
+        if (esc.rows.length > 0) {
+          await query(
+            `INSERT INTO public.deadline_watches
+               (id, watch_type, entity_type, entity_id, due_at, status, escalation_step, created_at)
+             VALUES (gen_random_uuid(), 'SLA_BREACH', 'doubt_escalation', $1::uuid, NOW() - INTERVAL '1 hour', 'BREACHED', 1, NOW())`,
+            [esc.rows[0].id],
+          );
+        }
+      }
+      return ok({ action, breachedWatch: upd.rows[0]?.id ?? "created" });
+    }
+
+    case "hod_inject_low_enrollment": {
+      // No per-course enrollment table yet — the harness injects a synthetic
+      // low-enrollment course row into the HOD OS state via a flag in
+      // operational_announcements.content_payload (dev-only, reversible).
+      const code = String(val?.code ?? "ELEC-HOD-HARNESS");
+      await query(
+        `INSERT INTO public.operational_announcements
+           (id, title, category, target_criteria, state, content_payload, created_at, updated_at)
+         VALUES (gen_random_uuid(), 'HARNESS: Low-Enrollment ' || $1, 'COURSE_FLAG',
+                 jsonb_build_object('course_code', $1, 'enrollment', $2, 'harness', true),
+                 'PUBLISHED',
+                 jsonb_build_object('note', 'harness_injected_low_enrollment'),
+                 NOW(), NOW())`,
+        [code, Number(val?.enrollment ?? 12)],
+      );
+      return ok({ action, code, enrollment: Number(val?.enrollment ?? 12) });
+    }
+
+    case "hod_simulate_bot_approval": {
+      // Simulate @cej_server_bot approving a pending faculty lab swap
+      // externally (Telegram path). Updates the approval_card live.
+      const upd = await query<{ id: string }>(
+        `UPDATE public.faculty_leave_requests
+            SET status = 'APPROVED', approved_by = $1::uuid, approved_at = NOW()
+          WHERE status = 'PENDING'
+          ORDER BY created_at ASC
+          LIMIT 1
+          RETURNING id`,
+        [auth.userId],
+      );
+      return ok({ action, approvedId: upd.rows[0]?.id ?? null });
+    }
+
+    case "hod_simulate_circular_recall": {
+      // Recall the most recently published circular + tombstone its RAG
+      // chunk (the recall cascade the spec asks for).
+      const circ = await query<{ id: string; title: string }>(
+        `SELECT id, title FROM public.operational_announcements
+          WHERE state = 'PUBLISHED' OR state = 'ACTIVE'
+          ORDER BY created_at DESC LIMIT 1`,
+      );
+      if (circ.rows.length > 0) {
+        await query(
+          `UPDATE public.operational_announcements SET state = 'RECALLED', updated_at = NOW() WHERE id = $1::uuid`,
+          [circ.rows[0].id],
+        );
+        await query(
+          `UPDATE public.institutional_knowledge_chunks SET tombstone_at = NOW() WHERE source_ref = $1::text AND tombstone_at IS NULL`,
+          [circ.rows[0].id],
+        ).catch(() => ({ rows: [] as never[] }));
+      }
+      return ok({ action, circularId: circ.rows[0]?.id ?? null });
     }
   }
 }
