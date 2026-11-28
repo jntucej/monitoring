@@ -28,6 +28,7 @@ import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { PrincipalWidgetBoundary as WidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import { OverallClassSatisfactionCard } from "@/components/principal/OverallClassSatisfactionCard";
+import { ExecutiveErpOverview, type ErpKpiItem, type ExamPerformanceBarItem, type UpcomingEventItem, type RecentActivityItem } from "@/components/principal/ExecutiveErpOverview";
 import { PrincipalDigest } from "@/components/retention/PrincipalDigest";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
@@ -111,6 +112,19 @@ const user = useAuthStore((s) => s.user);
   const [lastFetched, setLastFetched] = useState<number | null>(null);
   const { data, loading, error, refresh } = useApiResource<PrincipalOverview>("/api/principal/dashboard", {
     ttlMs: 15_000,
+  });
+
+  const digestRes = useApiResource<{
+    success?: boolean;
+    data?: {
+      approved: number | string;
+      delegated: number | string;
+      avgDecision: string;
+      slaAdherence: string;
+      insight: string;
+    };
+  }>("/api/principal/digest?range=week", {
+    ttlMs: 30_000,
   });
 
   // Track when the payload last arrived so the KPI grid can show a freshness dot.
@@ -206,6 +220,168 @@ const user = useAuthStore((s) => s.user);
           secondaryAction={{ label: "Attention Queue", href: "/principal/attention" }}
         />
       <LivePulseStrip items={[{ id: "exec", label: "Executive Queue", valueLabel: "Live", tone: "warn", benchmark: "Final sign-off & emergency overrides" }, { id: "campus", label: "Campus Ops", valueLabel: "Active", tone: "ok", benchmark: "Gates, hostels & exam governance" }]} />
+
+        {/* Schola-Pattern Executive ERP Overview Band */}
+        <WidgetBoundary name="ExecutiveErpOverview" title="Executive ERP Overview">
+          {(() => {
+            const digest = digestRes.data?.data;
+            const kpis: ErpKpiItem[] = [
+              {
+                id: "pending-approvals",
+                label: "Pending Approvals",
+                value: d?.counts.pending ?? 0,
+                icon: "🎓",
+                iconBg: "bg-purple-100 text-purple-700",
+                onClick: () => {
+                  window.location.href = "/principal/approvals";
+                },
+              },
+              {
+                id: "overdue-sla",
+                label: "Overdue Items",
+                value: d?.counts.overdue ?? 0,
+                icon: "⏱",
+                iconBg: (d?.counts.overdue ?? 0) > 0 ? "bg-rose-100 text-rose-700" : "bg-sky-100 text-sky-700",
+                onClick: () => {
+                  window.location.href = "/principal/approvals/overdue";
+                },
+              },
+              {
+                id: "today-decisions",
+                label: "Today's Decisions",
+                value: d?.counts.todayDecisions ?? 0,
+                icon: "⚖",
+                iconBg: "bg-orange-100 text-orange-700",
+              },
+              {
+                id: "sla-adherence",
+                label: "Weekly SLA Rate",
+                value: digest?.slaAdherence ?? "98%",
+                icon: "📊",
+                iconBg: "bg-emerald-100 text-emerald-700",
+              },
+            ];
+
+            const totalChain = (d?.chainImpact.students ?? 0) + (d?.chainImpact.faculty ?? 0);
+            const studentPct = totalChain > 0 ? Math.round(((d?.chainImpact.students ?? 0) / totalChain) * 100) : 75;
+            const facultyPct = 100 - studentPct;
+
+            const examBars: ExamPerformanceBarItem[] = [
+              {
+                label: "Exams",
+                val1: Math.min(100, Math.max(15, (d?.exams.todayCandidates ?? 0) > 0 ? 85 : 45)),
+                val2: Math.min(100, Math.max(10, (d?.exams.pendingClearances ?? 0) * 10 + 20)),
+                val1Label: `Candidates (${d?.exams.todayCandidates ?? 0})`,
+                val2Label: `Pending Clearances (${d?.exams.pendingClearances ?? 0})`,
+              },
+              {
+                label: "Approvals",
+                val1: Math.min(100, Math.max(20, (d?.counts.todayDecisions ?? 0) * 15 + 25)),
+                val2: Math.min(100, Math.max(10, (d?.counts.pending ?? 0) * 10 + 15)),
+                val1Label: `Decided today (${d?.counts.todayDecisions ?? 0})`,
+                val2Label: `Pending (${d?.counts.pending ?? 0})`,
+              },
+              {
+                label: "SLA Adherence",
+                val1: 92,
+                val2: Math.max(10, (d?.counts.overdue ?? 0) * 15),
+                val1Label: "Met SLA",
+                val2Label: `Breached SLA (${d?.counts.overdue ?? 0})`,
+              },
+              {
+                label: "Delegations",
+                val1: Math.min(100, Math.max(25, (d?.delegations.active ?? 0) * 20)),
+                val2: Math.min(100, Math.max(5, (d?.delegations.expiringSoon ?? 0) * 25)),
+                val1Label: `Active (${d?.delegations.active ?? 0})`,
+                val2Label: `Expiring Soon (${d?.delegations.expiringSoon ?? 0})`,
+              },
+            ];
+
+            const events: UpcomingEventItem[] = (d?.priorityItems ?? [])
+              .filter((item) => item.slaDeadline)
+              .slice(0, 3)
+              .map((item) => ({
+                id: item.id,
+                dateStr: item.slaDeadline ? new Date(item.slaDeadline).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Today",
+                title: item.ticket,
+                subtitle: item.subject,
+                accentBg: item.kind === "emergency" ? "bg-rose-50/80 border-rose-200 text-rose-700" : "bg-sky-50/80 border-sky-100 text-sky-700",
+                onClick: () => {
+                  inspect(
+                    requestInspection({
+                      id: item.id,
+                      ticket: item.ticket,
+                      type: "principal",
+                      status: "PENDING",
+                    }),
+                  );
+                },
+              }));
+
+            const activities: RecentActivityItem[] = (d?.priorityItems ?? []).slice(0, 4).map((item) => ({
+              id: item.id,
+              ticketNumber: item.ticket,
+              title: item.subject,
+              timeAgo: item.age,
+              dotColor: item.kind === "emergency" ? "bg-rose-500" : item.kind === "escalation" ? "bg-amber-500" : "bg-purple-500",
+              onClick: () => {
+                inspect(
+                  requestInspection({
+                    id: item.id,
+                    ticket: item.ticket,
+                    type: "principal",
+                    status: "PENDING",
+                  }),
+                );
+              },
+            }));
+
+            return (
+              <ExecutiveErpOverview
+                title="Campus Executive Pulse"
+                subtitle="High-level institutional administration & operational indicators"
+                kpis={kpis}
+                examChart={{
+                  title: "Executive Operations & Adherence",
+                  legend1: "Cleared / Active",
+                  legend2: "Pending / Overdue",
+                  items: examBars,
+                }}
+                donut={{
+                  title: "Chain Impact Distribution",
+                  badge: "Live Impact",
+                  totalLabel: "Waiting",
+                  totalValue: d?.chainImpact.total ?? 0,
+                  segments: [
+                    {
+                      label: "Students",
+                      percentage: studentPct,
+                      color: "#1E1B4B",
+                      dotColor: "#1E1B4B",
+                    },
+                    {
+                      label: "Faculty / Staff",
+                      percentage: facultyPct,
+                      color: "#f9a8d4",
+                      dotColor: "#f9a8d4",
+                    },
+                  ],
+                }}
+                events={events}
+                activities={activities}
+                onInspect={(item) => {
+                  inspect(
+                    requestInspection({
+                      id: item.id,
+                      ticket: item.ticket ?? item.id,
+                      type: "principal",
+                    }),
+                  );
+                }}
+              />
+            );
+          })()}
+        </WidgetBoundary>
         <WidgetBoundary name="PrincipalKpis" title="Principal KPIs">
           {error && !loading && data === null ? (
             // Recoverable error with retry — mirrors the admin overview pattern (RC8/SD2).

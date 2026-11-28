@@ -118,6 +118,8 @@ import runBackupMaintenance from './jobs/backup_maintenance.js';
 import confirmationSla from './jobs/confirmation_sla.js';
 import messPollClose from './jobs/mess_poll_close.js';
 import messAnomalyDaily from './jobs/mess_anomaly_daily.js';
+import attendanceSubThresholdAlert from './jobs/attendance_sub_threshold.js';
+import dueDateReminders from './jobs/due_date_reminders.js';
 
 /**
  * Job heartbeat sentinel: after each scheduled run, upsert a row in
@@ -228,6 +230,13 @@ const jobs = [
   { name: 'confirmation-sla', ms: 5 * 60 * 1000, run: () => runJob('confirmation-sla', confirmationSla) },
   { name: 'mess-poll-close', ms: 1 * 60 * 1000, run: () => runJob('mess-poll-close', messPollClose) },
   { name: 'mess-anomaly-daily', ms: 60 * 60 * 1000, run: () => runJob('mess-anomaly-daily', messAnomalyDaily) },
+  // Student academic / hostel / mess reminder jobs (20270131000047-49):
+  //  - attendance-sub-threshold: nightly flag students below 75% (+ 75–78% warn)
+  //    to the student + their registered guardian.
+  //  - due-date-reminders: hourly reminders for assignments / library / fees /
+  //    mess opt-out cutoffs due within 24h, quiet-hours aware (in_app only).
+  { name: 'attendance-sub-threshold', ms: 24 * 60 * 60 * 1000, run: () => runJob('attendance-sub-threshold', attendanceSubThresholdAlert) },
+  { name: 'due-date-reminders', ms: 60 * 60 * 1000, run: () => runJob('due-date-reminders', dueDateReminders) },
   { name: 'mess-secret-rotate', ms: 6 * 60 * 60 * 1000, run: () => runJob('mess-secret-rotate', runMessSecretRotate) },
   { name: 'mess-conversion-track', ms: 15 * 60 * 1000, run: () => runJob('mess-conversion-track', runMessConversionTrack) },
   { name: 'sos-lease', ms: 30 * 1000, run: () => runJob('sos-lease', runSosLease) },

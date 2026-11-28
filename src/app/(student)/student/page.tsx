@@ -13,14 +13,16 @@ import { CampusPulseStrip } from "@/components/student/home/CampusPulseStrip";
 import { MyDayStrip } from "@/components/student/home/MyDayStrip";
 import { ActionItemsStrip } from "@/components/student/home/ActionItemsStrip";
 import { MyStatsCard } from "@/components/student/home/MyStatsCard";
-import { StudentLivingHub } from "@/components/student/StudentLivingHub";
+import { StudentLivingHub, type StudentLiveSnapshot } from "@/components/student/StudentLivingHub";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import {
-  StudentModeSwitcher,
   StudentModeBody,
   type StudentDashboardMode,
 } from "@/components/student/home/StudentDashboardModes";
+import { BlobTabs } from "@/components/ui/BlobTabs";
+import { MotionTabPanel, MotionBentoGrid, MotionBentoCard } from "@/components/ui/MotionKit";
+import { StudentAcademicsHub } from "@/components/student/StudentAcademicsHub";
 import { WifiOff, RotateCw } from "lucide-react";
 import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
 import { useAuthStore } from "@/stores/authStore";
@@ -30,6 +32,17 @@ import { usePersona } from "@/hooks/usePersona";
 import { useApiResource } from "@/hooks/useApiResource";
 import { resolveRoleConfig } from "@/config/roles";
 import type { WorkspaceContext } from "@/config/roles/types";
+
+// Short human label for a gate_passes.reason value (no raw codes leaked).
+function humanizePassReason(reason: string | null | undefined): string {
+  if (!reason) return "Gate Pass";
+  const r = reason.trim().toLowerCase();
+  if (r === "hostel_leave" || r === "leave") return "Hostel Leave";
+  if (r === "outpass" || r === "out_pass") return "Out-of-Campus Pass";
+  if (r === "medical") return "Medical";
+  if (r === "official" || r === "official_duty") return "Official Duty";
+  return "Gate Pass";
+}
 
 // Persona-aware student home. The SAME widget pool serves both personas, but each
 // persona gets a DISTINCT dashboard: a day scholar's home is attendance/class
@@ -204,12 +217,71 @@ function StudentHomeInner() {
     });
   }, [personaKey, widgetOrderPref.value, studentCaps]);
 
-  const { data: permData } = useApiResource<{
-    data?: Array<{ ticket_number?: string; status?: string; current_stage?: string }>;
-  }>("/api/permissions?limit=5", { ttlMs: 30_000 });
-  const recentPerms = permData?.data ?? [];
-  const activePass = recentPerms.find((p) => p.status === "APPROVED");
-  const pendingReq = recentPerms.find((p) => p.status === "PENDING");
+  const { data: dash } = useApiResource<{
+    success: boolean;
+    data: {
+      attendance?: { pct?: number; total?: number };
+      activePasses?: Array<{
+        id: string;
+        reason: string;
+        from: string;
+        to: string;
+        status: string;
+        qrCode?: string;
+      }>;
+      lastScan?: Record<string, unknown> | null;
+    };
+  }>("/api/student/dashboard", { ttlMs: 30_000 });
+
+  const { data: ws } = useApiResource<{
+    success: boolean;
+    context?: {
+      campusStatus: "in_campus" | "out_campus" | "unknown";
+      residentialStatus: "hosteller" | "day_scholar" | string;
+    };
+  }>("/api/me/workspace", { ttlMs: 30_000 });
+
+  // Real presence + persona (from /api/me/workspace). The residentialStatus
+  // here is the DB-truth source of the persona; usePersona() is the fallback.
+  const wsCampus = ws?.context?.campusStatus ?? "unknown";
+  const wsResidential = ws?.context?.residentialStatus;
+  const effectivePersona: "day_scholar" | "hosteller" =
+    wsResidential === "hosteller"
+      ? "hosteller"
+      : wsResidential === "day_scholar"
+        ? "day_scholar"
+        : personaKey;
+
+  // Build the hub snapshot from REAL data — no hardcoded INSIDE / 82%.
+  const activePasses = dash?.data?.activePasses ?? [];
+  const topPass = activePasses[0];
+  const hubSnapshot: StudentLiveSnapshot = {
+    campusState:
+      wsCampus === "out_campus" || activePasses.length > 0 ? "OUTSIDE" : "INSIDE",
+    activePass: topPass
+      ? {
+          id: topPass.id,
+          ticketNumber: topPass.id,
+          typeLabel: humanizePassReason(topPass.reason),
+          returnDeadline: topPass.to
+            ? new Date(topPass.to).toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : null,
+          status: topPass.status,
+        }
+      : null,
+    attendancePct: dash?.data?.attendance?.pct ?? 0,
+    safeSkipsRemaining: 0,
+    pendingAssignments: 0,
+    todayMealLabel: undefined,
+    unratedMealsCount: 0,
+    activeStreakDays: 0,
+    unreadAlerts: 0,
+  };
 
   const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
@@ -230,38 +302,36 @@ function StudentHomeInner() {
             : "Track academic schedules, day attendance, and campus gate passes"
         }
         contextLabel={personaKey === "hosteller" ? "Hosteller Dashboard" : "Day Scholar Dashboard"}
-        statusTone={activePass ? "ok" : pendingReq ? "warn" : "info"}
+        statusTone={hubSnapshot.activePass ? "ok" : "info"}
         statusPill={
-          activePass
-            ? `Active Pass · ${activePass.ticket_number ?? "QR Ready"}`
-            : pendingReq
-              ? `Pending · ${pendingReq.current_stage ?? "In Review"}`
-              : undefined
+          hubSnapshot.activePass
+            ? `Active · ${hubSnapshot.activePass.typeLabel}`
+            : undefined
         }
         statusSummary={
-          activePass
-            ? `Pass ${activePass.ticket_number ?? ""} is approved and ready for gate scan.`
-            : pendingReq
-              ? `Request ${pendingReq.ticket_number ?? ""} is currently at ${pendingReq.current_stage ?? "review"} stage.`
-              : personaKey === "hosteller"
-                ? "Track your curfew status, active hostel passes, meal tokens, and campus updates."
-                : "Track your class attendance, today's schedule, gate passes, and campus updates."
+          hubSnapshot.activePass
+            ? `Your ${hubSnapshot.activePass.typeLabel.toLowerCase()} pass is approved. ${
+                hubSnapshot.activePass.returnDeadline
+                  ? `Return by ${hubSnapshot.activePass.returnDeadline}.`
+                  : ""
+              }`
+            : effectivePersona === "hosteller"
+              ? "Track your curfew status, active hostel passes, meal tokens, and campus updates."
+              : "Track your class attendance, today's schedule, gate passes, and campus updates."
         }
         why={
-          activePass
+          hubSnapshot.activePass
             ? "Show your QR pass at the gate scanner when exiting or re-entering campus."
-            : pendingReq
-              ? "Your request is moving through the approval chain. You'll be notified once a QR pass is issued."
-              : "Use the mode tabs below to switch between today's status, academics, hostel/mess, and monthly recap."
+            : "Use the mode tabs below to switch between today's status, academics, and monthly recap."
         }
         primaryAction={
-          activePass
+          hubSnapshot.activePass
             ? { label: "Show QR / Passes", href: "/student/passes" }
             : { label: "Digital ID Card", href: "/student/id" }
         }
         secondaryActions={[
           { label: "New Pass Request", href: "/student/permissions/new" },
-          ...(personaKey === "hosteller"
+          ...(effectivePersona === "hosteller"
             ? [{ label: "Meal Token", href: "/student/mess/token" }]
             : []),
         ]}
@@ -270,16 +340,16 @@ function StudentHomeInner() {
         ariaLabel="Student live pulse"
         items={[
           {
-            id: "pass-state",
-            label: "Gate Pass",
-            valueLabel: activePass ? "QR Ready" : pendingReq ? "In Review" : "None Active",
-            ratio: activePass ? 1 : pendingReq ? 0.5 : 0,
-            tone: activePass ? "ok" : pendingReq ? "warn" : "info",
-            benchmark: activePass
-              ? `Ticket ${activePass.ticket_number ?? ""} active`
-              : pendingReq
-                ? `At ${pendingReq.current_stage ?? "approver"} stage`
-                : "Request a pass when leaving campus",
+            id: "presence",
+            label: "Campus Presence",
+            valueLabel: hubSnapshot.campusState === "OUTSIDE" ? "Out of Campus" : "On Campus",
+            ratio: hubSnapshot.campusState === "OUTSIDE" ? 0.35 : 0.85,
+            tone: hubSnapshot.campusState === "OUTSIDE" ? "warn" : "ok",
+            benchmark: hubSnapshot.activePass
+              ? hubSnapshot.activePass.returnDeadline
+                ? `Return by ${hubSnapshot.activePass.returnDeadline}`
+                : `${hubSnapshot.activePass.typeLabel} active`
+              : "In-campus — normal operations",
           },
           {
             id: "curfew",
@@ -292,10 +362,13 @@ function StudentHomeInner() {
           {
             id: "attendance",
             label: "Attendance",
-            valueLabel: "82%",
-            ratio: 0.82,
-            tone: "ok",
-            benchmark: "Above 75% minimum threshold",
+            valueLabel: `${hubSnapshot.attendancePct}%`,
+            ratio: Math.min(1, hubSnapshot.attendancePct / 100),
+            tone: hubSnapshot.attendancePct >= 75 ? "ok" : "warn",
+            benchmark:
+              hubSnapshot.attendancePct >= 75
+                ? "Above 75% minimum threshold"
+                : "Below 75% — attend upcoming classes",
           },
         ]}
       />
@@ -303,32 +376,49 @@ function StudentHomeInner() {
         <p className="text-[11px] text-text-muted px-0.5">
           Choose a view below to focus on today&apos;s gate status, academics, hostel &amp; mess, or monthly growth.
         </p>
-        <StudentModeSwitcher mode={mode} onChange={setMode} />
+        <BlobTabs
+          items={
+            effectivePersona === "day_scholar"
+              ? [
+                  { id: "today", label: "Today" },
+                  { id: "academics", label: "Academics" },
+                  { id: "growth", label: "Recap" },
+                ]
+              : [
+                  { id: "today", label: "Today" },
+                  { id: "academics", label: "Academics" },
+                  { id: "hostel", label: "Hostel &amp; Mess" },
+                  { id: "growth", label: "Recap" },
+                ]
+          }
+          value={mode}
+          onChange={(next) => setMode(next as StudentDashboardMode)}
+        />
       </div>
-      <StudentLivingHub
-        snapshot={{
-          campusState: "INSIDE",
-          attendancePct: 82,
-          safeSkipsRemaining: 3,
-          pendingAssignments: 0,
-          unratedMealsCount: 0,
-          activeStreakDays: 5,
-          unreadAlerts: 0,
-        }}
-      />
-      {mode === "today" ? (
-        personaDataWidgets.map((id) => {
-          const Render = ALL_WIDGET_COMPONENTS[id];
-          if (!Render) return null;
-          return (
-            <WidgetBoundary key={`${personaKey}-${id}`} name={id} resetKey={resetKey}>
-              <Render />
-            </WidgetBoundary>
-          );
-        })
-      ) : (
-        <StudentModeBody mode={mode} resetKey={resetKey} />
-      )}
+      <StudentLivingHub snapshot={hubSnapshot} persona={effectivePersona} />
+      <MotionTabPanel tabKey={mode}>
+        {mode === "academics" ? (
+          <WidgetBoundary name="student-academics-hub" resetKey={resetKey}>
+            <StudentAcademicsHub />
+          </WidgetBoundary>
+        ) : mode === "today" ? (
+          <MotionBentoGrid className="space-y-2.5">
+            {personaDataWidgets.map((id) => {
+              const Render = ALL_WIDGET_COMPONENTS[id];
+              if (!Render) return null;
+              return (
+                <MotionBentoCard key={`${personaKey}-${id}`} interactive className="p-0">
+                  <WidgetBoundary name={id} resetKey={resetKey}>
+                    <Render />
+                  </WidgetBoundary>
+                </MotionBentoCard>
+              );
+            })}
+          </MotionBentoGrid>
+        ) : (
+          <StudentModeBody mode={mode} resetKey={resetKey} />
+        )}
+      </MotionTabPanel>
     </div>
   );
 

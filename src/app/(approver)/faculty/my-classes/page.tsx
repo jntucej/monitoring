@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { ClassConfirmCard } from "@/components/faculty/ClassConfirmCard";
 import { LiveClassCard } from "@/components/shared/LiveClassCard";
 import { AssignmentsCard } from "@/components/faculty/AssignmentsCard";
+import { WeeklyScheduleGrid, type ScheduleSessionSlot } from "@/components/faculty/WeeklyScheduleGrid";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -55,7 +56,24 @@ function FacultyMyclassesInner() {
     refresh,
   } = useApiResource<MyClassesResponse>("/api/faculty/my-classes?role=class_teacher", { ttlMs: 30_000 });
 
+  const {
+    data: schedData,
+  } = useApiResource<{ success?: boolean; data?: { schedule?: Array<{ id: string; subject: string; section: string; room: string | null; startsAt: string; endsAt: string; marked: boolean }> } }>("/api/hod/schedule", { ttlMs: 30_000 });
+
   const classes = data?.data ?? [];
+
+  const rawSchedule = schedData?.data?.schedule || [];
+  const scheduleSlots: ScheduleSessionSlot[] = rawSchedule.map((s, idx) => ({
+    id: s.id,
+    subjectName: s.subject,
+    section: s.section,
+    roomNumber: s.room || undefined,
+    startTime: s.startsAt || "09:00",
+    endTime: s.endsAt || "10:00",
+    dayOfWeek: (idx % 5) + 1,
+    attendanceMarked: s.marked,
+    statusTone: s.marked ? "emerald" : "purple",
+  }));
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -127,6 +145,14 @@ function FacultyMyclassesInner() {
           </button>
         </div>
       )}
+
+      <WidgetBoundary title="Class Schedule">
+        <WeeklyScheduleGrid
+          sessions={scheduleSlots}
+          title="Assigned Teaching Timetable"
+          dateRangeLabel="Weekly Class Slots"
+        />
+      </WidgetBoundary>
 
       <WidgetBoundary title="My Classes">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">

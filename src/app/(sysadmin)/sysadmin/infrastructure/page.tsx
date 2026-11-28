@@ -3,8 +3,15 @@
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { DockerFleetPanel } from "@/components/sysadmin/monitoring/DockerFleetPanel";
+import { SysAdminTelemetryGrid, useSysAdminTelemetry } from "@/components/sysadmin/SysAdminTelemetryGrid";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { Server } from "lucide-react";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+
+function TelemetrySection() {
+  const { services, dbHealth, worker, jobs } = useSysAdminTelemetry();
+  return <SysAdminTelemetryGrid services={services} dbHealth={dbHealth} worker={worker} jobs={jobs} />;
+}
 
 export default function InfrastructurePage() {
   return (
@@ -28,6 +35,10 @@ export default function InfrastructurePage() {
             Read-only view of host, container, and service telemetry.
           </p>
         </div>
+
+        <WidgetBoundary name="sysadmin-telemetry" title="Telemetry Grid">
+          <TelemetrySection />
+        </WidgetBoundary>
 
         <DockerFleetPanel />
       </div>

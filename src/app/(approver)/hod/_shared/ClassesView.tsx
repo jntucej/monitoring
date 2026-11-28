@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, ChevronDown } from "lucide-react";
+import { CheckCircle2, ChevronDown, Calendar, Table } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
@@ -11,6 +11,7 @@ import { WeekBar } from "./WeekBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildHodScheduleInspection, type HodScheduleRecord } from "@/lib/role-registers/hodInspections";
 import { TimetableSlotCard } from "@/components/nav/TimetableSlotCard";
+import { WeeklyScheduleGrid, type ScheduleSessionSlot } from "@/components/faculty/WeeklyScheduleGrid";
 import type { ResolvedTimetableSlot } from "@/lib/timetable-resolver";
 
 interface ScheduleItem {
@@ -40,6 +41,7 @@ export function ClassesView() {
   });
   const { inspection, inspect, closeInspection } = useEntityInspector();
   const [filter, setFilter] = useState<"all" | "pending" | "marked">("pending");
+  const [viewMode, setViewMode] = useState<"grid" | "cards">("grid");
 
   const raw = data?.data;
   const items: ScheduleItem[] = Array.isArray(raw)
@@ -58,6 +60,20 @@ export function ClassesView() {
     return true;
   });
 
+  const scheduleSlots: ScheduleSessionSlot[] = items.map((item, idx) => ({
+    id: item.id ?? `slot-${idx}`,
+    subjectName: item.subjectName ?? item.subjectCode ?? `Period ${item.periodNumber ?? idx + 1}`,
+    subjectCode: item.subjectCode,
+    section: item.section,
+    roomNumber: item.roomNumber,
+    startTime: item.startTime ?? "09:00",
+    endTime: item.endTime ?? "10:00",
+    dayOfWeek: (idx % 5) + 1,
+    facultyName: item.facultyName,
+    attendanceMarked: item.attendanceMarked,
+    statusTone: item.attendanceMarked ? "emerald" : "purple",
+  }));
+
   return (
     <div className="space-y-4">
       <WeekBar />
@@ -68,15 +84,43 @@ export function ClassesView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard label="Scheduled Classes" value={items.length} tone="ok" onClick={() => setFilter("all")} />
-        <KpiCard label="Marked" value={markedCount} tone="ok" onClick={() => setFilter("marked")} />
-        <KpiCard
-          label="Pending Attendance"
-          value={pendingCount}
-          tone={pendingCount > 0 ? "warn" : "ok"}
-          onClick={() => setFilter("pending")}
-        />
+      <div className="flex items-center justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1 mr-4">
+          <KpiCard label="Scheduled Classes" value={items.length} tone="ok" onClick={() => setFilter("all")} />
+          <KpiCard label="Marked" value={markedCount} tone="ok" onClick={() => setFilter("marked")} />
+          <KpiCard
+            label="Pending Attendance"
+            value={pendingCount}
+            tone={pendingCount > 0 ? "warn" : "ok"}
+            onClick={() => setFilter("pending")}
+          />
+        </div>
+        <div className="flex items-center gap-1.5 bg-bg-surface p-1 rounded-xl border border-border shrink-0 self-start">
+          <button
+            type="button"
+            onClick={() => setViewMode("grid")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
+              viewMode === "grid"
+                ? "bg-text-primary text-bg-base shadow-sm"
+                : "text-text-muted hover:text-text-primary"
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Timetable Grid</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("cards")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
+              viewMode === "cards"
+                ? "bg-text-primary text-bg-base shadow-sm"
+                : "text-text-muted hover:text-text-primary"
+            }`}
+          >
+            <Table className="w-3.5 h-3.5" />
+            <span>Action Deck</span>
+          </button>
+        </div>
       </div>
 
       {loading && items.length === 0 ? (
@@ -85,6 +129,16 @@ export function ClassesView() {
         <EmptyState
           title="No classes scheduled"
           description="Schedule records are currently unavailable for today."
+        />
+      ) : viewMode === "grid" ? (
+        <WeeklyScheduleGrid
+          sessions={scheduleSlots}
+          onInspectSession={(slot) => {
+            const found = items.find((i) => i.id === slot.id);
+            if (found) inspect(buildHodScheduleInspection(found));
+          }}
+          title="Department Weekly Timetable"
+          dateRangeLabel="Assigned Faculty Schedule Grid"
         />
       ) : (
         <div className="space-y-5">

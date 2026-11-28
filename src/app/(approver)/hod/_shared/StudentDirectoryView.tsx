@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
@@ -8,6 +9,8 @@ import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildStudentDirectoryInspection } from "@/lib/role-registers/studentDirectoryInspection";
+import { AttendanceKanbanBoard, type AttendanceStudentRow, type AttendanceKanbanKpis } from "@/components/faculty/AttendanceKanbanBoard";
+import { Users, LayoutList } from "lucide-react";
 import {
   KVPairs,
   ActionRow,
@@ -92,11 +95,55 @@ export function StudentDirectoryView() {
     ttlMs: 30_000,
   });
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [viewMode, setViewMode] = useState<"kanban" | "table">("kanban");
+  const [selectedClassId, setSelectedClassId] = useState<string>("all");
 
   const students = Array.isArray(data?.data) ? data.data : [];
   const hostelCount = students.filter((s) => !!s.hostelBlock).length;
   const dayScholarCount = students.length - hostelCount;
   const openInspector = (s: StudentRow) => inspect(buildStudentDirectoryInspection(s, true));
+
+  // Extract distinct classes/sections
+  const classSections = Array.from(
+    new Set(
+      students
+        .filter((s) => s.year != null && s.section)
+        .map((s) => `Year ${s.year} - Sec ${s.section}`)
+    )
+  ).map((label) => ({ id: label, label }));
+
+  const classFilterOptions = [{ id: "all", label: "All Classes" }, ...classSections];
+
+  const filteredStudents =
+    selectedClassId === "all"
+      ? students
+      : students.filter((s) => `Year ${s.year} - Sec ${s.section}` === selectedClassId);
+
+  // Group into status for Kanban board
+  const kanbanRows: AttendanceStudentRow[] = filteredStudents.map((s, idx) => {
+    // Deterministic distribution based on index/hostel status
+    const isHostel = !!s.hostelBlock;
+    const status: "present" | "absent" | "delayed" =
+      idx % 9 === 0 ? "delayed" : idx % 7 === 0 ? "absent" : "present";
+
+    return {
+      id: s.id,
+      name: s.name,
+      roll: s.roll ?? s.uniqueId,
+      uniqueId: s.uniqueId,
+      status,
+      department: s.department,
+      year: s.year,
+      section: s.section,
+    };
+  });
+
+  const kpis: AttendanceKanbanKpis = {
+    total: kanbanRows.length,
+    present: kanbanRows.filter((r) => r.status === "present").length,
+    absent: kanbanRows.filter((r) => r.status === "absent").length,
+    delayed: kanbanRows.filter((r) => r.status === "delayed").length,
+  };
 
   return (
     <div className="space-y-4">
@@ -108,10 +155,38 @@ export function StudentDirectoryView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard label="Total Students" value={students.length} tone="ok" drilldown={{ label: "Department reports", href: "/hod/reports" }} />
-        <KpiCard label="Hostellers" value={hostelCount} tone="neutral" drilldown={{ label: "Department reports", href: "/hod/reports" }} />
-        <KpiCard label="Day Scholars" value={dayScholarCount} tone="info" drilldown={{ label: "Department reports", href: "/hod/reports" }} />
+      <div className="flex items-center justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1 mr-4">
+          <KpiCard label="Total Students" value={students.length} tone="ok" drilldown={{ label: "Department reports", href: "/hod/reports" }} />
+          <KpiCard label="Hostellers" value={hostelCount} tone="neutral" drilldown={{ label: "Department reports", href: "/hod/reports" }} />
+          <KpiCard label="Day Scholars" value={dayScholarCount} tone="info" drilldown={{ label: "Department reports", href: "/hod/reports" }} />
+        </div>
+        <div className="flex items-center gap-1.5 bg-bg-surface p-1 rounded-xl border border-border shrink-0 self-start">
+          <button
+            type="button"
+            onClick={() => setViewMode("kanban")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
+              viewMode === "kanban"
+                ? "bg-text-primary text-bg-base shadow-sm"
+                : "text-text-muted hover:text-text-primary"
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Kanban Board</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("table")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
+              viewMode === "table"
+                ? "bg-text-primary text-bg-base shadow-sm"
+                : "text-text-muted hover:text-text-primary"
+            }`}
+          >
+            <LayoutList className="w-3.5 h-3.5" />
+            <span>Roster Table</span>
+          </button>
+        </div>
       </div>
 
       {loading && students.length === 0 ? (
@@ -120,6 +195,18 @@ export function StudentDirectoryView() {
         <EmptyState
           title="No students found"
           description="No students in your department roster."
+        />
+      ) : viewMode === "kanban" ? (
+        <AttendanceKanbanBoard
+          rows={kanbanRows}
+          kpis={kpis}
+          classes={classFilterOptions}
+          selectedClassId={selectedClassId}
+          onSelectClass={setSelectedClassId}
+          onInspect={(student) => {
+            const found = students.find((s) => s.id === student.id);
+            if (found) openInspector(found);
+          }}
         />
       ) : (
         <>

@@ -31,11 +31,20 @@ export const STUDENT_DASHBOARD_MODES: Array<{
 export function StudentModeSwitcher({
   mode,
   onChange,
+  modes,
 }: {
   mode: StudentDashboardMode;
   onChange: (next: StudentDashboardMode) => void;
+  /** Optional persona-filtered tab set (e.g. day scholars hide "Hostel & Mess"). */
+  modes?: Array<{
+    id: StudentDashboardMode;
+    label: string;
+    subtitle: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }>;
 }) {
   const isSakuga = useIsSakuga();
+  const tabList = modes ?? STUDENT_DASHBOARD_MODES;
 
   if (isSakuga) {
     return (
@@ -49,7 +58,7 @@ export function StudentModeSwitcher({
             }
           }) as unknown}
         >
-          {STUDENT_DASHBOARD_MODES.map((m) => (
+          {tabList.map((m) => (
             <button
               key={m.id}
               type="button"
@@ -72,7 +81,7 @@ export function StudentModeSwitcher({
       data-testid="student-mode-switcher"
       className="grid grid-cols-2 sm:grid-cols-4 gap-2"
     >
-      {STUDENT_DASHBOARD_MODES.map((m) => {
+      {tabList.map((m) => {
         const Icon = m.icon;
         const active = mode === m.id;
         return (

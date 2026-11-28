@@ -1,0 +1,6 @@
+-- 20270131000048_student_academic_plans.sql.down
+BEGIN;
+DROP POLICY IF EXISTS student_own_academic_plans ON public.student_academic_plans;
+DROP POLICY IF EXISTS svc_all_student_academic_plans ON public.student_academic_plans;
+DROP TABLE IF EXISTS public.student_academic_plans;
+COMMIT;

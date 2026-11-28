@@ -1,19 +1,19 @@
 "use client";
 
-
-import React, { useState, useCallback } from "react";
-import { Users, AlertCircle, RotateCw, Inbox } from "lucide-react";
+import React, { useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-
-import { FacultyTracking } from "@/components/admin/FacultyTracking";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
-import { BarcodeRatioCard } from "@/components/dashboard/UnifiedDashboardWidgets";
-import { useAuthStore } from "@/stores/authStore";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { getAuthHeaders } from "@/lib/utils";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { useApiResource } from "@/hooks/useApiResource";
+import { AttendanceKanbanBoard, type AttendanceStudentRow, type AttendanceKanbanKpis } from "@/components/faculty/AttendanceKanbanBoard";
+import { WeeklyScheduleGrid, type ScheduleSessionSlot, type StudentAnalyticsItem } from "@/components/faculty/WeeklyScheduleGrid";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildStudentDirectoryInspection } from "@/lib/role-registers/studentDirectoryInspection";
+import { buildHodScheduleInspection } from "@/lib/role-registers/hodInspections";
+import { Users, Calendar, AlertCircle } from "lucide-react";
 import type { FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/types";
 
-interface FacultyAttendanceResponse {
+interface FacultyAttendanceApiResponse {
   success: boolean;
   summary?: {
     totalFaculty: number;
@@ -26,164 +26,200 @@ interface FacultyAttendanceResponse {
   };
   departmentSummaries?: DepartmentAttendanceSummary[];
   records?: FacultyMemberAttendance[];
-  error?: string | { message?: string };
+  error?: string;
 }
 
-const EMPTY_SUMMARY = {
-  totalFaculty: 0,
-  presentToday: 0,
-  currentlyInside: 0,
-  currentlyOutside: 0,
-  lateArrivals: 0,
-  absentCount: 0,
-  overallAttendanceRate: 0,
-};
+interface ScheduleApiResponse {
+  success?: boolean;
+  data?: {
+    schedule?: Array<{
+      id: string;
+      subject: string;
+      section: string;
+      room: string | null;
+      startsAt: string;
+      endsAt: string;
+      marked: boolean;
+    }>;
+  };
+}
 
 function FacultyAttendanceInner() {
-  const user = useAuthStore((s) => s.user);
-  const [records, setRecords] = useState<FacultyMemberAttendance[]>([]);
-  const [summary, setSummary] = useState(EMPTY_SUMMARY);
-  const [departmentSummaries, setDepartmentSummaries] = useState<DepartmentAttendanceSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"kanban" | "schedule">("kanban");
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
-  const fetchFacultyAttendance = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch("/api/faculty/attendance", {
-        headers: getAuthHeaders(),
-        cache: "no-store",
-      });
-      const data: FacultyAttendanceResponse = await res.json();
-      if (data.success) {
-        setRecords(data.records || []);
-        if (data.summary) setSummary(data.summary);
-        if (data.departmentSummaries) setDepartmentSummaries(data.departmentSummaries);
-      } else {
-        const msg =
-          typeof data.error === "string"
-            ? data.error
-            : data.error?.message || "Failed to fetch faculty attendance data";
-        setError(msg);
-      }
-    } catch (err) {
-      console.error("Error loading faculty attendance:", err);
-      setError("Network error fetching faculty attendance");
-    } finally {
-      setLoading(false);
+  // Primary attendance resource
+  const {
+    data: attData,
+    loading: attLoading,
+    error: attError,
+  } = useApiResource<FacultyAttendanceApiResponse>("/api/faculty/attendance", { ttlMs: 30_000 });
+
+  // Schedule resource for timetable grid
+  const {
+    data: schedData,
+  } = useApiResource<ScheduleApiResponse>("/api/hod/schedule", { ttlMs: 30_000 });
+
+  const summary = attData?.summary;
+  const records = attData?.records || [];
+
+  // Map real records into Kanban student rows
+  const kanbanRows: AttendanceStudentRow[] = records.map((r) => {
+    let status: "present" | "absent" | "delayed" = "absent";
+    if (r.status === "INSIDE" || r.status === "OUTSIDE") {
+      status = r.punctualityStatus === "LATE" ? "delayed" : "present";
     }
-  }, []);
 
-  // Initial fetch + poll every 30s while the global Live toggle is on.
-  useLiveRefresh(fetchFacultyAttendance, { intervalMs: 30_000 });
+    return {
+      id: r.id,
+      name: r.fullName,
+      roll: r.uniqueId || undefined,
+      uniqueId: r.uniqueId,
+      status,
+      subject: r.designation || undefined,
+      department: r.department,
+    };
+  });
 
-  const isFaculty = user?.role === "faculty";
-  const deptCode = user?.departmentId ? ` · dept ${user.departmentId}` : "";
+  const kpis: AttendanceKanbanKpis = {
+    total: summary?.totalFaculty || kanbanRows.length,
+    present: summary?.presentToday || kanbanRows.filter((r) => r.status === "present").length,
+    absent: summary?.absentCount || kanbanRows.filter((r) => r.status === "absent").length,
+    delayed: summary?.lateArrivals || kanbanRows.filter((r) => r.status === "delayed").length,
+    attendanceRate: summary?.overallAttendanceRate,
+  };
+
+  // Map real schedule rows
+  const rawSchedule = schedData?.data?.schedule || [];
+  const scheduleSlots: ScheduleSessionSlot[] = rawSchedule.map((s, idx) => ({
+    id: s.id,
+    subjectName: s.subject,
+    section: s.section,
+    roomNumber: s.room || undefined,
+    startTime: s.startsAt || "09:00",
+    endTime: s.endsAt || "10:00",
+    dayOfWeek: (idx % 5) + 1, // Mon-Fri cycle
+    attendanceMarked: s.marked,
+    statusTone: s.marked ? "emerald" : "purple",
+  }));
+
+  const studentAnalytics: StudentAnalyticsItem[] = records.map((r) => {
+    const isPresent = r.status === "INSIDE" || r.status === "OUTSIDE";
+    return {
+      id: r.id,
+      name: r.fullName,
+      roll: r.uniqueId,
+      uniqueId: r.uniqueId,
+      attendanceRate: r.attendanceRate ?? (isPresent ? 100 : 0),
+      presentCount: isPresent ? 1 : 0,
+      absentCount: r.status === "ABSENT" ? 1 : 0,
+      delayedCount: r.punctualityStatus === "LATE" ? 1 : 0,
+    };
+  });
+
+  const handleInspectStudent = (student: AttendanceStudentRow | StudentAnalyticsItem) => {
+    inspect(
+      buildStudentDirectoryInspection({
+        id: student.id,
+        name: student.name,
+        roll: student.roll || student.uniqueId,
+        uniqueId: student.uniqueId,
+        department: "department" in student ? student.department : undefined,
+        status: "status" in student ? student.status.toUpperCase() : "ACTIVE",
+      })
+    );
+  };
+
+  const handleInspectSession = (session: ScheduleSessionSlot) => {
+    inspect(
+      buildHodScheduleInspection({
+        id: session.id,
+        subjectName: session.subjectName,
+        subjectCode: session.subjectCode,
+        section: session.section,
+        roomNumber: session.roomNumber,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        attendanceMarked: session.attendanceMarked,
+      })
+    );
+  };
 
   return (
-    <div className="min-h-dvh bg-bg-elevated p-4 sm:p-6 md:p-4 space-y-4 sm:space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-2xl font-bold text-white flex items-center gap-2">
-            <Users className="w-6 h-6 text-action-success" />
-            Faculty Attendance Desk
-          </p>
-          <p className="text-sm text-text-muted mt-1">
-            {isFaculty
-              ? `Your department${deptCode || " (assigned branch)"} — live entry/exit, punctuality and attendance metrics.`
-              : "Real-time entry/exit logs, punctuality tracking, and department-level attendance metrics."}
-          </p>
-        </div>
-        <div className="flex items-center gap-3 text-xs text-text-muted">
-          {user?.name && <span className="truncate max-w-55">{user.name}</span>}
-        </div>
-      </div>
-
+    <div className="min-h-dvh bg-bg-elevated p-4 sm:p-6 md:p-6 space-y-5">
+      {/* 3-Band Layout Band 1: Context Situation Bar */}
       <ContextSituationBar
-        roleLabel="Faculty Attendance Admin"
-        purpose="Track faculty arrivals, gate movement logs, and departmental presence compliance"
-        why="Auditing faculty attendance records ensures timely lecture delivery and complies with institutional regulatory metrics."
-        contextLabel={`Faculty Presence · ${summary.presentToday}/${summary.totalFaculty || records.length} Present`}
-        statusTone={summary.overallAttendanceRate > 0 && summary.overallAttendanceRate < 75 ? "warn" : "ok"}
-        statusPill={`${summary.presentToday} Present`}
-        statusSummary={
-          records.length > 0
-            ? `${summary.presentToday} faculty present today across departments (${summary.overallAttendanceRate}% overall attendance rate).`
-            : "No faculty check-in records logged for today yet."
-        }
-        primaryAction={{ label: "Faculty Directory", href: "/faculty/student-directory" }}
-        secondaryAction={{ label: "My Classes", href: "/faculty/my-classes" }}
+        roleLabel="Faculty · Teacher Ops"
+        purpose="Track student and classroom attendance, review punctuality, and inspect weekly sessions."
+        why="Real-time attendance ensures verified presence across batches and supports academic compliance."
+        contextLabel="Attendance & Operations"
+        statusTone="info"
+        statusPill={`${kpis.present}/${kpis.total} Active`}
+        statusSummary={`${kpis.attendanceRate ?? Math.round((kpis.present / (kpis.total || 1)) * 100)}% attendance verified across assigned cohorts.`}
+        primaryAction={{ label: "My Classes", href: "/faculty/my-classes" }}
+        secondaryActions={[
+          { label: "Student Directory", href: "/faculty/student-directory" },
+          { label: "Reports", href: "/faculty/reports" },
+        ]}
       />
 
-      {/* Error banner with retry */}
-      {error && (
-        <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-sm flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <span>Failed to load faculty attendance: {error}</span>
-          </span>
-          <button
-            type="button"
-            onClick={() => fetchFacultyAttendance()}
-            className="surface-card inline-flex items-center gap-1.5 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/20 shrink-0"
-          >
-            <RotateCw className="w-3.5 h-3.5" />
-            Retry
-          </button>
+      {/* View Switcher Pills */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setActiveTab("kanban")}
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+            activeTab === "kanban"
+              ? "bg-[#111111] text-white shadow-sm"
+              : "bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200"
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          <span>Attendance Board</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("schedule")}
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+            activeTab === "schedule"
+              ? "bg-[#111111] text-white shadow-sm"
+              : "bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200"
+          }`}
+        >
+          <Calendar className="w-3.5 h-3.5" />
+          <span>Weekly Timetable</span>
+        </button>
+      </div>
+
+      {attError && (
+        <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-action-warning flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{attError}</span>
         </div>
       )}
 
-      {/* Loading state */}
-      {loading && records.length === 0 && !error ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="size-6 border-4 border-action-success border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : !error && records.length === 0 && departmentSummaries.length === 0 ? (
-        /* Empty state — no attendance records yet */
-        <div className="surface-card flex flex-col items-center justify-center p-12 bg-bg-base text-center space-y-3">
-          <Inbox className="size-6 text-text-muted" />
-          <div className="space-y-1">
-            <h3 className="text-base font-semibold text-text-secondary">No attendance records yet</h3>
-            <p className="text-xs text-text-muted max-w-sm">
-              Faculty appear here after their first gate check-in today. Metrics refresh
-              automatically while Live mode is on.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {summary.totalFaculty > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              <BarcodeRatioCard
-                title="Attendance"
-                pct={Math.round((summary.presentToday / summary.totalFaculty) * 100)}
-                countLabel={`${summary.presentToday} of ${summary.totalFaculty} present`}
-                tone="emerald"
-              />
-              <BarcodeRatioCard
-                title="Absences"
-                pct={Math.round((summary.absentCount / summary.totalFaculty) * 100)}
-                countLabel={`${summary.absentCount} absent today`}
-                tone="amber"
-              />
-              <BarcodeRatioCard
-                title="Delayed"
-                pct={Math.round((summary.lateArrivals / summary.totalFaculty) * 100)}
-                countLabel={`${summary.lateArrivals} late arrivals`}
-                tone="indigo"
-              />
-            </div>
-          )}
-          <FacultyTracking
-            records={records}
-            summary={summary}
-            departmentSummaries={departmentSummaries}
+      {/* 3-Band Layout Band 2 & 3: Workspace */}
+      <WidgetBoundary name="AttendanceWorkspace" title="Teacher Operations Workspace">
+        {activeTab === "kanban" ? (
+          <AttendanceKanbanBoard
+            rows={kanbanRows}
+            kpis={kpis}
+            onInspect={handleInspectStudent}
           />
-        </div>
-      )}
+        ) : (
+          <WeeklyScheduleGrid
+            sessions={scheduleSlots}
+            studentAnalytics={studentAnalytics}
+            onInspectSession={handleInspectSession}
+            onInspectStudent={handleInspectStudent}
+            title="Assigned Class Timetable"
+            dateRangeLabel="Academic Session Schedule"
+          />
+        )}
+      </WidgetBoundary>
 
+      {/* Inspector Panel */}
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

@@ -1,0 +1,7 @@
+-- 20270131000049_campus_facility_feedback.sql.down
+BEGIN;
+DROP POLICY IF EXISTS student_own_facility_feedback_ins ON public.campus_facility_feedback;
+DROP POLICY IF EXISTS student_own_facility_feedback ON public.campus_facility_feedback;
+DROP POLICY IF EXISTS svc_all_campus_facility_feedback ON public.campus_facility_feedback;
+DROP TABLE IF EXISTS public.campus_facility_feedback;
+COMMIT;

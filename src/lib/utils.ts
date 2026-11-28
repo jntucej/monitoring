@@ -236,3 +236,6 @@ export function humanizeCode(
   if (!s) return fallback;
   return String(s).replace(/_/g, " ");
 }
+
+export { isSuperAdmin } from "./roles";
+

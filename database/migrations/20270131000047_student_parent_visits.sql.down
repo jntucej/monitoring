@@ -1,0 +1,7 @@
+-- 20270131000047_student_parent_visits.sql.down
+BEGIN;
+DROP POLICY IF EXISTS student_own_parent_visits_ins ON public.student_parent_visits;
+DROP POLICY IF EXISTS student_own_parent_visits ON public.student_parent_visits;
+DROP POLICY IF EXISTS svc_all_student_parent_visits ON public.student_parent_visits;
+DROP TABLE IF EXISTS public.student_parent_visits;
+COMMIT;
