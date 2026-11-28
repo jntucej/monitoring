@@ -10,7 +10,7 @@
         { "path": ".env", "required": false }
       ],
       "environment": {
-        "AUTOPILOT_DB_DSN": "postgresql://autopilot_runtime_app:${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD:?}}@gate_postgres:5432/autopilot_runtime",
+        "AUTOPILOT_DB_DSN": "postgresql://autopilot_runtime_app:${POSTGRES_PASSWORD:?}@gate_postgres:5432/autopilot_runtime",
         "AUTOPILOT_ADDR": "0.0.0.0:8401",
         "RUST_LOG": "${RUST_LOG:-autopilot_api=info}"
       },
