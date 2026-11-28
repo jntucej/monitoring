@@ -66,7 +66,7 @@ export interface CreateMissionReq {
   initiator_id: string;
   objective: string;
   workspace_id: string;
-  mode: "autonomous" | "supervised";
+  mode: "read_only" | "workspace_write" | "approval_required";
   context_limit: number;
   max_steps: number;
   max_retries: number;

@@ -90,7 +90,7 @@ async function implPost(
         initiator_id: String(body.initiator_id ?? auth.userId),
         objective: String(body.objective ?? ""),
         workspace_id: String(body.workspace_id ?? "gate_monitor"),
-        mode: (body.mode as "autonomous" | "supervised") ?? "supervised",
+        mode: (body.mode as "read_only" | "workspace_write" | "approval_required") ?? "workspace_write",
         context_limit: Number(body.context_limit ?? 8192),
         max_steps: Number(body.max_steps ?? 20),
         max_retries: Number(body.max_retries ?? 3),

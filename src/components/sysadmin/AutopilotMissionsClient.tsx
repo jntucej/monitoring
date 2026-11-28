@@ -42,6 +42,13 @@ interface MissionEvent {
   occurred_at: string;
 }
 
+/**
+ * The control plane's ExecutionMode enum (Contract C). `workspace_write` is
+ * the default for campus jobs; `approval_required` routes through the
+ * waiting_approval state; `read_only` is the restricted research profile.
+ */
+type ExecutionMode = "read_only" | "workspace_write" | "approval_required";
+
 const STATUS_COLORS: Record<MissionStatus, string> = {
   created: "bg-zinc-500/20 text-zinc-300 border-zinc-500/40",
   queued: "bg-zinc-400/20 text-zinc-300 border-zinc-400/40",
@@ -94,7 +101,7 @@ export function AutopilotMissionsClient() {
 
   // Create-mission form state
   const [objective, setObjective] = useState("");
-  const [mode, setMode] = useState<"supervised" | "autonomous">("supervised");
+  const [mode, setMode] = useState<ExecutionMode>("workspace_write");
   const [contextLimit, setContextLimit] = useState(8192);
   const [maxSteps, setMaxSteps] = useState(20);
   const [creating, setCreating] = useState(false);
@@ -242,11 +249,12 @@ export function AutopilotMissionsClient() {
           />
           <select
             value={mode}
-            onChange={(e) => setMode(e.target.value as "supervised" | "autonomous")}
+            onChange={(e) => setMode(e.target.value as ExecutionMode)}
             className="rounded border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
           >
-            <option value="supervised">Supervised</option>
-            <option value="autonomous">Autonomous</option>
+            <option value="workspace_write">Workspace write</option>
+            <option value="approval_required">Approval required</option>
+            <option value="read_only">Read-only</option>
           </select>
           <button
             onClick={() => void create()}

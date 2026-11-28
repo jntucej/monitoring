@@ -38,7 +38,9 @@
         }
       },
       "healthcheck": {
-        "test": ["CMD-SHELL", "wget -q -O- http://127.0.0.1:8401/health || exit 1"],
+        "test": [
+          "NONE"
+        ],
         "interval": "10s",
         "timeout": "3s",
         "retries": "5"

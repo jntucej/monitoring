@@ -22,20 +22,23 @@ export function getAutopilotDbPool() {
   if (autopilotPool) return autopilotPool;
 
   // Reuse the worker's env-loading + connection settings; only the database
-  // name differs. The worker container runs on the host network (or has
-  // host.docker.internal) so 127.0.0.1:5432 reaches gate_postgres.
+  // name differs. The worker container reaches gate_postgres by service
+  // name (postgres:5432) on the shared bridge network.
   const gatePool = getWorkerDbPool();
   const baseUrl = gatePool.connectionString;
+  if (!baseUrl) {
+    throw new Error("worker pool has no connection string; cannot derive the autopilot DSN");
+  }
 
   const autopilotUrl =
     process.env.AUTOMONITORING_DSN ||
-    baseUrl.replace(/\/gate_monitor\/?$/, '/autopilot_runtime');
+    baseUrl.replace(/\/gate_monitor\/?$/, "/autopilot_runtime");
 
   autopilotPool = new Pool({
     connectionString: autopilotUrl,
     max: 5, // frozen conservative pool (control plane is small)
-    ssl: process.env.PG_SSL === 'true'
-      ? { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== 'false' }
+    ssl: process.env.PG_SSL === "true"
+      ? { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== "false" }
       : undefined,
   });
 
