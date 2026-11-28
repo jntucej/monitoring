@@ -2,6 +2,7 @@
 -- the pre-existing academic_regulations/workflow_definitions columns are left
 -- in place (additive, harmless, and the existing R22/R25 rows don't depend on them).
 DROP FUNCTION IF EXISTS public.query_institutional_knowledge(vector, text, text, float, int);
+DROP FUNCTION IF EXISTS public.clone_academic_regulation(text, text, integer);
 DROP TABLE IF EXISTS public.institutional_knowledge_chunks;
 -- keep the vector extension (shared, harmless)
 DROP FUNCTION IF EXISTS public.process_announcement_lifecycles();

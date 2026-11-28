@@ -248,16 +248,19 @@ CREATE OR REPLACE FUNCTION public.clone_academic_regulation(
   source_regulation_code text,
   new_regulation_code text,
   new_effective_year int
-) RETURNS uuid AS $$
+) RETURNS text AS $$
 DECLARE
-  src_reg_id uuid;
-  new_reg_id uuid;
+  src_version int;
+  new_version int;
 BEGIN
-  SELECT id INTO src_reg_id FROM public.academic_regulations
-   WHERE code = source_regulation_code ORDER BY version DESC LIMIT 1;
-  IF src_reg_id IS NULL THEN
+  -- The lean academic_regulations table is keyed by (code, version) with no
+  -- UUID PK, so we resolve the source by its latest version, not by id.
+  SELECT MAX(version) INTO src_version FROM public.academic_regulations
+   WHERE code = source_regulation_code;
+  IF src_version IS NULL THEN
     RAISE EXCEPTION 'source regulation % not found', source_regulation_code;
   END IF;
+  new_version := src_version + 1;
 
   INSERT INTO public.academic_regulations
     (code, program_code, effective_from, is_active, status, version, description)
@@ -267,11 +270,10 @@ BEGIN
     make_date(new_effective_year, 7, 1)::date,
     false,
     'DRAFT',
-    COALESCE(MAX(a.version), 1) + 1,
+    new_version,
     'Cloned from ' || source_regulation_code
   FROM public.academic_regulations a
-  WHERE a.id = src_reg_id
-  RETURNING id INTO new_reg_id;
+  WHERE a.code = source_regulation_code AND a.version = src_version;
 
   -- Deep-copy all JSONLogic policy trees to the new regulation.
   INSERT INTO public.academic_policy_rules
@@ -281,6 +283,6 @@ BEGIN
    WHERE p.regulation_code = source_regulation_code
     ON CONFLICT (regulation_code, policy_category, sub_category) DO NOTHING;
 
-  RETURN new_reg_id;
+  RETURN new_regulation_code || '@v' || new_version;
 END;
 $$ LANGUAGE plpgsql;

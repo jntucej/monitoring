@@ -38,13 +38,15 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   }
 
   // The clone function is idempotent-safe: it raises if the source is missing.
-  let newRegId: string;
+  // Returns a "CODE@vN" reference (the lean academic_regulations table has no
+  // UUID PK, so the new regulation is addressed by code + version).
+  let cloneRef: string;
   try {
-    const { rows } = await query<{ id: string }>(
-      `SELECT public.clone_academic_regulation($1, $2, $3) AS id`,
+    const { rows } = await query<{ ref: string }>(
+      `SELECT public.clone_academic_regulation($1, $2, $3) AS ref`,
       [sourceRegulationCode, newRegulationCode, newEffectiveYear],
     );
-    newRegId = rows[0]?.id ?? "";
+    cloneRef = rows[0]?.ref ?? "";
   } catch (err) {
     return fail(
       "CLONE_FAILED",
@@ -52,8 +54,8 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
       500,
     );
   }
-  if (!newRegId) {
-    return fail("CLONE_FAILED", "Clone did not return a regulation id.", 500);
+  if (!cloneRef) {
+    return fail("CLONE_FAILED", "Clone did not return a regulation reference.", 500);
   }
 
   // Flush the in-process catalog cache so the topology + active_regulations
@@ -66,14 +68,14 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
     roleContext: auth.role,
     action: "regulation_clone",
     resource: "academic_regulations",
-    resourceId: newRegId,
+    resourceId: cloneRef,
     afterState: { source: sourceRegulationCode, clonedTo: newRegulationCode, effectiveYear: newEffectiveYear, status: "DRAFT" },
   });
 
   return ok({
     clonedFrom: sourceRegulationCode,
     newRegulationCode,
-    regulationId: newRegId,
+    regulationRef: cloneRef,
     status: "DRAFT",
     note: "Clone created as DRAFT. Deep-copied the policy JSONB trees; the source + bound cohorts are untouched.",
   });
