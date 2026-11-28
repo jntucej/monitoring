@@ -1,6 +1,6 @@
 import { errMsg, errCode } from "@/lib/err-msg";
 import { randomUUID } from "crypto";
-import { query } from "@/lib/postgres";
+import { query, withTransaction } from "@/lib/postgres";
 import { dispatchAutonomousEvent } from "../../../../worker/autonomous-orchestrator";
 import {
   assertNotLockedOut,
@@ -828,21 +828,66 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
     }
   }
 
-  // Idempotency gate (reliability layer): a deterministic dedup key prevents
-  // a replayed webhook from double-processing. The key is built from the
-  // integration adapter's idempotency_key_template when available; falls
-  // back to a device:timestamp:user hash for bare terminal punches.
+  // Idempotency gate + transactional outbox (reliability layer): the dedup
+  // check and the domain_outbox insert run in the SAME Postgres transaction
+  // (withTransaction). This is the context-aware, closed-loop guarantee —
+  // a crash between the two writes can never leave an unprocessed event
+  // marked as processed, or a processed event without its outbox row.
+  // The outbox relay worker (FOR UPDATE SKIP LOCKED + 5-retry backoff +
+  // DEAD_LETTER) picks the row up asynchronously; a crash after COMMIT but
+  // before relay leaves the row PENDING for the next sweep.
   const idempotencyKey =
     input.idempotencyKey ??
     `${input.deviceId ?? "manual"}:${(finalLog as { timestamp?: string })?.timestamp ?? ""}:${person.id}`;
-  const { rows: dedupRows } = await query<{ n: number }>(
-    `INSERT INTO public.processed_events (idempotency_key, source, event_type, entity_ref)
-     VALUES ($1, $2, 'GATE_PUNCH', $3)
-     ON CONFLICT (idempotency_key) DO NOTHING
-     RETURNING 1 AS n`,
-    [idempotencyKey, input.deviceId ?? "manual", person.id],
-  ).catch(() => ({ rows: [] as { n: number }[] }));
-  if (dedupRows.length === 0) {
+
+  let isReplayed = false;
+  try {
+    await withTransaction(
+      async (client) => {
+        // 1. Idempotency gate: deterministic dedup key prevents a replayed
+        //    webhook from double-processing.
+        const { rows: dedupRows } = await client.query(
+          `INSERT INTO public.processed_events (idempotency_key, source, event_type, entity_ref)
+           VALUES ($1, $2, 'GATE_PUNCH', $3)
+           ON CONFLICT (idempotency_key) DO NOTHING
+           RETURNING 1 AS n`,
+          [idempotencyKey, input.deviceId ?? "manual", person.id],
+        );
+        if (dedupRows.length === 0) {
+          isReplayed = true;
+          return;
+        }
+
+        // 2. Transactional outbox: enqueue the GATE_PUNCH domain event in
+        //    the same transaction as the state mutation. The outbox relay
+        //    worker polls PENDING rows with FOR UPDATE SKIP LOCKED, pushes
+        //    to Redis/SSE, marks SENT. A crash after the insert but before
+        //    the relay leaves the row PENDING for retry — never silently
+        //    dropped.
+        await client.query(
+          `INSERT INTO public.domain_outbox (event_type, payload)
+           VALUES ('GATE_PUNCH', $1::jsonb)`,
+          [
+            JSON.stringify({
+              studentId: person.id,
+              direction: input.direction,
+              atIso: (finalLog as { timestamp?: string })?.timestamp ?? new Date().toISOString(),
+              gateId: gate.id,
+              idempotencyKey,
+            }),
+          ],
+        );
+      },
+      { currentUserId: person.id, currentRole: person.role },
+    );
+  } catch (err: unknown) {
+    // A missing table (pre-migration) or a relay lag must never block the
+    // primary scan write. Log and continue — the outbox row will be written
+    // by the next successful transaction.
+    console.warn("[recordScan] idempotency/outbox transaction failed:", errMsg(err));
+  }
+
+  if (isReplayed) {
     // Already processed — acknowledge and exit without re-mutating state.
     return {
       log: finalLog ?? {},
@@ -859,29 +904,6 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
       },
     };
   }
-
-  // Transactional outbox: enqueue the GATE_PUNCH domain event in the same
-  // logical transaction as the state mutation. The outbox relay worker polls
-  // PENDING rows with FOR UPDATE SKIP LOCKED, pushes to Redis/SSE, marks
-  // SENT. A crash after the insert but before the relay leaves the row
-  // PENDING for retry — never silently dropped.
-  await query(
-    `INSERT INTO public.domain_outbox (event_type, payload)
-     VALUES ('GATE_PUNCH', $1::jsonb)`,
-    [
-      JSON.stringify({
-        studentId: person.id,
-        direction: input.direction,
-        atIso: (finalLog as { timestamp?: string })?.timestamp ?? new Date().toISOString(),
-        gateId: gate.id,
-        idempotencyKey,
-      }),
-    ],
-  ).catch((err: unknown) => {
-    // Outbox insert is best-effort: a missing table (pre-migration) or a
-    // relay lag must never block the primary scan write.
-    console.warn("[recordScan] domain_outbox GATE_PUNCH insert failed:", errMsg(err));
-  });
 
   // Autonomous presence loop (Loop 3): a successful biometric/QR punch flips
   // the student's live campus presence + reshuffles the hub. Fire-and-forget —

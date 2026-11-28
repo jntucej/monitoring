@@ -199,6 +199,46 @@ export async function dispatchAutonomousEvent(event) {
     }
 
     case "GATE_PUNCH": {
+      // Hardware debounce (Blind Spot 3): ignore same-direction punches
+      // within the debounce window (read from runtime_profiles — zero
+      // hardcoded). A fresh OUT punch 5s after an OUT is a terminal glitch,
+      // not a real session boundary.
+      let debounceSec = 300;
+      try {
+        const { rows: cfgRows } = await pool.query(
+          `SELECT config_json->>'hardware_debounce_sec' AS debounce
+             FROM public.runtime_profiles
+            WHERE profile_key = 'campus_autonomy_defaults' AND status = 'ACTIVE'
+            LIMIT 1`,
+        );
+        if (cfgRows[0]?.debounce != null) {
+          debounceSec = Number(cfgRows[0].debounce) || 300;
+        }
+      } catch {
+        // pre-migration DB — use the default
+      }
+
+      const { rows: lastPunchRows } = await pool.query(
+        `SELECT timestamp AS last_punch
+           FROM public.movement_logs
+          WHERE user_id = $1::uuid AND direction = $2
+          ORDER BY timestamp DESC LIMIT 1`,
+        [event.studentId, event.direction],
+      );
+      const lastPunch = lastPunchRows[0]?.last_punch;
+      if (lastPunch) {
+        const lastPunchMs = new Date(lastPunch).getTime();
+        const nowMs = new Date(event.atIso).getTime();
+        const debounceMs = debounceSec * 1000;
+        if (nowMs - lastPunchMs < debounceMs && lastPunchMs <= nowMs) {
+          // Same-direction punch within the debounce window — suppress.
+          // The B1 timestamp guard above already made this a no-op for
+          // campus_occupancy; here we just avoid the notification fan-out
+          // and the anomaly-tag write so a terminal glitch doesn't spam.
+          return;
+        }
+      }
+
       // B1: timestamp-guarded presence flip.
       const { rowCount } = await pool.query(
         `INSERT INTO public.campus_occupancy (user_id, current_status, last_updated)
