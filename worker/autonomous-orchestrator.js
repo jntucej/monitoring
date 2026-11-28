@@ -2,9 +2,9 @@
  * Autonomous event orchestrator (worker runtime path).
  *
  * Plain ESM, `pg` only — importable by `worker/index.mjs` under bare `node`
- * (no TS transpile, no app-alias coupling). The Next app-side mirror is
- * `src/server/services/autonomous/orchestrator.ts`, which re-exports this
- * module so both the app bundle and the worker use the same runtime logic.
+ * (no TS transpile, no app-alias coupling). The Next app bundle imports this
+ * same module via a relative path (record.ts) so both runtime paths share
+ * one source of truth.
  *
  * Wired from:
  *   - record.ts (gate punch)              -> dispatchAutonomousEvent({ GATE_PUNCH })
