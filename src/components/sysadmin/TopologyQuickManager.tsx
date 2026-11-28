@@ -12,10 +12,12 @@ import { Loader2, Plus, RefreshCw, Building2, DoorOpen } from "lucide-react";
  * cache so every dashboard refreshes instantly).
  */
 export function TopologyQuickManager({ onRebuilt }: { onRebuilt?: () => void }) {
-  const [mode, setMode] = useState<"idle" | "course" | "gate">("idle");
+  const [mode, setMode] = useState<"idle" | "course" | "gate" | "facility" | "org_unit">("idle");
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
+  const [category, setCategory] = useState("GATE");
+  const [unitType, setUnitType] = useState("DEPARTMENT");
   const [busy, setBusy] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -82,6 +84,22 @@ export function TopologyQuickManager({ onRebuilt }: { onRebuilt?: () => void }) 
           <button
             type="button"
             disabled={busy}
+            onClick={() => setMode(mode === "facility" ? "idle" : "facility")}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-700 text-white text-xs font-semibold disabled:opacity-50"
+          >
+            <Building2 className="h-3.5 w-3.5" /> New Facility
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => setMode(mode === "org_unit" ? "idle" : "org_unit")}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-700 text-white text-xs font-semibold disabled:opacity-50"
+          >
+            <Building2 className="h-3.5 w-3.5" /> New Org Unit
+          </button>
+          <button
+            type="button"
+            disabled={busy}
             onClick={() => void runAction({ action: "rebuild_hierarchy" })}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold disabled:opacity-50"
           >
@@ -103,8 +121,12 @@ export function TopologyQuickManager({ onRebuilt }: { onRebuilt?: () => void }) 
                 years: 4,
                 sectionsPerYear: 1,
               });
-            } else {
+            } else if (mode === "gate") {
               void runAction({ action: "add_gate", code, name, location });
+            } else if (mode === "facility") {
+              void runAction({ action: "add_facility", code, name, category });
+            } else if (mode === "org_unit") {
+              void runAction({ action: "add_org_unit", code, name, unitType });
             }
           }}
           className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2 border-t border-border"
@@ -113,7 +135,15 @@ export function TopologyQuickManager({ onRebuilt }: { onRebuilt?: () => void }) 
             required
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder={mode === "course" ? "Code (e.g. AIDS)" : "Code (e.g. GATE-5)"}
+            placeholder={
+              mode === "course"
+                ? "Code (e.g. AIDS)"
+                : mode === "gate"
+                ? "Code (e.g. GATE-5)"
+                : mode === "facility"
+                ? "Code (e.g. HOSTEL_GH3)"
+                : "Code (e.g. AI_ROBOTICS)"
+            }
             className="px-3 py-2 rounded-xl border border-border bg-bg-elevated text-xs font-medium"
           />
           <input
@@ -121,7 +151,13 @@ export function TopologyQuickManager({ onRebuilt }: { onRebuilt?: () => void }) 
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={
-              mode === "course" ? "Full Name (e.g. B.Tech AI & DS)" : "Gate name (e.g. East Gate)"
+              mode === "course"
+                ? "Full Name (e.g. B.Tech AI & DS)"
+                : mode === "gate"
+                ? "Gate name (e.g. East Gate)"
+                : mode === "facility"
+                ? "Facility name (e.g. Girls Hostel 3)"
+                : "Unit name (e.g. AI & Robotics Dept)"
             }
             className={`px-3 py-2 rounded-xl border border-border bg-bg-elevated text-xs font-medium ${
               mode === "course" ? "sm:col-span-2" : ""
@@ -135,6 +171,29 @@ export function TopologyQuickManager({ onRebuilt }: { onRebuilt?: () => void }) 
               placeholder="Location (e.g. Main Entrance)"
               className="px-3 py-2 rounded-xl border border-border bg-bg-elevated text-xs font-medium"
             />
+          )}
+          {mode === "facility" && (
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="px-3 py-2 rounded-xl border border-border bg-bg-elevated text-xs font-medium"
+            >
+              <option value="GATE">Gate</option>
+              <option value="HOSTEL_BLOCK">Hostel Block</option>
+              <option value="EXAM_HALL">Exam Hall</option>
+              <option value="LAB">Lab</option>
+            </select>
+          )}
+          {mode === "org_unit" && (
+            <select
+              value={unitType}
+              onChange={(e) => setUnitType(e.target.value)}
+              className="px-3 py-2 rounded-xl border border-border bg-bg-elevated text-xs font-medium"
+            >
+              <option value="INSTITUTE">Institute</option>
+              <option value="DEPARTMENT">Department</option>
+              <option value="DIVISION">Division</option>
+            </select>
           )}
           <button
             type="submit"
