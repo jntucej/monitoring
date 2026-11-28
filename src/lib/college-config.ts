@@ -45,7 +45,13 @@ export const COLLEGE: CollegeConfig = {
   emailAlt: "principal@jntuhcej.ac.in",
   phone: "6302503548",
   domain: "monitor.ucej.in",
-  baseUrl: "https://monitor.ucej.in",
+  // Honor a public-base override (e.g. a Tailscale dev URL) so generated
+  // opengraph-image / canonical URLs point at a reachable origin. In prod
+  // PUBLIC_BASE_URL is unset, so this stays the canonical production host.
+  baseUrl:
+    typeof process !== "undefined" && process.env.PUBLIC_BASE_URL
+      ? process.env.PUBLIC_BASE_URL
+      : "https://monitor.ucej.in",
   logoPath: "/logo.png",
   establishedYear: "2007",
   accreditation:
