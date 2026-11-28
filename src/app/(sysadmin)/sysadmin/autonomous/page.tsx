@@ -243,7 +243,7 @@ function AutonomousInner() {
         purpose="Oversee self-healing error hunter sweeps, automated Docker diagnostics, backup integrity verifications, and system findings."
         statusSummary={`${findingsActive} active system findings, backup status ${backupOk ? "healthy" : "warning"}, and ${containers?.running ?? 0}/${containers?.total ?? 0} monitored containers active.`}
         why="Autonomous surveillance discovers dangling locks, silent worker stalls, and container memory leaks before services drop offline."
-        primaryAction={{ label: "Scheduled Jobs", href: "/sysadmin/cron" }}
+        primaryAction={{ label: "Policy Console", href: "/sysadmin/policy-console" }}
         secondaryAction={{ label: "Deployments", href: "/sysadmin/deployments" }}
       />
       <div className="flex items-center justify-between">
