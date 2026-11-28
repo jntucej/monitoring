@@ -23,7 +23,7 @@ async function implGet(_req: NextRequest, ctx: { auth: AuthContext }) {
   let v;
   try {
     v = await resolveAttendanceVerdict({ userId: auth.userId });
-  } catch (err) {
+  } catch {
     return fail("POLICY_RESOLUTION_FAILED", "Could not compute eligibility.", 500);
   }
 
