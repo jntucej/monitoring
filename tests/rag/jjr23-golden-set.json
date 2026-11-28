@@ -1,0 +1,33 @@
+{
+  "tests": [
+    {
+      "id": "hostel-curfew-01",
+      "category": "exact_policy",
+      "role": "student",
+      "question": "What is the official evening curfew for the Girls' Hostel, and who can grant an exception?",
+      "mustContain": ["9:00 PM", "Chief Warden"]
+    },
+    {
+      "id": "hostel-quota-gap-01",
+      "category": "negative_gap",
+      "role": "student",
+      "question": "How many monthly outings am I officially allowed from the hostel?",
+      "mustContain": ["not documented", "circular"],
+      "mustNotContain": ["4 outings", "2 outings"]
+    },
+    {
+      "id": "hostel-pass-chain-01",
+      "category": "exact_policy",
+      "role": "student",
+      "question": "What is the approval process for overnight medical or home leave from the hostel?",
+      "mustContain": ["parent", "Deputy Warden", "Chief Warden", "biometric"]
+    },
+    {
+      "id": "mess-rebate-01",
+      "category": "exact_policy",
+      "role": "student",
+      "question": "Can I get a mess rebate if I am away for 2 days without prior approval?",
+      "mustContain": ["3 consecutive days", "Deputy Warden", "prior"]
+    }
+  ]
+}

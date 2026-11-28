@@ -108,6 +108,7 @@ import { runSosEscalate } from './jobs/sos_escalate.js';
 import { runGuardPingCheck } from './jobs/guard_ping_check.js';
 import { runShiftAutoClose } from './jobs/shift_auto_close.js';
 import { runFeedExpire } from './jobs/feed_expire.js';
+import { runCampusLifecycleSweep } from './jobs/campus_lifecycle.js';
 import { runAchievementAuto } from './jobs/achievement_auto.js';
 import { runLeaderboardRefresh } from './jobs/leaderboard_refresh.js';
 import { runPresenceReconcile } from './jobs/presence_reconcile.js';
@@ -249,6 +250,8 @@ const jobs = [
   { name: 'presence-reconcile', ms: 5 * 60 * 1000, run: () => runJob('presence-reconcile', runPresenceReconcile) },
   // Backup & Maintenance Center (20270131000037):
   { name: 'backup-maintenance', ms: 30 * 60 * 1000, run: () => runJob('backup-maintenance', runBackupMaintenance) },
+  // Campus OS lifecycle: auto-expire announcements + tombstone archived KB chunks.
+  { name: 'campus-lifecycle', ms: 5 * 60 * 1000, run: () => runJob('campus-lifecycle', runCampusLifecycleSweep) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client

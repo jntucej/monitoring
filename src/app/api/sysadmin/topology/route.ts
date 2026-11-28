@@ -40,6 +40,19 @@ const ActionSchema = z.discriminatedUnion("action", [
     location: z.string().min(1).max(120),
   }),
   z.object({
+    action: z.literal("add_facility"),
+    code: z.string().min(2).max(32),
+    name: z.string().min(3).max(120),
+    category: z.enum(["HOSTEL_BLOCK", "GATE", "EXAM_HALL", "LAB"]),
+    config: z.record(z.string(), z.unknown()).optional(),
+  }),
+  z.object({
+    action: z.literal("add_org_unit"),
+    code: z.string().min(2).max(32),
+    name: z.string().min(3).max(120),
+    unitType: z.enum(["INSTITUTE", "DEPARTMENT", "DIVISION"]).default("DEPARTMENT"),
+  }),
+  z.object({
     action: z.literal("rebuild_hierarchy"),
   }),
 ]);
@@ -80,6 +93,28 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
          VALUES ($1, $2, $3, 'main', true)
          ON CONFLICT (gate_code) DO UPDATE SET name = EXCLUDED.name`,
         [body.code.toUpperCase(), body.name, body.location],
+      );
+    }
+
+    if (body.action === "add_facility") {
+      await client.query(
+        `INSERT INTO public.facilities (facility_code, name, category, config, is_active)
+         VALUES ($1, $2, $3, COALESCE($4::jsonb, '{"requires_digital_pass":true}'::jsonb), true)
+         ON CONFLICT (facility_code) DO UPDATE SET
+           name = EXCLUDED.name,
+           category = EXCLUDED.category,
+           config = public.facilities.config || EXCLUDED.config,
+           is_active = true`,
+        [body.code.toUpperCase(), body.name, body.category, JSON.stringify(body.config ?? {})],
+      );
+    }
+
+    if (body.action === "add_org_unit") {
+      await client.query(
+        `INSERT INTO public.org_units (code, name, unit_type, is_active)
+         VALUES ($1, $2, $3, true)
+         ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, is_active = true, updated_at = NOW()`,
+        [body.code.toUpperCase(), body.name, body.unitType],
       );
     }
 
