@@ -113,30 +113,28 @@ export interface HodOsState {
   llmCircuitOpen: boolean;
 }
 
-/** The HOD's department (code + name) via users.department_id. */
-async function resolveDepartment(userId: string): Promise<{ code: string; name: string } | null> {
-  const r = await query<{ code: string; name: string }>(
-    `SELECT d.code, d.name
+/** The HOD's department (code + name). users.department_id stores the
+ * department UUID as text; classes.department_id stores the CODE as text. */
+async function resolveDepartment(userId: string): Promise<{ code: string; name: string; id: string } | null> {
+  const r = await query<{ code: string; name: string; id: string }>(
+    `SELECT d.code, d.name, d.id::text AS id
        FROM public.users u
        JOIN public.departments d ON d.id = u.department_id::uuid
       WHERE u.id = $1 LIMIT 1`,
     [userId],
-  ).catch(() => ({ rows: [] as { code: string; name: string }[] }));
+  ).catch(() => ({ rows: [] as { code: string; name: string; id: string }[] }));
   const row = r.rows[0];
-  return row ? { code: row.code, name: row.name } : null;
+  return row ? { code: row.code, name: row.name, id: row.id } : null;
 }
 
 /** The dept's active sections + student counts (student_details year/section). */
 async function deptSections(deptCode: string) {
-  // A department's sections are the (year, section) pairs that carry students
-  // whose classes belong to that dept. The live schema links students to a
-  // section; we scope by the dept's classes when available, else all active
-  // sections. Null-tolerant.
+  // A department's sections are the (year, section) pairs on its active
+  // classes. classes.department_id stores the dept CODE as text.
   const classRows = await query<{ year: number | null; section: string | null }>(
     `SELECT DISTINCT c.year, c.section
        FROM public.classes c
-       JOIN public.departments d ON d.id = c.department_id::uuid
-      WHERE d.code = $1 AND c.is_active
+      WHERE c.department_id = $1 AND c.is_active
       ORDER BY c.year, c.section`,
     [deptCode],
   ).catch(() => ({ rows: [] as { year: number | null; section: string | null }[] }));
@@ -299,9 +297,9 @@ async function implGet(_req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
                 WHERE fa.faculty_id = u.id AND fa.is_active)::int AS n
          FROM public.users u
         WHERE u.role = 'faculty'
-          AND u.department_id::text = (SELECT id FROM public.departments WHERE code = $1)
+          AND u.department_id = $1
         ORDER BY u.name`,
-      [dept.code],
+      [dept.id],
     ).catch(() => ({ rows: [] as { user_id: string; name: string | null; n: number }[] }));
     const mentee = await query<{ n: number }>(
       `SELECT COUNT(*)::int AS n FROM public.mentee_assignments WHERE status <> 'TERMINATED'`,
@@ -337,7 +335,8 @@ async function implGet(_req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
        LEFT JOIN public.deadline_watches w
          ON w.entity_type = 'doubt_escalation' AND w.entity_id = d.id AND w.status IN ('OPEN','BREACHED')
       WHERE lower(d.target_role) IN ('hod','oie','principal')
-        OR lower(d.escalation_chain) ~ 'hod|oie|principal'
+        OR 'hod' = ANY (d.escalation_chain)
+        OR 'oie' = ANY (d.escalation_chain)
       ORDER BY w.due_at ASC NULLS LAST, d.created_at DESC
       LIMIT 25`,
   ).catch(() => ({ rows: [] as { id: string; topic: string; status: string; due_at: string | null; watch_status: string | null }[] }));

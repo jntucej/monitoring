@@ -37,11 +37,12 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
   }
 
   // Route the doubt up to OIE (target_role + escalation_chain).
+  // escalation_chain is a text[] — append 'oie' as an array element.
   await query(
     `UPDATE public.class_doubt_escalations
         SET target_role = 'oie',
-            escalation_chain = (escalation_chain || ' → oie'),
-            status = 'ESCALATED',
+            escalation_chain = array_append(escalation_chain, 'oie'),
+            status = 'routed',
             updated_at = NOW()
       WHERE id = $1::uuid`,
     [escalationId],

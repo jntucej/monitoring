@@ -37,27 +37,32 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
   const esc = await query<{
     id: string;
     topic: string;
+    question: string;
     target_role: string | null;
     status: string;
   }>(
-    `SELECT id, topic, target_role, status FROM public.class_doubt_escalations WHERE id = $1::uuid LIMIT 1`,
+    `SELECT id, topic, question, target_role, status FROM public.class_doubt_escalations WHERE id = $1::uuid LIMIT 1`,
     [escalationId],
-  ).catch(() => ({ rows: [] as { id: string; topic: string; target_role: string | null; status: string }[] }));
+  ).catch(() => ({ rows: [] as { id: string; topic: string; question: string; target_role: string | null; status: string }[] }));
   if (esc.rows.length === 0) {
     return fail("NOT_FOUND", "Escalation not found.", 404);
   }
   const topic = esc.rows[0].topic;
 
-  // Privacy lock: if the topic matches a private-only category, force
-  // publishToClass=false regardless of the request body.
+  // Privacy lock: if the topic OR the question text matches a private-only
+  // category (fees/condonation/medical/marks/disciplinary), force
+  // publishToClass=false regardless of the request body. The topic is a fixed
+  // enum (academic/exam/...), so the free-text question is where a "fee
+  // dispute" is actually expressed.
   const privCats = await query<{ scope_filter: Record<string, unknown> | null }>(
     `SELECT scope_filter FROM public.routing_policies WHERE policy_key = 'doubt_bridge_academic_exam' LIMIT 1`,
   ).catch(() => ({ rows: [] as { scope_filter: Record<string, unknown> | null }[] }));
   const privList: string[] = Array.isArray(privCats.rows[0]?.scope_filter?.private_only_categories)
     ? ((privCats.rows[0].scope_filter!.private_only_categories as unknown[]) as string[])
-    : ["condonation", "medical", "marks_dispute", "disciplinary", "fees"];
-  const topicLower = topic.toLowerCase();
-  const isPrivate = privList.some((c) => topicLower.includes(c.toLowerCase()));
+    : ["condonation", "medical", "marks_dispute", "disciplinary", "fees", "fee"];
+  const qText = esc.rows[0].question ?? "";
+  const combinedLower = `${topic.toLowerCase()} ${qText.toLowerCase()}`;
+  const isPrivate = privList.some((c) => combinedLower.includes(c.toLowerCase()));
   if (isPrivate) {
     publishToClass = false; // hard-lock: private threads never broadcast.
   }
@@ -78,8 +83,8 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
   // hard-lock above, so a private thread stays private in the DB too).
   await query(
     `UPDATE public.class_doubt_escalations
-        SET status = 'ANSWERED',
-            authority_reply = $1,
+        SET status = 'answered',
+           authority_reply = $1,
             answered_by = $2::uuid,
             answered_at = NOW(),
             publish_to_class = $3,
@@ -94,16 +99,21 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
     await query(
       `INSERT INTO public.confirmed_knowledge
          (question_pattern, answer_text, topic, regulation, confirmed_by, confirmed_by_role, source_kind, source_ref, created_at)
-       VALUES ($1, $2, $3, $4, $5::uuid, $6, 'hod_official', $7, NOW())
+       VALUES ($1, $2, $3, $4, $5::uuid, $6, 'faculty_confirmation', $7, NOW())
        ON CONFLICT DO NOTHING`,
       [topic, `${tag} ${reply}`, topic, reg || null, auth.userId, auth.role, escalationId],
     );
   }
 
-  // Close the SLA deadline_watch so the queue clears live.
+  // Close the SLA deadline_watch so the queue clears live. On RESOLVED the
+  // chk_watch_due constraint requires due_at > created_at; bump due_at to the
+  // resolve time for a breached watch so the row stays valid.
   await query(
     `UPDATE public.deadline_watches
-        SET status = 'RESOLVED', resolved_at = NOW(), resolved_by = $1::uuid
+        SET status = 'RESOLVED',
+            due_at = GREATEST(COALESCE(due_at, NOW()), NOW()),
+            resolved_at = NOW(),
+            resolved_by = $1::uuid
       WHERE entity_type = 'doubt_escalation' AND entity_id = $2::uuid AND status IN ('OPEN','BREACHED')`,
     [auth.userId, escalationId],
   );
