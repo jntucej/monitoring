@@ -1,6 +1,8 @@
 "use client";
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import { ClassesView } from "../_shared/ClassesView";
 
 export default function ClassesPage() {
@@ -20,6 +22,11 @@ export default function ClassesPage() {
         ]}
       />
       <ClassesView />
+      {/* Department domain map — locked to the department area (no 5-tab
+          switcher). Live data via GET /api/org-map?area=department. */}
+      <WidgetBoundary name="SpatialPeopleMap" title="Department Hall Map">
+        <SpatialPeopleMapWorkspace defaultArea="department" lockedArea compact />
+      </WidgetBoundary>
     </div>
   );
 }

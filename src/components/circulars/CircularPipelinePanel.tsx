@@ -53,7 +53,8 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
   const [deadline, setDeadline] = useState("");
   const [roles, setRoles] = useState<string[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
-  const [branchOptions, setBranchOptions] = useState<string[]>(["CSE", "IT", "ECE", "EEE", "MECH"]);
+  const [branchOptions, setBranchOptions] = useState<string[]>([]);
+  const [branchOptionsLoaded, setBranchOptionsLoaded] = useState(false);
   const [circulars, setCirculars] = useState<CircularRow[]>([]);
   const [compliance, setCompliance] = useState<Record<string, ComplianceData>>({});
 
@@ -77,13 +78,28 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
 
   useEffect(() => {
     load();
+    // Live branch list — primary: academic catalogs. Fallback: DB departments
+    // (new branches appear automatically). Never hardcode the list.
     fetch("/api/academic/catalogs")
       .then((r) => r.json())
       .then((j) => {
         const list = (j?.data?.branches ?? []).map((b: { short_name: string }) => b.short_name);
-        if (list.length > 0) setBranchOptions(list);
+        if (list.length > 0) {
+          setBranchOptions(list);
+          setBranchOptionsLoaded(true);
+        } else {
+          // Fall back to the live department codes.
+          fetch("/api/admin/categories")
+            .then((cr) => cr.json())
+            .then((cj) => {
+              const depts = (cj?.data?.departments ?? []).map((d: { code: string }) => d.code);
+              setBranchOptions(depts);
+              setBranchOptionsLoaded(true);
+            })
+            .catch(() => setBranchOptionsLoaded(true));
+        }
       })
-      .catch(() => {});
+      .catch(() => setBranchOptionsLoaded(true));
   }, [load]);
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -242,6 +258,11 @@ export function CircularPipelinePanel({ canApprove = false }: { canApprove?: boo
                 {d}
               </button>
             ))}
+            {branchOptionsLoaded && branchOptions.length === 0 && (
+              <span className="text-xs text-muted-foreground">
+                No branches configured yet.
+              </span>
+            )}
           </div>
           <div className="text-xs text-muted-foreground">
             Rationale: {preview.targets.rationale.join(" • ")}

@@ -8,6 +8,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
+import { LockdownCommandCenter } from "@/components/principal/LockdownCommandCenter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -223,6 +224,13 @@ function AdminLockdownInner() {
           </div>
         )}
       </WidgetBoundary>
+
+      {/* Full-context command center: when each scope was locked, elapsed +
+          auto-expiry, Inside/Outside affected split, live blocked-scan attempts
+          (who tried to cross, how many times, which gate), repeat-offender
+          highlight, and the unacknowledged-alert badge. Read-only telemetry —
+          the Lift authority stays with the Principal console. */}
+      <LockdownCommandCenter />
 
       {/* Pending Principal-approval (two-person sign-off) */}
       {pending.length > 0 && (

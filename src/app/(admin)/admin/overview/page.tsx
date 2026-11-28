@@ -38,8 +38,8 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { PresenceSplitPanel } from "@/components/shared/PresenceSplitPanel";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
-import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import { GenderDonutChart } from "@/components/dashboard/GenderDonutChart";
 import { DualSeriesBarChart } from "@/components/dashboard/DualSeriesBarChart";
 
@@ -291,6 +291,10 @@ function AdminOverviewInner() {
       <LivePulseStrip items={[{ id: "campus", label: "Campus Admin", valueLabel: "Live", tone: "ok", benchmark: "Users, gates, passes & lockdown control" }, { id: "policies", label: "Governance", valueLabel: "Active", tone: "info", benchmark: "Manage classes, faculty & policies" }]} />
       <h1 className="sr-only">Campus administration overview</h1>
       <PageHeader title="Admin" subtitle="Campus administration" onRefresh={load} refreshing={isRefreshing} />
+
+      {/* Live Inside vs. Outside headcount split by branch + hostel block
+          (campus_occupancy presence) so the admin sees movement state. */}
+      <PresenceSplitPanel />
 
       {/* RC1/UE1 — dominant, conditional alert cluster. Only present when alerts exist;
           critical gets danger weight. Replaces the old quiet bottom amber banner. */}
@@ -569,10 +573,6 @@ function AdminOverviewInner() {
           </WidgetBoundary>
         </div>
       </section>
-
-      <WidgetBoundary name="SpatialPeopleMap" title="Institutional Command Map">
-        <SpatialPeopleMapWorkspace defaultArea="institutional" compact />
-      </WidgetBoundary>
 
       {/* RC6/AX2 — info strip restyled to a neutral, non-alert tone so it no longer mimics an alert.
           (contrast verify-first; not assumed a failure) */}

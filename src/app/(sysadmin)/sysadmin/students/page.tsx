@@ -9,6 +9,7 @@ import { UserRolesPanel } from "@/components/sysadmin/UserRolesPanel";
 import {GraduationCap, Search, RefreshCw, UserPlus, Edit, Trash2, X, Upload, SlidersHorizontal, Lock, KeyRound, Link as LinkIcon, Loader2}  from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
+import { useCategories } from "@/hooks/useCategories";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
 import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll, getDepartmentFromRoll, resolveCourseType } from "@/lib/rollNumber";
 import { useEntityInspector } from "@/components/shared/useEntityInspector";
@@ -484,8 +485,12 @@ const api = useApi();
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
   }, [courseOf]);
 
-  // --- Canonical branch card: always the 5 defined branches, decoded from roll
-  const CANONICAL_BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH"] as const;
+  // --- Branch card: defined branches, decoded from roll. The branch set is
+  //     derived live from the departments table (new branches appear
+  //     automatically); never a hardcoded list.
+  const { categories: catData, loading: catsLoading } = useCategories();
+  const LIVE_BRANCHES = (catData?.departments ?? []).map((d) => d.code);
+  const CANONICAL_BRANCHES = LIVE_BRANCHES;
   const byBranchCanonical = useMemo(() => {
     const map: Record<string, number> = {};
     CANONICAL_BRANCHES.forEach((b) => { map[b] = 0; });
@@ -702,10 +707,16 @@ const api = useApi();
                 ))}
               </div>
             </div>
-            {/* Branch distribution — canonical 5 branches decoded from roll */}
+            {/* Branch distribution — defined branches decoded from roll (live set) */}
             <div className="surface-card bg-bg-elevated p-4 sm:col-span-2">
               <div className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-3">Branch / Department Distribution</div>
               <div className="space-y-2">
+                {catsLoading && CANONICAL_BRANCHES.length === 0 && (
+                  <div className="text-xs text-text-muted">Loading branch list…</div>
+                )}
+                {!catsLoading && CANONICAL_BRANCHES.length === 0 && (
+                  <div className="text-xs text-text-muted">No branches configured yet.</div>
+                )}
                 {byBranchCanonical.entries.map(([b, n]) => (
                   <div key={b} className="flex items-center gap-2 text-xs">
                     <div className="w-5 text-text-secondary truncate text-right">{b}</div>

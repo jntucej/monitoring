@@ -21,6 +21,7 @@ import { InsightCard } from "../_retention/InsightCard";
 import { LiveClassCard } from "@/components/shared/LiveClassCard";
 import { EmergencyPulse } from "../_retention/EmergencyPulse";
 import { LockdownStatusPulse } from "@/components/principal/LockdownStatusPulse";
+import { PresenceSplitPanel } from "@/components/shared/PresenceSplitPanel";
 import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPreview";
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -268,6 +269,9 @@ const user = useAuthStore((s) => s.user);
         </WidgetBoundary>
 
           <LockdownStatusPulse />
+
+          {/* Live Inside vs. Outside headcount split by branch + hostel block. */}
+          <PresenceSplitPanel compact />
 
           {d?.emergency && d.emergency.length > 0 && (
             <WidgetBoundary name="EmergencyPulse" title="Emergency Pulse">

@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { ChartRenderer, CHART_PALETTE, type ChartType } from "@/components/shared/ChartRenderer";
 import { getRoleAnalytics, type AnalyticsMetric } from "@/lib/retention";
+import { useCategories } from "@/hooks/useCategories";
 
 /* ------------------------------------------------------------------ */
 /* Component                                                           */
@@ -93,6 +94,12 @@ export function RoleAnalytics() {
   const showDeptFilter = isManager || isOperator;
   const showGateFilter = isOperator || isManager;
 
+  // Live, DB-derived department + gate lists — never hardcoded. New branches /
+  // gates appear automatically with real counts.
+  const { categories, loading: catsLoading } = useCategories();
+  const deptOptions = categories?.departments ?? [];
+  const gateOptions = categories?.gates ?? [];
+
   return (
     <WidgetBoundary title="Role Analytics">
       <div className="surface-card bg-bg-elevated/40 p-4 sm:p-5">
@@ -127,9 +134,13 @@ export function RoleAnalytics() {
                 aria-label="Department"
               >
                 <option value="">All depts</option>
-                {["CSE", "ECE", "EEE", "MECH", "IT"].map((d) => (
-                  <option key={d} value={d}>
-                    {d}
+                {catsLoading && <option value="" disabled>Loading branches…</option>}
+                {!catsLoading && deptOptions.length === 0 && (
+                  <option value="" disabled>No branches configured</option>
+                )}
+                {deptOptions.map((d) => (
+                  <option key={d.code} value={d.code}>
+                    {d.code}
                   </option>
                 ))}
               </select>
@@ -143,9 +154,13 @@ export function RoleAnalytics() {
                 aria-label="Gate"
               >
                 <option value="">All gates</option>
-                {["main", "north", "south", "east", "west"].map((g) => (
-                  <option key={g} value={g}>
-                    {g.charAt(0).toUpperCase() + g.slice(1)}
+                {catsLoading && <option value="" disabled>Loading gates…</option>}
+                {!catsLoading && gateOptions.length === 0 && (
+                  <option value="" disabled>No gates configured</option>
+                )}
+                {gateOptions.map((g) => (
+                  <option key={g.code} value={g.code}>
+                    {g.name ?? g.code}
                   </option>
                 ))}
               </select>

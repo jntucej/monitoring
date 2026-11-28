@@ -27,6 +27,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { getAuthHeaders } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { SysAdminRolesHierarchyMap } from "@/components/sysadmin/SysAdminRolesHierarchyMap";
+import { useCategories } from "@/hooks/useCategories";
 
 /** Shape of the read-only /api/roles-graph response. */
 interface RolesGraphPayload {
@@ -152,7 +153,10 @@ export default function RolesManagementPage() {
   const [grantOpen, setGrantOpen] = useState(false);
 
   // ---- HOD branch (department) assignment state ----
-  const HOD_BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH"];
+  // Live, DB-derived department codes — never hardcoded. New branches appear
+  // automatically. The HOD branch picker is fed from the departments table.
+  const { categories: catData, loading: catsLoading } = useCategories();
+  const HOD_BRANCHES = (catData?.departments ?? []).map((d) => d.code);
   const [hodUsers, setHodUsers] = useState<Array<{ id: string; name: string; department_id?: string | null; email?: string }>>([]);
   const [hodBranchMsg, setHodBranchMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [hodBranchBusy, setHodBranchBusy] = useState<string | null>(null);
@@ -579,6 +583,10 @@ export default function RolesManagementPage() {
                       aria-label={`Assign branch to ${u.name}`}
                     >
                       <option value="">— none —</option>
+                      {catsLoading && <option value="" disabled>Loading branches…</option>}
+                      {!catsLoading && HOD_BRANCHES.length === 0 && (
+                        <option value="" disabled>No branches configured</option>
+                      )}
                       {HOD_BRANCHES.map((b) => (
                         <option key={b} value={b}>
                           {b}

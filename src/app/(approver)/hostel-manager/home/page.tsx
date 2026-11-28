@@ -15,6 +15,7 @@ import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
 import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { PresenceSplitPanel } from "@/components/shared/PresenceSplitPanel";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 export default function HostelManagerPage() {
@@ -43,6 +44,8 @@ return (
             ]}
           />
       <LivePulseStrip items={[{ id: "blocks", label: "Hostel Blocks", valueLabel: "Live", tone: "ok", benchmark: "Monitor occupancy & resident passes" }, { id: "complaints", label: "Maintenance", valueLabel: "Active", tone: "warn", benchmark: "Triage block complaints & repairs" }]} />
+          {/* Live Inside vs. Outside headcount split by branch + hostel block. */}
+          <PresenceSplitPanel compact />
           <WidgetBoundary name="RoleDashboardPanel" title="Hostel Manager Dashboard">
             <RoleDashboardPanel
               title="Hostel Manager dashboard"

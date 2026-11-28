@@ -52,6 +52,11 @@ export function toLockdownRule(row: {
     lift_reason: (d.lift_reason as string | null) ?? null,
     evacuation: d.evacuation === true,
     scopes: rawTargets,
+    started_at:
+      (d.issued_at as string | null) ??
+      (d.started_at as string | null) ??
+      row.created_at ??
+      null,
   };
 }
 

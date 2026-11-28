@@ -17,7 +17,6 @@ import { AdminAlertsPanel } from "@/components/approver/AdminAlertsPanel";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
-import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import { ObservabilityStackPanel } from "@/components/sysadmin/monitoring/ObservabilityStackPanel";
 
 /**

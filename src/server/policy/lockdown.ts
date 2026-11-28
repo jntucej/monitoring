@@ -51,6 +51,8 @@ export interface LockdownRule {
   evacuation: boolean;
   /** The full scopes[] array (legacy field, kept for backward compat). */
   scopes: string[];
+  /** When the rule was issued (start of the lockdown window). */
+  started_at: string | null;
 }
 
 /** The subset of a scanned person's identity the evaluator needs. */

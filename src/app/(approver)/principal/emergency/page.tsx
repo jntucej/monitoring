@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageLoading as Loading } from "@/components/shared/LoadingStates";
 import { ScopedLockdownPanel } from "@/components/principal/ScopedLockdownPanel";
+import { LockdownCommandCenter } from "@/components/principal/LockdownCommandCenter";
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 import { SmartTextRef } from "@/components/nav/SmartTextRef";
 import { ChevronRight } from "lucide-react";
@@ -131,6 +132,11 @@ export default function EmergencyPage() {
               The Admin page can *initiate* + *monitor* lockdowns; only the
               Principal can approve pending requests and lift active ones. */}
           <ScopedLockdownPanel />
+          {/* Full-context command center: when each scope was locked, elapsed +
+              auto-expiry, Inside/Outside affected split, live blocked-scan
+              attempts (who tried to cross, how many times, which gate) and the
+              unacknowledged-alert badge. Read-only telemetry. */}
+          <LockdownCommandCenter />
           {commands.length === 0 && <EmptyState title="No emergency commands" description="The command plane is at rest." />}
           <div className="space-y-2">
             {commands.map((c) => (

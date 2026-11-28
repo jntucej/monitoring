@@ -11,6 +11,7 @@ import type { AuthContext } from "@/lib/authContext";
 import type { Student, GatePass } from "@/lib/types";
 import { createCase, linkCaseToRecord } from "@/lib/institutional/cases";
 import { generateAttention } from "@/lib/institutional/attention";
+import { getValidHostelCodes } from "@/server/repositories/hostel/codes";
 
 const ADMIN_ROLES = ["admin", "sysadmin", "operator", "principal", "supervisor", "principal"];
 
@@ -77,11 +78,26 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     if (authRole === "principal" || authRole === "supervisor") {
       limit = Math.min(parseInt(params.get("limit") || "200", 10), 500);
       const hostel = params.get("hostel");
-      if (hostel && !["CSE", "IT", "ECE", "EEE", "ME"].includes(hostel.toUpperCase())) {
-        return NextResponse.json(
-          { success: false, error: { code: "INVALID_FILTER", message: "hostel must be one of CSE, IT, ECE, EEE, ME." } },
-          { status: 400 }
-        );
+      if (hostel) {
+        // Live, DB-derived hostel block codes — a new block is valid
+        // automatically. Legacy roll alias "ME" normalizes to "MECH".
+        const probe = hostel.toUpperCase() === "ME" ? "MECH" : hostel.toUpperCase();
+        const valid = await getValidHostelCodes();
+        if (!valid.has(probe)) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: "INVALID_FILTER",
+                message:
+                  valid.size === 0
+                    ? "No hostel blocks are configured yet."
+                    : `Unknown hostel block '${hostel}'. Available: ${[...valid].join(", ")}`,
+              },
+            },
+            { status: 400 }
+          );
+        }
       }
     }
 

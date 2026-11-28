@@ -1,6 +1,8 @@
 "use client";
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import { GateActivityView } from "../../_shared/GateActivityView";
 
 export default function GateLivePage() {
@@ -16,6 +18,11 @@ export default function GateLivePage() {
         secondaryAction={{ label: "Hourly Activity", href: "/supervisor/gates/activity" }}
       />
       <GateActivityView />
+      {/* Security domain map — locked to the security area (no 5-tab
+          switcher). Live data via GET /api/org-map?area=security. */}
+      <WidgetBoundary name="SpatialPeopleMap" title="Security & Gate Footprint">
+        <SpatialPeopleMapWorkspace defaultArea="security" lockedArea compact />
+      </WidgetBoundary>
     </div>
   );
 }

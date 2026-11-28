@@ -23,6 +23,7 @@ import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
 import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { PresenceSplitPanel } from "@/components/shared/PresenceSplitPanel";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { gateLiveInspection, shiftInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
@@ -218,6 +219,8 @@ const user = useAuthStore((s) => s.user);
           secondaryAction={{ label: "Shift Handover", href: "/supervisor/shift/handover" }}
         />
       <LivePulseStrip items={[{ id: "gates", label: "Gate Wall", valueLabel: "Live", tone: "ok", benchmark: "Monitor active terminals & claim codes" }, { id: "escalations", label: "Escalations", valueLabel: "Actionable", tone: "warn", benchmark: "Acknowledge, resolve, or escalate to VP" }]} />
+        {/* Live Inside vs. Outside headcount split by branch + hostel block. */}
+        <PresenceSplitPanel compact />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {kpis.map((k) => <KpiTile key={k.label} {...k} />)}
         </div>

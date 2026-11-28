@@ -9,6 +9,7 @@ import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 
@@ -50,6 +51,12 @@ const user = useAuthStore((s) => s.user);
                 ];
               }}
             />
+          </WidgetBoundary>
+
+          {/* Exam domain map — locked to the exam area (no 5-tab switcher).
+              Live data via GET /api/org-map?area=exam. */}
+          <WidgetBoundary name="SpatialPeopleMap" title="Exam-Day Hall Map">
+            <SpatialPeopleMapWorkspace defaultArea="exam" lockedArea compact />
           </WidgetBoundary>
         </div>
       </AuthGuard>

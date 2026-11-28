@@ -5,10 +5,10 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { mPerson } from "@/lib/db";
+import { getValidHostelCodes } from "@/server/repositories/hostel/codes";
 import type { Person, Student } from "@/lib/types";
 import type { Role } from "@/lib/roles";
 
-const HOSTEL_CODES = ["CSE", "IT", "ECE", "EEE", "ME"];
 const WARDEN_ROLES = ["principal", "supervisor"];
 const PRINCIPAL_ROLES = ["principal", "vice_principal", "hod"];
 const FACULTY_ROLES = ["faculty"] as Role[];
@@ -20,8 +20,19 @@ const FACULTY_ROLES = ["faculty"] as Role[];
  *   (hostel without scope is rejected — scoped roles only get scoped listings)
  */
 async function findWardenScopedStudents(scope: string | null, hostel: string | null): Promise<Student[]> {
-  if (hostel && !HOSTEL_CODES.includes(hostel.toUpperCase())) {
-    throw new Error("Invalid hostel code. Use one of CSE, IT, ECE, EEE, ME.");
+  if (hostel) {
+    // Live, DB-derived hostel block codes — a newly added block is valid
+    // automatically. Unknown codes are rejected (never a hardcoded list).
+    // Legacy roll alias: "ME" normalizes to "MECH".
+    const probe = hostel.toUpperCase() === "ME" ? "MECH" : hostel.toUpperCase();
+    const valid = await getValidHostelCodes();
+    if (!valid.has(probe)) {
+      throw new Error(
+        valid.size === 0
+          ? "No hostel blocks are configured yet."
+          : `Unknown hostel block '${hostel}'. Available: ${[...valid].join(", ")}`,
+      );
+    }
   }
   const service = getSupabaseServiceClient();
   let query = service

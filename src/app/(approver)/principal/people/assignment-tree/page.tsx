@@ -4,6 +4,8 @@ import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ReactiveAssignmentTree } from "@/components/governance/ReactiveAssignmentTree";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 
 export default function PrincipalAssignmentTreePage() {
   return (
@@ -36,6 +38,13 @@ export default function PrincipalAssignmentTreePage() {
         />
 
         <ReactiveAssignmentTree />
+
+        {/* Institutional domain map — locked to the institutional area (no
+            5-tab switcher). Live data via GET /api/org-map?area=institutional.
+            UUID redaction + PII rules are enforced inside the component. */}
+        <WidgetBoundary name="SpatialPeopleMap" title="Institutional Command Map">
+          <SpatialPeopleMapWorkspace defaultArea="institutional" lockedArea compact />
+        </WidgetBoundary>
       </div>
     </AuthGuard>
   );

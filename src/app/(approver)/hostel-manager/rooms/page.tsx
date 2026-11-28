@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { SpatialPeopleMapWorkspace } from "@/components/dashboard/SpatialPeopleMap";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import {
   hostelBlockInspection,
@@ -101,6 +103,15 @@ export default function HostelManagerRoomsPage() {
         </Link>
         .
       </p>
+
+      {/* Hostel domain map — locked to the hostel area (no 5-tab switcher).
+          Live data via GET /api/org-map?area=hostel. VP hostel PII masking is
+          enforced inside the component (enforceVpPrivacy is the default for
+          the hostel area on this approver surface). */}
+      <WidgetBoundary name="SpatialPeopleMap" title="Hostel Block Map">
+        <SpatialPeopleMapWorkspace defaultArea="hostel" lockedArea compact />
+      </WidgetBoundary>
+
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
