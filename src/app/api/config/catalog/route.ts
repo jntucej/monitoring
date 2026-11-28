@@ -154,6 +154,35 @@ interface CatalogPayload {
       uiSchema: Record<string, unknown>;
     }>;
   };
+  principalOsPolicy: {
+    activeRegulation: string | null;
+    // The two-person quorum split, read live from governance_matrix.
+    quorumActions: Array<{
+      key: string;
+      requiredApprovers: number;
+      eligibleRoles: string[];
+      isImmutableMetaRule: boolean;
+    }>;
+    oneClickActions: string[];
+    // Retention TTLs the Principal owns (Casual 30d / 1yr, Official 1yr / 8yr).
+    retention: Array<{
+      policyKey: string;
+      hotDays: number | null;
+      coldYears: number | null;
+    }>;
+    // Emergency telemetry is audit-gated: only served with a reason.
+    emergencyTelemetry: {
+      gated: boolean;
+      layers: string[];
+    };
+    // Annual rollover playbook (declarative state graph).
+    rollover: {
+      playbookKey: string | null;
+      status: string | null;
+      transitions: Array<{ from: string; to: string; label: string }>;
+    };
+    llmCircuitOpen: boolean;
+  };
   generated_at: string;
 }
 
@@ -452,6 +481,80 @@ async function buildHodOsLayer(): Promise<CatalogPayload["hodOsPolicy"]> {
   };
 }
 
+/**
+ * buildPrincipalOsLayer — the Principal (Data Owner / CAC Chair) catalog
+ * surface. Read live:
+ *   - quorumActions / oneClickActions  ← governance_matrix (the 1-click vs
+ *     two-person quorum split, plus the Immutable Meta-Rule flag).
+ *   - retention                        ← retention_policy_rules TTLs.
+ *   - emergencyTelemetry               ← the audit-gated live layers (static
+ *     map default; live GPS/reader only on an audited emergency request).
+ *   - rollover                         ← lifecycle_playbooks annual graph.
+ * Raw UUIDs are never serialized.
+ */
+async function buildPrincipalOsLayer(): Promise<CatalogPayload["principalOsPolicy"]> {
+  const [regs, gov, retention, circuit, playbooks] = await Promise.all([
+    query<{ code: string; version: number; status: string }>(
+      `SELECT code, version, status FROM public.academic_regulations WHERE is_active ORDER BY version DESC NULLS LAST LIMIT 1`,
+    ).catch(() => ({ rows: [] as { code: string; version: number; status: string }[] })),
+    query<{ action_key: string; channel: string; eligible_roles: string[]; required_approvers_count: number; status: string }>(
+      `SELECT action_key, channel, eligible_roles, required_approvers_count, status
+         FROM public.governance_matrix WHERE status IN ('ACTIVE','DRY_RUN_VERIFIED') ORDER BY action_key`,
+    ).catch(() => ({ rows: [] as { action_key: string; channel: string; eligible_roles: string[]; required_approvers_count: number; status: string }[] })),
+    query<{ policy_key: string; hot_db_ttl_days: number | null; cold_r2_ttl_years: number | null }>(
+      `SELECT policy_key, hot_db_ttl_days, cold_r2_ttl_years
+         FROM public.retention_policy_rules ORDER BY policy_key`,
+    ).catch(() => ({ rows: [] as { policy_key: string; hot_db_ttl_days: number | null; cold_r2_ttl_years: number | null }[] })),
+    query<{ circuit_open: boolean }>(
+      `SELECT circuit_open FROM public.llm_circuit_state ORDER BY updated_at DESC NULLS LAST LIMIT 1`,
+    ).catch(() => ({ rows: [] as { circuit_open: boolean }[] })),
+    query<{ playbook_key: string; status: string; state_graph: Record<string, unknown> }>(
+      `SELECT playbook_key, status, state_graph FROM public.lifecycle_playbooks WHERE playbook_key ILIKE '%rollover%' OR playbook_key ILIKE '%sem%' ORDER BY updated_at DESC NULLS LAST LIMIT 1`,
+    ).catch(() => ({ rows: [] as { playbook_key: string; status: string; state_graph: Record<string, unknown> }[] })),
+  ]);
+
+  const META = new Set(["rbac_edit", "edit_governance", "governance_meta", "publish_regulation", "edit_thresholds", "debar_student", "campus_lockdown"]);
+  const quorum: CatalogPayload["principalOsPolicy"]["quorumActions"] = [];
+  const oneClick: string[] = [];
+  for (const r of gov.rows) {
+    const key = r.action_key;
+    const isQuorum = r.channel === "step_up_quorum" || r.required_approvers_count >= 2;
+    if (isQuorum) {
+      quorum.push({
+        key,
+        requiredApprovers: r.required_approvers_count,
+        eligibleRoles: r.eligible_roles ?? [],
+        isImmutableMetaRule: META.has(key) || r.required_approvers_count >= 2,
+      });
+    } else {
+      oneClick.push(key);
+    }
+  }
+
+  const pb = playbooks.rows[0] ?? null;
+  const graph = pb?.state_graph ?? {};
+  const transitions: Array<{ from: string; to: string; label: string }> = [];
+  const t = graph.transitions as Array<{ from?: string; to?: string; label?: string }> | undefined;
+  if (Array.isArray(t)) for (const x of t) transitions.push({ from: x.from ?? "?", to: x.to ?? "?", label: x.label ?? "" });
+
+  return {
+    activeRegulation: regs.rows[0]?.code ?? null,
+    quorumActions: quorum,
+    oneClickActions: oneClick,
+    retention: retention.rows.map((r) => ({ policyKey: r.policy_key, hotDays: r.hot_db_ttl_days, coldYears: r.cold_r2_ttl_years != null ? Math.round(r.cold_r2_ttl_years) : null })),
+    emergencyTelemetry: {
+      gated: true,
+      layers: ["static_wayfinding", "live_gps_geofence", "h0201_reader_status"],
+    },
+    rollover: {
+      playbookKey: pb?.playbook_key ?? null,
+      status: pb?.status ?? null,
+      transitions,
+    },
+    llmCircuitOpen: circuit.rows[0]?.circuit_open ?? false,
+  };
+}
+
 async function buildCatalog(): Promise<CatalogPayload> {
   const [depts, blocks, ys, gates, passTypes, roles, complaints] =
     await Promise.all([
@@ -517,6 +620,7 @@ async function buildCatalog(): Promise<CatalogPayload> {
     // Zero-hardcoding topology + versioned policy layer.
     ...(await buildTopologyLayer()),
     hodOsPolicy: await buildHodOsLayer(),
+    principalOsPolicy: await buildPrincipalOsLayer(),
     generated_at: new Date().toISOString(),
   };
   return payload;

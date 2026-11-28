@@ -118,6 +118,30 @@ export interface Catalog {
       uiSchema: Record<string, unknown>;
     }>;
   };
+  /**
+   * Principal (Data Owner / CAC Chair) OS policy layer — the two-person quorum
+   * split (1-click vs StepUpModal quorum), retention TTLs, audit-gated
+   * emergency telemetry, and the declarative annual-rollover playbook. Zero
+   * hardcoding: the Principal UI renders these live, not static arrays.
+   */
+  principalOsPolicy: {
+    activeRegulation: string | null;
+    quorumActions: Array<{
+      key: string;
+      requiredApprovers: number;
+      eligibleRoles: string[];
+      isImmutableMetaRule: boolean;
+    }>;
+    oneClickActions: string[];
+    retention: Array<{ policyKey: string; hotDays: number | null; coldYears: number | null }>;
+    emergencyTelemetry: { gated: boolean; layers: string[] };
+    rollover: {
+      playbookKey: string | null;
+      status: string | null;
+      transitions: Array<{ from: string; to: string; label: string }>;
+    };
+    llmCircuitOpen: boolean;
+  };
   generated_at: string;
 }
 

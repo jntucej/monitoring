@@ -31,6 +31,17 @@ export const PRINCIPAL_NAV: PrincipalEntry[] = [
   { kind: "link", href: "/principal/home", label: "Today", icon: LayoutDashboard },
   {
     kind: "group",
+    id: "governance-os",
+    label: "Governance OS",
+    icon: Scale,
+    children: [
+      { href: "/principal/os", label: "Command & Sign-Offs" },
+      { href: "/principal/os/policies", label: "Policy Studio & Rollover" },
+      { href: "/principal/os/oversight", label: "Oversight & Emergency" },
+    ],
+  },
+  {
+    kind: "group",
     id: "approvals",
     label: "Approvals",
     icon: CheckSquare,
