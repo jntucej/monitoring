@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bot, CheckCircle2, Clock, FileWarning, HelpCircle, Send, X } from "lucide-react";
+import { Bot, CheckCircle2, Clock, HelpCircle, Send, X } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 import type { DraftActionCard } from "@/lib/agent/toolGateway";
 
@@ -141,19 +141,11 @@ export function AgentConsoleDrawer({ role }: AgentConsoleDrawerProps) {
             <div className="flex flex-wrap gap-1.5 border-b border-border-subtle px-4 py-2.5 bg-bg-elevated/40">
               <button
                 type="button"
-                onClick={() => runAgent("What is pending for me?", "get_pending_items")}
+                onClick={() => runAgent("What is pending for me, including any circulars I haven't noted yet?", "get_pending_items")}
                 className="inline-flex items-center gap-1 rounded-md border border-border-subtle bg-bg-surface px-2.5 py-1 text-xs font-medium text-text-primary hover:bg-bg-elevated"
               >
                 <Clock className="size-3.5" />
-                Pending for Me
-              </button>
-              <button
-                type="button"
-                onClick={() => runAgent("Which circulars haven't I noted?", "get_unnoted_circulars")}
-                className="inline-flex items-center gap-1 rounded-md border border-border-subtle bg-bg-surface px-2.5 py-1 text-xs font-medium text-text-primary hover:bg-bg-elevated"
-              >
-                <FileWarning className="size-3.5" />
-                Unnoted Circulars
+                Pending &amp; Circulars
               </button>
               <button
                 type="button"
