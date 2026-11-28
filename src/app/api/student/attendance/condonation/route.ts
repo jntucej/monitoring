@@ -87,14 +87,27 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
     );
   }
 
-  const { rows } = await query<{ id: string }>(
+  const { rows } = await query<{ id: string; reg_code: string }>(
+    `SELECT id::text AS id, code AS reg_code
+       FROM public.academic_regulations
+      WHERE status = 'ACTIVE'
+      ORDER BY version DESC LIMIT 1`,
+    [],
+  );
+  const activeRegCode = rows[0]?.reg_code ?? null;
+  if (!activeRegCode) {
+    return fail("NO_ACTIVE_REGULATION", "No active academic regulation found in the catalog.", 409);
+  }
+
+  const { rows: insertRows } = await query<{ id: string }>(
     `INSERT INTO public.attendance_condonations
        (student_id, regulation_code, academic_year, semester, aggregate_pct,
         grounds_category, absence_from, absence_to, missed_hours, proof_storage_key, status)
-     VALUES ($1::uuid, 'R25', $2, $3, $4, $5, $6::date, $7::date, $8, $9, 'PENDING_HOD')
+     VALUES ($1::uuid, $2, $3, $4, $5, $6, $7::date, $8::date, $9, $10, 'PENDING_HOD')
      RETURNING id::text AS id`,
     [
       auth.userId,
+      activeRegCode,
       academicYear,
       semester,
       v.aggregatePct,
@@ -106,7 +119,7 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
     ],
   );
 
-  return ok({ id: rows[0]?.id, status: "PENDING_HOD", submittedPct: v.aggregatePct });
+  return ok({ id: insertRows[0]?.id, status: "PENDING_HOD", submittedPct: v.aggregatePct, regulationCode: activeRegCode });
 }
 
 export const GET = withApiChain(implGet, {
