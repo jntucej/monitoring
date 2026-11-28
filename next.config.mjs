@@ -61,6 +61,7 @@ const nextConfig = {
     ];
   },
   async headers() {
+    const isDev = process.env.NODE_ENV === "development";
     return [
       {
         source: "/:path*",
@@ -72,10 +73,19 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(self), microphone=(self), geolocation=(self)",
           },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
+          // HSTS forces browsers to always use HTTPS. In development over a
+          // private Tailscale HTTP endpoint (e.g. http://100.122.7.62:3002)
+          // that makes Safari auto-upgrade every request to https:// (no cert
+          // on the raw IP → TLS error on all assets/HMR). Emit HSTS in
+          // production only; drop it in dev so the plain-HTTP path works.
+          ...(isDev
+            ? []
+            : [
+                {
+                  key: "Strict-Transport-Security",
+                  value: "max-age=63072000; includeSubDomains; preload",
+                },
+              ]),
           {
             key: "Cross-Origin-Opener-Policy",
             value: "same-origin",
