@@ -20,6 +20,7 @@ import { WinFeed } from "../_retention/WinFeed";
 import { InsightCard } from "../_retention/InsightCard";
 import { LiveClassCard } from "@/components/shared/LiveClassCard";
 import { EmergencyPulse } from "../_retention/EmergencyPulse";
+import { LockdownStatusPulse } from "@/components/principal/LockdownStatusPulse";
 import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPreview";
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -265,9 +266,11 @@ const user = useAuthStore((s) => s.user);
             </>
           )}
         </WidgetBoundary>
-                {/* 1. Emergency pulse — only when present, top priority */}
-        {d?.emergency && d.emergency.length > 0 && (
-          <WidgetBoundary name="EmergencyPulse" title="Emergency Pulse">
+
+          <LockdownStatusPulse />
+
+          {d?.emergency && d.emergency.length > 0 && (
+            <WidgetBoundary name="EmergencyPulse" title="Emergency Pulse">
             <EmergencyPulse items={d.emergency} />
           </WidgetBoundary>
         )}

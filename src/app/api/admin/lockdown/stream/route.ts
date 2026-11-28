@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { getActiveLockdown } from "@/lib/db";
+import { findLockdownRulesForConsole } from "@/server/repositories/lockdown/findActive";
 import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
 import { registerSse, unregisterSse, SseCapacityError } from "@/lib/sse-registry";
 
@@ -31,23 +31,53 @@ async function handleGet(req: NextRequest) {
         }
         throw err;
       }
-      let lastId: string | null = null;
-      let lastActiveStatus = false;
+      let lastFingerprint: string | null = null;
 
       const sendEvent = async () => {
         try {
-          const active = await getActiveLockdown();
-          const currentId = active?.id || null;
-          const isActive = !!active;
+          const rules = await findLockdownRulesForConsole();
+          const activeRules = rules.filter((r) => r.status === "ACTIVE");
+          const pendingRules = rules.filter((r) => r.status === "PENDING_PRINCIPAL");
+          // Legacy single-active shape (kept for back-compat consumers).
+          const active = activeRules.find((r) => r.scope_type === "campus") ?? activeRules[0] ?? null;
+          const legacyLockdown = active
+            ? { id: active.id, scopes: active.scopes, message: active.public_message }
+            : null;
 
-          if (currentId !== lastId || isActive !== lastActiveStatus) {
-            lastId = currentId;
-            lastActiveStatus = isActive;
+          const fingerprint = JSON.stringify({
+            ids: activeRules.map((r) => r.id).concat(pendingRules.map((r) => r.id)),
+            active: activeRules.length,
+            pending: pendingRules.length,
+            expires: activeRules.map((r) => r.expires_at),
+          });
+
+          if (fingerprint !== lastFingerprint) {
+            lastFingerprint = fingerprint;
 
             const payload = {
               timestamp: new Date().toISOString(),
-              active: isActive,
-              lockdown: active,
+              active: activeRules.length > 0,
+              // Desk-safe fields only. target_values is intentionally
+              // omitted: a `user`-scoped rule's targets are user UUIDs,
+              // which are sysadmin-only. The desk needs scope_type +
+              // public_message + direction + expiry to render the strip.
+              activeRules: activeRules.map((r) => ({
+                id: r.id,
+                scope_type: r.scope_type,
+                direction: r.direction,
+                status: r.status,
+                public_message: r.public_message,
+                expires_at: r.expires_at,
+                evacuation: r.evacuation,
+              })),
+              pendingRules: pendingRules.map((r) => ({
+                id: r.id,
+                scope_type: r.scope_type,
+                direction: r.direction,
+                public_message: r.public_message,
+                expires_at: r.expires_at,
+              })),
+              lockdown: legacyLockdown,
             };
             const evId = recordSseEvent(ringKey, payload, "lockdown");
             controller.enqueue(encoder.encode(sseWire({ id: evId, event: "lockdown", data: payload })));
@@ -116,4 +146,9 @@ async function handleGet(req: NextRequest) {
 }
 
 
-export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] });
+// Gate desks (operator / supervisor / OIE) subscribe to this stream for the
+// scoped restriction strip, so they must be in the read set. The stream emits
+// only the rule *summary* (scope_type + human public_message + direction +
+// expiry) — no PII, no target_values UUIDs — so widening the read set is
+// safe. sysadmin/admin keep full access; principal reads the console instead.
+export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin", "operator", "supervisor", "oie"] });

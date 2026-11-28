@@ -1,7 +1,17 @@
 import { errMsg, errCode } from "@/lib/err-msg";
 import { randomUUID } from "crypto";
 import { query } from "@/lib/postgres";
-import { assertNotLockedOut } from "@/server/policy/lockdown";
+import {
+  assertNotLockedOut,
+  matchActiveLockdown,
+  buildLockdownSubject,
+  type LockdownRule,
+} from "@/server/policy/lockdown";
+import {
+  findActiveLockdown,
+  findActiveLockdownRules,
+} from "@/server/repositories/lockdown/findActive";
+import { resolveLockdownSubjectAttrs } from "@/server/repositories/lockdown/resolveSubjectAttrs";
 import {
   assertOperatorGateMatch,
   assertOperatorHasGate,
@@ -13,7 +23,6 @@ import {
   validateStudentExitFlow,
 } from "@/lib/student-exit-flow";
 import { resolveEntryOptions } from "@/lib/permission-workflow";
-import { findActiveLockdown } from "@/server/repositories/lockdown/findActive";
 import { findGateById } from "@/server/repositories/gates/findById";
 import { findByUniqueId } from "@/server/repositories/users/findByUniqueId";
 import { findOccupancyByUserId } from "@/server/repositories/occupancy/findByUserId";
@@ -351,6 +360,62 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
   if (!person) throw new NotFoundError("Person not found");
   if (person.status !== "ACTIVE") {
     throw new ForbiddenError(`Account ${person.status}`);
+  }
+
+  // 7.5. Rule-based scoped lockdown check.
+  //
+  // Step 1 already blocked campus-wide + gate-scoped rules (which don't need
+  // the subject). Scoped rules (role / persona / department / hostel_block /
+  // class_section / user) need the scanned person's identity, so we evaluate
+  // them here — after the person is resolved. We only pay for the attribute
+  // lookups when at least one ACTIVE scoped rule exists, so the common
+  // no-lockdown and campus/gate-only paths are unaffected.
+  {
+    const rules = await findActiveLockdownRules();
+    const scopedActive = rules.filter((r) => {
+      if (r.status !== "ACTIVE") return false;
+      // campus + gate are handled at step 1 (global/gate). Everything else
+      // needs the subject.
+      return (
+        r.scope_type === "role" ||
+        r.scope_type === "persona" ||
+        r.scope_type === "department" ||
+        r.scope_type === "hostel_block" ||
+        r.scope_type === "class_section" ||
+        r.scope_type === "user"
+      );
+    });
+    if (scopedActive.length > 0) {
+      const attrs = await resolveLockdownSubjectAttrs(
+        person.id,
+        input.entryType ?? null,
+      );
+      const subject = buildLockdownSubject(
+        { id: person.id, role: person.role },
+        {
+          gateId: input.gateId,
+          direction: input.direction,
+          persona: attrs.persona,
+          departmentCode: attrs.departmentCode,
+          hostelBlock: attrs.hostelBlock,
+          classId: attrs.classId,
+        },
+      );
+      const hit = matchActiveLockdown(rules, subject);
+      if (hit) {
+        // Scoped rule matched this person + direction. Throw 423 with the
+        // rule's human-safe public message (never the raw rule UUID).
+        throw new LockedError(
+          hit.public_message ?? "Restricted by an active lockdown rule.",
+          "LOCKDOWN_BLOCKED",
+          {
+            code: "LOCKDOWN_BLOCKED",
+            scope_type: hit.scope_type,
+            direction: hit.direction,
+          },
+        );
+      }
+    }
   }
 
   // 8. Direction validation against campus_occupancy.

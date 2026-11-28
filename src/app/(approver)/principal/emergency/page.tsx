@@ -6,6 +6,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageLoading as Loading } from "@/components/shared/LoadingStates";
+import { ScopedLockdownPanel } from "@/components/principal/ScopedLockdownPanel";
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 import { SmartTextRef } from "@/components/nav/SmartTextRef";
 import { ChevronRight } from "lucide-react";
@@ -125,6 +126,11 @@ export default function EmergencyPage() {
             </div>
             <p className="text-xs text-text-muted">{commands.length} command{commands.length === 1 ? "" : "s"} on record · click any to inspect</p>
           </div>
+
+          {/* Scoped Lockdown Builder + Approval/Lift console (Principal surface).
+              The Admin page can *initiate* + *monitor* lockdowns; only the
+              Principal can approve pending requests and lift active ones. */}
+          <ScopedLockdownPanel />
           {commands.length === 0 && <EmptyState title="No emergency commands" description="The command plane is at rest." />}
           <div className="space-y-2">
             {commands.map((c) => (

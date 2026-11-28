@@ -16,6 +16,7 @@ import { ShakeDetector } from "@/components/shared/ShakeDetector";
 import { RoleThemeProvider } from "@/components/RoleThemeProvider";
 import { InspectOverlay } from "@/components/shared/InspectOverlay";
 import { RoleCommandPalette } from "@/components/nav/RoleCommandPalette";
+import { GlobalLockdownBanner } from "@/components/shared/GlobalLockdownBanner";
 
 // The floating bot pulls in `three` + `@react-three/fiber` (the listening
 // canvas) plus speech hooks. Loading it eagerly would bloat the shared chunk
@@ -118,7 +119,14 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
       <RoleThemeProvider>
       <NavigationProvider>
         <ToastProvider>
-          <SafeAreaAppShell>{children}</SafeAreaAppShell>
+          <SafeAreaAppShell>
+            {/* GlobalLockdownBanner: shows any logged-in user a high-contrast
+                strip when they are covered by an active lockdown rule.
+                Data is server-side filtered to the caller (never leaks other
+                cohorts' private lockdowns). Inert when nothing matches. */}
+            {!isMarketing && <GlobalLockdownBanner />}
+            {children}
+          </SafeAreaAppShell>
           {/* LiveEventToaster: ambient SSE/poll-to-toast layer, gated
               per-role inside the component — inert for non-alert roles. */}
           {!isMarketing && <LiveEventToaster />}

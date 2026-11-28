@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from "react";
 import { usePolling } from "@/hooks/usePolling";
+import { useLockdownStream } from "@/hooks/useLockdownStream";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useOperatorGate } from "@/hooks/useOperatorGate";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, AlertCircle, KeyRound, ArrowLeft, DoorOpen } from "lucide-react";
+import { RefreshCw, AlertCircle, KeyRound, ArrowLeft, DoorOpen, ShieldOff, Siren } from "lucide-react";
 // The two-decision rule: the bottom bar carries only IN / OUT. Manual entry
 // is reachable via "Enter Roll Manually" in the Scanner's "Can't see the code?"
 // row — no duplicate "Manual entry" button here (removed in this pass).
@@ -211,6 +212,81 @@ const shift = useOperatorShiftClock();
     setActiveLockdown(storeLockdown ? { ...storeLockdown, dismissed: storeLockdownDismissed } : null);
   }, [storeLockdown, storeLockdownDismissed]);
 
+  // ── Rule-based lockdown: hard (camera-freeze) vs soft (camera stays live) ──
+  // The legacy store `activeLockdown` is the hard global signal. The SSE
+  // stream adds the full rule set: a rule is HARD (freezes the camera, blocks
+  // every scan) when it is campus-wide or scoped to THIS gate; everything
+  // else is SOFT (a scoped cohort rule) — the camera keeps running so
+  // unaffected people can scan, and a matched person gets a 423 LOCKDOWN_BLOCKED.
+  const { activeRules } = useLockdownStream(true);
+
+  /**
+   * A LOCKDOWN_BLOCKED (423) scan is ALREADY auto-logged server-side: the
+   * recordScan catch writes a SCAN_REJECTED audit event carrying the
+   * LOCKDOWN_BLOCKED code + the rule's public_message. This helper just
+   * surfaces that to the operator (so they know it was recorded) — it does
+   * not invent a new endpoint.
+   */
+  const logLockdownEscalation = useCallback(
+    (err: { code?: string; message?: string } | null) => {
+      addToast({
+        variant: "success",
+        title: "Blocked attempt logged",
+        message: "The lockdown block was recorded to the security audit trail. Supervisor dashboards will surface it.",
+      });
+      void err;
+    },
+    [addToast],
+  );
+
+  const hardLockdown = useMemo(() => {
+    // Legacy hard signal (campus/gate from /api/lockdown/active).
+    if (activeLockdown) return true;
+    const now = Date.now();
+    return activeRules.some((r) => {
+      if (r.status !== "ACTIVE") return false;
+      if (r.expires_at && new Date(r.expires_at).getTime() <= now) return false;
+      if (r.scope_type === "campus") return true;
+      // `gate`-scoped rules no longer carry target_values in the desk-safe
+      // stream, so they render in the restriction strip (soft) rather than
+      // freezing the camera. The server's matchActiveLockdown (with full
+      // target_values from the DB) still enforces gate blocks on scan.
+      return false;
+    });
+  }, [activeLockdown, activeRules, gateId]);
+
+  // Soft rules: scoped cohorts that should NOT freeze the camera.
+  const scopedLockdowns = useMemo(() => {
+    const now = Date.now();
+    return activeRules.filter((r) => {
+      if (r.status !== "ACTIVE") return false;
+      if (r.expires_at && new Date(r.expires_at).getTime() <= now) return false;
+      if (r.scope_type === "campus") return false; // hard (via activeLockdown)
+      // Everything else — gate / role / persona / department / hostel_block /
+      // class_section / user — keeps the camera live.
+      return true;
+    });
+  }, [activeRules]);
+
+  // Human labels for the restriction strip — never raw target_values UUIDs.
+  const restrictionSummary = useMemo(() => {
+    if (scopedLockdowns.length === 0) return "";
+    const SCOPE_HUMAN: Record<string, string> = {
+      role: "Role", persona: "Persona", department: "Dept",
+      hostel_block: "Hostel", class_section: "Class", user: "Individual",
+    };
+    return scopedLockdowns
+      .map((r) => {
+        const dir = r.direction === "BOTH" ? "IN+OUT" : r.direction;
+        const label =
+          r.scope_type === "user"
+            ? "Individual"
+            : `${SCOPE_HUMAN[r.scope_type] ?? r.scope_type} (${dir} ${r.direction === "OUT" ? "Blocked" : r.direction === "IN" ? "Blocked" : "Restricted"})`;
+        return r.public_message ? `${label} · ${r.public_message}` : label;
+      })
+      .join("  ·  ");
+  }, [scopedLockdowns]);
+
   // Special routing shortcuts (/gate/history & /gate/manual) resolve to the
   // operator's own gate — or the desk (picker) when unassigned.
   useEffect(() => {
@@ -284,7 +360,7 @@ const shift = useOperatorShiftClock();
 
   // Camera decode → start a scan flow (lockdown blocks all scans).
   const handleQRScanned = useCallback((scannedPayload: string) => {
-    if (activeLockdown) {
+    if (hardLockdown) {
       addToast({ variant: "error", title: "Lockdown Active", message: "Scans are blocked during active campus lockdown." });
       return;
     }
@@ -295,7 +371,7 @@ const shift = useOperatorShiftClock();
     }
     lastRollRef.current = rollCandidate;
     startScan(rollCandidate);
-  }, [activeLockdown, addToast, startScan]);
+  }, [hardLockdown, addToast, startScan]);
 
   // Keep a test handle for the decode path (used by integration tests).
   useEffect(() => {
@@ -420,12 +496,14 @@ const shift = useOperatorShiftClock();
   const scannerActive =
     (state === "idle" || state === "detecting") &&
     gateMode !== "MAINTENANCE" &&
-    !activeLockdown;
+    !hardLockdown;
   const canConfirm = state === "confirming" && currentStudent != null;
 
   // Zone-1 status dot: derived from live gate mode + lockdown (no new data).
-  const statusDot = activeLockdown
+  const statusDot = hardLockdown
     ? { label: "LOCKDOWN", cls: "bg-rose-500", ring: "ring-rose-500/30", pulse: true }
+    : scopedLockdowns.length > 0
+    ? { label: "RESTRICTED", cls: "bg-amber-400", ring: "ring-amber-400/30", pulse: true }
     : gateMode === "CURFEW"
     ? { label: "CURFEW", cls: "bg-amber-400", ring: "ring-amber-400/30", pulse: false }
     : gateMode === "MAINTENANCE"
@@ -475,11 +553,20 @@ const shift = useOperatorShiftClock();
             <GateModeBanner
               mode={gateMode as GateMode}
               lockdown={activeLockdown}
-              scanningAllowed={gateMode === "OPEN" && !activeLockdown}
+              scanningAllowed={gateMode === "OPEN" && !hardLockdown}
               onOverrideMaintenance={(reason) => overrideGateMode("OPEN", reason)}
               onDismissLockdown={dismissLockdown}
               compact
             />
+            {/* Scoped restriction strip — camera stays LIVE for these. Shows a
+                compact amber summary of the scoped cohort rules (human labels
+                only, never target UUIDs). A matched scan returns 423. */}
+            {!hardLockdown && restrictionSummary && (
+              <div className="flex items-center gap-2 rounded-lg bg-amber-500/15 px-3 py-1.5 text-[11px] font-medium text-amber-300">
+                <span className="shrink-0 font-bold tracking-wide">RESTRICTED:</span>
+                <span className="truncate">{restrictionSummary}</span>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -626,7 +713,7 @@ const shift = useOperatorShiftClock();
           gateId={gateId}
           onClose={() => setManualOpen(false)}
           onScan={(roll) => {
-            if (activeLockdown) {
+            if (hardLockdown) {
               addToast({ variant: "error", title: "Lockdown Active", message: "Scans are blocked during active campus lockdown." });
               return;
             }
@@ -660,9 +747,61 @@ const shift = useOperatorShiftClock();
         )}
       </AnimatePresence>
 
+      {/* Lockdown block (423 LOCKDOWN_BLOCKED): red card that STAYS until the
+          operator acknowledges + auto-logs an escalation. Distinct from the
+          generic scan-failure card because the operator's next action differs
+          (log the blocked attempt, keep scanning the next person — do NOT
+          retry the same person). */}
+      <AnimatePresence>
+        {state === "error" && error?.code === "LOCKDOWN_BLOCKED" && (
+          <motion.div
+            key="lockdown-block"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/70"
+          >
+            <div className="surface-card w-full max-w-md p-5 text-center space-y-3 bg-red-950/40 border border-red-500/40 rounded-xl">
+              <div className="size-10 rounded-full mx-auto bg-red-500/25 text-red-300 flex items-center justify-center">
+                <ShieldOff className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-base text-red-300">Movement Blocked</h3>
+                <p className="text-xs text-red-200/80">
+                  {typeof error.message === "string" ? error.message : "This person is restricted by an active lockdown rule."}
+                </p>
+                <p className="text-[11px] text-red-200/60">
+                  They remain on the active blocklist. Keep the scanner running for the next person.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void logLockdownEscalation(error);
+                    reset(); // next person can scan immediately
+                  }}
+                  className="min-h-[48px] px-4 py-2 bg-red-600 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                >
+                  <Siren className="w-3.5 h-3.5" /> Acknowledge + Log Escalation
+                </button>
+                <button
+                  type="button"
+                  onClick={() => reset()}
+                  className="min-h-[48px] px-4 py-2 bg-neutral-700 text-white font-semibold text-xs rounded-lg flex items-center justify-center active:scale-[0.98]"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Failure: red, stays until acknowledged (always resets to idle) */}
       <AnimatePresence>
-        {state === "error" && error && (() => {
+        {state === "error" && error && error.code !== "LOCKDOWN_BLOCKED" && (() => {
           const isAuthError =
             error.code === "UNAUTHORIZED" ||
             error.code === "SESSION_EXPIRED" ||
