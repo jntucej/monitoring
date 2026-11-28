@@ -2,11 +2,19 @@ import type { NavEntry, NavGroup } from "@/components/shell/types";
 import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
   LayoutDashboard, CheckSquare, CalendarClock,
-  ClipboardList,
+  ClipboardList, FlaskConical,
 } from "lucide-react";
 
 export const OIE_NAV: NavEntry[] = [
   { kind: "link", href: "/oie", label: "Exam Day Overview", icon: LayoutDashboard },
+  {
+    kind: "group", id: "exam-os", label: "Exam OS", icon: FlaskConical,
+    children: [
+      { href: "/oie/exam-ops", label: "Exam Ops & Hall Ticket Gate" },
+      { href: "/oie/regulations", label: "Regulations & Rollover" },
+      { href: "/oie/bridge", label: "Bridge & Adapters" },
+    ],
+  },
   {
     kind: "group", id: "queue", label: "Exam queue", icon: CheckSquare,
     children: [
