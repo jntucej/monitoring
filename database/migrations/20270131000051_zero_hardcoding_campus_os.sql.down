@@ -1,0 +1,16 @@
+-- Rollback for migration 51 (reverse order). Bridge data + new tables dropped;
+-- the pre-existing academic_regulations/workflow_definitions columns are left
+-- in place (additive, harmless, and the existing R22/R25 rows don't depend on them).
+DROP FUNCTION IF EXISTS public.query_institutional_knowledge(vector, text, text, float, int);
+DROP TABLE IF EXISTS public.institutional_knowledge_chunks;
+-- keep the vector extension (shared, harmless)
+DROP FUNCTION IF EXISTS public.process_announcement_lifecycles();
+DROP TABLE IF EXISTS public.operational_announcements;
+DROP TABLE IF EXISTS public.student_exam_access_controls;
+DROP TABLE IF EXISTS public.academic_policy_rules;
+DROP TABLE IF EXISTS public.student_cohorts;
+DROP TABLE IF EXISTS public.facilities;
+DROP TABLE IF EXISTS public.org_units;
+-- Note: academic_regulations extension columns + workflow_definitions columns
+-- are intentionally NOT dropped (they pre-date this as lean tables; removing
+-- them would risk the live R22/R25 rows). The DDL is idempotent-additive.

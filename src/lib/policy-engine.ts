@@ -139,3 +139,79 @@ export function condonationEligible(
 ): boolean {
   return aggregatePct >= config.condonationMinPct && aggregatePct < config.eligibleMinPct;
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// GENERIC DECLARATIVE POLICY ENGINE (JSONLogic)
+//
+// Reads policy trees from the `academic_policy_rules` JSONB table and
+// evaluates them. Adding a curriculum (JJR27, M.Tech, …) = new DB rows,
+// zero code deploy. Backs the dual-regulation test + any future policy.
+//
+// Custom operators are registered via json-logic-engine's addMethod, whose
+// FIRST argument is the already-evaluated operand array.
+// ═══════════════════════════════════════════════════════════════════════
+
+import { LogicEngine } from "json-logic-engine";
+
+export interface EvaluationContext {
+  /** Flat facts the JSONLogic `var` nodes resolve against. */
+  metrics: Record<string, unknown>;
+  request?: Record<string, unknown>;
+  system?: Record<string, unknown>;
+}
+
+export class PolicyExecutionEngine {
+  private engine: InstanceType<typeof LogicEngine>;
+
+  constructor() {
+    this.engine = new LogicEngine();
+    this.registerCustomOperators();
+  }
+
+  /**
+   * json-logic-engine custom operators are invoked as
+   * `fn(operandArray, data, path, options)` — the FIRST arg is the full
+   * already-evaluated operand array.
+   */
+  private registerCustomOperators(): void {
+    this.engine.addMethod("has_minimum_credit_ratio", (operands: unknown[]) => {
+      const [secured, total, ratio] = operands as [number, number, number];
+      return total > 0 ? secured / total >= ratio : false;
+    });
+
+    this.engine.addMethod("within_working_days", (operands: unknown[]) => {
+      const [submittedAt, eventDate, maxDays] = operands as [string, string, number];
+      const diffMs = Math.abs(new Date(submittedAt).getTime() - new Date(eventDate).getTime());
+      return diffMs / (1000 * 60 * 60 * 24) <= maxDays;
+    });
+  }
+
+  /** Evaluate a single JSONLogic tree against the context. */
+  public evaluate<T = unknown>(ruleTree: unknown, context: EvaluationContext): T {
+    try {
+      return this.engine.run(ruleTree as object, context.metrics) as T;
+    } catch (err) {
+      throw new Error(`Rule Execution Fault: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  /**
+   * Walk a tiered policy (`rules[]`) and return the first matching tier.
+   * This is the declarative replacement for hardcoded attendance if/else.
+   */
+  public evaluateTieredAttendance(
+    policy: {
+      rules: Array<{ tier: string; condition: unknown; action: Record<string, unknown> }>;
+    },
+    context: EvaluationContext,
+  ): { tier: string; action: Record<string, unknown> } | null {
+    for (const rule of policy.rules ?? []) {
+      const holds = this.engine.run(rule.condition as object, context.metrics) as unknown;
+      if (holds) return { tier: rule.tier, action: rule.action };
+    }
+    return null;
+  }
+}
+
+/** Module-level singleton (stateless, safe for reads). */
+export const policyEngine = new PolicyExecutionEngine();

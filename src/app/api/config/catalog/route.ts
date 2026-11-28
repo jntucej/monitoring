@@ -55,7 +55,47 @@ interface CatalogPayload {
   }>;
   roles: CatItem[];
   complaintCategories: CatItem[];
+  // Zero-hardcoding topology + versioned policy (code-keyed, no raw UUIDs).
+  orgUnits: Array<{ code: string; name: string; type: string }>;
+  facilities: Array<{ code: string; name: string; category: string }>;
+  activeRegulations: Array<{ code: string; version: number; status: string }>;
+  workflowSchemas: Array<{ key: string; name: string; states: Record<string, unknown>; formSchema: Record<string, unknown> }>;
   generated_at: string;
+}
+
+/** Public, code-keyed topology + policy layer. Raw UUIDs are never serialized. */
+async function buildTopologyLayer(): Promise<{
+  orgUnits: CatalogPayload["orgUnits"];
+  facilities: CatalogPayload["facilities"];
+  activeRegulations: CatalogPayload["activeRegulations"];
+  workflowSchemas: CatalogPayload["workflowSchemas"];
+}> {
+  const [orgUnits, facilities, regs, workflows] = await Promise.all([
+    query<{ code: string; name: string; unit_type: string }>(
+      `SELECT code, name, unit_type FROM public.org_units WHERE is_active ORDER BY code`,
+    ).catch(() => ({ rows: [] as { code: string; name: string; unit_type: string }[] })),
+    query<{ facility_code: string; name: string; category: string }>(
+      `SELECT facility_code, name, category FROM public.facilities WHERE is_active ORDER BY facility_code`,
+    ).catch(() => ({ rows: [] as { facility_code: string; name: string; category: string }[] })),
+    query<{ code: string; version: number; status: string }>(
+      `SELECT code, version, status FROM public.academic_regulations WHERE is_active ORDER BY code`,
+    ).catch(() => ({ rows: [] as { code: string; version: number; status: string }[] })),
+    query<{ code: string; name: string; states: Record<string, unknown>; form_schema: Record<string, unknown> }>(
+      `SELECT code, name, states, form_schema FROM public.workflow_definitions WHERE is_active ORDER BY code`,
+    ).catch(() => ({ rows: [] as { code: string; name: string; states: Record<string, unknown>; form_schema: Record<string, unknown> }[] })),
+  ]);
+
+  return {
+    orgUnits: orgUnits.rows.map((r) => ({ code: r.code, name: r.name, type: r.unit_type })),
+    facilities: facilities.rows.map((r) => ({ code: r.facility_code, name: r.name, category: r.category })),
+    activeRegulations: regs.rows.map((r) => ({ code: r.code, version: r.version, status: r.status })),
+    workflowSchemas: workflows.rows.map((r) => ({
+      key: r.code,
+      name: r.name,
+      states: r.states ?? {},
+      formSchema: r.form_schema ?? {},
+    })),
+  };
 }
 
 async function buildCatalog(): Promise<CatalogPayload> {
@@ -120,6 +160,8 @@ async function buildCatalog(): Promise<CatalogPayload> {
     })),
     roles: roles.rows.map((r) => ({ code: r.code, name: r.display })),
     complaintCategories: complaints.rows.map((r) => ({ code: r.category, count: Number(r.n) })),
+    // Zero-hardcoding topology + versioned policy layer.
+    ...(await buildTopologyLayer()),
     generated_at: new Date().toISOString(),
   };
   return payload;

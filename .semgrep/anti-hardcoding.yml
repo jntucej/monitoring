@@ -1,0 +1,82 @@
+# Anti-Hardcoding CI Gate — blocks domain values from re-entering code.
+#
+# These rules enforce the zero-hardcoding invariant of the Campus OS: regulation
+# codes, attendance thresholds, and static branch/topology arrays must come from
+# the live catalog + JSONLogic policy engine, never from inline literals.
+#
+# Run:  semgrep scan --config .semgrep/anti-hardcoding.yml src/
+#
+# Scope note: the JSONLogic policy TABLE (academic_policy_rules.rule_expression)
+# may contain these values — that IS the data-driven source of truth. The gate
+# only scans TypeScript source (src/), so policy JSON in the DB is exempt.
+rules:
+  - id: no-hardcoded-regulation-codes
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $X === "R18"
+          - pattern: |
+              $X === "R22"
+          - pattern: |
+              $X === "R25"
+          - pattern: |
+              $X === "JJR23"
+          - pattern: |
+              $X === "JJR27"
+          - pattern: |
+              $X == "R18"
+          - pattern: |
+              $X == "R22"
+          - pattern: |
+              $X == "R25"
+          - pattern: |
+              $X == "JJR23"
+    message: >
+      VIOLATION: Hardcoded regulation code. Resolve the regulation from the
+      student's cohort binding + academic_regulations at runtime instead.
+    languages: [typescript, javascript]
+    severity: ERROR
+    options:
+      # Allow these identifiers in policy/engine files where the code is the
+      # engine itself (it must name the operators), not a domain check.
+      symbol-whitelist: []
+
+  - id: no-hardcoded-attendance-thresholds
+    pattern-either:
+      - pattern: |
+          $X < 75.0
+      - pattern: |
+          $X < 65.0
+      - pattern: |
+          $X >= 75.0
+      - pattern: |
+          $X >= 65.0
+      - pattern: |
+          $X < 0.75
+      - pattern: |
+          $X < 0.65
+      - pattern: |
+          $X >= 0.75
+    message: >
+      VIOLATION: Hardcoded attendance threshold. Fetch the limit from
+      config_exam_eligibility_rules / the JSONLogic policy tree, not a literal.
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  - id: no-static-branch-arrays
+    pattern-either:
+      - pattern: |
+          const BRANCHES = [ ... ]
+      - pattern: |
+          const CANONICAL_BRANCHES = [ ... ]
+      - pattern: |
+          const HOD_BRANCHES = [ ... ]
+      - pattern: |
+          const DEPARTMENTS = [ ... ]
+      - pattern: |
+          const GATES = [ ... ]
+    message: >
+      VIOLATION: Static branch/department/gate array. Read topology from
+      /api/config/catalog (org_units + facilities) instead.
+    languages: [typescript, javascript]
+    severity: ERROR
