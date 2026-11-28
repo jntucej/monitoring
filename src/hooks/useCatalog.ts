@@ -29,6 +29,32 @@ export interface Catalog {
   }>;
   roles: CatalogItem[];
   complaintCategories: CatalogItem[];
+  // Zero-hardcoding topology + versioned policy (code-keyed, no raw UUIDs).
+  orgUnits: Array<{ code: string; name: string; type: string }>;
+  facilities: Array<{ code: string; name: string; category: string; config?: Record<string, unknown> }>;
+  activeRegulations: Array<{ code: string; version: number; status: string }>;
+  workflowSchemas: Array<{ key: string; name: string; states: Record<string, unknown>; formSchema: Record<string, unknown> }>;
+  /** JSON Schema + UI Schema form registry (form_schemas, migration 59). */
+  formSchemas: Array<{
+    key: string;
+    name: string;
+    description?: string;
+    jsonSchema: Record<string, unknown>;
+    uiSchema: Record<string, unknown>;
+    workflowCode?: string | null;
+    bypassStaging: boolean;
+  }>;
+  /** Exam-eligibility thresholds for the client What-If simulator. */
+  examEligibility: {
+    eligibleMinPct: number | null;
+    condonationMinPct: number | null;
+    requireFeesPaid: boolean;
+    requireAcademicActive: boolean;
+  };
+  routingPolicies: Array<{ key: string; category: string; stage1: string; status: string; version: number }>;
+  governanceMatrix: Array<{ key: string; channel: string; approvers: number; status: string; version: number }>;
+  retentionRules: Array<{ key: string; artifact: string; hotDays: number; coldYears: number; status: string }>;
+  spatialPolicies: Array<{ key: string; role: string; layers: string[]; status: string }>;
   generated_at: string;
 }
 

@@ -15,6 +15,7 @@ const isHosteller = (ctx: NavContext) => ctx.residentialStatus === "hosteller";
 // 5 cards; everything else is one tap away here.
 export const STUDENT_NAV: NavEntry[] = [
   { kind: "link", href: "/student", label: "Home", icon: Home },
+  { kind: "link", href: "/student/dashboard", label: "Campus OS Dashboard", icon: CheckSquare },
   {
     kind: "group", id: "permissions", label: "Passes & Requests", icon: CheckSquare,
     when: isHosteller, // hostel-leave surfaces: hostellers only
