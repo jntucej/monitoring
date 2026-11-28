@@ -131,3 +131,6 @@ gitleaks
 .worktrees/
 .worktrees/
 .worktrees/
+
+# model-runtime compiled output (dist is build artifacts, not source)
+model-runtime/dist/
