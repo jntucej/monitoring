@@ -11,6 +11,7 @@
 
 import { MapPin, Clock, ArrowDownLeft, ArrowUpRight, Timer } from "lucide-react";
 import { useGateStore } from "@/stores/gateStore";
+import { displayId } from "@/lib/utils";
 
 export interface StatusBarProps {
   counts: {
@@ -52,7 +53,7 @@ export function StatusBar({ counts, lastScan }: StatusBarProps) {
             {gate?.name || "Gate not set"}
           </span>
           <span className="font-mono text-xs text-text-muted">
-            {gate ? `ID ${gate.id.slice(0, 8)}` : "—"}
+            {gate ? `ID ${displayId(gate.id, "…")}` : "—"}
           </span>
         </span>
         <span className="hidden sm:inline-flex items-center gap-1.5 text-text-muted">

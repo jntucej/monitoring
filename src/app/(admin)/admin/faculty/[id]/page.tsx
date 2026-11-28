@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders, displayId } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface FacultyHistoryItem {
@@ -149,7 +149,7 @@ function AdminFacultyDetail() {
                       </div>
                       <div className="min-w-2 flex-1">
                         <p className="text-sm font-medium text-text-primary">{a.subjectCode}</p>
-                        <p className="text-xs text-text-muted capitalize">{a.role.replace("_", " ")} · class {a.classId.slice(0, 8)}</p>
+                        <p className="text-xs text-text-muted capitalize">{a.role.replace("_", " ")} · class {displayId(a.classId, "class")}</p>
                       </div>
                       <span className={`px-2 py-0.5 rounded-full text-xs ${a.isActive ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
                         {a.isActive ? "Active" : "Off"}

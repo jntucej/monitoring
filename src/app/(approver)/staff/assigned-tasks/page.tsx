@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { displayId } from "@/lib/utils";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -109,7 +110,7 @@ function StaffAssignedTasksInner() {
                 <div className="space-y-2 min-w-0">
                   {slice.openRequests.map((r) => (
                     <div key={r.id} className="surface-card flex flex-wrap items-center gap-3 bg-bg-surface/40 p-3 min-w-0">
-                      <span className="text-xs text-text-muted font-mono shrink-0">{r.ticket_number ?? r.id.slice(0, 8)}</span>
+                      <span className="text-xs text-text-muted font-mono shrink-0">{r.ticket_number ?? displayId(r.id, "Ticket")}</span>
                       <span className="flex-1 text-sm text-text-secondary">{r.workflow_type}</span>
                       <span className="surface-card px-2 py-0.5 text-xs bg-bg-elevated/40 text-text-secondary shrink-0 capitalize">
                         {r.current_stage ?? r.status}

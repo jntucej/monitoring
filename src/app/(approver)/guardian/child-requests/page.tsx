@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useMemo, useState } from "react";
 import Link from "next/link";
+import { displayId } from "@/lib/utils";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -51,7 +52,7 @@ function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "dan
  * cannot approve — the approval chain is the campus office's job).
  */
 function buildChildTicketInspection(r: PermissionRow): EntityInspection {
-  const ticketNum = r.ticket_number ?? r.id.slice(0, 8);
+  const ticketNum = r.ticket_number ?? displayId(r.id, "Ticket");
   const statusTone: "ok" | "warn" | "danger" | "neutral" =
     (r.status ?? "").toUpperCase() === "APPROVED" || (r.status ?? "").toUpperCase() === "COMPLETED" ? "ok"
     : (r.status ?? "").toUpperCase() === "REJECTED" ? "danger"
@@ -297,7 +298,7 @@ function ChildRequestsInner() {
           {/* Mobile list view */}
           <ul className="space-y-2 md:hidden p-3">
             {rows.slice(0, 20).map((r) => {
-              const ticket = r.ticket_number || r.id.slice(0, 8);
+              const ticket = r.ticket_number || displayId(r.id, "Ticket");
               const ward = r.student?.name || "—";
               return (
                 <li key={r.id}>
@@ -354,11 +355,11 @@ function ChildRequestsInner() {
                       }}
                       role="button"
                       tabIndex={0}
-                      aria-label={`Inspect request ${r.ticket_number || r.id.slice(0, 8)}`}
+                      aria-label={`Inspect request ${r.ticket_number || displayId(r.id, "Ticket")}`}
                       className="hover:bg-bg-base/40 transition-colors motion-reduce:transition-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:ring-inset"
                     >
                       <td className="px-4 py-3 text-white font-mono text-xs">
-                        {r.ticket_number || r.id.slice(0, 8)}
+                        {r.ticket_number || displayId(r.id, "Ticket")}
                       </td>
                       <td className="px-4 py-3 text-text-secondary min-w-0">
                         {r.student?.name || "—"}

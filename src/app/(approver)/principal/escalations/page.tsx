@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { PageLoading as Loading } from "@/components/shared/LoadingStates";
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
+import { displayId } from "@/lib/utils";
 import type { EscalationView } from "@/app/api/principal/escalations/route";
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 import { PrincipalEmptyReconciler } from "@/components/nav/level3/PrincipalRecordHub";
@@ -25,7 +26,7 @@ export default function EscalationsPage() {
     ? {
         kind: "escalation",
         title: active.reason,
-        subtitle: `Case ${active.case_id.slice(0, 8)}`,
+        subtitle: `Case ${displayId(active.case_id, "unknown")}`,
         status: (
           <span
             className={
@@ -126,7 +127,7 @@ export default function EscalationsPage() {
               </span>
             </header>
             <p className="mt-1 text-xs text-text-muted">
-              Case {e.case_id.slice(0, 8)} · target {e.target_role ?? "ladder"}{e.recommended_action ? ` · ${e.recommended_action}` : ""}
+              Case {displayId(e.case_id, "unknown")} · target {e.target_role ?? "ladder"}{e.recommended_action ? ` · ${e.recommended_action}` : ""}
             </p>
           </article>
         ))}

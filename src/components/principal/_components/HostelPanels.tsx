@@ -6,6 +6,7 @@ import { memo } from "react";
 import {Building2, CheckCircle2, ShieldCheck, Users}  from "lucide-react";
 import { PrincipalWidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import type {PresenceMatrixData} from "./types";
+import { displayId } from "@/lib/utils";
 
 function PlaceholderBadge({ note }: { note: string }) {
   return (
@@ -91,7 +92,7 @@ export const HostelAttendancePanel = memo(function HostelAttendancePanel({ matri
                 <tbody className="divide-y divide-border">
                   {rows.map((r) => (
                     <tr key={r.id} className="hover:bg-bg-elevated">
-                      <td className="px-3 py-2 text-text-primary">{r.name || r.code || r.id.slice(0, 8)}</td>
+                      <td className="px-3 py-2 text-text-primary">{r.name || r.code || displayId(r.id, "Room")}</td>
                       <td className="px-3 py-2 text-right">
                         <span className={`font-bold ${r.total > 0 ? "text-action-success" : "text-text-muted"}`}>{r.total}</span>
                       </td>

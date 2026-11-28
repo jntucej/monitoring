@@ -964,7 +964,7 @@ const AREA_ADAPTERS = {
         name: 'Dr. R. Subramanian',
         initials: 'RS',
         role: 'Chief Warden (Principal Hat)',
-        roleContexts: ['role_context: chief_warden'],
+        roleContexts: ['Chief Warden'],
         clusterId: 'hc_exec',
         parentId: null,
         tier: 0,
@@ -1225,7 +1225,7 @@ const AREA_ADAPTERS = {
         name: 'Dr. R. Subramanian',
         initials: 'RS',
         role: 'Chief Superintendent (Principal Hat)',
-        roleContexts: ['role_context: exam_superintendent'],
+        roleContexts: ['Exam Superintendent'],
         clusterId: 'ec_cmd',
         parentId: null,
         tier: 0,
@@ -1708,7 +1708,7 @@ export default function App() {
 
             {/* Deep-Link Status Pill */}
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-600">
-              <span>/api/org-map?area={activeAreaId}</span>
+              <span>Org map · area {activeAreaId}</span>
             </div>
           </div>
         </header>

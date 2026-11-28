@@ -7,7 +7,7 @@
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEffect, useMemo, useState } from "react";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders, displayId } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 import { ChevronRight } from "lucide-react";
@@ -245,7 +245,7 @@ export default function PrincipalPassesPage() {
                   onClick={() => setActivePass(r)}
                 >
                   <td className="py-1.5 pr-3 font-mono">{r.ticket_number}</td>
-                  <td className="py-1.5 pr-3">{r.student_user_id?.slice(0, 8)}</td>
+                  <td className="py-1.5 pr-3">{displayId(r.student_user_id, "Student")}</td>
                   <td className="py-1.5 pr-3">{new Date(r.from_date ?? 0).toLocaleString()}</td>
                   <td className="py-1.5 pr-3">{r.to_date ? new Date(r.to_date).toLocaleString() : "—"}</td>
                   <td className="py-1.5">{r.reason}</td>

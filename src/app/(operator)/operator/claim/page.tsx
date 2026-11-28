@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, KeyRound, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { InputOTP } from "@/components/ui/input-otp";
+import { displayId } from "@/lib/utils";
 
 /**
  * Operator claim page — redeem a 6-digit claim code minted by a supervisor
@@ -182,7 +183,7 @@ export default function OperatorClaimPage() {
 
           {user?.gateId && (
             <p className="text-xs text-text-muted text-center">
-              You already have gate <span className="font-mono text-text-secondary">{user.gateId}</span>{" "}
+              You already have gate <span className="font-mono text-text-secondary">{displayId(user.gateId, "assigned")}</span>{" "}
               assigned. Use the link above to return to your desk.
             </p>
           )}

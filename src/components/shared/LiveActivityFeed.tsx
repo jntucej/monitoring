@@ -13,7 +13,7 @@ import { useGlass } from "@/context/GlassContext";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import type { AlertPayload } from "@/lib/mockData";
-import { formatTime } from "@/lib/utils";
+import { formatTime, displayId } from "@/lib/utils";
 
 /**
  * LiveActivityFeed — a compact "Live" feed of relevant events sourced from
@@ -96,7 +96,7 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
       id: `alert-${a.timestamp}-${a.gateId}`,
       kind: "alert" as const,
       title: a.message,
-      detail: `${a.gateId} · ${a.severity}`,
+      detail: `${displayId(a.gateId, "gate")} · ${a.severity}`,
       severity: a.severity,
       timestamp: a.timestamp,
     }));

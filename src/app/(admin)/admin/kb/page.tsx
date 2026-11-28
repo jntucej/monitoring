@@ -8,7 +8,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
 
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders, displayId } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 interface IngestResult {
@@ -142,7 +142,7 @@ function AdminKbInner() {
                   <BookOpen className="w-4 h-4 shrink-0" />
                   <span>
                     Ingested {result.chunkCount} chunk{result.chunkCount === 1 ? "" : "s"}
-                    {result.deduped ? " (deduped)" : ""} — document {result.documentId.slice(0, 8)}…
+                    {result.deduped ? " (deduped)" : ""} — document {displayId(result.documentId, "unknown")}
                   </span>
                 </div>
               )}

@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { displayId } from "@/lib/utils";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -167,7 +168,7 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-mono font-medium text-text-primary">
-                        {r.ticket_number || r.id.slice(0, 8)}
+                        {r.ticket_number || displayId(r.id, "Ticket")}
                       </span>
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${statusPill(r.status)}`}

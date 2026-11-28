@@ -12,7 +12,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { usePassTypes } from "@/hooks/usePassTypes";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders, displayId } from "@/lib/utils";
 import type { Person } from "@/lib/types";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
@@ -434,7 +434,7 @@ function PassLeaveSubmissionInner() {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-text-primary font-mono">
-                      {r.ticket_number || r.id.slice(0, 8)}
+                      {r.ticket_number || displayId(r.id, "Ticket")}
                     </p>
                     <p className="text-xs text-text-muted">
                       {r.workflow_type || "—"}

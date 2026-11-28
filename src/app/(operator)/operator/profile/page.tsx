@@ -6,7 +6,7 @@ import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWid
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 
 import { useAuthStore } from "@/stores/authStore";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders, displayId } from "@/lib/utils";
 import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
 import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import {
@@ -128,7 +128,7 @@ function OperatorProfileInner() {
               <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Assigned Gate</p>
               <div className="flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5 text-text-muted shrink-0" />
-                <p className="text-text-primary">{user?.gateId ? `Gate ${user.gateId}` : "—"}</p>
+                <p className="text-text-primary">{user?.gateId ? `Gate ${displayId(user.gateId, "assigned")}` : "—"}</p>
               </div>
             </div>
           </div>

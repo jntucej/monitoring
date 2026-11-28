@@ -8,7 +8,7 @@ import { AlertTriangle, Bell, CheckCircle, Check, RefreshCw, ExternalLink, Shiel
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 import { useToast } from "@/components/ui/toast";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders, displayId } from "@/lib/utils";
 import type { Alert } from "@/lib/types";
 
 const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
@@ -68,7 +68,7 @@ function AdminAlertsInner() {
                     ? [{ label: "Affected student", value: <span className="font-mono">{activeAlert.studentRoll}</span> }]
                     : []),
                   ...(activeAlert.gateId
-                    ? [{ label: "Gate", value: <span className="font-mono">{activeAlert.gateId}</span> }]
+                    ? [{ label: "Gate", value: <span className="font-mono">{displayId(activeAlert.gateId, "assigned")}</span> }]
                     : []),
                 ]}
               />
@@ -315,7 +315,7 @@ function AdminAlertsInner() {
                       {a.studentRoll && (
                         <span className="text-xs font-mono text-text-muted">{a.studentRoll}</span>
                       )}
-                      {a.gateId && <span className="text-xs text-text-muted">at gate {a.gateId}</span>}
+                      {a.gateId && <span className="text-xs text-text-muted">at gate {displayId(a.gateId, "assigned")}</span>}
                     </div>
                   );
                 },

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { X, Home, FileText, Wrench, User, LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/shared/BrandLogo";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, displayId } from "@/lib/utils";
 import { DrawerCategory } from "./DrawerCategory";
 import { useOperatorGate } from "@/hooks/useOperatorGate";
 import type { LucideIcon } from "lucide-react";
@@ -229,9 +229,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
             </p>
             <p className="text-xs text-text-muted truncate">
               {user?.gateId
-                ? /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(user.gateId)
-                  ? "Gate assigned"
-                  : `Gate ${user.gateId}`
+                ? `Gate ${displayId(user.gateId, "assigned")}`
                 : "No gate assigned"}
             </p>
           </div>

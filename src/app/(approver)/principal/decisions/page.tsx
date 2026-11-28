@@ -4,6 +4,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageLoading as Loading } from "@/components/shared/LoadingStates";
+import { humanizeCode } from "@/lib/utils";
 import { useState } from "react";
 import { ChevronRight, ExternalLink } from "lucide-react";
 import type { DecisionView } from "@/app/api/principal/decisions/route";
@@ -31,7 +32,7 @@ export default function DecisionsPage() {
                 items={[
                   { label: "Operation", value: <span className="font-mono">{active.operation}</span> },
                   { label: "Actor role", value: active.actor_role },
-                  { label: "Role context", value: active.role_context },
+                  { label: "Role context", value: <span className="capitalize">{humanizeCode(active.role_context)}</span> },
                   {
                     label: "Authority source",
                     value: (

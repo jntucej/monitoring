@@ -62,7 +62,7 @@ function AdminClassesInner() {
   const [saving, setSaving] = useState(false);
   const [active, setActive] = useState<ClassRow | null>(null);
 
-  const deptName = (id: string) => depts.find((d) => d.id === id)?.name ?? id;
+  const deptName = (id: string) => depts.find((d) => d.id === id)?.name ?? "Unassigned";
 
   /** Standardized inspection model for a class row (overview → actions).
    *  Built lazily so it can reference `deptName`, which depends on the

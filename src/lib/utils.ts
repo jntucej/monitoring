@@ -190,3 +190,49 @@ export function getAuthHeaders(): Record<string, string> {
     return headers;
   }
 }
+
+/**
+ * UUID / internal-identifier display guards.
+ *
+ * Raw database UUIDs (id, gateId, userId, sessionId, classId, departmentId)
+ * are strictly sysadmin-only. Every other role must see a human identifier or
+ * a neutral label — never the raw UUID. These helpers centralize that rule so
+ * badge/label code cannot drift back to printing a raw id.
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** True when `s` is a database UUID (v1-v5 shape). */
+export function isUuid(s: string | null | undefined): boolean {
+  return typeof s === "string" && UUID_RE.test(s);
+}
+
+/**
+ * Safe display label for an identifier that may be a UUID.
+ * - empty/undefined/null → `fallback`
+ * - a UUID              → a masked form (first 4 + "…" + last 4), never the full raw value
+ * - a human code        → the value as-is (e.g. "gate-1", "23JJ1A0599", a ticket)
+ */
+export function displayId(
+  s: string | null | undefined,
+  fallback = "Unknown"
+): string {
+  if (!s) return fallback;
+  if (!isUuid(s)) return s;
+  // Mask: keep 4-char head + 4-char tail, drop the middle. Not reversible, not the raw UUID.
+  const head = s.slice(0, 4);
+  const tail = s.slice(-4);
+  return `${head}…${tail}`;
+}
+
+/**
+ * Humanize an internal snake_case enum / context code for UI display
+ * (e.g. `chief_warden` → "Chief Warden"). Matches the existing
+ * `workflow_type.replace(/_/g, " ")` convention. Empty → "Unknown".
+ */
+export function humanizeCode(
+  s: string | null | undefined,
+  fallback = "Unknown"
+): string {
+  if (!s) return fallback;
+  return String(s).replace(/_/g, " ");
+}

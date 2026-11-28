@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { displayId } from "@/lib/utils";
 
 interface GateHeadcount {
   gate_id: string;
@@ -73,7 +74,7 @@ export function OpsCompliancePanel() {
       body: JSON.stringify({ scenario: "campus_lockdown_drill" }),
     });
     const j = await r.json();
-    if (j?.data?.drill_id) setDrillMsg(`Drill completed (${j.data.drill_id.slice(0, 8)})`);
+    if (j?.data?.drill_id) setDrillMsg(`Drill completed (${displayId(j.data.drill_id, "unknown")})`);
   }
 
   async function loadReport(fw: string) {

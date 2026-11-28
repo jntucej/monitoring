@@ -36,7 +36,7 @@ import {
   type InspectionSection,
 } from "@/components/shared/EntityInspector";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, displayId } from "@/lib/utils";
 
 /* ── small shared status badge (kept local so the console files don't
      pull in a Badge dependency graph) ─────────────────────────────────── */
@@ -104,8 +104,8 @@ export function boardRowTicketInspection(
   const status = /pending/i.test(row.direction) ? "PENDING" : row.direction;
   return {
     kind: "permission ticket",
-    title: row.name ?? row.roll ?? row.id,
-    subtitle: row.roll ? `${row.id} · ${row.roll}` : row.id,
+    title: row.name ?? row.roll ?? "Permission request",
+    subtitle: row.roll ? `${displayId(row.id, "ticket")} · ${row.roll}` : displayId(row.id, "ticket"),
     status: (
       <StatusBadge
         text={status}

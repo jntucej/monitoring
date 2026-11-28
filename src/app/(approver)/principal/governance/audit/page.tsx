@@ -6,6 +6,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageLoading as Loading } from "@/components/shared/LoadingStates";
+import { humanizeCode } from "@/lib/utils";
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 import { ExternalLink, ChevronRight } from "lucide-react";
 import type { DecisionView } from "@/app/api/principal/decisions/route";
@@ -37,7 +38,7 @@ export default function AuditPage() {
                 items={[
                   { label: "Operation", value: <span className="font-mono">{active.operation}</span> },
                   { label: "Actor role", value: active.actor_role },
-                  { label: "Role context", value: active.role_context },
+                  { label: "Role context", value: <span className="capitalize">{humanizeCode(active.role_context)}</span> },
                   {
                     label: "Authority source",
                     value: <span className="font-mono text-action-primary">{active.authority_source}</span>,
@@ -116,7 +117,7 @@ export default function AuditPage() {
           >
             <p className="font-mono text-text-primary">{d.decision_no}</p>
             <p className="mt-1 text-text-muted">
-              {d.operation} by {d.actor_role} ({d.authority_source}) · {d.role_context}
+              {d.operation} by {humanizeCode(d.actor_role)} ({d.authority_source}) · {humanizeCode(d.role_context)}
             </p>
             <p className="mt-1 text-text-secondary max-w-[30rem] truncate">{d.reason}</p>
           </article>

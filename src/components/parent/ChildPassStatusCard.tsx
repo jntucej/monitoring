@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Ticket, MapPin, Clock, CheckCircle2, XCircle, Loader2, ArrowUpRight,
 } from "lucide-react";
-import { getAuthHeaders, cn } from "@/lib/utils";
+import { getAuthHeaders, cn, displayId } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
@@ -52,7 +52,7 @@ export function ChildPassStatusCard({ passes, onTrackPass, className }: ChildPas
     addToast({
       variant: "info",
       title: "Tracking pass",
-      message: `Opening timeline for ${passId.slice(0, 8)}…`,
+      message: `Opening timeline for ${displayId(passId, "pass")}…`,
     });
   };
 

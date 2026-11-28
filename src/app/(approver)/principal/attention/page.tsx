@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageLoading as Loading } from "@/components/shared/LoadingStates";
 import { useState } from "react";
+import { displayId } from "@/lib/utils";
 import { ChevronRight, ExternalLink } from "lucide-react";
 import type { AttentionItemRow } from "@/lib/institutional/attention";
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
@@ -52,12 +53,12 @@ export default function AttentionPage() {
                     label: "Source",
                     value: (
                       <span className="font-mono text-xs">
-                        {active.source_kind} · {active.source_id.slice(0, 8)}
+                        {active.source_kind} · {displayId(active.source_id, "unknown")}
                       </span>
                     ),
                   },
                   ...(active.case_id
-                    ? [{ label: "Case", value: <span className="font-mono text-xs">{active.case_id.slice(0, 8)}</span> }]
+                    ? [{ label: "Case", value: <span className="font-mono text-xs">{displayId(active.case_id, "Case")}</span> }]
                     : []),
                 ]}
               />

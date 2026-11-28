@@ -9,6 +9,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { displayId } from "@/lib/utils";
 import Link from "next/link";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import {
@@ -256,7 +257,7 @@ function ExamBranchDiscrepanciesInner() {
                           minute: "2-digit",
                         })}
                       </span>
-                      {alert.gateId && <span>gate: {alert.gateId}</span>}
+                      {alert.gateId && <span>gate: {displayId(alert.gateId, "assigned")}</span>}
                       {alert.studentRoll && <span>roll: {alert.studentRoll}</span>}
                     </div>
                   </li>

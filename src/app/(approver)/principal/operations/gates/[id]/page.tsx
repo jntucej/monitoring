@@ -3,6 +3,7 @@ import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { displayId } from "@/lib/utils";
 import { ArrowLeft, ShieldCheck, Radio, Users, Clock, MapPin, ExternalLink } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
@@ -123,7 +124,7 @@ export default function PrincipalGateDetailPage() {
         <div className="surface-card p-6 text-center space-y-2">
           <p className="text-sm font-medium text-text-primary">Gate metrics unavailable</p>
           <p className="text-xs text-text-muted">
-            Gate {gateId} could not be loaded or has no recent telemetry.
+            Gate {displayId(gateId, "assigned")} could not be loaded or has no recent telemetry.
           </p>
         </div>
       ) : (

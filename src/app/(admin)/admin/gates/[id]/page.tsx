@@ -21,6 +21,7 @@ import { StatCard } from "@/components/admin/StatCard";
 import { useApi } from "@/hooks/useApi";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { displayId } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 import { useAuthStore } from "@/stores/authStore";
@@ -179,7 +180,7 @@ export default function GateDetailPage() {
             <div>
               <div className="flex items-center gap-2">
                 <p className="text-xl font-bold text-text-primary">
-                  {data?.gateName || `Gate ${gateId}`}
+                  {data?.gateName || `Gate ${displayId(gateId, "assigned")}`}
                 </p>
                 {data && (
                   <span
@@ -195,7 +196,7 @@ export default function GateDetailPage() {
               </div>
               <p className="text-xs text-text-muted mt-0.5">
                 {data?.gateCode ? `${data.gateCode} — ` : ""}
-                Terminal ID: {gateId} — {data?.location || "Campus Access Point"}
+                Terminal ID: {displayId(gateId, "assigned")} — {data?.location || "Campus Access Point"}
               </p>
             </div>
           </div>
@@ -214,7 +215,7 @@ export default function GateDetailPage() {
                 setPivot({
                   kind: "gate",
                   id: gateId,
-                  title: data?.gateName || `Gate ${gateId}`,
+                  title: data?.gateName || `Gate ${displayId(gateId, "assigned")}`,
                   subtitle: `${data?.gateCode ? data.gateCode + " · " : ""}${data?.location || "Campus"} · ${data?.status || ""}`,
                   fullRoute: `/admin/gates/${gateId}`,
                   relatedLinks: [

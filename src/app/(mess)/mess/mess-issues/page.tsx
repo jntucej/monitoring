@@ -352,7 +352,7 @@ function MessIssuesInner() {
                             setFrontlineSubject({
                               id: issue.id,
                               name: issue.eventType.replace(/_/g, " "),
-                              code: issue.id,
+                              code: issue.channel || issue.eventType.replace(/_/g, " "),
                               statusTag: issue.status,
                               locationOrScope: issue.channel,
                             });

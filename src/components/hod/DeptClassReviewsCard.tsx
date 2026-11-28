@@ -14,6 +14,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { BarChart3, Star, Users } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { displayId } from "@/lib/utils";
 
 interface DeptSummary {
   data: {
@@ -80,7 +81,7 @@ function DeptClassReviewsCardInner() {
             </div>
             {top.map((f) => (
               <div key={f.facultyId} className="flex items-center justify-between text-xs">
-                <span className="text-text-secondary">{f.facultyName ?? f.facultyId.slice(0, 8)}</span>
+                <span className="text-text-secondary">{f.facultyName ?? displayId(f.facultyId, "Unassigned")}</span>
                 <span className="flex items-center gap-2 text-text-muted">
                   <span className="tabular-nums">{f.total} reviews</span>
                   <span className="text-amber-500 tabular-nums">{f.avg ?? "—"}</span>

@@ -9,6 +9,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { displayId } from "@/lib/utils";
 import Link from "next/link";
 import { Loader2, UserCheck, AlertTriangle, ArrowRight, ShieldCheck, HelpCircle } from "lucide-react";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -160,7 +161,7 @@ function VisitorRegistrationInner() {
                     <HelpTip text="Unique identifier scanned at gate barriers." />
                   </div>
                   <p className="mt-1 text-base font-mono text-action-info">
-                    {reg?.uniqueId ?? (user?.id?.slice(0, 8) ?? "—")}
+                    {reg?.uniqueId ?? displayId(user?.id, "—")}
                   </p>
                 </div>
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">

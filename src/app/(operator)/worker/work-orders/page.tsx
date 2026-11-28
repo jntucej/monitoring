@@ -132,7 +132,7 @@ function WorkerWorkOrdersInner() {
                         setFrontlineSubject({
                           id: o.id,
                           name: o.ticket,
-                          code: o.id,
+                          code: o.ticket,
                           statusTag: o.status ?? "PENDING",
                           locationOrScope: o.stage ? `Stage: ${o.stage}` : undefined,
                         });

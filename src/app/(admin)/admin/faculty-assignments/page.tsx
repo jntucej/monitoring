@@ -92,10 +92,10 @@ function AdminFacultyAssignmentsInner() {
 
   useEffect(() => { load(); }, [load]);
 
-  const facultyName = (id: string) => faculty.find((f) => f.id === id)?.name ?? id.slice(0, 8);
+  const facultyName = (id: string) => faculty.find((f) => f.id === id)?.name ?? "Unassigned";
   const className = (id: string) => {
     const c = classes.find((x) => x.id === id);
-    return c ? `Y${c.year} ${c.section}` : id.slice(0, 8);
+    return c ? `Y${c.year} ${c.section}` : "Unassigned";
   };
   const subjectLabel = (code: string) => subjects.find((s) => s.code === code)?.label ?? code;
 

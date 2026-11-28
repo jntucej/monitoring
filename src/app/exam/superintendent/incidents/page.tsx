@@ -9,6 +9,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { displayId } from "@/lib/utils";
 import Link from "next/link";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { ShieldCheck, AlertTriangle, ArrowRight, BellRing } from "lucide-react";
@@ -163,7 +164,7 @@ function ExamSuperintendentIncidentsInner() {
                     {exceptions.slice(0, 9).map((row, i) => (
                       <div key={row.id ?? i} className="surface-card bg-bg-surface/40 p-3 min-w-0">
                         <p className="text-sm font-semibold text-action-warning truncate">
-                          {row.title ?? (row.id ? `Exception ${row.id.slice(0, 8)}` : "Exam exception")}
+                          {row.title ?? (row.id ? `Exception ${displayId(row.id, "unknown")}` : "Exam exception")}
                         </p>
                         <p className="text-xs text-text-muted mt-0.5 truncate">{row.message ?? row.source}</p>
                       </div>
