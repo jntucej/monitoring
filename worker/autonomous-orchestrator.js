@@ -223,6 +223,33 @@ export async function dispatchAutonomousEvent(event) {
           ],
         ).catch(() => {});
       }
+
+      // Hardware edge-case reconciliation (Blind Spot 3): detect dangling
+      // sessions. If the occupancy row already had the SAME direction before
+      // this punch (a missed OUT/IN), tag the movement log with the anomaly
+      // so the warden can review. The punch is never blocked.
+      const { rows: occRows } = await pool.query(
+        `SELECT current_status FROM public.campus_occupancy WHERE user_id = $1::uuid LIMIT 1`,
+        [event.studentId],
+      );
+      const priorStatus = occRows[0]?.current_status;
+      const anomalyTag =
+        priorStatus === "IN" && event.direction === "IN"
+          ? "UNMATCHED_ENTRY"
+          : priorStatus === "OUT" && event.direction === "OUT"
+            ? "UNMATCHED_EXIT"
+            : null;
+
+      if (anomalyTag) {
+        await pool.query(
+          `UPDATE public.movement_logs
+              SET payload = jsonb_set(COALESCE(payload, '{}'::jsonb), '{anomaly_tag}', $1::jsonb)
+            WHERE user_id = $2::uuid AND timestamp::timestamptz >= $3::timestamptz - interval '2 minutes'
+            ORDER BY timestamp DESC
+            LIMIT 1`,
+          [JSON.stringify(anomalyTag), event.studentId, event.atIso],
+        ).catch(() => {});
+      }
       return;
     }
 

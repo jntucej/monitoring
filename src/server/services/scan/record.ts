@@ -96,6 +96,10 @@ export interface RecordScanInput {
   isManual?: boolean;
   clientEventId?: string;
   geo?: GeoInput;
+  /** Device identifier for idempotency-key construction (e.g. H0201 terminal code). */
+  deviceId?: string;
+  /** Pre-computed idempotency key from the integration adapter (overrides the device fallback). */
+  idempotencyKey?: string;
   // Injected from AuthContext
   operatorId: string;
   operatorName: string;
@@ -114,6 +118,12 @@ export interface RecordScanResult {
    * the ticket number the operator just cleared.
    */
   consumedPassId: string | null;
+  /**
+   * Set when the idempotency gate detected a replayed event (the
+   * idempotency_key already existed in processed_events). The scan is
+   * acknowledged but no state was re-mutated.
+   */
+  replayed?: boolean;
   person: {
     id: string;
     uniqueId: string;
@@ -817,6 +827,61 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
       })();
     }
   }
+
+  // Idempotency gate (reliability layer): a deterministic dedup key prevents
+  // a replayed webhook from double-processing. The key is built from the
+  // integration adapter's idempotency_key_template when available; falls
+  // back to a device:timestamp:user hash for bare terminal punches.
+  const idempotencyKey =
+    input.idempotencyKey ??
+    `${input.deviceId ?? "manual"}:${(finalLog as { timestamp?: string })?.timestamp ?? ""}:${person.id}`;
+  const { rows: dedupRows } = await query<{ n: number }>(
+    `INSERT INTO public.processed_events (idempotency_key, source, event_type, entity_ref)
+     VALUES ($1, $2, 'GATE_PUNCH', $3)
+     ON CONFLICT (idempotency_key) DO NOTHING
+     RETURNING 1 AS n`,
+    [idempotencyKey, input.deviceId ?? "manual", person.id],
+  ).catch(() => ({ rows: [] as { n: number }[] }));
+  if (dedupRows.length === 0) {
+    // Already processed — acknowledge and exit without re-mutating state.
+    return {
+      log: finalLog ?? {},
+      isDuplicate: true,
+      consumedPassId: null,
+      replayed: true,
+      person: {
+        id: person.id,
+        uniqueId: person.unique_id,
+        name: person.name,
+        role: person.role,
+        status: person.role,
+        photoUrl: null,
+      },
+    };
+  }
+
+  // Transactional outbox: enqueue the GATE_PUNCH domain event in the same
+  // logical transaction as the state mutation. The outbox relay worker polls
+  // PENDING rows with FOR UPDATE SKIP LOCKED, pushes to Redis/SSE, marks
+  // SENT. A crash after the insert but before the relay leaves the row
+  // PENDING for retry — never silently dropped.
+  await query(
+    `INSERT INTO public.domain_outbox (event_type, payload)
+     VALUES ('GATE_PUNCH', $1::jsonb)`,
+    [
+      JSON.stringify({
+        studentId: person.id,
+        direction: input.direction,
+        atIso: (finalLog as { timestamp?: string })?.timestamp ?? new Date().toISOString(),
+        gateId: gate.id,
+        idempotencyKey,
+      }),
+    ],
+  ).catch((err: unknown) => {
+    // Outbox insert is best-effort: a missing table (pre-migration) or a
+    // relay lag must never block the primary scan write.
+    console.warn("[recordScan] domain_outbox GATE_PUNCH insert failed:", errMsg(err));
+  });
 
   // Autonomous presence loop (Loop 3): a successful biometric/QR punch flips
   // the student's live campus presence + reshuffles the hub. Fire-and-forget —

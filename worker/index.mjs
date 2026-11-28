@@ -110,6 +110,9 @@ import { runShiftAutoClose } from './jobs/shift_auto_close.js';
 import { runFeedExpire } from './jobs/feed_expire.js';
 import { runCampusLifecycleSweep } from './jobs/campus_lifecycle.js';
 import { runRetentionColdArchive } from "./jobs/retention_cold_archive.js";
+import { runOutboxRelay } from "./jobs/outbox_relay.js";
+import { runDeadlineSweep } from "./jobs/deadline_sweep.js";
+import { runAgentLoop } from "./jobs/agent_loop.js";
 import { runAchievementAuto } from './jobs/achievement_auto.js';
 import { runLeaderboardRefresh } from './jobs/leaderboard_refresh.js';
 import { runPresenceReconcile } from './jobs/presence_reconcile.js';
@@ -255,6 +258,13 @@ const jobs = [
   { name: 'campus-lifecycle', ms: 5 * 60 * 1000, run: () => runJob('campus-lifecycle', runCampusLifecycleSweep) },
   // Hot->cold retention sweep (1-yr hot audit -> 8-yr cold R2 ledger; windows read from JSONB policy).
   { name: 'retention-cold-archive', ms: 60 * 60 * 1000, run: () => runJob('retention-cold-archive', runRetentionColdArchive) },
+  // Transactional outbox relay: claims PENDING rows, pushes to SSE/Redis,
+  // marks SENT. Exponential backoff + DEAD_LETTER after 5 retries.
+  { name: 'outbox-relay', ms: 30 * 1000, run: () => runJob('outbox-relay', runOutboxRelay) },
+  // Deadline watch sweep: curfew breaches + SLA escalations + calendar rollovers.
+  { name: 'deadline-sweep', ms: 60 * 1000, run: () => runJob('deadline-sweep', runDeadlineSweep) },
+  // Agent feedback loop: abstention clustering + LLM circuit-breaker.
+  { name: 'agent-loop', ms: 5 * 60 * 1000, run: () => runJob('agent-loop', runAgentLoop) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client
