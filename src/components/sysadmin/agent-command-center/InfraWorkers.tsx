@@ -12,7 +12,6 @@ import {
   Layers,
   Webhook,
   ToggleLeft,
-  ChevronRight,
   Database,
 } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
