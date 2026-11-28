@@ -59,13 +59,35 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<PassActionBody, A
       ).catch(() => {});
       return ok({ advanced: true, step: "parent_clearance", note: "Parent telephonic clearance logged." });
     }
-    case "DEPUTY_APPROVE":
-    case "CHIEF_WARDEN_SIGN": {
-      // Deputy review or Chief sign-off. 1-click when allowed.
-      const target = action === "DEPUTY_APPROVE" ? "APPROVED" : "APPROVED_ADMIN";
+    case "DEPUTY_APPROVE": {
+      // DEPUTY_WARDEN Step-3: must confirm Step-2 (Parent Clearance) is logged.
+      // Blocks approval if guardian_status is not APPROVED_PARENT / APPROVED.
+      const parentCheck = await query<{ guardian_status: string }>(
+        `SELECT guardian_status FROM public.gate_passes WHERE id = $1 LIMIT 1`,
+        [passId],
+      ).catch(() => ({ rows: [] as { guardian_status: string }[] }));
+      const gs = parentCheck.rows[0]?.guardian_status ?? "PENDING";
+      if (!["APPROVED_PARENT", "APPROVED"].includes(gs)) {
+        return fail(
+          "PARENT_CLEARANCE_MISSING",
+          "DEPUTY_APPROVE requires Step-2 Parent Clearance (guardian_status = APPROVED_PARENT). Pass is still PENDING parent.",
+          409,
+          { guardianStatus: gs, passId },
+        );
+      }
+      const target = "APPROVED";
       await query(
-        `UPDATE public.gate_passes SET admin_status = $1, final_status = $2, updated_at = NOW() WHERE id = $3`,
-        [target, target, passId],
+        `UPDATE public.gate_passes SET admin_status = $1, final_status = $2, admin_approver_id = $3, updated_at = NOW() WHERE id = $4`,
+        [target, target, auth.userId, passId],
+      ).catch(() => {});
+      return ok({ advanced: true, step: "DEPUTY_APPROVE", finalStatus: target, oneClick: Boolean(oneClick), parentCleared: true, note: "Pass endorsed by Deputy Warden (parent clearance confirmed). Forward to Chief Warden sign-off." });
+    }
+    case "CHIEF_WARDEN_SIGN": {
+      // Chief sign-off. 1-click when allowed.
+      const target = "APPROVED_ADMIN";
+      await query(
+        `UPDATE public.gate_passes SET admin_status = $1, final_status = $2, admin_approver_id = $3, updated_at = NOW() WHERE id = $4`,
+        [target, target, auth.userId, passId],
       ).catch(() => {});
       return ok({ advanced: true, step: action, finalStatus: target, oneClick: Boolean(oneClick), note: "Pass approved." });
     }
