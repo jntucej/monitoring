@@ -123,6 +123,8 @@ export function Scanner({
   const lastDecodeRef = useRef<number>(0);
   const activeRef = useRef<boolean>(active);
   const rvfAvailableRef = useRef<boolean>(HAS_RVFC);
+  const lastPayloadRef = useRef<string>("");
+  const lastPayloadTimeRef = useRef<number>(0);
 
   const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error">(
     // Pre-seed "requesting" so the very first paint (before the mount
@@ -218,6 +220,18 @@ export function Scanner({
   const handleSuccessScan = useCallback((rawScannedData: string) => {
     const scannedData = normalizeScannedPayload(rawScannedData);
     if (hasScannedRef.current || !scannedData) return;
+
+    // Debounce duplicate reads: a held QR/barcode can be re-detected on the
+    // very next frame after re-arm. If the identical payload fired within
+    // the last 1500ms, skip the API call (the held code is already in
+    // flight / just returned) so one physical hold produces one scan.
+    const now = Date.now();
+    if (lastPayloadRef.current === scannedData && now - lastPayloadTimeRef.current < 1500) {
+      return;
+    }
+    lastPayloadRef.current = scannedData;
+    lastPayloadTimeRef.current = now;
+
     hasScannedRef.current = true;
 
     playBeep();
@@ -684,7 +698,11 @@ export function Scanner({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-black">
+      {/* The Scanner is mounted inside the gate-desk's Zone-2 viewfinder
+          (a flex-1 min-h-0 box). It fills that parent instead of going
+          position:fixed over the whole viewport — so the top HUD and the
+          bottom action dock can never collide with it. */}
+      <div className="relative w-full h-full bg-black">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -692,16 +710,19 @@ export function Scanner({
           className="relative w-full h-full flex flex-col overflow-hidden"
         >
           {/* Header — one compact status line. No decoration. */}
-          <div className="surface-card flex items-center justify-between px-4 py-2.5 bg-bg-elevated/85 z-10">
+          <div className="surface-card flex items-center justify-between px-4 py-2.5 bg-neutral-900/90 z-10">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="size-6 bg-bg-elevated text-text-secondary flex items-center justify-center border border-border">
+              <div className="size-6 bg-neutral-800 text-neutral-300 flex items-center justify-center border border-neutral-700">
                 <Camera className="w-4 h-4" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-white truncate">
-                  {gateId ? `Gate ${gateId}` : "Scanner"}
+                  {/* Internal UUIDs are sysadmin-only — the operator surface
+                      shows the gate name (in the Zone-1 HUD), never the raw
+                      gateId. Keep gateId strictly internal. */}
+                  "Scanner"
                 </h2>
-                <p className="text-xs text-text-muted">Auto-detecting · no re-prompt</p>
+                <p className="text-xs text-neutral-400">Auto-detecting · no re-prompt</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -777,10 +798,19 @@ export function Scanner({
                 <button
                   type="button"
                   onClick={() => startCamera()}
-                  className="surface-card mt-1 px-4 py-2 bg-bg-elevated hover:bg-bg-elevated text-white text-xs font-semibold flex items-center gap-1.5"
+                  className="surface-card mt-1 min-h-[48px] w-full px-4 py-2 bg-emerald-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 active:scale-[0.99]"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" /> Retry camera
+                  <RefreshCw className="w-3.5 h-3.5" /> Retry Camera
                 </button>
+                {onManualEntryClick && (
+                  <button
+                    type="button"
+                    onClick={onManualEntryClick}
+                    className="surface-card min-h-[48px] w-full px-4 py-2 bg-neutral-800 border border-neutral-700 text-neutral-100 text-xs font-semibold flex items-center justify-center gap-1.5 active:scale-[0.99]"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" /> Enter Roll Manually
+                  </button>
+                )}
               </div>
             )}
           </div>

@@ -1,14 +1,12 @@
 "use client";
-import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 
 import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from "react";
 import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useOperatorGate } from "@/hooks/useOperatorGate";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, AlertCircle, KeyRound } from "lucide-react";
+import { RefreshCw, AlertCircle, KeyRound, ArrowLeft, DoorOpen } from "lucide-react";
 // The two-decision rule: the bottom bar carries only IN / OUT. Manual entry
 // is reachable via "Enter Roll Manually" in the Scanner's "Can't see the code?"
 // row — no duplicate "Manual entry" button here (removed in this pass).
@@ -27,6 +25,7 @@ import { recommend } from "@/lib/operator-recommend";
 import { ConfirmSheet } from "@/components/operator/sheet/ConfirmSheet";
 import type { EntryButtonId } from "@/lib/operator-recommend";
 import { GateModeBanner } from "@/components/operator/GateModeBanner";
+import { ManualEntrySheet } from "@/components/operator/sheet/ManualEntrySheet";
 import { PassPreviewFetcher } from "@/components/operator/PassPreview";
 import { RecentScansSheet } from "@/components/operator/RecentScansSheet";
 import { GeoFenceWarning, resolveKioskLocation, haversineMeters } from "@/components/operator/GeoFenceWarning";
@@ -173,7 +172,6 @@ const shift = useOperatorShiftClock();
 
   // Manual entry is ONE button that opens an inline sheet — not a mode.
   const [manualOpen, setManualOpen] = useState(false);
-  const [manualRollInput, setManualRollInput] = useState("");
   // Scanner close (X): the Scanner's onClose just stops the camera; the page
   // stays on the kiosk. Give the X a real destination — back to the operator
   // dashboard — so it isn't a dead button.
@@ -259,7 +257,7 @@ const shift = useOperatorShiftClock();
     };
   }, [authenticated, gateId, setGate, reset]);
 
-  const [gateName, setGateName] = useState("Loading...");
+  const [gateName, setGateName] = useState("Loading gate…");
 
   useEffect(() => {
     if (!gateId) return;
@@ -270,10 +268,14 @@ const shift = useOperatorShiftClock();
           const match = data.data.find(
             (g: any) => g.id === gateId || g.gate_code === gateId || g.gateCode === gateId || g.id === `gate-${gateId}`
           );
-          setGateName(match?.name || gateState?.name || `Gate ${gateId}`);
+          // NEVER fall back to the raw gateId/UUID — show a neutral label
+          // instead (UUIDs are sysadmin-only per the operator audit).
+          setGateName(match?.name || gateState?.name || "Assigned Gate");
+        } else {
+          setGateName(gateState?.name || "Assigned Gate");
         }
       })
-      .catch(() => setGateName(gateState?.name || `Gate ${gateId}`));
+      .catch(() => setGateName(gateState?.name || "Assigned Gate"));
   }, [gateId, gateState?.name]);
 
   // Gate mode + lockdown now poll through the operator store (A1) — the
@@ -368,22 +370,8 @@ const shift = useOperatorShiftClock();
     [doConfirm, gateState],
   );
 
-  // Manual entry submit: one button → inline input → same scan flow.
-  const submitManual = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (activeLockdown) {
-      addToast({ variant: "error", title: "Lockdown Active", message: "Scans are blocked during active campus lockdown." });
-      return;
-    }
-    const raw = manualRollInput.trim().toUpperCase();
-    const roll = raw.startsWith(">") ? raw.slice(1).trim() : raw;
-    const normalized = normalizeScannedPayload(roll);
-    if (normalized) {
-      lastRollRef.current = normalized;
-      startScan(normalized);
-      setManualOpen(false);
-    }
-  };
+  // Manual entry submit now lives in <ManualEntrySheet onScan={...}> (Zone 3
+  // sheet) — the inline form + submitManual are gone.
 
   // Keyboard escape hatches (active only while confirming a scan):
   //   ESC cancel · M manual entry · F flag the student.
@@ -435,85 +423,125 @@ const shift = useOperatorShiftClock();
     !activeLockdown;
   const canConfirm = state === "confirming" && currentStudent != null;
 
+  // Zone-1 status dot: derived from live gate mode + lockdown (no new data).
+  const statusDot = activeLockdown
+    ? { label: "LOCKDOWN", cls: "bg-rose-500", ring: "ring-rose-500/30", pulse: true }
+    : gateMode === "CURFEW"
+    ? { label: "CURFEW", cls: "bg-amber-400", ring: "ring-amber-400/30", pulse: false }
+    : gateMode === "MAINTENANCE"
+    ? { label: "MAINTENANCE", cls: "bg-amber-400", ring: "ring-amber-400/30", pulse: false }
+    : gateMode === "OPEN"
+    ? { label: "OPEN", cls: "bg-emerald-500", ring: "ring-emerald-500/30", pulse: false }
+    : { label: "OPEN", cls: "bg-neutral-500", ring: "ring-neutral-500/30", pulse: false };
+
+  // The strict 3-zone viewport: nothing is position:fixed over the viewfinder
+  // except self-contained bottom sheets (z-50). Zone 1 (top HUD, shrink-0),
+  // Zone 2 (camera, flex-1 min-h-0), Zone 3 (bottom dock, shrink-0).
   return (
-    <div className="relative min-h-[85vh] flex flex-col bg-bg-base text-text-primary pb-safe min-w-0">
-      <div className="px-4 pt-3 max-w-4xl mx-auto w-full">
-        <ContextSituationBar
-          roleLabel="Gate Operator"
-          purpose="Live terminal for real-time QR scanning, student roll check, and directional entry/exit validation"
-          contextLabel={gateName ? `Gate Desk · ${gateName}` : "Gate Desk"}
-          statusSummary={gateMode === "OPEN" && !activeLockdown ? "Kiosk active and ready for barcode, roll entry, or RFID scanning." : "Scanning restricted: check active gate mode or campus lockdown status."}
-          why="Scans automatically validate active permissions and register movements. Switch to manual entry if an optical barcode is unreadable or hardware offline."
-          severity={activeLockdown ? "critical" : gateMode === "MAINTENANCE" ? "warn" : "ok"}
-          primaryAction={{ label: "Manual Roll Entry", onClick: () => { primeAudioOnGesture(); setManualOpen(true); } }}
-          secondaryAction={{ label: "Operator Console", href: "/operator" }}
-        />
-      </div>
-      {/* ── Operational status + confirmation card (above the camera layer) ── */}
-      <div className="fixed top-14 inset-x-0 z-60 flex flex-col items-center gap-2 px-4 pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-md space-y-2">
-          {/* O16: shift clock — first-scan-derived 8h window label. */}
-          <div className="pointer-events-none flex items-center gap-1.5 text-xs text-text-muted">
-            {shift.start ? (
-              <>
-                <span className="font-mono font-semibold text-text-secondary">
-                  {formatTime(shift.start.toISOString())}
-                </span>
-                <span>shift · {shift.end ? formatTime(shift.end.toISOString()) : ""}</span>
-                {shift.remainingHours != null && (
-                  <span className="text-action-success">{shift.remainingHours.toFixed(1)}h left</span>
-                )}
-              </>
-            ) : (
-              <span title="Your 8-hour shift window begins the moment you confirm your first scan of the day.">shift window opens on your first scan</span>
-            )}
+    <div className="h-[100dvh] w-full overflow-hidden flex flex-col bg-neutral-950 text-neutral-100 min-w-0">
+      {/* ═══════════ ZONE 1 — TOP HUD (shrink-0, safe-area top) ═══════════ */}
+      {!needsAssignment && (
+        <div className="shrink-0 z-30 bg-neutral-950/90 border-b border-neutral-800 pt-[env(safe-area-inset-top,0px)]">
+          <div className="h-12 flex items-center justify-between gap-2 px-3">
+            {/* Left: gate name + live status dot */}
+            <div className="flex items-center gap-2 min-w-0">
+              <DoorOpen className="w-4 h-4 text-neutral-400 shrink-0" aria-hidden />
+              <span className="text-sm font-bold text-white truncate">{gateName}</span>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold tracking-wide ring-1 ${statusDot.cls} ${statusDot.ring} ${statusDot.pulse ? "animate-pulse" : ""}`}
+              >
+                {statusDot.label}
+              </span>
+            </div>
+            {/* Right: shift clock + Desk exit */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="font-mono text-xs tabular-nums text-neutral-300">
+                {shift.start
+                  ? `${formatTime(shift.start.toISOString())}${shift.end ? "–" + formatTime(shift.end.toISOString()) : ""}`
+                  : "shift opens on first scan"}
+              </span>
+              <button
+                type="button"
+                onClick={() => router.push("/operator")}
+                className="flex items-center gap-1 min-h-[44px] px-2.5 rounded-lg bg-neutral-900 border border-neutral-700 text-xs font-semibold text-neutral-200 hover:bg-neutral-800 active:scale-[0.98] transition"
+                aria-label="Exit to operator desk"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Desk
+              </button>
+            </div>
           </div>
-          {/* A1: single compact status strip (pill + one-line reason +
-              dismiss). The previous layout rendered this banner PLUS three
-              full-width cards (MAINTENANCE / CURFEW / LOCKDOWN) stacked
-              below it — up to four overlapping notifications that obscured
-              the scan area and read as contradictory ("scans disabled"
-              while the UI still shows scan options). The compact banner
-              carries the state, the reason, and one dismissal in one line,
-              and the three cards are gone. */}
-          <GateModeBanner
-            mode={gateMode as GateMode}
-            lockdown={activeLockdown}
-            scanningAllowed={gateMode === "OPEN" && !activeLockdown}
-            onOverrideMaintenance={(reason) => overrideGateMode("OPEN", reason)}
-            onDismissLockdown={dismissLockdown}
-            compact
-          />
-        </div>
-
-        <AnimatePresence>
-          {canConfirm && currentStudent && recommendation && !manualOpen && (
-            <ConfirmSheet
-              key="confirm-sheet"
-              student={currentStudent}
-              recommendation={recommendation}
-              currentEntryType={entryType}
-              lastOutReason={lastOutReason}
-              isOpen={true}
-              autoConfirmMs={null}
-              onConfirm={(dir, reason, et, buttonId) => {
-                // O8+O11: the geo-fence intercept runs before the store
-                // commit; ConfirmSheet's payload is passed straight through.
-                doConfirmWithGeo(dir, reason, et, buttonId);
-              }}
-              onCancel={cancelScan}
+          {/* GateModeBanner in normal flow (shrink-0) — never position:fixed */}
+          <div className="px-3 pb-2">
+            <GateModeBanner
+              mode={gateMode as GateMode}
+              lockdown={activeLockdown}
+              scanningAllowed={gateMode === "OPEN" && !activeLockdown}
+              onOverrideMaintenance={(reason) => overrideGateMode("OPEN", reason)}
+              onDismissLockdown={dismissLockdown}
+              compact
             />
-          )}
-        </AnimatePresence>
+          </div>
+        </div>
+      )}
 
-        {/* O8: pass preview for OUT scans (advisory, fetches /api/gate/verify-pass) */}
-        {passPreview && (
-          <PassPreviewFetcher roll={passPreview.roll} reason={passPreview.reason} />
+      {/* ═══════════ ZONE 2 — CAMERA VIEWFINDER (flex-1 min-h-0) ═══════════ */}
+      <div className="relative flex-1 min-h-0 overflow-hidden">
+        <Scanner
+          isOpen={scannerOpen && !needsAssignment}
+          active={scannerActive && !needsAssignment && scannerOpen}
+          onClose={() => { setScannerOpen(false); router.push("/operator"); }}
+          onScan={handleQRScanned}
+          onManualEntryClick={() => { primeAudioOnGesture(); setManualOpen(true); }}
+          gateId={gateId}
+        />
+
+        {/* Camera-paused state (X pressed): re-open CTA, not a frozen desk */}
+        {!scannerOpen && !needsAssignment && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-neutral-950">
+            <div className="w-full max-w-sm rounded-xl bg-neutral-900 border border-neutral-800 p-5 text-center space-y-3">
+              <p className="text-sm font-bold text-white">Scanner paused</p>
+              <p className="text-xs text-neutral-400">
+                Camera stopped. Re-open it to continue scanning, or return to the dashboard.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setScannerOpen(true); setManualOpen(false); }}
+                  className="min-h-[48px] rounded-lg bg-emerald-600 text-white font-bold text-sm active:scale-[0.99]"
+                >
+                  Open scanner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/operator")}
+                  className="min-h-[48px] rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-200 font-bold text-sm active:scale-[0.99]"
+                >
+                  Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
-        {/* L1: open the frontline subject sheet from the pass-preview / recent-scans surface
-            when the desk is idle (no scan in flight). */}
-        {state === "idle" && recentScans.length > 0 && (
+        {/* Unassigned operators: the picker fills the viewfinder zone */}
+        {needsAssignment && (
+          <div className="absolute inset-0 z-20 bg-neutral-950 overflow-y-auto pt-[env(safe-area-inset-top,0px)]">
+            <div className="min-h-full flex items-center justify-center p-4">
+              <div className="w-full max-w-lg">
+                <div className="mb-4 space-y-1">
+                  <h1 className="text-lg font-bold text-white">Your gate</h1>
+                  <p className="text-xs text-neutral-400">
+                    Pick the gate you work today, or claim it with the code your supervisor gave you.
+                  </p>
+                </div>
+                <GatePickerScreen />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Idle-only "verify latest scan" chip (in-flow, not a fixed overlay) */}
+        {state === "idle" && recentScans.length > 0 && !needsAssignment && scannerOpen && (
           <button
             type="button"
             onClick={() => {
@@ -527,125 +555,92 @@ const shift = useOperatorShiftClock();
                 locationOrScope: latest.gateName || gateName,
               });
             }}
-            className="surface-card absolute right-4 z-40 min-h-11 px-3 py-1.5 bg-bg-elevated text-xs font-semibold text-text-secondary hover:bg-bg-surface transition-colors"
+            className="absolute top-3 right-3 z-20 min-h-[44px] px-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-700 text-xs font-semibold text-neutral-200 hover:bg-neutral-800 transition-colors"
             aria-label="Open frontline subject sheet for latest scan"
           >
             Verify subject
           </button>
         )}
-
-        {/* O10: biometric gate for high-risk OUT (home_out with valid pass).
-            Hardware note: the reader <Input> is the integration point — wire
-            only after a fingerprint reader is tested on the kiosk. Kept
-            inert (mounted only when a pass is present and OUT is confirmed)
-            so it cannot accidentally block a routine scan. */}
-        {passPreview && biometricPending && (
-          <BiometricPrompt
-            ticketNumber={passPreview.ticketNumber ?? ""}
-            roll={passPreview.roll}
-            mode="thumb"
-            onVerified={() => setBiometricPending(false)}
-            onCancel={() => setBiometricPending(false)}
-          />
-        )}
-
-        {/* O11: geo-fence warning (advisory "continue anyway" escape hatch) */}
-        {geoFence && (
-          <GeoFenceWarning
-            distanceMeters={geoFence.distanceMeters}
-            allowedRadiusMeters={gateState?.allowedRadiusMeters ?? 200}
-            gateName={gateName}
-            onContinue={() => {
-              const [dir, reason, et, buttonId] = geoFence.pending;
-              setGeoFence(null);
-              doConfirm(dir as "IN" | "OUT", reason, et, buttonId);
-            }}
-            onCancel={() => {
-              setGeoFence(null);
-              cancelScan();
-            }}
-          />
-        )}
-
-        {/* O9: swipe-up recent scans sheet above the decision bar */}
-        <RecentScansSheet scans={recentScans} gateName={gateName} />
-
-        {/* L1 FrontlinePivot: duty-scoped subject sheet, idle-only */}
-        {state === "idle" && (
-          <FrontlineSubjectSheet
-            subject={frontlineSubject}
-            onClose={() => setFrontlineSubject(null)}
-          />
-        )}
       </div>
 
-      {/* ── Manual entry: one button, inline sheet (not a mode) ── */}
-      {/* Gated on "not confirming" rather than "idle" — the previous
-          `state === "idle"` condition made the button appear dead when the
-          desk was in any transient state (detecting/error/success), which
-          operators reported as "clicked Enter Roll Manually, nothing
-          happened". The sheet itself is a fixed overlay; the underlying
-          camera state does not matter while it is open. */}
-      {manualOpen && state !== "confirming" && !needsAssignment && (
-        <div className="fixed bottom-28 inset-x-0 z-60 flex justify-center px-4 pointer-events-none">
-          <form
-            onSubmit={submitManual}
-            className="surface-card pointer-events-auto w-full max-w-md bg-bg-surface p-4 space-y-3"
-          >
-            <div className="space-y-1.5">
-              <label htmlFor="manual-roll-input" className="text-xs font-semibold text-text-muted uppercase tracking-wide">
-                Roll / Employee / ID number
-              </label>
-              <p className="text-xs text-text-muted -mt-1">
-                Type &gt; then the number (or paste a roll number directly), then verify.
-              </p>
-            </div>
-            <input
-              id="manual-roll-input"
-              type="text"
-              maxLength={11}
-              autoFocus
-              value={manualRollInput}
-              onChange={(e) => setManualRollInput(e.target.value.toUpperCase())}
-              placeholder="e.g. >24JJ1A0501"
-              aria-label="Enter roll or employee number to verify manually"
-              className="surface-card w-full min-h-11 px-4 py-3 bg-bg-base text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
-            />
-            <div className="flex gap-2">
+      {/* ═══════════ ZONE 3 — BOTTOM ACTION DOCK (shrink-0, safe-area bottom) ═══════════ */}
+      {!needsAssignment && scannerOpen && (
+        <div className="shrink-0 z-30 bg-neutral-950 border-t border-neutral-800 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+          <div className="w-full max-w-md mx-auto space-y-2">
+            {/* Row 1: two large high-contrast decision buttons */}
+            <div className="grid grid-cols-2 gap-2">
               <button
-                type="submit"
-                disabled={!manualRollInput.trim() || !!activeLockdown}
-                className="surface-card flex-1 min-h-11 px-4 bg-action-primary disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                type="button"
+                disabled={!canConfirm}
+                aria-label="Confirm entry (IN)"
+                onClick={() => { void doConfirmWithGeo("IN"); }}
+                className="min-h-[52px] rounded-xl bg-emerald-600 text-white font-extrabold text-lg flex flex-col items-center justify-center gap-0.5 active:scale-[0.99] disabled:opacity-30"
               >
-                <KeyRound className="w-5 h-5" />
-                <span>Verify Roll Number</span>
+                <span>IN</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-white/80">Entry</span>
               </button>
               <button
                 type="button"
-                onClick={() => { setManualOpen(false); setManualRollInput(""); }}
-                className="surface-card min-h-11 px-4 bg-bg-base text-text-muted text-sm font-semibold"
+                disabled={!canConfirm}
+                aria-label="Confirm exit (OUT)"
+                onClick={() => { void doConfirmWithGeo("OUT"); }}
+                className="min-h-[52px] rounded-xl bg-amber-600 text-white font-extrabold text-lg flex flex-col items-center justify-center gap-0.5 active:scale-[0.99] disabled:opacity-30"
               >
-                Close
+                <span>OUT</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-white/80">Exit</span>
               </button>
             </div>
-            {activeLockdown && (
-              <p className="text-xs font-semibold text-action-danger" role="alert">
-                Verification is blocked by the active campus lockdown. This button is disabled until an administrator lifts it.{" "}
-                <Link href="/operator/lookup" className="underline underline-offset-2">
-                  Look up a person
-                </Link>{" "}
-                or{" "}
-                <Link href="/operator/exceptions" className="underline underline-offset-2">
-                  flag / escalate
-                </Link>{" "}
-                in the meantime.
-              </p>
-            )}
-          </form>
+            {/* Row 2: one clean secondary action — always clickable */}
+            <button
+              type="button"
+              onClick={() => { primeAudioOnGesture(); setManualOpen(true); }}
+              className="w-full min-h-[52px] rounded-xl bg-neutral-800 border border-neutral-700 text-neutral-100 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.99]"
+            >
+              <KeyRound className="w-4 h-4" />
+              Manual Entry
+            </button>
+          </div>
         </div>
       )}
 
-      {/* ── Success: one short green flash (250ms), then instant reset ── */}
+      {/* ── Confirmation / preview / manual sheets: bottom sheets (z-50) ── */}
+      <AnimatePresence>
+        {canConfirm && currentStudent && recommendation && !manualOpen && (
+          <ConfirmSheet
+            key="confirm-sheet"
+            student={currentStudent}
+            recommendation={recommendation}
+            currentEntryType={entryType}
+            lastOutReason={lastOutReason}
+            isOpen={true}
+            autoConfirmMs={null}
+            onConfirm={(dir, reason, et, buttonId) => doConfirmWithGeo(dir, reason, et, buttonId)}
+            onCancel={cancelScan}
+          />
+        )}
+      </AnimatePresence>
+
+      {manualOpen && !needsAssignment && (
+        <ManualEntrySheet
+          isOpen
+          gateId={gateId}
+          onClose={() => setManualOpen(false)}
+          onScan={(roll) => {
+            if (activeLockdown) {
+              addToast({ variant: "error", title: "Lockdown Active", message: "Scans are blocked during active campus lockdown." });
+              return;
+            }
+            const normalized = normalizeScannedPayload(roll);
+            if (normalized) {
+              lastRollRef.current = normalized;
+              startScan(normalized);
+              setManualOpen(false);
+            }
+          }}
+        />
+      )}
+
+      {/* Success: short flash (250ms), then instant reset */}
       <AnimatePresence>
         {state === "success" && (
           <motion.div
@@ -654,7 +649,7 @@ const shift = useOperatorShiftClock();
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-60 flex items-center justify-center p-4 pointer-events-none"
+            className="fixed inset-0 z-40 flex items-center justify-center p-4 pointer-events-none"
           >
             <SuccessFlash
               autoDismissMs={1800}
@@ -665,7 +660,7 @@ const shift = useOperatorShiftClock();
         )}
       </AnimatePresence>
 
-      {/* ── Failure: red, and it stays — the operator must acknowledge ── */}
+      {/* Failure: red, stays until acknowledged (always resets to idle) */}
       <AnimatePresence>
         {state === "error" && error && (() => {
           const isAuthError =
@@ -686,32 +681,21 @@ const shift = useOperatorShiftClock();
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.18 }}
-              className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50"
+              className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60"
             >
-              <div className="surface-card scan-error w-full max-w-md p-5 text-center space-y-3 bg-rose-500/10">
-                <div className="size-5 rounded-full flex items-center justify-center mx-auto bg-rose-500/20 text-action-danger">
+              <div className="surface-card w-full max-w-md p-5 text-center space-y-3 bg-rose-500/10 border border-rose-500/30 rounded-xl">
+                <div className="size-6 rounded-full mx-auto bg-rose-500/20 text-rose-400 flex items-center justify-center">
                   <AlertCircle className="w-5 h-5" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-bold text-sm text-action-danger">
-                    {isAuthError
-                      ? "Verification Failed"
-                      : error.code === "NOT_FOUND"
-                      ? "Person Not Found"
-                      : error.code === "ACCOUNT_INACTIVE"
-                      ? "Verification Failed (Account Inactive)"
-                      : error.code === "DUPLICATE"
-                      ? "Duplicate Scan"
-                      : isNetworkError
-                      ? "Network Error"
-                      : "Verification Failed"}
+                  <h3 className="font-bold text-sm text-rose-400">
+                    {isAuthError ? "Verification Failed"
+                      : error.code === "NOT_FOUND" ? "Person Not Found"
+                      : error.code === "ACCOUNT_INACTIVE" ? "Verification Failed (Account Inactive)"
+                      : error.code === "DUPLICATE" ? "Duplicate Scan"
+                      : isNetworkError ? "Network Error" : "Verification Failed"}
                   </h3>
-                  <p className="text-xs text-text-secondary">{error.message}</p>
-                  {isAuthError && (
-                    <p className="text-xs font-semibold text-action-warning">
-                      Your session could not be verified. Dismiss to sign in again.
-                    </p>
-                  )}
+                  <p className="text-xs text-neutral-300">{error.message}</p>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
                   {canRetry && (
@@ -723,7 +707,7 @@ const shift = useOperatorShiftClock();
                         else if (lastRollRef.current) { startScan(lastRollRef.current); }
                         else { reset(); }
                       }}
-                      className="surface-card min-h-11 px-4 py-2 bg-action-success text-black font-bold text-xs hover:bg-action-success transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
+                      className="min-h-[48px] px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 active:scale-[0.98]"
                     >
                       <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
@@ -731,17 +715,10 @@ const shift = useOperatorShiftClock();
                   <button
                     type="button"
                     onClick={() => {
-                      if (isAuthError) {
-                        logout();
-                      } else {
-                        // Always return to idle — a failed scan must never
-                        // leave the desk paused (the camera stops when
-                        // state !== idle/detecting, so a stuck error state
-                        // kills the desk until reload).
-                        reset();
-                      }
+                      if (isAuthError) logout();
+                      else reset(); // never leave the desk stuck on a failed scan
                     }}
-                    className="surface-card min-h-11 px-4 py-2 bg-action-danger text-white font-semibold text-xs hover:bg-action-danger transition-colors active:scale-[0.98] flex items-center justify-center"
+                    className="min-h-[48px] px-4 py-2 bg-rose-600 text-white font-semibold text-xs rounded-lg flex items-center justify-center active:scale-[0.98]"
                   >
                     {isAuthError ? "Dismiss & Sign In Again" : "Dismiss"}
                   </button>
@@ -752,109 +729,51 @@ const shift = useOperatorShiftClock();
         })()}
       </AnimatePresence>
 
-      {/* Person detail sheet removed: the transaction log lives at
-          /operator/transactions — the modal is dead weight on the
-          scanning surface (two-decisions rule). */}
-
-      {/* ── The camera IS the page: full-bleed, z-50, auto-detecting ──
-          Unassigned operators see the picker OVER the camera layer — the
-          camera keeps warm underneath so the desk activates instantly
-          once a gate is claimed. */}
-      <Scanner
-        isOpen={scannerOpen}
-        active={scannerActive && !needsAssignment && scannerOpen}
-        onClose={() => { setScannerOpen(false); router.push("/operator"); }}
-        onScan={handleQRScanned}
-        onManualEntryClick={() => { primeAudioOnGesture(); setManualOpen(true); }}
-        gateId={gateId}
-      />
-
-      {/* Scanner closed (X pressed): a single clear re-open action instead
-          of a frozen empty desk. */}
-      {!scannerOpen && !needsAssignment && (
-        <div className="fixed inset-0 z-50 bg-bg-base flex items-center justify-center p-4">
-          <div className="surface-card w-full max-w-sm bg-bg-surface p-6 text-center space-y-3">
-            <p className="text-sm font-bold text-text-primary">Scanner paused</p>
-            <p className="text-xs text-text-muted">
-              Camera stopped. Re-open it to continue scanning, or go back to the dashboard.
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => { setScannerOpen(true); setManualOpen(false); }}
-                className="min-h-11 rounded-xl bg-action-primary text-black font-bold text-sm"
-              >
-                Open scanner
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/operator")}
-                className="min-h-11 rounded-xl bg-bg-surface border border-border text-text-secondary font-bold text-sm"
-              >
-                Dashboard
-              </button>
-            </div>
+      {/* O8: OUT pass preview (advisory). Positioned as a bottom-sheet above the dock. */}
+      {passPreview && (
+        <div className="absolute inset-x-0 bottom-[calc(env(safe-area-inset-bottom,0px)+8rem)] z-40 flex justify-center px-4 pointer-events-none">
+          <div className="pointer-events-auto w-full max-w-md">
+            <PassPreviewFetcher roll={passPreview.roll} reason={passPreview.reason} />
           </div>
         </div>
       )}
 
-      {/* ── Unassigned operators: the picker, never a first-active gate ── */}
-      {needsAssignment && (
-        <div className="fixed inset-0 z-60 bg-bg-base overflow-y-auto">
-          <div className="min-h-full flex items-center justify-center p-4">
-            <div className="w-full max-w-lg">
-              <div className="mb-4 space-y-1">
-                <h1 className="text-lg font-bold text-text-primary">Your gate</h1>
-                <p className="text-xs text-text-muted">
-                  Pick the gate you work today, or claim it with the code your supervisor gave you.
-                </p>
-              </div>
-              <GatePickerScreen />
-            </div>
-          </div>
-        </div>
+      {/* O10: biometric gate for high-risk OUT */}
+      {passPreview && biometricPending && (
+        <BiometricPrompt
+          ticketNumber={passPreview.ticketNumber ?? ""}
+          roll={passPreview.roll}
+          mode="thumb"
+          onVerified={() => setBiometricPending(false)}
+          onCancel={() => setBiometricPending(false)}
+        />
       )}
 
-      {/* ── Two decisions, always in the same place ── */}
-      {/* pointer-events-none on the full-width container so it does NOT
-          overlay the Scanner's "Can't see the code?" action row (Enter Roll
-          Manually / Upload QR Image) that sits at the same vertical band.
-          The v2/v3 synthetic runs found that button unclickable ("Enter
-          Roll Manually triggers no visible change") — this z-70 bar was
-          intercepting the pointer events over it. Only the two decision
-          buttons themselves are clickable. */}
-      {!needsAssignment && scannerOpen && (
-        <div className="fixed bottom-4 inset-x-0 z-70 flex flex-col items-center gap-1.5 px-4 pointer-events-none">
-          <div className="w-full max-w-md pointer-events-auto">
-            {state !== "confirming" && (
-              <p className="text-center text-xs text-text-muted mb-1.5" aria-live="polite">
-                Scan a pass or enter a roll, then choose entry or exit.
-              </p>
-            )}
-          </div>
-          <div className="w-full max-w-md grid grid-cols-2 gap-2 pointer-events-auto">
-            <button
-              type="button"
-              disabled={!canConfirm}
-              aria-label="Confirm entry (IN)"
-              onClick={() => { void doConfirmWithGeo("IN"); }}
-              className="min-h14 rounded-xl bg-action-primary text-black font-extrabold text-lg flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.99] disabled:opacity-25"
-            >
-              <span>IN</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">Entry</span>
-            </button>
-            <button
-              type="button"
-              disabled={!canConfirm}
-              aria-label="Confirm exit (OUT)"
-              onClick={() => { void doConfirmWithGeo("OUT"); }}
-              className="min-h14 rounded-xl bg-action-danger text-white font-extrabold text-lg flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.99] disabled:opacity-25"
-            >
-              <span>OUT</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">Exit</span>
-            </button>
-          </div>
-        </div>
+      {/* O11: geo-fence warning (advisory "continue anyway" escape hatch) */}
+      {geoFence && (
+        <GeoFenceWarning
+          distanceMeters={geoFence.distanceMeters}
+          allowedRadiusMeters={gateState?.allowedRadiusMeters ?? 200}
+          gateName={gateName}
+          onContinue={() => {
+            const [dir, reason, et, buttonId] = geoFence.pending;
+            setGeoFence(null);
+            doConfirm(dir as "IN" | "OUT", reason, et, buttonId);
+          }}
+          onCancel={() => {
+            setGeoFence(null);
+            cancelScan();
+          }}
+        />
+      )}
+
+      {/* O9: recent scans sheet + L1 frontline subject sheet (idle-only) */}
+      <RecentScansSheet scans={recentScans} gateName={gateName} />
+      {state === "idle" && (
+        <FrontlineSubjectSheet
+          subject={frontlineSubject}
+          onClose={() => setFrontlineSubject(null)}
+        />
       )}
     </div>
   );
