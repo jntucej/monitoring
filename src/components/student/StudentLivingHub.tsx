@@ -19,7 +19,6 @@ import {
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
-import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
 import { AttendanceNextPeriodRadar } from "@/components/student/AttendanceNextPeriodRadar";
 import {
   StudentPageLoop,
@@ -133,13 +132,6 @@ export function StudentLivingHub({
 
   return (
     <div className="space-y-4 pb-6">
-      <CustomRoleGreeting
-        name={user?.name}
-        role={user?.role ?? "student"}
-        pendingCount={snapshot.pendingAssignments + snapshot.unratedMealsCount}
-        urgentCount={snapshot.unreadAlerts}
-      />
-
       {/* Dynamic Context Hero */}
       <motion.section
         layout

@@ -13,13 +13,6 @@ interface DashboardPayload {
   activePasses: Array<{ id: string }>;
 }
 
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-}
-
 export function TodayStatus() {
   const user = useAuthStore((s) => s.user);
   const { data, loading } = useApiResource<DashboardPayload>("/api/student/dashboard", {
@@ -39,11 +32,10 @@ export function TodayStatus() {
 
   return (
     <div className="surface-card bg-bg-surface p-4">
-      <p className="text-sm text-text-secondary">{greeting()},</p>
-      <h1 className="text-xl font-semibold text-text-primary">
-        {user?.name ?? "Student"}
-      </h1>
-      <div className="mt-3 flex items-center gap-2">
+      <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+        Today&apos;s Gate Status
+      </p>
+      <div className="mt-2 flex items-center gap-2">
         <state.Icon
           className={`h-5 w-5 ${
             state.tone === "in"
