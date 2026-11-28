@@ -36,14 +36,35 @@ const GOVERNED: Record<string, { table: string; keyCol: string }> = {
   lifecycle_playbooks: { table: "lifecycle_playbooks", keyCol: "playbook_key" },
 };
 
+// VP-authorized domains: VICE_PRINCIPAL can publish/rollback ONLY these.
+// Everything else (academic_regulation, fee_slab, governance_matrix,
+// DEBARRED overrides, annual rollover sign-off) is HARD-BLOCKED → 403.
+const VP_AUTHORIZED_DOMAINS = new Set(["facilities.config"]);
+
 async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthContext>) {
   const auth = ctx.auth;
-  if (!["principal", "admin", "sysadmin"].includes(auth.role)) {
-    return fail("FORBIDDEN", "Requires principal/admin/sysadmin.", 403);
+  if (!["principal", "admin", "sysadmin", "vice_principal"].includes(auth.role)) {
+    return fail("FORBIDDEN", "Requires principal/admin/sysadmin/vice_principal.", 403);
   }
   const body = (await req.json().catch(() => ({}))) as Body;
-  const g = GOVERNED[body.domain ?? ""];
-  if (!g) return fail("VALIDATION_ERROR", `Unknown domain. Allowed: ${Object.keys(GOVERNED).join(", ")}`, 400);
+  const g = GOVERNED[body.domain ?? ""] ?? { table: body.domain ?? "", keyCol: "policy_key" };
+
+  // VP guardrail: VICE_PRINCIPAL may publish/rollback ONLY facilities.config.
+  // Academic regulations, fee slabs, governance_matrix, DEBARRED overrides,
+  // and annual rollover sign-off are HARD-BLOCKED (403 FORBIDDEN_QUORUM_LOCKED).
+  if (auth.role === "vice_principal") {
+    const isFacilities = g.table === "facilities" || g.table === "facilities.config" || body.domain === "facilities.config";
+    if (!isFacilities) {
+      return fail(
+        "FORBIDDEN_QUORUM_LOCKED",
+        "VICE_PRINCIPAL may publish/rollback facilities.config only. " +
+        `Domain '${g.table}' requires Principal / Quorum (Immutable Meta-Rule).`,
+        403,
+      );
+    }
+  }
+
+  if (!g.table) return fail("VALIDATION_ERROR", `Unknown domain. Allowed: ${[...Object.keys(GOVERNED), "facilities.config"].join(", ")}`, 400);
   if (!body.key || !["publish", "rollback"].includes(body.action ?? "")) {
     return fail("VALIDATION_ERROR", "key + action (publish|rollback) required.", 400);
   }
@@ -74,28 +95,47 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
 
   // Publish or rollback.
   if (body.action === "publish") {
-    await query(
-      `UPDATE public.${g.table} SET status = 'ACTIVE', approved_by = $1::uuid, approved_at = NOW() WHERE ${g.keyCol} = $2`,
-      [auth.userId, body.key],
-    ).catch(() => ({}));
+    // facilities.config: update the facilities table's config JSONB + status.
+    if (g.table === "facilities" || g.table === "facilities.config") {
+      await query(
+        `UPDATE public.facilities SET config = COALESCE(config, '{}'), updated_at = NOW() WHERE facility_code = $1`,
+        [body.key],
+      ).catch(() => ({}));
+    } else {
+      await query(
+        `UPDATE public.${g.table} SET status = 'ACTIVE', approved_by = $1::uuid, approved_at = NOW() WHERE ${g.keyCol} = $2`,
+        [auth.userId, body.key],
+      ).catch(() => ({}));
+    }
   } else {
     // Rollback: flip the target to DRAFT and record the rollback.
-    await query(
-      `UPDATE public.${g.table} SET status = 'DRAFT' WHERE ${g.keyCol} = $1`,
-      [body.key],
-    ).catch(() => ({}));
+    if (g.table === "facilities" || g.table === "facilities.config") {
+      await query(
+        `UPDATE public.facilities SET is_active = FALSE, updated_at = NOW() WHERE facility_code = $1`,
+        [body.key],
+      ).catch(() => ({}));
+    } else {
+      await query(
+        `UPDATE public.${g.table} SET status = 'DRAFT' WHERE ${g.keyCol} = $1`,
+        [body.key],
+      ).catch(() => ({}));
+    }
   }
 
   // Emit a domain_outbox event (the closed-loop that re-seeds @agent + UI).
+  const outboxEvent = body.action === "publish"
+    ? (g.table === "facilities" || g.table === "facilities.config") ? "FACILITIES_POLICY_PUBLISHED" : "policy.published"
+    : (g.table === "facilities" || g.table === "facilities.config") ? "FACILITIES_POLICY_ROLLED_BACK" : "policy.rolled_back";
   await query(
     `INSERT INTO public.domain_outbox (id, event_type, payload, status, created_at)
      VALUES (gen_random_uuid(), $1, $2, 'PENDING', NOW())`,
     [
-      body.action === "publish" ? "policy.published" : "policy.rolled_back",
+      outboxEvent,
       JSON.stringify({
         domain: g.table,
         key: body.key,
         by: auth.userId,
+        role: auth.role,
         co_approver: body.co_approver_id ?? null,
         step_up_verified: true,
       }),
@@ -111,12 +151,13 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
     action: body.action,
     quorumSatisfied: isGovernanceAction ? Boolean(body.co_approver_id) : true,
     metaRuleEnforced: isMeta,
-    outboxEmitted: body.action === "publish" ? "policy.published" : "policy.rolled_back",
+    outboxEmitted: outboxEvent,
+    ...(auth.role === "vice_principal" ? { vpAuthorized: true, domainWhitelist: "facilities.config" } : {}),
   });
 }
 
 export const POST = withApiChain(implPost, {
   route: "/api/principal/policy/publish-or-rollback",
   auth: "user",
-  requiredRole: ["principal", "admin", "sysadmin"],
+  requiredRole: ["principal", "admin", "sysadmin", "vice_principal"],
 });

@@ -502,13 +502,16 @@ async function circuitOpen(): Promise<boolean> {
 
 async function implGet(_req: NextRequest, ctx: ApiChainContext<unknown, AuthContext>) {
   const auth = ctx.auth;
-  if (!["principal", "admin", "sysadmin"].includes(auth.role)) {
-    return fail("FORBIDDEN", "Principal dashboard requires principal/admin/sysadmin role.", 403);
+  if (!["principal", "admin", "sysadmin", "vice_principal"].includes(auth.role)) {
+    return fail("FORBIDDEN", "Principal dashboard requires principal/admin/sysadmin/vice_principal role.", 403);
   }
   const nameRow = await query<{ name: string }>(
     `SELECT name FROM public.users WHERE id = $1 LIMIT 1`,
     [auth.userId],
   ).catch(() => ({ rows: [] as { name: string }[] }));
+
+  // VP sub-role scoping: ?role=VICE_PRINCIPAL or the auth role is vice_principal.
+  const isVP = auth.role === "vice_principal" || _req.nextUrl.searchParams.get("role") === "VICE_PRINCIPAL";
 
   const [
     pulse,
@@ -550,8 +553,76 @@ async function implGet(_req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
   const dlq = outbox.filter((r) => r.status === "DEAD_LETTER");
   const outboxPending = outbox.filter((r) => r.status === "PENDING").reduce((s, r) => s + Number(r.n), 0);
 
+  // VP-scoped data: facilities.config drafts + hostel/infra pulse.
+  let vpFacilitiesDrafts: Array<{
+    event_type: string;
+    facilityCode: string | null;
+    field: string | null;
+    value: unknown;
+    by: string | null;
+    at: string;
+    staged: boolean;
+  }> = [];
+  let vpHostelPulse: {
+    curfewOverdue: number;
+    openCurfewWatches: number;
+    estateSlaBreaches: number;
+    patrolZones: number;
+    antiRaggingAlerts: number;
+  } = { curfewOverdue: 0, openCurfewWatches: 0, estateSlaBreaches: 0, patrolZones: 0, antiRaggingAlerts: 0 };
+
+  if (isVP) {
+    // Facilities.config drafts from chief_warden (staged in domain_outbox).
+    const drafts = await query<{ event_type: string; payload: Record<string, unknown> }>(
+      `SELECT event_type, payload FROM public.domain_outbox
+        WHERE event_type = 'hostel.config_draft' AND status = 'PENDING'
+        ORDER BY created_at DESC LIMIT 50`,
+    ).catch(() => ({ rows: [] as { event_type: string; payload: Record<string, unknown> }[] }));
+    vpFacilitiesDrafts = drafts.rows.map((r) => ({
+      event_type: r.event_type,
+      facilityCode: (r.payload.facilityCode as string) ?? null,
+      field: (r.payload.field as string) ?? null,
+      value: r.payload.value ?? null,
+      by: (r.payload.by as string) ?? null,
+      at: (r.payload.at as string) ?? "",
+      staged: Boolean(r.payload.staged),
+    }));
+
+    // Hostel & curfew pulse.
+    const curfewOver = await query<{ n: number }>(
+      `SELECT COUNT(*)::int AS n FROM public.deadline_watches
+        WHERE watch_type = 'CURFEW_RETURN' AND status = 'BREACHED'`,
+    ).catch(() => ({ rows: [] as { n: number }[] }));
+    const openWatches = await query<{ n: number }>(
+      `SELECT COUNT(*)::int AS n FROM public.deadline_watches
+        WHERE watch_type = 'CURFEW_RETURN' AND status = 'OPEN'`,
+    ).catch(() => ({ rows: [] as { n: number }[] }));
+    // Estate/maintenance SLA breaches: escalated hostel_incidents or estate work orders.
+    const estate = await query<{ n: number }>(
+      `SELECT COUNT(*)::int AS n FROM public.hostel_incidents
+        WHERE status = 'ESCALATED'`,
+    ).catch(() => ({ rows: [] as { n: number }[] }));
+    // 14-zone anti-ragging patrol roster: count facilities in the patrol category.
+    const zones = await query<{ n: number }>(
+      `SELECT COUNT(*)::int AS n FROM public.facilities
+        WHERE category ILIKE '%patrol%' OR category ILIKE '%zone%' OR category ILIKE '%security%'`,
+    ).catch(() => ({ rows: [] as { n: number }[] }));
+    // Anti-ragging alerts.
+    const antiRag = await query<{ n: number }>(
+      `SELECT COUNT(*)::int AS n FROM public.anti_ragging_cases WHERE status IN ('OPEN','INVESTIGATING')`,
+    ).catch(() => ({ rows: [] as { n: number }[] }));
+
+    vpHostelPulse = {
+      curfewOverdue: Number(curfewOver.rows[0]?.n ?? 0),
+      openCurfewWatches: Number(openWatches.rows[0]?.n ?? 0),
+      estateSlaBreaches: Number(estate.rows[0]?.n ?? 0),
+      patrolZones: Number(zones.rows[0]?.n ?? 0),
+      antiRaggingAlerts: Number(antiRag.rows[0]?.n ?? 0),
+    };
+  }
+
   return ok({
-    identity: { name: nameRow.rows[0]?.name ?? null, role: auth.role },
+    identity: { name: nameRow.rows[0]?.name ?? null, role: isVP ? "VICE_PRINCIPAL" : auth.role },
     catalogVersion: "v1",
     campus: {
       totalStudents: Number(totalStudents.rows[0]?.n ?? 0),
@@ -582,11 +653,27 @@ async function implGet(_req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
     auditTrail: audit,
     retentionLedger: retention,
     emergency,
-  } satisfies PrincipalState);
+    // VP-scoped: facilities.config drafts + hostel/infra pulse + publish lock status.
+    ...(isVP ? {
+      vp: {
+        role: "VICE_PRINCIPAL",
+        facilitiesDrafts: vpFacilitiesDrafts,
+        hostelPulse: vpHostelPulse,
+        publishLocked: {
+          academic_regulation: true,
+          fee_slab: true,
+          governance_matrix: true,
+          debarred_override: true,
+          annual_rollover_signoff: true,
+          note: "Restricted to Principal / Quorum. Facilities.config only.",
+        },
+      },
+    } : {}),
+  } satisfies PrincipalState & { vp?: unknown });
 }
 
 export const GET = withApiChain(implGet, {
   route: "/api/principal/state",
   auth: "user",
-  requiredRole: ["principal", "admin", "sysadmin"],
+  requiredRole: ["principal", "admin", "sysadmin", "vice_principal"],
 });

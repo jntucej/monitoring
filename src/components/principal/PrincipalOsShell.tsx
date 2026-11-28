@@ -101,55 +101,104 @@ export function PrincipalOsShell({ view }: { view: View }) {
   const openDryRun = (domain: string, key: string) => setDryRun({ domain, key });
   const openQuorum = (a: NonNullable<typeof quorumAction>) => setQuorumAction(a);
 
+  // VP sub-role: catalog-filtered views. The VICE_PRINCIPAL is a Deputy
+  // Executive — they see facilities.config approvals + hostel/infra pulse,
+  // with academic/governance controls LOCKED (Principal / Quorum only).
+  const isVP = state.identity.role === "VICE_PRINCIPAL";
+  const vp = (state as any).vp as
+    | {
+        facilitiesDrafts: Array<{ facilityCode: string | null; field: string | null; value: unknown; by: string | null; at: string; staged: boolean }>;
+        hostelPulse: { curfewOverdue: number; openCurfewWatches: number; estateSlaBreaches: number; patrolZones: number; antiRaggingAlerts: number };
+        publishLocked: Record<string, boolean | string>;
+      }
+    | undefined;
+
   return (
     <div className="space-y-4 p-4">
-      {/* KPI Strip — the 4 executive cards */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <KpiCard
-          icon={Shield}
-          title="Campus Eligibility Pulse"
-          value={state.campus.eligibility.hasAttendanceData ? String(state.campus.eligibility.total) : "No data"}
-          sub={
-            state.campus.eligibility.hasAttendanceData
-              ? `${state.campus.eligibility.eligible} safe · ${state.campus.eligibility.condonationRequired} condonation · ${state.campus.eligibility.detained} detained`
-              : "No attendance records yet"
-          }
-          tone={state.campus.eligibility.detained > 0 ? "warning" : "neutral"}
-        />
-        <KpiCard
-          icon={FileText}
-          title="Quorum & Publish Queue"
-          value={String(quorumCount)}
-          sub={`${state.pendingApprovals.length} drafts · ${state.highRisk.length} high-risk · ${state.delegations.length} delegates`}
-          tone={quorumCount > 0 ? "primary" : "neutral"}
-        />
-        <KpiCard
-          icon={Users}
-          title="Active Delegates & SLA"
-          value={String(state.delegations.length + slaBreaches)}
-          sub={`${state.delegations.length} officers on leave · ${slaBreaches} unacked topology alerts`}
-          tone={slaBreaches > 0 ? "warning" : "neutral"}
-        />
-        <KpiCard
-          icon={Bot}
-          title="Autopilot Health"
-          value={state.autopilot.outboxDead > 0 ? "Degraded" : "Healthy"}
-          sub={`Outbox DLQ ${state.autopilot.outboxDead} · LLM circuit ${state.autopilot.llmCircuitOpen ? "OPEN" : "closed"}`}
-          tone={state.autopilot.outboxDead > 0 || state.autopilot.llmCircuitOpen ? "danger" : "success"}
-        />
-      </div>
+      {/* KPI Strip — VP: facilities.config + hostel pulse; Principal: full queue */}
+      {isVP && vp ? (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <KpiCard
+            icon={FileText}
+            title="Pending facilities.config Drafts"
+            value={String(vp.facilitiesDrafts.length)}
+            sub="From chief_warden · ready for Lint + Dry-Run"
+            tone={vp.facilitiesDrafts.length > 0 ? "primary" : "neutral"}
+          />
+          <KpiCard
+            icon={Shield}
+            title="Hostel & Curfew Pulse"
+            value={String(vp.hostelPulse.curfewOverdue + vp.hostelPulse.openCurfewWatches)}
+            sub={`${vp.hostelPulse.curfewOverdue} CURFEW_OVERDUE · ${vp.hostelPulse.openCurfewWatches} open watches`}
+            tone={vp.hostelPulse.curfewOverdue > 0 ? "danger" : "success"}
+          />
+          <KpiCard
+            icon={AlertTriangle}
+            title="Estate & Maintenance SLAs"
+            value={String(vp.hostelPulse.estateSlaBreaches)}
+            sub="Escalated SUPERVISOR / EMO work-order breaches"
+            tone={vp.hostelPulse.estateSlaBreaches > 0 ? "warning" : "success"}
+          />
+          <KpiCard
+            icon={Users}
+            title="Anti-Ragging & Patrols"
+            value={`${vp.hostelPulse.patrolZones} zones`}
+            sub={`${vp.hostelPulse.antiRaggingAlerts} statutory alerts active`}
+            tone={vp.hostelPulse.antiRaggingAlerts > 0 ? "danger" : "success"}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <KpiCard
+            icon={Shield}
+            title="Campus Eligibility Pulse"
+            value={state.campus.eligibility.hasAttendanceData ? String(state.campus.eligibility.total) : "No data"}
+            sub={
+              state.campus.eligibility.hasAttendanceData
+                ? `${state.campus.eligibility.eligible} safe · ${state.campus.eligibility.condonationRequired} condonation · ${state.campus.eligibility.detained} detained`
+                : "No attendance records yet"
+            }
+            tone={state.campus.eligibility.detained > 0 ? "warning" : "neutral"}
+          />
+          <KpiCard
+            icon={FileText}
+            title="Quorum & Publish Queue"
+            value={String(quorumCount)}
+            sub={`${state.pendingApprovals.length} drafts · ${state.highRisk.length} high-risk · ${state.delegations.length} delegates`}
+            tone={quorumCount > 0 ? "primary" : "neutral"}
+          />
+          <KpiCard
+            icon={Users}
+            title="Active Delegates & SLA"
+            value={String(state.delegations.length + slaBreaches)}
+            sub={`${state.delegations.length} officers on leave · ${slaBreaches} unacked topology alerts`}
+            tone={slaBreaches > 0 ? "warning" : "neutral"}
+          />
+          <KpiCard
+            icon={Bot}
+            title="Autopilot Health"
+            value={state.autopilot.outboxDead > 0 ? "Degraded" : "Healthy"}
+            sub={`Outbox DLQ ${state.autopilot.outboxDead} · LLM circuit ${state.autopilot.llmCircuitOpen ? "OPEN" : "closed"}`}
+            tone={state.autopilot.outboxDead > 0 || state.autopilot.llmCircuitOpen ? "danger" : "success"}
+          />
+        </div>
+      )}
 
-      {/* Body per view */}
+      {/* Body per view — VP gets facilities.config + hostel + locked academic */}
       {view === "command" && (
-        <CommandView
-          state={state}
-          onDryRun={openDryRun}
-          onQuorum={openQuorum}
-          quorumByKey={quorumByKey}
-        />
+        isVP && vp ? (
+          <VpCommandView state={state} vp={vp} onDryRun={openDryRun} onQuorum={openQuorum} quorumByKey={quorumByKey} />
+        ) : (
+          <CommandView
+            state={state}
+            onDryRun={openDryRun}
+            onQuorum={openQuorum}
+            quorumByKey={quorumByKey}
+          />
+        )
       )}
       {view === "policies" && (
-        <PoliciesView state={state} onDryRun={openDryRun} onQuorum={openQuorum} quorumByKey={quorumByKey} activeRegulation={principalPolicy?.activeRegulation ?? null} />
+        <PoliciesView state={state} onDryRun={openDryRun} onQuorum={openQuorum} quorumByKey={quorumByKey} activeRegulation={principalPolicy?.activeRegulation ?? null} locked={isVP} />
       )}
       {view === "oversight" && <OversightView state={state} />}
 
@@ -212,6 +261,147 @@ function KpiCard({
       </div>
       <div className={`mt-2 text-2xl font-semibold ${toneClass[tone]}`}>{value}</div>
       <div className="mt-1 text-xs text-text-secondary">{sub}</div>
+    </Card>
+  );
+}
+
+/* ── VP Command view: facilities.config + hostel/estate + locked academic ── */
+function VpCommandView({
+  state,
+  vp,
+  onDryRun,
+  onQuorum,
+  quorumByKey,
+}: {
+  state: NonNullable<ReturnType<typeof usePrincipalState>["state"]>;
+  vp: {
+    facilitiesDrafts: Array<{ facilityCode: string | null; field: string | null; value: unknown; by: string | null; at: string; staged: boolean }>;
+    hostelPulse: { curfewOverdue: number; openCurfewWatches: number; estateSlaBreaches: number; patrolZones: number; antiRaggingAlerts: number };
+    publishLocked: Record<string, boolean | string>;
+  };
+  onDryRun: (domain: string, key: string) => void;
+  onQuorum: (a: {
+    actionKey: string;
+    label?: string;
+    requiredRoles: string[];
+    isImmutableMetaRule?: boolean;
+    requestId?: string;
+    domain?: string;
+    key?: string;
+    action?: "publish" | "rollback" | "sign";
+  }) => void;
+  quorumByKey: Map<string, { key: string; requiredApprovers: number; eligibleRoles: string[]; isImmutableMetaRule: boolean }>;
+}) {
+  const [tab, setTab] = useState("facilities");
+
+  const draftCols: Column<typeof vp.facilitiesDrafts[number]>[] = [
+    { key: "facilityCode", header: "Facility", render: (r) => <code className="text-[11px]">{r.facilityCode ?? "—"}</code> },
+    { key: "field", header: "Field", render: (r) => r.field ?? "—" },
+    { key: "value", header: "Proposed Value", render: (r) => <span className="text-[11px] font-mono">{String(r.value ?? "—")}</span> },
+    { key: "staged", header: "Status", render: (r) => <Badge variant={r.staged ? "dayout" : "success"}>{r.staged ? "DRAFT" : "ACTIVE"}</Badge> },
+    {
+      key: "actions",
+      header: "",
+      render: (r) => (
+        <div className="flex gap-1">
+          <Button
+            size="sm"
+            variant="secondary"
+            onPress={() => onDryRun("facilities.config", r.facilityCode ?? "")}
+          >
+            <Shield className="size-3" /> Inspect &amp; Dry-Run
+          </Button>
+          <Button
+            size="sm"
+            variant="primary"
+            onPress={() =>
+              onQuorum({
+                actionKey: "facilities.config.publish",
+                label: `Publish ${r.facilityCode ?? ""} (${r.field ?? ""})`,
+                requiredRoles: ["vice_principal"],
+                domain: "facilities.config",
+                key: r.facilityCode ?? "",
+                action: "publish",
+              })
+            }
+          >
+            <CheckCircle2 className="size-3" /> Approve &amp; Publish
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>VP Command · Facilities, Hostel & Escalations</CardTitle>
+        <p className="text-xs text-text-secondary">
+          Approve chief_warden's facilities.config drafts (Lint → Dry-Run → Publish → 1-Click Rollback). Academic + governance controls are locked to the Principal / Quorum.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={tab} onValueChange={setTab}>
+          <Tabs.List>
+            <Tabs.Tab value="facilities">facilities.config Approvals</Tabs.Tab>
+            <Tabs.Tab value="escalations">Hostel, Estate & Patrol</Tabs.Tab>
+            <Tabs.Tab value="academic">Academic & Quorum (Read-Only)</Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="facilities">
+            {vp.facilitiesDrafts.length === 0 ? (
+              <p className="text-xs text-text-secondary py-4">No pending facilities.config drafts from chief_warden.</p>
+            ) : (
+              <Table columns={draftCols} data={vp.facilitiesDrafts} rowKey={(r) => `${r.facilityCode}-${r.field}`} />
+            )}
+          </Tabs.Panel>
+
+          <Tabs.Panel value="escalations">
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/50">
+                  <p className="text-xs text-text-secondary">CURFEW_OVERDUE</p>
+                  <p className="text-lg font-bold">{vp.hostelPulse.curfewOverdue}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/50">
+                  <p className="text-xs text-text-secondary">Estate SLA Breaches</p>
+                  <p className="text-lg font-bold">{vp.hostelPulse.estateSlaBreaches}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/50">
+                  <p className="text-xs text-text-secondary">Anti-Ragging Alerts</p>
+                  <p className="text-lg font-bold">{vp.hostelPulse.antiRaggingAlerts}</p>
+                </div>
+              </div>
+              <p className="text-xs text-text-secondary">
+                {vp.hostelPulse.patrolZones} patrol zones · {vp.hostelPulse.openCurfewWatches} open curfew watches
+              </p>
+              {vp.hostelPulse.estateSlaBreaches > 0 && (
+                <Badge variant="exit">Escalated estate/maintenance SLA breaches require VP coordination</Badge>
+              )}
+              {vp.hostelPulse.antiRaggingAlerts > 0 && (
+                <Badge variant="dayout">Statutory anti-ragging alerts bypass class staging — VP + Chief Warden</Badge>
+              )}
+            </div>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="academic">
+            <div className="space-y-2">
+              <p className="text-xs text-text-secondary">
+                The following are read-only for VICE_PRINCIPAL. Publishing / editing requires the Principal or Two-Person Quorum.
+              </p>
+              {state.pendingApprovals.slice(0, 10).map((p) => (
+                <div key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800/40">
+                  <span className="text-xs">{p.summary}</span>
+                  <Badge variant="dayout"><Lock className="size-3" /> Principal / Quorum</Badge>
+                </div>
+              ))}
+              {(vp.publishLocked.note as string | undefined) && (
+                <p className="text-[11px] text-text-secondary italic">{vp.publishLocked.note as string}</p>
+              )}
+            </div>
+          </Tabs.Panel>
+        </Tabs>
+      </CardContent>
     </Card>
   );
 }
@@ -404,6 +594,7 @@ function PoliciesView({
   onQuorum,
   quorumByKey,
   activeRegulation,
+  locked = false,
 }: {
   state: NonNullable<ReturnType<typeof usePrincipalState>["state"]>;
   onDryRun: (domain: string, key: string) => void;
@@ -419,8 +610,36 @@ function PoliciesView({
   }) => void;
   quorumByKey: Map<string, { key: string; requiredApprovers: number; eligibleRoles: string[]; isImmutableMetaRule: boolean }>;
   activeRegulation: string | null;
+  locked?: boolean;
 }) {
   const [tab, setTab] = useState("versioned");
+
+  if (locked) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="size-4" /> Read-Only · Quorum Required
+          </CardTitle>
+          <p className="text-xs text-text-secondary">
+            Academic regulations, annual rollover sign-off, and governance_matrix are locked to the Principal / Two-Person Quorum. VICE_PRINCIPAL may publish facilities.config only.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {(["academic_regulation", "fee_slab", "governance_matrix", "debarred_override", "annual_rollover_signoff"] as const).map((k) => (
+              <Badge key={k} variant="dayout">
+                <Lock className="size-3" /> {k} — Principal / Quorum
+              </Badge>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-text-secondary">
+            facilities.config (curfew, pass quotas, mess rebate) remains publishable — see the command view.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const policyCols: Column<(typeof state.activePolicies)[number]>[] = [
     { key: "key", header: "Policy", render: (r) => <code className="text-[11px]">{r.key}</code> },

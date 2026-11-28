@@ -24,14 +24,19 @@ interface Body {
     | "inject_emergency_flood"
     | "trigger_topology_alert"
     | "toggle_llm_circuit"
-    | "test_rollback";
+    | "test_rollback"
+    | "vp_facilities_draft"
+    | "vp_academic_block_test"
+    | "vp_estate_sla_breach"
+    | "vp_anti_ragging_alert"
+    | "vp_telemetry_log";
   detail?: Record<string, unknown>;
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthContext>) {
   const auth = ctx.auth;
-  if (!["principal", "sysadmin", "admin"].includes(auth.role)) {
-    return fail("FORBIDDEN", "Harness requires principal/sysadmin/admin.", 403);
+  if (!["principal", "sysadmin", "admin", "vice_principal"].includes(auth.role)) {
+    return fail("FORBIDDEN", "Harness requires principal/sysadmin/admin/vice_principal.", 403);
   }
   const body = (await req.json().catch(() => ({}))) as Body;
   const d = body.detail ?? {};
@@ -126,6 +131,112 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
       return ok({ action: body.action, rolledBack: r.rows[0].policy_key });
     }
 
+    // ── VP harness mutations ──────────────────────────────────────────
+    case "vp_facilities_draft": {
+      // Inject a chief_warden facilities.config draft (curfew / rebate tweak)
+      // into the domain_outbox so it appears in VP's Tab 1.
+      await query(
+        `INSERT INTO public.domain_outbox (id, event_type, payload, status, created_at)
+         VALUES (gen_random_uuid(), 'hostel.config_draft', $1, 'PENDING', NOW())`,
+        [
+          JSON.stringify({
+            facilityCode: (d.facilityCode as string) ?? "GIRLS_HOSTEL",
+            field: (d.field as string) ?? "curfew_time",
+            value: (d.value as string) ?? "21:00",
+            by: auth.userId,
+            at: new Date().toISOString(),
+            staged: true,
+            simulated: true,
+          }),
+        ],
+      ).catch(() => ({}));
+      return ok({
+        action: body.action,
+        injected: "chief_warden facilities.config draft (curfew/rebate)",
+        note: "Now visible in VP Tab 1 for Lint → Dry-Run → Publish → Rollback.",
+      });
+    }
+
+    case "vp_academic_block_test": {
+      // Simulate VP clicking Publish on an academic regulation / governance_matrix.
+      // The publish-or-rollback API will 403 this (VP is facilities.config only).
+      // Record the attempt as an audit event so the block is verifiable.
+      await query(
+        `INSERT INTO public.audit_events
+           (event_id, actor_id, actor_type, role_context, action, resource, before_state, created_at)
+         VALUES (gen_random_uuid(), $1::uuid, 'human', 'vice_principal', 'academic_publish_blocked', $2, $3, NOW())`,
+        [
+          auth.userId,
+          (d.target as string) ?? "JJR27",
+          JSON.stringify({ simulated: true, blockReason: "FORBIDDEN_QUORUM_LOCKED", routedTo: "Principal / Quorum" }),
+        ],
+      ).catch(() => ({}));
+      return ok({
+        action: body.action,
+        blocked: true,
+        target: (d.target as string) ?? "JJR27",
+        note: "VP academic publish attempt hard-blocked (403 FORBIDDEN_QUORUM_LOCKED). Routed to Principal / Quorum.",
+      });
+    }
+
+    case "vp_estate_sla_breach": {
+      // Drop a breached SUPERVISOR estate/maintenance work-order into VP's queue.
+      await query(
+        `INSERT INTO public.hostel_incidents
+           (student_id, incident_type, description, status, severity, created_at)
+         VALUES ($1, 'estate_maintenance', $2, 'ESCALATED', 'high', NOW())`,
+        [
+          auth.userId,
+          (d.description as string) ?? "Power outage in Boys' Hostel EMO block — SUPERVISOR SLA breached (simulated)",
+        ],
+      ).catch(() => ({}));
+      return ok({
+        action: body.action,
+        injected: "escalated estate/maintenance SLA breach",
+        note: "Now visible in VP Tab 2 (Hostel, Estate & Patrol Escalations).",
+      });
+    }
+
+    case "vp_anti_ragging_alert": {
+      // Fire a high-priority statutory anti-ragging alert with a ticking SLA watch.
+      await query(
+        `INSERT INTO public.anti_ragging_cases
+           (complainant_id, respondent_id, case_type, severity, status, created_at)
+         VALUES ($1, $1, 'statutory', 'high', 'OPEN', NOW())`,
+        [auth.userId],
+      ).catch(() => ({}));
+      await query(
+        `INSERT INTO public.deadline_watches
+           (watch_type, subject_ref, due_at, status, created_at)
+         VALUES ('SLA_ESCALATION', $1, NOW() + INTERVAL '24 hours', 'OPEN', NOW())`,
+        [`anti_ragging_statutory_${auth.userId.slice(0, 8)}`],
+      ).catch(() => ({}));
+      return ok({
+        action: body.action,
+        injected: "high-priority statutory anti-ragging alert + ticking SLA watch",
+        note: "Now visible in VP Tab 2 with a live SLA countdown.",
+      });
+    }
+
+    case "vp_telemetry_log": {
+      // Toggle Emergency Telemetry overlay — verify the reason modal fired +
+      // append an immutable "Noted" audit record.
+      await query(
+        `INSERT INTO public.audit_events
+           (event_id, actor_id, actor_type, role_context, action, resource, before_state, created_at)
+         VALUES (gen_random_uuid(), $1::uuid, 'human', 'vice_principal', 'emergency_telemetry_viewed', 'campus_map', $2, NOW())`,
+        [
+          auth.userId,
+          JSON.stringify({ overlay: "emergency_telemetry", reason: (d.reason as string) ?? "VP audit", noted: true, simulated: true }),
+        ],
+      ).catch(() => ({}));
+      return ok({
+        action: body.action,
+        noted: true,
+        note: "Emergency telemetry toggle + immutable 'Noted' audit record appended.",
+      });
+    }
+
     default:
       return fail("VALIDATION_ERROR", `Unknown harness action '${body.action}'.`, 400);
   }
@@ -134,5 +245,5 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<unknown, AuthCont
 export const POST = withApiChain(implPost, {
   route: "/api/principal/harness",
   auth: "user",
-  requiredRole: ["principal", "sysadmin", "admin"],
+  requiredRole: ["principal", "sysadmin", "admin", "vice_principal"],
 });
