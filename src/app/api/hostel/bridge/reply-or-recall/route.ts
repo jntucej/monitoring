@@ -31,11 +31,11 @@ export interface HostelBridgeBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<HostelBridgeBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as HostelBridgeBody;
   const auth = ctx.auth;
   if (!["chief_warden", "deputy_warden", "hostel_manager", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "Hostel bridge requires a warden / hostel_manager role.", 403);
   }
-  const body = ctx.body;
 
   if (body.action === "reply") {
     const { escalationId, reply, category, broadcast } = body;

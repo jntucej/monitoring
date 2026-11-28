@@ -40,11 +40,12 @@ export interface HostelHarnessBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<HostelHarnessBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as HostelHarnessBody;
   const auth = ctx.auth;
   if (!["chief_warden", "deputy_warden", "hostel_manager", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "Hostel harness requires a warden role.", 403);
   }
-  const b = ctx.body;
+  const b = body;
 
   switch (b.mutation) {
     case "trigger_curfew_overdue": {

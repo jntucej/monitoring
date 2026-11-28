@@ -24,11 +24,12 @@ export interface RcRvProcessBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<RcRvProcessBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as RcRvProcessBody;
   const auth = ctx.auth;
   if (!["oie", "exam_branch", "exam_superintendent", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "RC/RV processing requires oie/exam_branch/admin.", 403);
   }
-  const { markId, outcome, revisedScore, maxMarks, revisionReason } = ctx.body;
+  const { markId, outcome, revisedScore, maxMarks, revisionReason } = body;
   if (!markId || !outcome) return fail("MISSING_BODY", "markId + outcome required.", 400);
 
   const current = await query<{ id: string; status: string; score: number | null; subject_code: string; student_id: string; term: string }>(

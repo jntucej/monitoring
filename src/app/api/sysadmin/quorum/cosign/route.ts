@@ -27,11 +27,12 @@ export interface QuorumCosignBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<QuorumCosignBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as QuorumCosignBody;
   const auth = ctx.auth;
   if (auth.role !== "sysadmin") {
     return fail("FORBIDDEN", "Quorum co-signature requires the sysadmin role (the Principal drafts; the Sysadmin co-signs).", 403);
   }
-  const { requestType, targetRef, stepUpTokenVerified, payload } = ctx.body;
+  const { requestType, targetRef, stepUpTokenVerified, payload } = body;
   if (!targetRef || !stepUpTokenVerified) {
     return fail("QUORUM_BLOCKED", "StepUpModal verification (6-digit TOTP + typed confirm) is required before co-signing.", 403);
   }

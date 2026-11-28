@@ -15,9 +15,10 @@ export interface OutboxReplayBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<OutboxReplayBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as OutboxReplayBody;
   const auth = ctx.auth;
   if (auth.role !== "sysadmin") return fail("FORBIDDEN", "Outbox replay requires sysadmin.", 403);
-  const { mode, outboxId } = ctx.body;
+  const { mode, outboxId } = body;
 
   if (mode === "one") {
     if (!outboxId) return fail("MISSING_BODY", "outboxId required for mode=one.", 400);

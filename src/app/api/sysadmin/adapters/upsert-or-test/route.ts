@@ -20,9 +20,10 @@ export interface AdapterUpsertBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<AdapterUpsertBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as AdapterUpsertBody;
   const auth = ctx.auth;
   if (auth.role !== "sysadmin") return fail("FORBIDDEN", "Adapter upsert requires sysadmin.", 403);
-  const { action, adapterKey, fieldMapping, idempotencyKeyTemplate, outboundTemplate, testPayload } = ctx.body;
+  const { action, adapterKey, fieldMapping, idempotencyKeyTemplate, outboundTemplate, testPayload } = body;
   if (!adapterKey) return fail("MISSING_BODY", "adapterKey required.", 400);
 
   const adapter = await query<{ id: string; status: string }>(

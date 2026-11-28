@@ -43,11 +43,12 @@ export interface HarnessBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<HarnessBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as HarnessBody;
   const auth = ctx.auth;
   if (!["oie", "exam_superintendent", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "OIE harness requires oie/exam_superintendent/admin.", 403);
   }
-  const b = ctx.body;
+  const b = body;
 
   switch (b.mutation) {
     case "switch_calendar_phase": {

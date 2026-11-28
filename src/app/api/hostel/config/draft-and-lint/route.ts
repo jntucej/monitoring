@@ -29,11 +29,12 @@ export interface ConfigDraftBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<ConfigDraftBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as ConfigDraftBody;
   const auth = ctx.auth;
   if (!["chief_warden", "deputy_warden", "hostel_manager", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "facilities.config stewardship requires a warden role.", 403);
   }
-  const b = ctx.body;
+  const b = body;
 
   switch (b.action) {
     case "draft_curfew": {

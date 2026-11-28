@@ -57,11 +57,11 @@ async function nextVersionFor(code: string): Promise<number> {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<DraftLintBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as DraftLintBody;
   const auth = ctx.auth;
   if (!["oie", "exam_branch", "exam_superintendent", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "OIE regulation drafting requires oie/exam_branch/admin.", 403);
   }
-  const body = ctx.body;
   const actor = auth.userId;
 
   switch (body.action) {

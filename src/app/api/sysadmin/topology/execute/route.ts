@@ -25,12 +25,13 @@ export interface TopologyBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<TopologyBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as TopologyBody;
   const auth = ctx.auth;
   if (auth.role !== "sysadmin") {
     // EXCLUSIVE: only sysadmin may run 1-click topology.
     return fail("EXCLUSIVE_ACTION", "1-Click Topology is exclusive to the sysadmin role.", 403);
   }
-  const { action, detail } = ctx.body;
+  const { action, detail } = body;
   if (!action || !detail) return fail("MISSING_BODY", "action + detail required.", 400);
 
   let mutated = false;

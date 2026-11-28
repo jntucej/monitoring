@@ -31,11 +31,12 @@ export interface ResultsPublishBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<ResultsPublishBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as ResultsPublishBody;
   const auth = ctx.auth;
   if (!["oie", "exam_branch", "exam_superintendent", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "Result publish/hold requires oie/exam_branch/admin.", 403);
   }
-  const { action } = ctx.body;
+  const { action } = body;
 
   // DEBARRED override = Immutable Meta-Rule: OIE cannot solo-execute. Route
   // to Principal Quorum (oie + principal co-sign) via /api/principal/quorum/sign.
@@ -51,7 +52,7 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<ResultsPublishBod
 
   if (action === "publish_semester") {
     // Publish all LOCKED marks for the semester + dispatch analysis pack.
-    const sem = ctx.body.semesterNumber;
+    const sem = body.semesterNumber;
     const locked = await query<{ id: string; student_id: string; subject_code: string; score: number | null }>(
       `SELECT id, student_id, subject_code, score FROM public.marks
          WHERE status = 'LOCKED' AND term = $1`,
@@ -85,10 +86,10 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<ResultsPublishBod
   }
 
   if (action === "withhold_result" || action === "release_withhold") {
-    const sid = ctx.body.studentId;
+    const sid = body.studentId;
     if (!sid) return fail("MISSING_BODY", "studentId required.", 400);
     const isWithhold = action === "withhold_result";
-    const reason = ctx.body.withholdReason ?? "UNPAID_DUES";
+    const reason = body.withholdReason ?? "UNPAID_DUES";
     // Record the withhold on the student's latest marks row(s) + a feed item.
     if (isWithhold) {
       await query(

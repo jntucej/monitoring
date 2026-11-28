@@ -49,9 +49,10 @@ async function validateKnobs(knobs: Record<string, number>): Promise<{ errors: s
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<RuntimeUpdateBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as RuntimeUpdateBody;
   const auth = ctx.auth;
   if (auth.role !== "sysadmin") return fail("FORBIDDEN", "Runtime profile updates require sysadmin.", 403);
-  const { knobs } = ctx.body;
+  const { knobs } = body;
   if (!knobs || Object.keys(knobs).length === 0) return fail("MISSING_BODY", "knobs required.", 400);
 
   const { errors, ok: valid } = await validateKnobs(knobs);
@@ -59,14 +60,14 @@ async function implPost(req: NextRequest, ctx: ApiChainContext<RuntimeUpdateBody
     return fail("VALIDATION_BLOCKED", "Zod hard-blocked unsafe runtime config.", 400, { errors });
   }
 
-  const profileKey = ctx.body.profileKey ?? "campus_autonomy_defaults";
+  const profileKey = body.profileKey ?? "campus_autonomy_defaults";
   const current = await query<{ config_json: Record<string, unknown>; version: number }>(
     `SELECT config_json, version FROM public.runtime_profiles WHERE profile_key = $1 AND status = 'ACTIVE' ORDER BY version DESC LIMIT 1`,
     [profileKey],
   ).catch(() => ({ rows: [] as { config_json: Record<string, unknown>; version: number }[] }));
   const nextConfig = { ...(current.rows[0]?.config_json ?? {}), ...knobs };
 
-  if (ctx.body.spatialOnly) {
+  if (body.spatialOnly) {
     // Update the spatial hardware profile on spatial_policies.
     await query(
       `UPDATE public.spatial_policies

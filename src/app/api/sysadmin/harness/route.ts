@@ -38,9 +38,10 @@ export interface SysadminHarnessBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<SysadminHarnessBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as SysadminHarnessBody;
   const auth = ctx.auth;
   if (auth.role !== "sysadmin") return fail("FORBIDDEN", "Sysadmin harness requires sysadmin.", 403);
-  const b = ctx.body;
+  const b = body;
 
   switch (b.mutation) {
     case "inject_outbox_deadletter": {

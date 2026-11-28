@@ -34,11 +34,12 @@ export interface PassActionBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<PassActionBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as PassActionBody;
   const auth = ctx.auth;
   if (!["chief_warden", "deputy_warden", "hostel_manager", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "Pass actions require a warden / hostel_manager role.", 403);
   }
-  const { action, passId, oneClick, curfewTime } = ctx.body;
+  const { action, passId, oneClick, curfewTime } = body;
   if (!action || !passId) return fail("MISSING_BODY", "action + passId required.", 400);
 
   const p = await query<{

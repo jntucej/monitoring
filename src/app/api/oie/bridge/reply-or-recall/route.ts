@@ -42,11 +42,11 @@ export interface BridgeBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<BridgeBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as BridgeBody;
   const auth = ctx.auth;
   if (!["oie", "exam_branch", "exam_superintendent", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "OIE bridge requires oie/exam_branch/admin.", 403);
   }
-  const body = ctx.body;
 
   if (body.action === "reply") {
     const { escalationId, reply, category, broadcast } = body;

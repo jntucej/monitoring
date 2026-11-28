@@ -28,11 +28,12 @@ export interface ReconcileBody {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<ReconcileBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as ReconcileBody;
   const auth = ctx.auth;
   if (!["chief_warden", "deputy_warden", "hostel_manager", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "Hardware reconcile requires a warden / hostel_manager role.", 403);
   }
-  const { anomalyId, tag, resolution, auditNote, device } = ctx.body;
+  const { anomalyId, tag, resolution, auditNote, device } = body;
   if (!anomalyId || !resolution) return fail("MISSING_BODY", "anomalyId + resolution required.", 400);
 
   // 1. Log the reconciliation as a hostel incident (non-blocking; the student

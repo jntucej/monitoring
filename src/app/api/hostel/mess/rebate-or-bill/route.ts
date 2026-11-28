@@ -37,11 +37,12 @@ async function minConsecutiveDays(): Promise<number | null> {
 }
 
 async function implPost(req: NextRequest, ctx: ApiChainContext<MessRebateBody, AuthContext>) {
+  const body = (await req.json().catch(() => ({}))) as MessRebateBody;
   const auth = ctx.auth;
   if (!["chief_warden", "deputy_warden", "hostel_manager", "mess_incharge", "admin", "sysadmin"].includes(auth.role)) {
     return fail("FORBIDDEN", "Mess rebate/bill requires a warden / hostel_manager / mess_incharge role.", 403);
   }
-  const { action, blockId, studentId, consecutiveDays, rebateAmountInr, adjustmentAmountInr, reason } = ctx.body;
+  const { action, blockId, studentId, consecutiveDays, rebateAmountInr, adjustmentAmountInr, reason } = body;
   const minDays = await minConsecutiveDays();
 
   if (action === "approve_rebate" || action === "reject_rebate") {
