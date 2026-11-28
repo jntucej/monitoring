@@ -47,6 +47,7 @@
   },
   "networks": {
     "gate-net": {
+      "name": "compose_gate-net",
       "external": true
     }
   }
