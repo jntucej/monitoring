@@ -1,0 +1,4 @@
+-- Rollback for migration 50 (reverse order).
+DROP TABLE IF EXISTS public.student_non_credit_status;
+DROP TABLE IF EXISTS public.credit_promotion_rules;
+DROP TABLE IF EXISTS public.attendance_condonations;

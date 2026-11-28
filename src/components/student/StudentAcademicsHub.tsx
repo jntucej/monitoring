@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { BarcodeRatioCard } from "@/components/shared/BarcodeRatioCard";
+import { CondonationComposer } from "@/components/student/CondonationComposer";
 
 /**
  * StudentAcademicsHub — a high-context academics view: overall attendance +
@@ -96,6 +97,10 @@ export function StudentAcademicsHub() {
           </Link>
         </div>
       )}
+
+      {/* Condonation composer: self-gates — only renders when the student is
+          in the condonation band (65–75%) and a remedy is available. */}
+      <CondonationComposer />
 
       {/* Top-3 KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

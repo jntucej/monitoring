@@ -1,75 +1,75 @@
 /**
  * GET /api/student/attendance/threshold
  *
- * Returns the exact number of additional classes the student must attend to
- * reach (or stay at) the 75% threshold, derived from REAL attendance_records
- * (no fabrication). attendance_records has no per-subject column, so this is
- * computed on overall attendance (the same source /api/student/attendance uses).
+ * JJR-agnostic, config-driven attendance verdict. Reads the threshold +
+ * condonation floor from config_exam_eligibility_rules, real attendance from
+ * attendance_records, and the condonation + debar state. The mid-term +2
+ * bonus is 0 (no per-subject source in the current schema — never fabricated).
  *
- * Response:
- *   present, total, pct,
- *   targetPct (75),
- *   classesNeededToReach75: >=0 number of MORE present records required,
- *   status: "safe" | "warn" | "critical" | "no-data"
+ * Response: legacy contract (present/total/pct/targetPct/classesNeededToReach75/
+ * status/note) PLUS a `verdict` object (JJR-agnostic hall-ticket state).
  */
 import { NextRequest } from "next/server";
 import { withApiChain } from "@/lib/api-chain";
 import { ok } from "@/server/http/response";
-import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
+import { resolveAttendanceVerdict } from "@/server/policy/attendance-verdict";
 
 async function implGet(_req: NextRequest, ctx: { auth: AuthContext }) {
   const { auth } = ctx;
   const uid = auth.userId;
 
-  const { rows } = await query<{ present: number; total: number }>(
-    `SELECT
-       COUNT(*) FILTER (WHERE status = 'PRESENT')::int AS present,
-       COUNT(*)::int AS total
-     FROM public.attendance_records
-    WHERE person_id = $1::uuid`,
-    [uid],
-  );
+  const v = await resolveAttendanceVerdict({ userId: uid });
 
-  const present = Number(rows[0]?.present ?? 0);
-  const total = Number(rows[0]?.total ?? 0);
-  const targetPct = 75;
+  // classesNeededToReach75 mirrors the legacy contract (more present records
+  // required to clear the eligible threshold), derived from the verdict.
+  const targetPct = v.config.eligibleMinPct;
+  const classesNeeded =
+    v.aggregatePct < targetPct ? v.safeBunksOrNeeded.count : 0;
 
-  if (total === 0) {
-    return ok({
-      present,
-      total,
-      pct: 0,
-      targetPct,
-      classesNeededToReach75: 0,
-      status: "no-data" as const,
-      note: "No attendance records yet — nothing to compute against.",
-    });
-  }
-
-  // To hit 75% after `k` more PRESENT classes:
-  //   (present + k) / (total + k) >= 0.75
-  //   => present + k >= 0.75*total + 0.75*k
-  //   => k*(1 - 0.75) >= 0.75*total - present
-  //   => k >= (0.75*total - present) / 0.25
-  const deficit = 0.75 * total - present;
-  const classesNeededToReach75 = deficit > 0 ? Math.ceil(deficit / 0.25) : 0;
-  const pct = Math.round((present / total) * 100);
-
-  const status =
-    pct >= 75 ? "safe" : pct >= 70 ? "warn" : "critical";
+  const status: "safe" | "warn" | "critical" | "no-data" | "detained" =
+    v.conductedPeriods === 0
+      ? "no-data"
+      : v.status === "DETAINED" || v.status === "DEBARRED"
+        ? "detained"
+        : v.status === "ELIGIBLE" || v.status === "CONDONATION_APPROVED"
+          ? "safe"
+          : v.status === "CONDONATION_REQUIRED"
+            ? "critical"
+            : "warn";
 
   return ok({
-    present,
-    total,
-    pct,
+    // Legacy contract (kept so existing UI keeps working)
+    present: v.effectiveAttended,
+    total: v.conductedPeriods,
+    pct: Math.round(v.aggregatePct),
     targetPct,
-    classesNeededToReach75,
+    classesNeededToReach75: classesNeeded,
     status,
+    // JJR-agnostic verdict (new)
+    verdict: {
+      status: v.status,
+      aggregatePct: v.aggregatePct,
+      effectiveAttended: v.effectiveAttended,
+      conductedPeriods: v.conductedPeriods,
+      hallTicketLocked: v.hallTicketLocked,
+      forfeitCieMarks: v.forfeitCieMarks,
+      safeBunksOrNeeded: v.safeBunksOrNeeded,
+      condonationRemedyAvailable: v.condonationRemedyAvailable,
+      activeCondonation: v.activeCondonation,
+      eligibleMinPct: v.config.eligibleMinPct,
+      condonationMinPct: v.config.condonationMinPct,
+    },
     note:
-      status === "safe"
-        ? "You are at or above the 75% threshold."
-        : `Attend ${classesNeededToReach75} more class(es) to reach 75%.`,
+      status === "no-data"
+        ? "No attendance records yet — nothing to compute against."
+        : status === "safe"
+          ? "You are at or above the eligibility threshold."
+          : status === "critical"
+            ? "Condonation required — submit a CAC condonation application."
+            : status === "detained"
+              ? "Detained — attendance below the condonation floor."
+              : `Attend ${classesNeeded} more class(es) to reach ${targetPct}%.`,
   });
 }
 
