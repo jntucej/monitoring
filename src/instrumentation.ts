@@ -19,6 +19,11 @@ export async function register() {
   // still runs in the Node web server via the Next.js instrumentation API.
   if (process.env.NEXT_RUNTIME === "edge") return;
 
+  // In development mode, skip heavy instrumentation to avoid Edge sandbox
+  // issues with Node-only imports (postgres.ts, auth-token.ts). The dev
+  // server doesn't need schema-drift guards or pool-budget checks.
+  if (process.env.NODE_ENV === "development") return;
+
   // Fail closed in production if kiosk is left in open mode without PIN or trusted IP restriction.
   // We keep the hard exit (open kiosk mode is a real security hole). But we write a
   // crash-loop marker FIRST so a future `restart: always` loop is diagnosable — the
