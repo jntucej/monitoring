@@ -9,15 +9,16 @@ interface ExamEligibilityChecklistProps {
 }
 
 export function ExamEligibilityChecklist({
-  attendancePct = 85,
-  totalDue = 0,
-  isDebarred = false,
+  attendancePct,
+  totalDue,
+  isDebarred,
 }: ExamEligibilityChecklistProps) {
-  const attendancePassed = attendancePct >= 75;
-  const feesPassed = totalDue <= 0;
-  const disciplinaryPassed = !isDebarred;
+  const hasData = attendancePct !== undefined || totalDue !== undefined || isDebarred !== undefined;
+  const attendancePassed = attendancePct !== undefined && attendancePct >= 75;
+  const feesPassed = totalDue !== undefined ? totalDue <= 0 : true;
+  const disciplinaryPassed = isDebarred !== undefined ? !isDebarred : true;
 
-  const isEligible = attendancePassed && feesPassed && disciplinaryPassed;
+  const isEligible = hasData && attendancePassed && feesPassed && disciplinaryPassed;
 
   return (
     <div className="surface-card bg-bg-surface p-4 rounded-xl border border-border space-y-3">
@@ -50,7 +51,10 @@ export function ExamEligibilityChecklist({
                 Class Attendance ≥ 75%
               </p>
               <p className="text-[11px] text-text-muted">
-                Current Standing: <span className="font-mono tabular-nums font-bold">{attendancePct}%</span>
+                Current Standing:{" "}
+                <span className="font-mono tabular-nums font-bold">
+                  {attendancePct !== undefined ? `${attendancePct}%` : "No data"}
+                </span>
               </p>
             </div>
           </div>
@@ -76,7 +80,7 @@ export function ExamEligibilityChecklist({
                 Tuition & Hostel Fee Clearance
               </p>
               <p className="text-[11px] text-text-muted">
-                Pending Balance: <span className="font-mono tabular-nums font-bold">₹{totalDue.toLocaleString("en-IN")}</span>
+                Pending Balance: <span className="font-mono tabular-nums font-bold">₹{totalDue !== undefined ? totalDue.toLocaleString("en-IN") : "0"}</span>
               </p>
             </div>
           </div>

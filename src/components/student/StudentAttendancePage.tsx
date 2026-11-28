@@ -42,6 +42,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { PERIOD_OPTIONS } from "@/lib/period";
 import type { PeriodKey } from "@/lib/period";
 import { AttendanceNextPeriodRadar } from "@/components/student/AttendanceNextPeriodRadar";
+import { AttendanceThresholdMeter } from "@/components/student/AttendanceThresholdMeter";
 import { ErrorRecoveryBanner } from "@/components/shared/ErrorRecoveryBanner";
 import {
   useEntityInspector,
@@ -407,6 +408,11 @@ export function StudentAttendancePage() {
                 </div>
                 <p className="text-[10px] text-text-muted mt-1">Green = present · Red = absent</p>
               </div>
+            </div>
+
+            {/* 75% threshold cushion meter (real present/total) */}
+            <div className="rounded-xl border border-border bg-bg-elevated p-4">
+              <AttendanceThresholdMeter attended={s.present} total={s.total} targetPct={75} />
             </div>
 
             {/* 30-day heatmap */}

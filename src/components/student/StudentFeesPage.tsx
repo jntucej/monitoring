@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { FeeDisputeComposer } from "@/components/student/FeeDisputeComposer";
 import { Loader2, Wallet, CheckCircle2, AlertCircle, Inbox } from "lucide-react";
 
 interface FeeItem {
@@ -136,6 +137,14 @@ export function StudentFeesPage() {
               </div>
             )}
           </WidgetBoundary>
+
+          {outstanding.length > 0 && (
+            <WidgetBoundary name="fee-dispute" title="Dispute a fee">
+              <FeeDisputeComposer
+                feeItems={outstanding.map((i) => ({ id: i.id, feeType: i.feeType, amount: i.amount - i.paid }))}
+              />
+            </WidgetBoundary>
+          )}
         </>
       )}
     </div>

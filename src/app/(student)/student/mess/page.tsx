@@ -3,6 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { MyMealHistory } from "@/components/shared/meals/MyMealHistory";
+import { RotatingMealQrCard } from "@/components/student/RotatingMealQrCard";
+import { MealOptOutComposer } from "@/components/student/MealOptOutComposer";
+import { DishReviewComposer } from "@/components/student/DishReviewComposer";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { SelfActionLoop, type NextActionStep } from "@/components/nav/level0/SelfActionLoop";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { UtensilsCrossed } from "lucide-react";
@@ -59,6 +63,19 @@ export default function StudentMessLanding() {
             <p className="text-xs text-text-muted mt-0.5">{c.sub}</p>
           </Link>
         ))}
+      </div>
+
+      {/* Live meal token + quick actions (self-contained, real data) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <WidgetBoundary name="mess-qr" title="Today's meal token">
+          <RotatingMealQrCard />
+        </WidgetBoundary>
+        <WidgetBoundary name="mess-opt-out" title="Skip this meal">
+          <MealOptOutComposer />
+        </WidgetBoundary>
+        <WidgetBoundary name="mess-review" title="Rate a dish">
+          <DishReviewComposer />
+        </WidgetBoundary>
       </div>
 
       {/* The meal loop (S4): my meal history — what I ate, rate it,

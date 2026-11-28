@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { Loader2, GraduationCap, Inbox } from "lucide-react";
+import { InternalMarksTrendChart } from "@/components/student/InternalMarksTrendChart";
+import { Loader2, Inbox } from "lucide-react";
 import {
   useEntityInspector,
   EntityInspectorPanel,
@@ -138,6 +139,19 @@ export function StudentMarksPage() {
             Mid-term and semester marks appear here once your faculty or the Exam Branch publishes them.
           </p>
         </div>
+      )}
+
+      {cards !== null && cards.length > 0 && (
+        <WidgetBoundary name="marks-trend" title="Score trend">
+          <InternalMarksTrendChart
+            marks={cards.map((c) => ({
+              subject: c.subject,
+              examType: c.examType,
+              score: c.score,
+              maxMarks: c.maxMarks,
+            }))}
+          />
+        </WidgetBoundary>
       )}
 
       {[...grouped.entries()].map(([label, rows]) => (

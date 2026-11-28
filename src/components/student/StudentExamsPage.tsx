@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ExamEligibilityChecklist } from "@/components/student/ExamEligibilityChecklist";
+import { HallTicketStatusCard } from "@/components/student/HallTicketStatusCard";
 import { Loader2, CalendarClock, Inbox, FileText } from "lucide-react";
 import {
   useEntityInspector,
@@ -82,6 +84,7 @@ function buildExamInspection(exam: NextExam): EntityInspection {
 
 export function StudentExamsPage() {
   const [nextExam, setNextExam] = useState<NextExam | null>(null);
+  const [attendancePct, setAttendancePct] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { inspection, inspect, closeInspection } = useEntityInspector();
@@ -89,12 +92,18 @@ export function StudentExamsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/student/next-exam", { credentials: "include" });
-        const json = await res.json();
-        if (json.success) {
-          setNextExam(json.data ?? null);
-        } else {
-          setError(json.error?.message ?? "Failed to load exam schedule");
+        const [examRes, attRes] = await Promise.all([
+          fetch("/api/student/next-exam", { credentials: "include" }),
+          fetch("/api/student/attendance", { credentials: "include" }),
+        ]);
+        const examJson = await examRes.json();
+        if (examJson.success) setNextExam(examJson.data ?? null);
+        else setError(examJson.error?.message ?? "Failed to load exam schedule");
+
+        const attJson = await attRes.json().catch(() => null);
+        const s = attJson?.data?.summary ?? attJson?.summary;
+        if (s?.pct !== undefined && s?.total > 0) {
+          setAttendancePct(Number(s.pct));
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load exam schedule");
@@ -103,6 +112,9 @@ export function StudentExamsPage() {
       }
     })();
   }, []);
+
+  const examEligible =
+    attendancePct !== null ? attendancePct >= 75 : undefined;
 
   return (
     <div className="space-y-4">
@@ -142,6 +154,20 @@ export function StudentExamsPage() {
           </button>
         </WidgetBoundary>
       )}
+
+      {/* Exam eligibility + hall ticket (real attendance-driven; no-data states when unknown) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <WidgetBoundary name="exam-eligibility" title="Exam eligibility">
+          <ExamEligibilityChecklist attendancePct={attendancePct ?? undefined} />
+        </WidgetBoundary>
+        <WidgetBoundary name="hall-ticket" title="Hall ticket">
+          <HallTicketStatusCard
+            isEligible={examEligible}
+            examName={nextExam ? (nextExam.subject ?? nextExam.label) : undefined}
+            examDate={nextExam ? new Date(nextExam.date).toLocaleDateString() : undefined}
+          />
+        </WidgetBoundary>
+      </div>
 
       {/* Results: published marks live on the Marks page (read-only grade card). */}
       <WidgetBoundary name="student-exam-results" title="Results">

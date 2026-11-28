@@ -11,13 +11,19 @@ interface MonthlyRebateLedgerProps {
 }
 
 export function MonthlyRebateLedger({
-  totalServed = 0,
-  mealRate = 60,
-  totalBilled = 0,
-  optOutCount = 0,
+  totalServed,
+  mealRate,
+  totalBilled,
+  optOutCount,
   monthLabel = "Current Month",
 }: MonthlyRebateLedgerProps) {
-  const rebateAmount = optOutCount * mealRate;
+  const hasData =
+    totalBilled !== undefined ||
+    totalServed !== undefined ||
+    optOutCount !== undefined ||
+    mealRate !== undefined;
+  const rebateAmount =
+    optOutCount !== undefined && mealRate !== undefined ? optOutCount * mealRate : null;
 
   return (
     <div className="surface-card bg-bg-surface p-4 rounded-xl border border-border space-y-3">
@@ -33,15 +39,21 @@ export function MonthlyRebateLedger({
         </span>
       </div>
 
+      {!hasData ? (
+        <p className="text-xs text-text-muted">
+          No mess billing data available for this period.
+        </p>
+      ) : (
+        <>
       <div className="flex items-baseline justify-between">
         <div>
           <span className="text-2xl font-bold tabular-nums text-text-primary">
-            ₹{totalBilled.toLocaleString("en-IN")}
+            ₹{(totalBilled ?? 0).toLocaleString("en-IN")}
           </span>
           <span className="text-xs text-text-muted ml-1.5">net mess charges</span>
         </div>
         <span className="text-xs font-mono tabular-nums text-text-muted">
-          {totalServed} meals @ ₹{mealRate}
+          {totalServed ?? 0} meals @ ₹{mealRate ?? "—"}
         </span>
       </div>
 
@@ -49,7 +61,7 @@ export function MonthlyRebateLedger({
         <div className="p-2 rounded bg-bg-elevated flex items-center justify-between">
           <span className="text-[11px] text-text-muted">Opt-Out Count</span>
           <span className="text-xs font-bold font-mono text-text-primary tabular-nums">
-            {optOutCount}
+            {optOutCount ?? 0}
           </span>
         </div>
         <div className="p-2 rounded bg-bg-elevated flex items-center justify-between">
@@ -57,10 +69,12 @@ export function MonthlyRebateLedger({
             <IndianRupee className="w-3 h-3 text-action-success" /> Rebate Credited
           </span>
           <span className="text-xs font-bold font-mono text-action-success tabular-nums">
-            ₹{rebateAmount.toLocaleString("en-IN")}
+            {rebateAmount === null ? "—" : `₹${rebateAmount.toLocaleString("en-IN")}`}
           </span>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

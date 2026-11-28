@@ -10,10 +10,11 @@ interface LiveMealCutoffCardProps {
 }
 
 export function LiveMealCutoffCard({
-  cutoffTime = "06:00 AM",
-  nextMeal = "Breakfast",
+  cutoffTime,
+  nextMeal,
   isPastCutoff = false,
 }: LiveMealCutoffCardProps) {
+  const hasData = cutoffTime !== undefined || nextMeal !== undefined;
   const currentHour = useMemo(() => new Date().getHours(), []);
   const calculatedPast = currentHour >= 6;
   const past = isPastCutoff || calculatedPast;
@@ -38,22 +39,29 @@ export function LiveMealCutoffCard({
         </span>
       </div>
 
-      <div className="flex items-baseline justify-between">
-        <div>
-          <span className="text-2xl font-bold text-text-primary tabular-nums">
-            {cutoffTime}
-          </span>
-          <p className="text-xs text-text-muted mt-0.5">
-            Daily cutoff for today&apos;s meal rebates
-          </p>
+      {!hasData ? (
+        <p className="text-xs text-text-muted">
+          No meal cutoff schedule available.
+        </p>
+      ) : (
+        <div className="flex items-baseline justify-between">
+          <div>
+            <span className="text-2xl font-bold text-text-primary tabular-nums">
+              {cutoffTime ?? "—"}
+            </span>
+            <p className="text-xs text-text-muted mt-0.5">
+              Daily cutoff for today&apos;s meal rebates
+            </p>
+          </div>
+          {nextMeal !== undefined && (
+            <div className="text-right">
+              <span className="text-xs font-semibold text-text-secondary block">
+                Next: {nextMeal}
+              </span>
+            </div>
+          )}
         </div>
-        <div className="text-right">
-          <span className="text-xs font-semibold text-text-secondary block">
-            Next: {nextMeal}
-          </span>
-          <span className="text-[11px] text-text-muted">Dining Hall Main</span>
-        </div>
-      </div>
+      )}
 
       <div className="pt-1 border-t border-border/50">
         <p className="text-xs text-text-muted flex items-center gap-1.5">

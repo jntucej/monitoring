@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useHasHydrated } from "@/stores/authStore";
 import { usePersona } from "@/hooks/usePersona";
 import { PassHub } from "@/components/shared/pass/PassHub";
+import { ProofUploadComposer } from "@/components/student/ProofUploadComposer";
 import { PassHistory } from "@/components/shared/pass/PassHistory";
 import { ExtendPassModal } from "@/components/shared/pass/ExtendPassModal";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -77,6 +78,11 @@ export default function StudentPassesPage() {
             <PassHub onSelectPass={setSelectedTicket} />
           </div>
         </Suspense>
+      </WidgetBoundary>
+
+      {/* Upload supporting proof for an active / pending pass (distinct from PassHub create) */}
+      <WidgetBoundary name="proof-upload" title="Upload proof">
+        <ProofUploadComposer ticketList={selectedTicket ? [selectedTicket] : []} />
       </WidgetBoundary>
 
       {/* PassHistory (period compare, rate, export) */}
