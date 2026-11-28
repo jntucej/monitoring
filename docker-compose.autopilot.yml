@@ -1,0 +1,53 @@
+{
+  "version": "2.0",
+  "services": {
+    "autopilot": {
+      "image": "debian:bookworm-slim",
+      "command": "/usr/local/bin/autopilot",
+      "container_name": "gate_autopilot",
+      "restart": "unless-stopped",
+      "env_file": [
+        { "path": ".env", "required": false }
+      ],
+      "environment": {
+        "AUTOPILOT_DB_DSN": "postgresql://autopilot_runtime_app:${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD:?}}@gate_postgres:5432/autopilot_runtime",
+        "AUTOPILOT_ADDR": "0.0.0.0:8401",
+        "RUST_LOG": "${RUST_LOG:-autopilot_api=info}"
+      },
+      "networks": [
+        "gate-net"
+      ],
+      "volumes": [
+        "/opt/autopilot/target/release/autopilot:/usr/local/bin/autopilot:ro"
+      ],
+      "ports": [
+        "127.0.0.1:8401:8401"
+      ],
+      "read_only": true,
+      "tmpfs": ["/tmp"],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": ["ALL"],
+      "deploy": {
+        "resources": {
+          "limits": {
+            "memory": "256M",
+            "cpus": "1.0"
+          }
+        }
+      },
+      "healthcheck": {
+        "test": ["CMD-SHELL", "wget -q -O- http://127.0.0.1:8401/health || exit 1"],
+        "interval": "10s",
+        "timeout": "3s",
+        "retries": "5"
+      }
+    }
+  },
+  "networks": {
+    "gate-net": {
+      "external": true
+    }
+  }
+}
