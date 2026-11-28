@@ -12,7 +12,6 @@
  * dedicated autopilot_runtime db name — no hardcoded credentials.
  */
 import pg from 'pg';
-import { getWorkerDbPool } from '../db.js';
 
 const { Pool } = pg;
 
@@ -23,12 +22,15 @@ export function getAutopilotDbPool() {
 
   // Reuse the worker's env-loading + connection settings; only the database
   // name differs. The worker container reaches gate_postgres by service
-  // name (postgres:5432) on the shared bridge network.
-  const gatePool = getWorkerDbPool();
-  const baseUrl = gatePool.connectionString;
-  if (!baseUrl) {
-    throw new Error("worker pool has no connection string; cannot derive the autopilot DSN");
-  }
+  // name (postgres:5432) on the shared bridge network. Derive the base URL
+  // the same way getWorkerDbPool does (env first, else POSTGRES_* vars).
+  const baseUrl =
+    process.env.DATABASE_URL ||
+    `postgres://${process.env.POSTGRES_USER || "postgres"}:${encodeURIComponent(
+      process.env.POSTGRES_PASSWORD || "postgres",
+    )}@${process.env.POSTGRES_HOST || "127.0.0.1"}:${process.env.POSTGRES_PORT || "5432"}/${
+      process.env.POSTGRES_DB || "gate_monitor"
+    }`;
 
   const autopilotUrl =
     process.env.AUTOMONITORING_DSN ||
