@@ -9,15 +9,17 @@ import {
   BookOpen,
   Server,
   RefreshCw,
+  Rocket,
 } from "lucide-react";
 import Overview from "@/components/sysadmin/agent-command-center/Overview";
 import ApprovalsGuardrails from "@/components/sysadmin/agent-command-center/ApprovalsGuardrails";
 import TracesFunnel from "@/components/sysadmin/agent-command-center/TracesFunnel";
 import KnowledgeBase from "@/components/sysadmin/agent-command-center/KnowledgeBase";
 import InfraWorkers from "@/components/sysadmin/agent-command-center/InfraWorkers";
+import { AutopilotMissionsClient } from "@/components/sysadmin/AutopilotMissionsClient";
 
 /**
- * The 5-tab AI Agent Command Center. A single outer shell lives in the sysadmin
+ * The 6-tab AI Agent Command Center. A single outer shell lives in the sysadmin
  * layout — this component is the tab content only (no second sidebar/topnav).
  *
  * Tabs:
@@ -26,6 +28,8 @@ import InfraWorkers from "@/components/sysadmin/agent-command-center/InfraWorker
  *   3. Traces & @agent Funnel  — live activity feed + step-level trace inspection
  *   4. Knowledge Base (RAG)    — document ingestion + retrieval hits
  *   5. Infra, Workers & Tools  — fleet, observability, redis, jobs, integrations
+ *   6. AUTOPILOT Missions      — control-plane missions, lifecycle transitions,
+ *                                durable event history, outbox backlog
  */
 const TABS = [
   { key: "overview", label: "Overview", icon: Command },
@@ -33,6 +37,7 @@ const TABS = [
   { key: "traces", label: "Traces & @agent", icon: Network },
   { key: "knowledge", label: "Knowledge Base", icon: BookOpen },
   { key: "infra", label: "Infra & Tools", icon: Server },
+  { key: "autopilot", label: "AUTOPILOT", icon: Rocket },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -78,6 +83,9 @@ export function AgentCommandCenter() {
         </Tabs.Panel>
         <Tabs.Panel value="infra">
           <InfraWorkers refreshSignal={refreshSignal} />
+        </Tabs.Panel>
+        <Tabs.Panel value="autopilot">
+          <AutopilotMissionsClient />
         </Tabs.Panel>
       </Tabs>
     </div>

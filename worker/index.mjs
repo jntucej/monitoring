@@ -113,6 +113,7 @@ import { runRetentionColdArchive } from "./jobs/retention_cold_archive.js";
 import { runOutboxRelay } from "./jobs/outbox_relay.js";
 import { runDeadlineSweep } from "./jobs/deadline_sweep.js";
 import { runAgentLoop } from "./jobs/agent_loop.js";
+import { autopilotOutboxRelayRun } from "./jobs/autopilot_outbox_relay.js";
 import { runAchievementAuto } from './jobs/achievement_auto.js';
 import { runLeaderboardRefresh } from './jobs/leaderboard_refresh.js';
 import { runPresenceReconcile } from './jobs/presence_reconcile.js';
@@ -265,6 +266,9 @@ const jobs = [
   { name: 'deadline-sweep', ms: 60 * 1000, run: () => runJob('deadline-sweep', runDeadlineSweep) },
   // Agent feedback loop: abstention clustering + LLM circuit-breaker.
   { name: 'agent-loop', ms: 5 * 60 * 1000, run: () => runJob('agent-loop', runAgentLoop) },
+  // AUTOPILOT outbox bridge: publishes unpublished autopilot_runtime events
+  // into gate_monitor.domain_outbox (cross-DB, at-least-once).
+  { name: 'autopilot-outbox-bridge', ms: 30 * 1000, run: () => runJob('autopilot-outbox-bridge', autopilotOutboxRelayRun) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client
