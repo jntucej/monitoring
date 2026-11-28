@@ -7,13 +7,15 @@
 
 "use client";
 
-import { Suspense, useState } from "react";
-import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
+import { Suspense, useState, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useHasHydrated } from "@/stores/authStore";
 import { usePersona } from "@/hooks/usePersona";
 import { PassHub } from "@/components/shared/pass/PassHub";
 import { ProofUploadComposer } from "@/components/student/ProofUploadComposer";
+import { CurfewComplianceCard } from "@/components/student/CurfewComplianceCard";
+import { PassQuotaGauge } from "@/components/student/PassQuotaGauge";
 import { PassHistory } from "@/components/shared/pass/PassHistory";
 import { ExtendPassModal } from "@/components/shared/pass/ExtendPassModal";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -28,6 +30,37 @@ export default function StudentPassesPage() {
   // Level-0 record pivot: the pass/ticket currently in focus. Set by
   // clicking an active pass row (Full Timeline step routes by ticket id).
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
+
+  // Real curfew + monthly outing data for the compliance card + quota gauge.
+  const [dash, setDash] = useState<{
+    curfew?: { score?: number; onTime?: number; late?: number };
+    outings?: { total?: number; daypass?: number };
+  } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/student/dashboard", { credentials: "include" });
+        const json = await res.json();
+        if (cancelled || !json?.success) return;
+        const d = json.data ?? {};
+        setDash({
+          curfew: d?.curfew?.today ? {
+            score: d.curfew.today.score,
+            onTime: d.curfew.today.onTime,
+            late: d.curfew.today.late,
+          } : undefined,
+          outings: d?.monthly ? { total: d.monthly.total, daypass: d.monthly.daypass } : undefined,
+        });
+      } catch {
+        /* no-data → cards render their own empty state */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   if (!hasHydrated) return <PageLoading />;
 
   const selectedSteps: NextActionStep[] = selectedTicket
@@ -84,6 +117,24 @@ export default function StudentPassesPage() {
       <WidgetBoundary name="proof-upload" title="Upload proof">
         <ProofUploadComposer ticketList={selectedTicket ? [selectedTicket] : []} />
       </WidgetBoundary>
+
+      {/* Real curfew compliance + monthly outing quota (from /api/student/dashboard) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <WidgetBoundary name="curfew-compliance" title="Curfew compliance">
+          <CurfewComplianceCard
+            curfewScore={dash?.curfew?.score}
+            onTimeReturns={dash?.curfew?.onTime}
+            lateReturns={dash?.curfew?.late}
+          />
+        </WidgetBoundary>
+        <WidgetBoundary name="outing-quota" title="Monthly outings">
+          <PassQuotaGauge
+            used={dash?.outings?.total ?? 0}
+            limit={4}
+            windowLabel="This month"
+          />
+        </WidgetBoundary>
+      </div>
 
       {/* PassHistory (period compare, rate, export) */}
       <WidgetBoundary name="pass-history">

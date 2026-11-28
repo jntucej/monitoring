@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MyMealHistory } from "@/components/shared/meals/MyMealHistory";
 import { RotatingMealQrCard } from "@/components/student/RotatingMealQrCard";
 import { MealOptOutComposer } from "@/components/student/MealOptOutComposer";
 import { DishReviewComposer } from "@/components/student/DishReviewComposer";
+import { MonthlyRebateLedger } from "@/components/student/MonthlyRebateLedger";
+import { LiveMealCutoffCard } from "@/components/student/LiveMealCutoffCard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { SelfActionLoop, type NextActionStep } from "@/components/nav/level0/SelfActionLoop";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -25,6 +27,29 @@ export default function StudentMessLanding() {
   // Level-0 record pivot: the most-recent meal currently in focus. When a
   // meal row is tapped it becomes the record the mess page pivots around.
   const [focusMeal, setFocusMeal] = useState<string | null>(null);
+
+  // Real mess-bill data for the rebate ledger + cutoff card (no fabrication).
+  const [bill, setBill] = useState<{
+    totalServed?: number;
+    mealRateInr?: number;
+    totalAmount?: number;
+    cutoffTime?: string;
+  } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/student/mess-bill", { credentials: "include" });
+        const json = await res.json();
+        if (!cancelled && json?.success) setBill(json.data ?? null);
+      } catch {
+        /* no-data → cards render their own empty state */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const messSteps: NextActionStep[] = focusMeal
     ? [
@@ -75,6 +100,20 @@ export default function StudentMessLanding() {
         </WidgetBoundary>
         <WidgetBoundary name="mess-review" title="Rate a dish">
           <DishReviewComposer />
+        </WidgetBoundary>
+      </div>
+
+      {/* Real mess-bill figures: rebate ledger + daily cutoff (no fabrication) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <WidgetBoundary name="mess-rebate" title="Monthly rebate">
+          <MonthlyRebateLedger
+            totalServed={bill?.totalServed}
+            mealRate={bill?.mealRateInr}
+            totalBilled={bill?.totalAmount}
+          />
+        </WidgetBoundary>
+        <WidgetBoundary name="mess-cutoff" title="Daily cutoff">
+          <LiveMealCutoffCard cutoffTime={bill?.cutoffTime} />
         </WidgetBoundary>
       </div>
 
