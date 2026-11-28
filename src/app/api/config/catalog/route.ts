@@ -60,6 +60,12 @@ interface CatalogPayload {
   facilities: Array<{ code: string; name: string; category: string }>;
   activeRegulations: Array<{ code: string; version: number; status: string }>;
   workflowSchemas: Array<{ key: string; name: string; states: Record<string, unknown>; formSchema: Record<string, unknown> }>;
+  // Versioned policy-as-data (Draft -> Dry-Run -> Approve -> Publish) — the
+  // admin console edits these; nothing in the app hardcodes the values.
+  routingPolicies: Array<{ key: string; category: string; stage1: string; status: string; version: number }>;
+  governanceMatrix: Array<{ key: string; channel: string; approvers: number; status: string; version: number }>;
+  retentionRules: Array<{ key: string; artifact: string; hotDays: number; coldYears: number; status: string }>;
+  spatialPolicies: Array<{ key: string; role: string; layers: string[]; status: string }>;
   generated_at: string;
 }
 
@@ -69,8 +75,12 @@ async function buildTopologyLayer(): Promise<{
   facilities: CatalogPayload["facilities"];
   activeRegulations: CatalogPayload["activeRegulations"];
   workflowSchemas: CatalogPayload["workflowSchemas"];
+  routingPolicies: CatalogPayload["routingPolicies"];
+  governanceMatrix: CatalogPayload["governanceMatrix"];
+  retentionRules: CatalogPayload["retentionRules"];
+  spatialPolicies: CatalogPayload["spatialPolicies"];
 }> {
-  const [orgUnits, facilities, regs, workflows] = await Promise.all([
+  const [orgUnits, facilities, regs, workflows, routing, gov, retention, spatial] = await Promise.all([
     query<{ code: string; name: string; unit_type: string }>(
       `SELECT code, name, unit_type FROM public.org_units WHERE is_active ORDER BY code`,
     ).catch(() => ({ rows: [] as { code: string; name: string; unit_type: string }[] })),
@@ -83,6 +93,20 @@ async function buildTopologyLayer(): Promise<{
     query<{ code: string; name: string; states: Record<string, unknown>; form_schema: Record<string, unknown> }>(
       `SELECT code, name, states, form_schema FROM public.workflow_definitions WHERE is_active ORDER BY code`,
     ).catch(() => ({ rows: [] as { code: string; name: string; states: Record<string, unknown>; form_schema: Record<string, unknown> }[] })),
+    // The four versioned policy tables (migration 55). Each may be absent on a
+    // pre-migration DB — catch() keeps the catalog building.
+    query<{ policy_key: string; category: string; stage_1_role: string; status: string; version: number }>(
+      `SELECT policy_key, category, stage_1_role, status, version FROM public.routing_policies ORDER BY policy_key, version DESC`,
+    ).catch(() => ({ rows: [] as { policy_key: string; category: string; stage_1_role: string; status: string; version: number }[] })),
+    query<{ action_key: string; channel: string; required_approvers_count: number; status: string; version: number }>(
+      `SELECT action_key, channel, required_approvers_count, status, version FROM public.governance_matrix ORDER BY action_key, version DESC`,
+    ).catch(() => ({ rows: [] as { action_key: string; channel: string; required_approvers_count: number; status: string; version: number }[] })),
+    query<{ policy_key: string; artifact_type: string; hot_db_ttl_days: number; cold_r2_ttl_years: number; status: string }>(
+      `SELECT policy_key, artifact_type, hot_db_ttl_days, cold_r2_ttl_years, status FROM public.retention_policy_rules ORDER BY policy_key`,
+    ).catch(() => ({ rows: [] as { policy_key: string; artifact_type: string; hot_db_ttl_days: number; cold_r2_ttl_years: number; status: string }[] })),
+    query<{ policy_key: string; role_id: string; map_layer_access: string[]; status: string }>(
+      `SELECT policy_key, role_id, map_layer_access, status FROM public.spatial_policies ORDER BY policy_key`,
+    ).catch(() => ({ rows: [] as { policy_key: string; role_id: string; map_layer_access: string[]; status: string }[] })),
   ]);
 
   return {
@@ -95,6 +119,10 @@ async function buildTopologyLayer(): Promise<{
       states: r.states ?? {},
       formSchema: r.form_schema ?? {},
     })),
+    routingPolicies: routing.rows.map((r) => ({ key: r.policy_key, category: r.category, stage1: r.stage_1_role, status: r.status, version: r.version })),
+    governanceMatrix: gov.rows.map((r) => ({ key: r.action_key, channel: r.channel, approvers: r.required_approvers_count, status: r.status, version: r.version })),
+    retentionRules: retention.rows.map((r) => ({ key: r.policy_key, artifact: r.artifact_type, hotDays: r.hot_db_ttl_days, coldYears: Number(r.cold_r2_ttl_years), status: r.status })),
+    spatialPolicies: spatial.rows.map((r) => ({ key: r.policy_key, role: r.role_id, layers: r.map_layer_access ?? [], status: r.status })),
   };
 }
 
