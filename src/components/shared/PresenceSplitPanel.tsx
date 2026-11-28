@@ -13,10 +13,13 @@ interface SplitRow {
   total: number;
 }
 interface PresenceResponse {
-  byBranch: SplitRow[];
-  byHostelBlock: SplitRow[];
-  totals: { inside: number; outside: number; unknown: number; total: number };
-  generated_at: string;
+  success: boolean;
+  data: {
+    byBranch: SplitRow[];
+    byHostelBlock: SplitRow[];
+    totals: { inside: number; outside: number; unknown: number; total: number };
+    generated_at: string;
+  };
 }
 
 /**
@@ -31,7 +34,15 @@ export function PresenceSplitPanel({ compact = false }: { compact?: boolean }) {
     { ttlMs: 30_000 },
   );
 
-  const totals = data?.totals;
+  // The API returns { success, data: { byBranch, byHostelBlock, totals, ... } }
+  // (withApiChain convention). The hook yields the full envelope; guard the
+  // nested access so an error envelope or a missing payload renders the
+  // explicit empty state instead of crashing the page.
+  const payload = data?.data;
+  const totals = payload?.totals;
+  const byBranch = payload?.byBranch ?? [];
+  const byHostelBlock = payload?.byHostelBlock ?? [];
+  const generatedAt = payload?.generated_at;
 
   return (
     <WidgetBoundary title="Campus Presence — Inside vs. Outside">
@@ -47,22 +58,22 @@ export function PresenceSplitPanel({ compact = false }: { compact?: boolean }) {
           <p className="text-xs text-text-muted">Loading live presence…</p>
         )}
 
-        {data && data.byBranch.length === 0 && data.byHostelBlock.length === 0 && (
+        {data && byBranch.length === 0 && byHostelBlock.length === 0 && (
           <p className="text-xs text-text-muted">
             No presence data is available yet.
           </p>
         )}
 
-        {data && (
+        {payload && (
           <>
             {/* By branch */}
-            {data.byBranch.length > 0 && (
+            {byBranch.length > 0 && (
               <div>
                 <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
                   By branch
                 </h4>
                 <div className="space-y-1.5">
-                  {data.byBranch.map((r) => (
+                  {byBranch.map((r) => (
                     <SplitBar key={r.key} row={r} compact={compact} />
                   ))}
                 </div>
@@ -70,13 +81,13 @@ export function PresenceSplitPanel({ compact = false }: { compact?: boolean }) {
             )}
 
             {/* By hostel block */}
-            {data.byHostelBlock.length > 0 && (
+            {byHostelBlock.length > 0 && (
               <div>
                 <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
                   By hostel block
                 </h4>
                 <div className="space-y-1.5">
-                  {data.byHostelBlock.map((r) => (
+                  {byHostelBlock.map((r) => (
                     <SplitBar key={r.key} row={r} compact={compact} />
                   ))}
                 </div>
@@ -84,7 +95,7 @@ export function PresenceSplitPanel({ compact = false }: { compact?: boolean }) {
             )}
 
             <div className="flex items-center justify-between border-t border-border/50 pt-2 text-[10px] text-text-muted">
-              <span>Live · {new Date(data.generated_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</span>
+              <span>{generatedAt ? `Live · ${new Date(generatedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}` : "Live"}</span>
               <button
                 type="button"
                 onClick={() => void refresh()}
