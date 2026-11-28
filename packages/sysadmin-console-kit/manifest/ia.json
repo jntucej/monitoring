@@ -438,6 +438,13 @@
       "order": 6,
       "pages": [
         {
+          "id": "governance-console",
+          "route": "governance",
+          "title": "Governance Console",
+          "kind": "console",
+          "pollMs": 30000
+        },
+        {
           "id": "security",
           "route": "security",
           "title": "Security",

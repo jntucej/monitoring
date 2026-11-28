@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { FeeDisputeComposer } from "@/components/student/FeeDisputeComposer";
-import { Loader2, Wallet, CheckCircle2, AlertCircle, Inbox } from "lucide-react";
+import { Select } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Wallet, CheckCircle2, AlertCircle, Inbox, Shield, CreditCard } from "lucide-react";
 
 interface FeeItem {
   id: string;
@@ -16,9 +20,21 @@ interface FeeItem {
   paidAt: string | null;
 }
 
+interface AidRow {
+  id: string;
+  scheme: string;
+  amount: number;
+  status: string;
+}
+
 export function StudentFeesPage() {
-  const [data, setData] = useState<{ totalDue: number; items: FeeItem[] } | null>(null);
+  const [data, setData] = useState<{ totalDue: number; totalAid: number; netDue: number; items: FeeItem[]; aid: AidRow[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [payMethod, setPayMethod] = useState<string | undefined>(undefined);
+  const [utrRef, setUtrRef] = useState("");
+  const [paying, setPaying] = useState(false);
+  const [payDone, setPayDone] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -35,6 +51,25 @@ export function StudentFeesPage() {
 
   const outstanding = (data?.items ?? []).filter((i) => i.status !== "PAID" && i.status !== "WAIVED");
   const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+
+  const pay = async () => {
+    if (!payMethod || !utrRef.trim()) return;
+    setPaying(true); setPayError(null); setPayDone(false);
+    try {
+      const res = await fetch("/api/student/fees", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ payMethod, utrRef: utrRef.trim() }),
+      });
+      const json = await res.json();
+      if (json.success) { setPayDone(true); setUtrRef(""); setPayMethod(undefined); }
+      else setPayError(json.error?.message ?? "Could not log payment reference");
+    } catch {
+      setPayError("Network error");
+    }
+    setPaying(false);
+  };
 
   return (
     <div className="space-y-4">
@@ -143,6 +178,72 @@ export function StudentFeesPage() {
               <FeeDisputeComposer
                 feeItems={outstanding.map((i) => ({ id: i.id, feeType: i.feeType, amount: i.amount - i.paid }))}
               />
+            </WidgetBoundary>
+          )}
+
+          {/* ── Aid / scholarships (scholarship_awards, migration 60) ── */}
+          {(data.aid?.length ?? 0) > 0 && (
+            <WidgetBoundary name="fee-aid" title="Scholarships & aid">
+              <div className="space-y-2">
+                {data.aid.map((a) => (
+                  <div key={a.id} className="flex items-center justify-between surface-card p-3">
+                    <div>
+                      <p className="text-sm font-medium text-text-primary">{a.scheme}</p>
+                      <p className="text-xs text-text-muted">{fmt(a.amount)}</p>
+                    </div>
+                    <Badge variant={a.status === "APPROVED" || a.status === "AWARDED" ? "success" : "leave"} dot={false}>
+                      {a.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </WidgetBoundary>
+          )}
+
+          {/* ── Pay drawer (SBI Collect / UPI — webhook-driven) ────────── */}
+          {outstanding.length > 0 && (
+            <WidgetBoundary name="fee-pay" title="Log a payment reference">
+              {payDone ? (
+                <div className="surface-card bg-emerald-500/10 p-3 text-sm text-action-success flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" /> Payment reference logged. The UPI/SBI webhook will reconcile it against the ledger.
+                </div>
+              ) : (
+                <div className="surface-card p-4 space-y-3">
+                  <p className="text-xs text-text-muted flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5" />
+                    Log your UPI / SBI-Collect reference. The <code>integration_adapters.sbi_collect_upi_fee</code> webhook reconciles it against the ledger.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-text-secondary">Method</label>
+                      <Select
+                        aria-label="Payment method"
+                        placeholder="Select method"
+                        value={payMethod}
+                        onChange={setPayMethod}
+                        options={[
+                          { value: "SBI_COLLECT", label: "SBI Collect" },
+                          { value: "UPI", label: "UPI" },
+                          { value: "CARD", label: "Card" },
+                        ]}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-text-secondary">UTR / reference</label>
+                      <Input
+                        aria-label="UTR / reference"
+                        placeholder="e.g. 482938475612"
+                        value={utrRef}
+                        onChange={(e) => setUtrRef(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  {payError && <p className="text-xs text-action-danger">{payError}</p>}
+                  <Button variant="primary" size="sm" onClick={pay} disabled={!payMethod || !utrRef.trim() || paying}>
+                    {paying ? "Logging…" : "Log payment reference"}
+                  </Button>
+                </div>
+              )}
             </WidgetBoundary>
           )}
         </>

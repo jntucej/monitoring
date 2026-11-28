@@ -86,6 +86,38 @@ interface CatalogPayload {
   governanceMatrix: Array<{ key: string; channel: string; approvers: number; status: string; version: number }>;
   retentionRules: Array<{ key: string; artifact: string; hotDays: number; coldYears: number; status: string }>;
   spatialPolicies: Array<{ key: string; role: string; layers: string[]; status: string }>;
+  /** Program-agnostic, NEP-ready degree tracks (program_blueprints). */
+  programBlueprints: Array<{
+    code: string;
+    name: string;
+    totalSemesters: number;
+    entrySemester: number;
+    componentTypes: string[];
+    status: string;
+  }>;
+  /** Cross-regulation credit transfer for detained/readmitted students. */
+  subjectEquivalency: Array<{
+    key: string;
+    source: string;
+    target: string;
+    credits: number;
+    status: string;
+  }>;
+  /** Calendar-driven semester/graduation state graphs (lifecycle_playbooks). */
+  lifecyclePlaybooks: Array<{
+    key: string;
+    trigger: string;
+    onCompletion: string | null;
+    onDetention: string | null;
+    status: string;
+  }>;
+  /** Swappable vendor adapters (integration_adapters) — code-keyed, no secrets. */
+  integrationAdapters: Array<{
+    key: string;
+    direction: string;
+    transport: string;
+    status: string;
+  }>;
   generated_at: string;
 }
 
@@ -101,8 +133,13 @@ async function buildTopologyLayer(): Promise<{
   governanceMatrix: CatalogPayload["governanceMatrix"];
   retentionRules: CatalogPayload["retentionRules"];
   spatialPolicies: CatalogPayload["spatialPolicies"];
+  programBlueprints: CatalogPayload["programBlueprints"];
+  subjectEquivalency: CatalogPayload["subjectEquivalency"];
+  lifecyclePlaybooks: CatalogPayload["lifecyclePlaybooks"];
+  integrationAdapters: CatalogPayload["integrationAdapters"];
 }> {
-  const [orgUnits, facilities, regs, workflows, formSchemas, examElig, routing, gov, retention, spatial] = await Promise.all([
+  const [orgUnits, facilities, regs, workflows, formSchemas, examElig, routing, gov, retention, spatial, blueprints, equivalency, playbooks, adapters] =
+    await Promise.all([
     query<{ code: string; name: string; unit_type: string }>(
       `SELECT code, name, unit_type FROM public.org_units WHERE is_active ORDER BY code`,
     ).catch(() => ({ rows: [] as { code: string; name: string; unit_type: string }[] })),
@@ -144,6 +181,46 @@ async function buildTopologyLayer(): Promise<{
     query<{ policy_key: string; role_id: string; map_layer_access: string[]; status: string }>(
       `SELECT policy_key, role_id, map_layer_access, status FROM public.spatial_policies ORDER BY policy_key`,
     ).catch(() => ({ rows: [] as { policy_key: string; role_id: string; map_layer_access: string[]; status: string }[] })),
+    // Program-agnostic, NEP-ready degree tracks (versioned blueprints).
+    query<{
+      program_key: string;
+      program_name: string;
+      total_semesters: number;
+      entry_semester: number;
+      credit_categories: string[];
+      status: string;
+    }>(
+      `SELECT program_key, program_name, total_semesters, entry_semester, credit_categories, status
+         FROM public.program_blueprints ORDER BY program_key`,
+    ).catch(() => ({ rows: [] as { program_key: string; program_name: string; total_semesters: number; entry_semester: number; credit_categories: string[]; status: string }[] })),
+    // Cross-regulation credit transfer (subject_equivalency_maps) — may be
+    // empty on a pre-NEP DB; the UI renders "no equivalency mapped".
+    query<{
+      from_reg_id: string;
+      from_subject_code: string;
+      to_reg_id: string;
+      to_subject_code: string;
+      credit_delta: string;
+      status: string;
+    }>(
+      `SELECT from_reg_id, from_subject_code, to_reg_id, to_subject_code, credit_delta, 'DRY_RUN_VERIFIED'::text AS status
+         FROM public.subject_equivalency_maps ORDER BY from_subject_code`,
+    ).catch(() => ({ rows: [] as { from_reg_id: string; from_subject_code: string; to_reg_id: string; to_subject_code: string; credit_delta: string; status: string }[] })),
+    // Calendar-driven state graphs (lifecycle_playbooks).
+    query<{
+      playbook_key: string;
+      trigger_event: string;
+      state_graph: Record<string, unknown>;
+      status: string;
+    }>(
+      `SELECT playbook_key, trigger_event, state_graph, status
+         FROM public.lifecycle_playbooks ORDER BY playbook_key`,
+    ).catch(() => ({ rows: [] as { playbook_key: string; trigger_event: string; state_graph: Record<string, unknown>; status: string }[] })),
+    // Swappable vendor adapters (integration_adapters) — code-keyed, no secrets.
+    query<{ adapter_key: string; direction: string; transport_kind: string; status: string }>(
+      `SELECT adapter_key, direction, transport_kind, status
+         FROM public.integration_adapters ORDER BY adapter_key`,
+    ).catch(() => ({ rows: [] as { adapter_key: string; direction: string; transport_kind: string; status: string }[] })),
   ]);
 
   const examRow = examElig.rows[0];
@@ -178,6 +255,37 @@ async function buildTopologyLayer(): Promise<{
     governanceMatrix: gov.rows.map((r) => ({ key: r.action_key, channel: r.channel, approvers: r.required_approvers_count, status: r.status, version: r.version })),
     retentionRules: retention.rows.map((r) => ({ key: r.policy_key, artifact: r.artifact_type, hotDays: r.hot_db_ttl_days, coldYears: Number(r.cold_r2_ttl_years), status: r.status })),
     spatialPolicies: spatial.rows.map((r) => ({ key: r.policy_key, role: r.role_id, layers: r.map_layer_access ?? [], status: r.status })),
+    programBlueprints: blueprints.rows.map((r) => ({
+      code: r.program_key,
+      name: r.program_name,
+      totalSemesters: r.total_semesters,
+      entrySemester: r.entry_semester,
+      componentTypes: r.credit_categories ?? [],
+      status: r.status,
+    })),
+    subjectEquivalency: equivalency.rows.map((r) => ({
+      key: `${r.from_subject_code}→${r.to_subject_code}`,
+      source: r.from_subject_code,
+      target: r.to_subject_code,
+      credits: Number(r.credit_delta) || 0,
+      status: r.status,
+    })),
+    lifecyclePlaybooks: playbooks.rows.map((r) => ({
+      key: r.playbook_key,
+      trigger: r.trigger_event,
+      onCompletion:
+        (r.state_graph.on_completion as string | undefined) ??
+        ((r.state_graph as { stages?: Array<{ to?: string }> }).stages?.find((s) => s.to)?.to) ??
+        null,
+      onDetention: (r.state_graph.on_detention as string | undefined) ?? null,
+      status: r.status,
+    })),
+    integrationAdapters: adapters.rows.map((r) => ({
+      key: r.adapter_key,
+      direction: r.direction,
+      transport: r.transport_kind,
+      status: r.status,
+    })),
   };
 }
 

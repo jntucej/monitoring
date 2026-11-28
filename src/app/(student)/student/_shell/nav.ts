@@ -51,6 +51,7 @@ export const STUDENT_NAV: NavEntry[] = [
   {
     kind: "group", id: "campus", label: "Campus & Attendance", icon: BookOpen,
     children: [
+      { href: "/student/services", label: "Campus & Services" },
       { href: "/student/attendance", label: "Attendance Summary" },
       { href: "/student/attendance-calendar", label: "Attendance Calendar" },
       { href: "/student/calendar", label: "My Calendar" },
@@ -66,6 +67,7 @@ export const STUDENT_NAV: NavEntry[] = [
   {
     kind: "group", id: "support", label: "Support", icon: AlertCircle,
     children: [
+      { href: "/student/bridge", label: "Authority Bridge" },
       { href: "/student/complaints", label: "Complaints" },
       { href: "/student/anti-ragging", label: "Anti-Ragging Report" },
     ],

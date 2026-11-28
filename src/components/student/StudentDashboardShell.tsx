@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useStudentState } from "@/hooks/useStudentState";
 import { useCatalog } from "@/hooks/useCatalog";
+import { DevHarnessDrawer } from "@/components/shared/DevHarnessDrawer";
 
 /**
  * StudentDashboardShell — the catalog-driven, zero-hardcoded student hub.
@@ -294,6 +295,9 @@ export function StudentDashboardShell() {
           {toast}
         </div>
       )}
+
+      {/* Live Dev Harness — env-gated to development; 404 in prod. */}
+      <DevHarnessDrawer />
     </div>
   );
 }

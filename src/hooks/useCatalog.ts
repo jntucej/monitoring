@@ -55,6 +55,34 @@ export interface Catalog {
   governanceMatrix: Array<{ key: string; channel: string; approvers: number; status: string; version: number }>;
   retentionRules: Array<{ key: string; artifact: string; hotDays: number; coldYears: number; status: string }>;
   spatialPolicies: Array<{ key: string; role: string; layers: string[]; status: string }>;
+  programBlueprints: Array<{
+    code: string;
+    name: string;
+    totalSemesters: number;
+    entrySemester: number;
+    componentTypes: string[];
+    status: string;
+  }>;
+  subjectEquivalency: Array<{
+    key: string;
+    source: string;
+    target: string;
+    credits: number;
+    status: string;
+  }>;
+  lifecyclePlaybooks: Array<{
+    key: string;
+    trigger: string;
+    onCompletion: string | null;
+    onDetention: string | null;
+    status: string;
+  }>;
+  integrationAdapters: Array<{
+    key: string;
+    direction: string;
+    transport: string;
+    status: string;
+  }>;
   generated_at: string;
 }
 

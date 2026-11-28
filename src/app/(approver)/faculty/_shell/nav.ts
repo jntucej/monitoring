@@ -1,11 +1,12 @@
 import type { NavEntry, NavGroup } from "@/components/shell/types";
 import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
-  LayoutDashboard, BookOpen, CheckSquare, FileBarChart,
+  LayoutDashboard, BookOpen, CheckSquare, FileBarChart, BrainCircuit,
 } from "lucide-react";
 
 export const FACULTY_NAV: NavEntry[] = [
   { kind: "link", href: "/faculty", label: "My Day", icon: LayoutDashboard },
+  { kind: "link", href: "/faculty/dashboard", label: "Faculty OS Dashboard", icon: BrainCircuit },
   {
     kind: "group", id: "class", label: "My class", icon: BookOpen,
     children: [
