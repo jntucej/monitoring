@@ -1,4 +1,5 @@
 import { query } from '../db.js';
+import { dispatchAutonomousEvent } from '../../src/server/services/autonomous/orchestrator.js';
 
 /**
  * Scheduled Job: Nightly sub-threshold attendance alert.
@@ -93,6 +94,14 @@ export default async function attendanceSubThresholdAlert() {
           ]
         );
       }
+
+      // 3) Autonomous loop 2: a sub-threshold flag recomputes the student's
+      //    hall-ticket lock from their REAL bound regulation + live aggregate.
+      //    Fire-and-forget — the alert is the primary deliverable, the lock
+      //    is the policy chain; a lock error never blocks the alert.
+      void dispatchAutonomousEvent({ type: 'ATTENDANCE_LOCKED', studentId: r.user_id }).catch(
+        (err) => console.error('[attendance-sub-threshold] autonomous ATTENDANCE_LOCKED dispatch failed:', err?.message ?? err),
+      );
       alerts++;
     }
 

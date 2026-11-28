@@ -109,6 +109,7 @@ import { runGuardPingCheck } from './jobs/guard_ping_check.js';
 import { runShiftAutoClose } from './jobs/shift_auto_close.js';
 import { runFeedExpire } from './jobs/feed_expire.js';
 import { runCampusLifecycleSweep } from './jobs/campus_lifecycle.js';
+import { runRetentionColdArchive } from "./jobs/retention_cold_archive.js";
 import { runAchievementAuto } from './jobs/achievement_auto.js';
 import { runLeaderboardRefresh } from './jobs/leaderboard_refresh.js';
 import { runPresenceReconcile } from './jobs/presence_reconcile.js';
@@ -252,6 +253,8 @@ const jobs = [
   { name: 'backup-maintenance', ms: 30 * 60 * 1000, run: () => runJob('backup-maintenance', runBackupMaintenance) },
   // Campus OS lifecycle: auto-expire announcements + tombstone archived KB chunks.
   { name: 'campus-lifecycle', ms: 5 * 60 * 1000, run: () => runJob('campus-lifecycle', runCampusLifecycleSweep) },
+  // Hot->cold retention sweep (1-yr hot audit -> 8-yr cold R2 ledger; windows read from JSONB policy).
+  { name: 'retention-cold-archive', ms: 60 * 60 * 1000, run: () => runJob('retention-cold-archive', runRetentionColdArchive) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client

@@ -15,8 +15,8 @@
  * ── BUG-FIX GUARDRAILS (per master-prompt review) ──────────────────────
  * B1 GATE_PUNCH out-of-order: a late batch-synced punch must not overwrite
  *    a newer live presence. The occupancy upsert is timestamp-guarded
- *    (last_updated <= event time) and we only publish PRESENCE_CHANGED when
- *    a row was actually flipped.
+ *    (last_updated <= event time) and we only notify when a row actually
+ *    flipped.
  * B2 No placeholder metrics: the attendance evaluation pulls the student's
  *    REAL bound regulation + aggregate attendance from live tables. No
  *    fabricated credits / semester defaults.
@@ -30,11 +30,9 @@
 
 import { query, withTransaction } from "@/lib/postgres";
 import type { PoolClient } from "pg";
-import {
-  evaluateAttendanceByPolicy,
-  type PolicyConfig,
-} from "@/lib/policy-engine";
+import { evaluateAttendanceByPolicy } from "@/lib/policy-engine";
 import { loadPolicyConfig } from "@/server/policy/attendance-verdict";
+import { recordSseEvent } from "@/lib/sse-ring-buffer";
 
 // ── Event taxonomy ───────────────────────────────────────────────────────
 export type CampusDomainEvent =
@@ -43,34 +41,24 @@ export type CampusDomainEvent =
   | { type: "GATE_PUNCH"; studentId: string; direction: "IN" | "OUT"; atIso: string }
   | { type: "CIRCULAR_PUBLISHED"; circularId: string };
 
-// ── Real-time fan-out ────────────────────────────────────────────────────
-// The per-user notification stream is an in-process SSE ring buffer
-// (recordSseEvent). Best-effort: a fan-out failure never fails the event.
-// The worker bundle compiles the app sources (next build), so the @/ alias
-// resolves here; import at top level for type-checking.
-import { recordSseEvent } from "@/lib/sse-ring-buffer";
+export const CAMPUS_EVENTS: Record<string, string> = {
+  ATTENDANCE_LOCKED: "ATTENDANCE_LOCKED",
+  PAYMENT_VERIFIED: "PAYMENT_VERIFIED",
+  GATE_PUNCH: "GATE_PUNCH",
+  CIRCULAR_PUBLISHED: "CIRCULAR_PUBLISHED",
+};
 
+// ── Real-time fan-out (best-effort; never fails the event) ─────────────
 function sseFanout(userId: string, payload: Record<string, unknown>, event: string): void {
   try {
     recordSseEvent(`notifications-stream:${userId}`, { ...payload, timestamp: new Date().toISOString() }, event);
   } catch {
-    // fire-and-forget
+    /* fire-and-forget */
   }
 }
 
-// ── B2: real metrics, no placeholders ────────────────────────────────────
-interface LiveAttendanceFacts {
-  present: number;
-  total: number;
-  regulation: string | null;
-}
-
-/**
- * Pull the student's live attendance + bound regulation. Returns null when
- * there is no attendance data yet (the engine treats that as 100% eligible —
- * nothing to lock, no fabricated number).
- */
-async function loadLiveFacts(studentId: string): Promise<LiveAttendanceFacts | null> {
+// ── B2: real metrics, no placeholders ───────────────────────────────────
+async function loadLiveFacts(studentId: string): Promise<{ present: number; total: number; regulation: string | null } | null> {
   const { rows } = await query<{ present: number; total: number; regulation: string | null }>(
     `SELECT
        COUNT(*) FILTER (WHERE ar.status = 'PRESENT')::int AS present,
@@ -112,7 +100,6 @@ async function recomputeHallTicketLock(
   );
   const activeCondonation = condRows[0];
   const hasApproved = activeCondonation?.status === "APPROVED";
-  // A PAYMENT_VERIFIED event clears the fee leg of an approved condonation.
   const feeCleared = paymentCleared ? true : hasApproved ? !!activeCondonation?.fee_cleared : false;
 
   const debar = await query<{ academic_status: string }>(
@@ -133,7 +120,6 @@ async function recomputeHallTicketLock(
     config,
   );
 
-  // B4: serialize concurrent recompute + upsert for this student.
   const regulationCode = facts.regulation ?? "ACTIVE";
   await withTransaction(async (client: PoolClient) => {
     await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`hall-ticket:${studentId}`]);
@@ -152,7 +138,7 @@ async function recomputeHallTicketLock(
   return { status: verdict.status, locked: verdict.hallTicketLocked };
 }
 
-// ── Event handlers ────────────────────────────────────────────────────────
+// ── Event handlers ───────────────────────────────────────────────────────
 export async function dispatchAutonomousEvent(event: CampusDomainEvent): Promise<void> {
   switch (event.type) {
     case "ATTENDANCE_LOCKED": {
@@ -201,17 +187,15 @@ export async function dispatchAutonomousEvent(event: CampusDomainEvent): Promise
     case "CIRCULAR_PUBLISHED": {
       // B3: crash-safe outbox row (not a bare redis lpush). The RAG-ingest
       // worker claims PENDING rows and writes to pgvector; a crash leaves the
-      // row PENDING for retry, never silently dropped.
+      // row PENDING for the next sweep — never lost.
       await query(
         `INSERT INTO public.campus_kb_ingest_outbox (circular_id, ingest_status, created_at)
          VALUES ($1::uuid, 'PENDING', NOW())
          ON CONFLICT (circular_id) DO UPDATE
            SET ingest_status = 'PENDING', updated_at = NOW()`,
         [event.circularId],
-      ).catch(async () => {
-        // Outbox table may not exist yet (migration not applied) — log and
-        // fall back to the in-process queue so the event is not lost.
-        console.error("[autonomous] kb-ingest outbox insert failed, deferring", event.circularId);
+      ).catch(() => {
+        console.error("[autonomous] kb-ingest outbox insert failed (table not yet migrated?), event deferred", event.circularId);
       });
       return;
     }

@@ -1,6 +1,7 @@
 import { errMsg, errCode } from "@/lib/err-msg";
 import { randomUUID } from "crypto";
 import { query } from "@/lib/postgres";
+import { dispatchAutonomousEvent } from "@/server/services/autonomous/orchestrator";
 import {
   assertNotLockedOut,
   matchActiveLockdown,
@@ -815,6 +816,22 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
         }
       })();
     }
+  }
+
+  // Autonomous presence loop (Loop 3): a successful biometric/QR punch flips
+  // the student's live campus presence + reshuffles the hub. Fire-and-forget —
+  // never blocks or fails the primary scan write. Occupancy itself is already
+  // maintained by the movement-log trigger; this adds the SSE fan-out +
+  // dashboard rehydration for students only.
+  if (!isDuplicate && person.role === "student") {
+    void dispatchAutonomousEvent({
+      type: "GATE_PUNCH",
+      studentId: person.id,
+      direction: input.direction,
+      atIso: (finalLog as { timestamp?: string })?.timestamp ?? new Date().toISOString(),
+    }).catch((err: unknown) => {
+      console.error("[recordScan] autonomous GATE_PUNCH dispatch failed:", errMsg(err));
+    });
   }
 
   return {
