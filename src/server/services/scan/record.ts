@@ -1,7 +1,7 @@
 import { errMsg, errCode } from "@/lib/err-msg";
 import { randomUUID } from "crypto";
 import { query } from "@/lib/postgres";
-import { dispatchAutonomousEvent } from "@/server/services/autonomous/orchestrator";
+import { dispatchAutonomousEvent } from "../../../../worker/autonomous-orchestrator";
 import {
   assertNotLockedOut,
   matchActiveLockdown,

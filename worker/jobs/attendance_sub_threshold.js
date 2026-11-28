@@ -1,5 +1,5 @@
 import { query } from '../db.js';
-import { dispatchAutonomousEvent } from '../../src/server/services/autonomous/orchestrator.js';
+import { dispatchAutonomousEvent } from "../autonomous-orchestrator.js";
 
 /**
  * Scheduled Job: Nightly sub-threshold attendance alert.
